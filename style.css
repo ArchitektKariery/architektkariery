@@ -325,20 +325,66 @@ img { max-width: 100%; height: auto; display: block; }
   font-size: 20px; margin-bottom: 25px; color: var(--dark);
 }
 
-/* ========== SECTION: KWIZ ========== */
+/* ========== SECTION: FORMULARZ ========== */
 .section-kwiz {
   background: linear-gradient(180deg, var(--cream) 0%, #F0EFE9 100%);
 }
-.kwiz-embed {
+.formularz-box {
   background: #FFF;
   border-radius: 24px;
-  overflow: hidden;
+  padding: 60px 50px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  text-align: center;
+  border: 1px solid rgba(184,150,46,0.2);
 }
-.kwiz-embed iframe {
-  display: block;
-  width: 100%;
-  border: none;
+.formularz-info {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.formularz-stat {
+  text-align: center;
+}
+.stat-number {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+.formularz-lead {
+  font-size: 18px;
+  color: var(--dark);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-large {
+  padding: 22px 50px !important;
+  font-size: 19px !important;
+}
+.formularz-note {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--gray);
+  letter-spacing: 1px;
+}
+@media (max-width: 700px) {
+  .formularz-box { padding: 40px 25px; }
+  .formularz-info { gap: 30px; flex-wrap: wrap; }
+  .stat-number { font-size: 36px; }
 }
 
 /* ========== SECTION: DLA KOGO ========== */
