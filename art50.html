@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Przejrzystości AI — obowiązki z art. 50 AI Act | Architekt Kariery</title>
+<meta name="description" content="Bezpłatne samosprawdzenie obowiązków przejrzystości z art. 50 AI Act, które obowiązują od 2 sierpnia 2026. 15 pytań, raport PDF, liczone lokalnie w przeglądarce.">
+<meta property="og:title" content="Test Przejrzystości AI — art. 50 AI Act">
+<meta property="og:description" content="15 pytań. Raport PDF. Narzędzie podaje własną wiarygodność wyniku i odmawia rozstrzygnięcia tam, gdzie potrzebny jest prawnik.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;700&display=swap&subset=latin,latin-ext" rel="stylesheet">
+<style>
+:root{
+  --ink:#12212E;
+  --ink-soft:#2C3E4C;
+  --paper:#E9ECEE;
+  --surface:#FFFFFF;
+  --rule:#C4CDD3;
+  --muted:#5F6E79;
+  --measure:#0E6B5C;
+  --judge:#8C5A0A;
+  --void:#7A2E2E;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Literata",Georgia,serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* ---------- header ---------- */
+.masthead{border-bottom:1px solid var(--rule);background:var(--surface)}
+.masthead .wrap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:16px;padding-bottom:16px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase}
+.brand span{color:var(--measure)}
+.masthead .meta{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+
+/* ---------- covenant strip ---------- */
+.covenant{background:var(--ink);color:#DDE4E8;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em}
+.covenant .wrap{display:flex;gap:28px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.covenant b{color:#fff;font-weight:700}
+
+/* ---------- hero ---------- */
+.hero{padding:56px 0 40px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--measure);margin:0 0 18px}
+h1{
+  font-family:var(--display);font-weight:800;font-size:clamp(34px,6.2vw,62px);
+  line-height:1.02;letter-spacing:-.025em;margin:0 0 22px;max-width:16ch;
+}
+h1 em{font-style:normal;color:var(--measure)}
+.lede{font-size:18px;max-width:60ch;margin:0 0 26px;color:var(--ink-soft)}
+.lede b{font-weight:600;color:var(--ink)}
+.factlist{list-style:none;padding:0;margin:0 0 30px;max-width:64ch}
+.factlist li{
+  display:grid;grid-template-columns:96px 1fr;gap:16px;
+  padding:11px 0;border-top:1px solid var(--rule);align-items:baseline;
+}
+.factlist li:last-child{border-bottom:1px solid var(--rule)}
+.factlist .d{font-family:var(--mono);font-size:12px;color:var(--measure);font-weight:700}
+.factlist .t{font-size:15px}
+.startbtn{
+  font-family:var(--display);font-weight:600;font-size:16px;
+  background:var(--ink);color:#fff;border:0;padding:15px 30px;cursor:pointer;
+  letter-spacing:.01em;
+}
+.startbtn:hover{background:var(--measure)}
+
+/* ---------- layout ---------- */
+.grid{display:grid;grid-template-columns:300px 1fr;gap:44px;padding-bottom:80px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr;gap:26px}}
+
+/* ---------- instrument ---------- */
+.instrument{position:sticky;top:18px;background:var(--surface);border:1px solid var(--rule);padding:20px}
+@media(max-width:900px){.instrument{position:static}}
+.inst-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.gauge{display:grid;grid-template-columns:52px 1fr;gap:14px;margin-bottom:18px}
+.scale{position:relative;height:190px;border-left:2px solid var(--ink);}
+.tick{position:absolute;left:0;width:100%;border-top:1px dashed var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);padding-left:6px}
+.tick.hard{border-top:1.5px solid var(--ink)}
+.needle{
+  position:absolute;left:-2px;width:44px;height:3px;background:var(--measure);
+  transition:bottom .45s cubic-bezier(.2,.7,.3,1);
+}
+.wbox{display:flex;flex-direction:column;justify-content:flex-end}
+.wval{font-family:var(--display);font-weight:800;font-size:56px;line-height:.9;letter-spacing:-.03em}
+.wlabel{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.verdict{font-family:var(--display);font-weight:700;font-size:17px;margin-top:10px}
+.v-measure{color:var(--measure)}
+.v-opinion{color:var(--judge)}
+.v-void{color:var(--void)}
+.terms{font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--rule);padding-top:12px;margin-top:4px}
+.terms div{display:flex;justify-content:space-between;padding:3px 0;color:var(--muted)}
+.terms div b{color:var(--ink);font-weight:700}
+.formula{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.5;border-top:1px solid var(--rule);padding-top:10px}
+
+/* ---------- questions ---------- */
+.section-head{margin:34px 0 14px;display:flex;align-items:baseline;gap:12px}
+.section-head:first-of-type{margin-top:0}
+.section-head .n{font-family:var(--mono);font-size:11px;color:var(--measure);letter-spacing:.1em}
+.section-head h2{font-family:var(--display);font-weight:600;font-size:20px;margin:0;letter-spacing:-.01em}
+.q{background:var(--surface);border:1px solid var(--rule);padding:18px 20px;margin-bottom:10px}
+.q.answered{border-left:3px solid var(--measure);padding-left:18px}
+.q.vague{border-left:3px solid var(--judge);padding-left:18px}
+.q .qt{font-size:16.5px;margin:0 0 4px;font-weight:600}
+.q .qh{font-size:13.5px;color:var(--muted);margin:0 0 13px}
+.q .qh code{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{
+  font-family:var(--display);font-size:14.5px;background:var(--paper);
+  border:1px solid var(--rule);padding:9px 15px;cursor:pointer;color:var(--ink-soft);
+}
+.opt:hover{border-color:var(--ink)}
+.opt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.opt.soft[aria-pressed="true"]{background:var(--judge);border-color:var(--judge)}
+.submitrow{margin-top:26px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.submitrow .hint{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+
+/* ---------- report ---------- */
+.report{background:var(--surface);border:1px solid var(--rule);padding:34px;margin-bottom:80px}
+.report h2{font-family:var(--display);font-weight:800;font-size:clamp(24px,4vw,36px);letter-spacing:-.02em;margin:0 0 6px}
+.stamp{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:26px;letter-spacing:.03em}
+.rsec{border-top:1px solid var(--rule);padding-top:20px;margin-top:26px}
+.rsec > h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--measure);margin:0 0 14px}
+.item{border-left:3px solid var(--measure);padding:2px 0 2px 16px;margin-bottom:18px}
+.item.judge{border-left-color:var(--judge)}
+.item.gap{border-left-color:var(--void)}
+.item h4{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 5px}
+.item .law{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:0 0 7px}
+.item p{margin:0 0 6px;font-size:15px}
+.item .flag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--judge);font-weight:700}
+.refuse{background:var(--paper);padding:18px 20px;font-size:14.5px}
+.refuse ol{margin:8px 0 0;padding-left:20px}
+.refuse li{margin-bottom:5px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--rule)}
+.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--measure);font-weight:700}
+.cta{background:var(--ink);color:#EDF1F3;padding:28px;margin-top:30px}
+.cta h3{font-family:var(--display);font-weight:700;font-size:21px;margin:0 0 8px;color:#fff}
+.cta p{margin:0 0 14px;font-size:15px;color:#C3CFD6}
+.cta a{color:#fff;font-family:var(--mono);font-size:13.5px;display:inline-block;margin-right:20px}
+.printbtn{font-family:var(--display);font-weight:600;font-size:15px;background:var(--measure);color:#fff;border:0;padding:13px 26px;cursor:pointer}
+.printbtn:hover{background:var(--ink)}
+.ghost{font-family:var(--display);font-size:15px;background:transparent;border:1px solid var(--rule);padding:13px 22px;cursor:pointer;color:var(--ink-soft)}
+
+footer{border-top:1px solid var(--rule);background:var(--surface);padding:30px 0;font-size:13.5px;color:var(--muted)}
+footer .wrap{display:grid;gap:10px;max-width:78ch}
+footer b{color:var(--ink)}
+.hidden{display:none !important}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+
+@media print{
+  body{background:#fff;font-size:11pt}
+  .masthead,.covenant,.hero,.grid,footer,.printbtn,.ghost,.cta a{display:none !important}
+  .report{border:0;padding:0;margin:0}
+  .item{break-inside:avoid}
+  .cta{background:#fff;color:#000;border:1px solid #000;padding:14px}
+  .cta h3,.cta p{color:#000}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brand">Architekt&nbsp;Kariery <span>/</span> System&nbsp;X</div>
+    <div class="meta">Silnik oceny v1.4 · zamrożony 05.08.2026</div>
+  </div>
+</header>
+
+<div class="covenant">
+  <div class="wrap">
+    <span><b>Progi ogłoszone przed testem:</b> W ≥ 70 = POMIAR · 50–69 = OPINIA · &lt; 50 = NIEROZSTRZYGNIĘTE</span>
+    <span><b>Sufit pewności metody:</b> U ≤ 80 · <b>minimalne pokrycie dla pomiaru:</b> n ≥ 8</span>
+    <span><b>Dane:</b> liczone lokalnie, nic nie wychodzi z przeglądarki</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Bezpłatne samosprawdzenie · 15 pytań · ok. 4 minuty</p>
+    <h1>Twoje AI musi się <em>przedstawić</em>. Sprawdź, gdzie dokładnie.</h1>
+    <p class="lede">2 sierpnia 2026 zaczęły obowiązywać przepisy o przejrzystości z <b>art. 50 AI Act</b>. Dotyczą chatbotów, treści generatywnych, deepfake'ów, rozpoznawania emocji i kategoryzacji biometrycznej. To narzędzie mapuje twój przypadek na konkretne ustępy i mówi wprost, gdzie kończy się jego kompetencja.</p>
+
+    <ul class="factlist">
+      <li><span class="d">02.08.2026</span><span class="t">Art. 50 stosowany w całości. Rusza też nadzór rynku i kary.</span></li>
+      <li><span class="d">02.12.2026</span><span class="t">Koniec okresu przejściowego na maszynowe znakowanie wyników przez dostawców narzędzi generatywnych wprowadzonych na rynek przed 2 sierpnia 2026.</span></li>
+      <li><span class="d">02.12.2027</span><span class="t">Obowiązki dla samodzielnych systemów wysokiego ryzyka z załącznika III. Przesunięte przez Digital Omnibus.</span></li>
+      <li><span class="d">02.08.2028</span><span class="t">Systemy wysokiego ryzyka wbudowane w produkty regulowane z załącznika I.</span></li>
+      <li><span class="d">od 02.02.2025</span><span class="t">Obowiązek kompetencji AI z art. 4. Bez odroczenia. Obowiązuje już dziś.</span></li>
+    </ul>
+
+    <button class="startbtn" id="start">Zacznij test</button>
+  </div>
+</section>
+
+<div class="wrap grid" id="app">
+
+  <aside class="instrument" aria-label="Wiarygodność wyniku">
+    <p class="inst-title">Bramka wiarygodności W</p>
+    <div class="gauge">
+      <div class="scale" aria-hidden="true">
+        <div class="tick hard" style="bottom:70%">70</div>
+        <div class="tick hard" style="bottom:50%">50</div>
+        <div class="tick" style="bottom:25%">25</div>
+        <div class="needle" id="needle" style="bottom:0%"></div>
+      </div>
+      <div class="wbox">
+        <div class="wval" id="wval">0</div>
+        <div class="wlabel">wiarygodność</div>
+        <div class="verdict v-void" id="verdict">Nierozstrzygnięte</div>
+      </div>
+    </div>
+    <div class="terms">
+      <div><span>F pokrycie</span><b id="tF">0</b></div>
+      <div><span>n odpowiedzi pewnych</span><b id="tn">0 / 15</b></div>
+      <div><span>N stabilność próby</span><b id="tN">0</b></div>
+      <div><span>U pewność metody</span><b id="tU">80</b></div>
+      <div><span>pozycje ocenne</span><b id="tJ">0</b></div>
+    </div>
+    <p class="formula">W = 0,35·F + 0,25·N + 0,40·U<br>POMIAR wymaga też n ≥ 8, OPINIA n ≥ 5<br>N = 100 − 100/√n<br>U = 80 − 7 × (pozycje ocenne), dolne ograniczenie 40<br>Wagi i progi zamrożone przed pierwszą odpowiedzią.</p>
+  </aside>
+
+  <main id="form"></main>
+</div>
+
+<div class="wrap"><section class="report hidden" id="report"></section></div>
+
+<footer>
+  <div class="wrap">
+    <p><b>To nie jest porada prawna.</b> Narzędzie mapuje odpowiedzi na przepisy art. 50 rozporządzenia (UE) 2024/1689 w brzmieniu uwzględniającym rozporządzenie (UE) 2026/1744. Klasyfikacja konkretnego systemu, ocena wyjątków i kwalifikacja wysokiego ryzyka wymagają analizy prawnej.</p>
+    <p>Nadzór w Polsce sprawuje Komisja Rozwoju i Bezpieczeństwa Sztucznej Inteligencji, powołana ustawą z 3 lipca 2026 o systemach sztucznej inteligencji (Dz.U. poz. 1003, ogłoszona 27 lipca 2026). Komisja powstaje etapami.</p>
+    <p>Twoje odpowiedzi zostają w przeglądarce. Narzędzie nie wysyła danych, nie używa ciasteczek i nie zapisuje niczego na dysku.</p>
+    <p>Zbudowane w metodologii System X · Architekt Kariery · <a href="https://architektkariery.com" style="color:var(--measure)">architektkariery.com</a></p>
+  </div>
+</footer>
+
+<script>
+const CERTAIN = 1, VAGUE = 0;
+
+const QUESTIONS = [
+ {s:"Rola i charakter działania", id:"q1",
+  t:"Kim jesteś wobec systemów AI, których używasz?",
+  h:"Dostawca tworzy lub rozwija system i udostępnia go pod własną nazwą. Podmiot stosujący wdraża gotowe narzędzie w swojej działalności.",
+  o:[["dostawca","dostawca",CERTAIN],["stosujacy","podmiot stosujący",CERTAIN],["oba","jedno i drugie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Rola i charakter działania", id:"q2",
+  t:"Używasz AI zawodowo czy prywatnie?",
+  h:"Osoby publikujące niezawodowo zasadniczo nie są podmiotem stosującym w rozumieniu AI Act.",
+  o:[["zawodowo","zawodowo",CERTAIN],["prywatnie","prywatnie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Interakcja z człowiekiem", id:"q3",
+  t:"Masz chatbota, voicebota albo asystenta AI, z którym rozmawiają ludzie?",
+  h:"Dotyczy każdego systemu przeznaczonego do bezpośredniej interakcji z osobami fizycznymi.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Interakcja z człowiekiem", id:"q4",
+  t:"Czy dla rozsądnego odbiorcy jest oczywiste z kontekstu, że rozmawia z AI?",
+  h:"Art. 50 ust. 1 przewiduje wyjątek, gdy sztuczne pochodzenie rozmówcy jest oczywiste. Ocena tego wyjątku należy do prawnika.",
+  o:[["tak","tak, oczywiste",VAGUE],["nie","nie, nie jest",CERTAIN],["nd","nie dotyczy",CERTAIN],["nw","trudno ocenić",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q5",
+  t:"Publikujesz teksty, obrazy, dźwięk lub wideo wytworzone albo zmodyfikowane przez AI?",
+  h:"Chodzi o publikację, nie o robocze użycie wewnętrzne.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q6",
+  t:"Dostarczasz innym narzędzie, które generuje syntetyczne treści?",
+  h:"Np. własny generator obrazu, głosu, wideo lub tekstu udostępniony klientom albo użytkownikom.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q7",
+  t:"Czy to narzędzie trafiło na rynek przed 2 sierpnia 2026?",
+  h:"Art. 111 ust. 4 daje takim systemom czas na maszynowe znakowanie do 2 grudnia 2026.",
+  o:[["tak","tak, przed",CERTAIN],["nie","nie, później",CERTAIN],["nd","nie dotyczy",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q8",
+  t:"Publikujesz realistyczne obrazy, dźwięk lub wideo osób, zdarzeń albo miejsc, które mogłyby uchodzić za prawdziwe?",
+  h:"To definicja deepfake'a z art. 50 ust. 4. Obowiązek ujawnienia leży po stronie tego, kto publikuje.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q9",
+  t:"Publikujesz teksty AI, które informują opinię publiczną o sprawach interesu publicznego?",
+  h:"Ocena, co jest sprawą interesu publicznego, wymaga analizy prawnej. Obowiązek odpada przy kontroli redakcyjnej i odpowiedzialności człowieka za publikację.",
+  o:[["tak","tak",VAGUE],["nie","nie",CERTAIN],["nw","trudno ocenić",VAGUE]]},
+
+ {s:"Treści generatywne", id:"q10",
+  t:"Czy te treści mają wyraźnie artystyczny, twórczy, satyryczny lub fikcyjny charakter?",
+  h:"Wtedy obowiązek ogranicza się do ujawnienia w sposób, który nie utrudnia odbioru utworu. Zakres wyjątku ocenia prawnik.",
+  o:[["tak","tak",VAGUE],["nie","nie",CERTAIN],["nd","nie dotyczy",CERTAIN],["nw","trudno ocenić",VAGUE]]},
+
+ {s:"Biometria i emocje", id:"q11",
+  t:"Stosujesz system rozpoznawania emocji wobec osób fizycznych?",
+  h:"Np. analiza nastroju klienta w call center albo reakcji kandydata w rekrutacji.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Biometria i emocje", id:"q12",
+  t:"Stosujesz system kategoryzacji biometrycznej?",
+  h:"Przypisywanie osób do kategorii na podstawie danych biometrycznych.",
+  o:[["tak","tak",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Dowody i kompetencje", id:"q13",
+  t:"Używasz AI w rekrutacji, ocenie pracowników, scoringu, edukacji albo dostępie do usług podstawowych?",
+  h:"To obszary z załącznika III. Kwalifikacja systemu jako wysokiego ryzyka wynika z art. 6 i wymaga prawnika.",
+  o:[["tak","tak",VAGUE],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Dowody i kompetencje", id:"q14",
+  t:"Czy osoby obsługujące AI przeszły udokumentowane szkolenie z kompetencji AI?",
+  h:"Art. 4 obowiązuje od 2 lutego 2025 i nie został odroczony. Liczy się dokumentacja, nie samo przeszkolenie.",
+  o:[["tak","tak, z dokumentacją",CERTAIN],["czesc","częściowo",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]},
+
+ {s:"Dowody i kompetencje", id:"q15",
+  t:"Masz rejestr systemów AI z przypisaniem ról i osób odpowiedzialnych?",
+  h:"Rejestr jest podstawą dowodową. Bez niego nie wykażesz zgodności przed organem nadzoru.",
+  o:[["tak","tak",CERTAIN],["czesc","częściowo",CERTAIN],["nie","nie",CERTAIN],["nw","nie wiem",VAGUE]]}
+];
+
+const A = {};
+const form = document.getElementById('form');
+
+let html = '', lastSection = '', sIdx = 0;
+QUESTIONS.forEach(q => {
+  if (q.s !== lastSection) {
+    sIdx++;
+    html += `<div class="section-head"><span class="n">${String(sIdx).padStart(2,'0')}</span><h2>${q.s}</h2></div>`;
+    lastSection = q.s;
+  }
+  const opts = q.o.map(([v,l,c]) =>
+    `<button class="opt ${c===VAGUE?'soft':''}" role="button" aria-pressed="false" data-q="${q.id}" data-v="${v}" data-c="${c}">${l}</button>`
+  ).join('');
+  html += `<div class="q" id="box-${q.id}">
+    <p class="qt">${q.t}</p>
+    <p class="qh">${q.h}</p>
+    <div class="opts">${opts}</div>
+  </div>`;
+});
+html += `<div class="submitrow">
+  <button class="printbtn" id="calc">Wystaw raport</button>
+  <span class="hint" id="left">pozostało 15 pytań</span>
+</div>`;
+form.innerHTML = html;
+
+form.addEventListener('click', e => {
+  const b = e.target.closest('.opt');
+  if (!b) return;
+  const q = b.dataset.q;
+  document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o => o.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+  A[q] = { v: b.dataset.v, certain: Number(b.dataset.c) === CERTAIN };
+  const box = document.getElementById('box-' + q);
+  box.classList.remove('answered','vague');
+  box.classList.add(A[q].certain ? 'answered' : 'vague');
+  update();
+});
+
+function judgmentCount() {
+  let j = 0;
+  if (A.q4 && (A.q4.v === 'tak' || A.q4.v === 'nw') && A.q3 && A.q3.v === 'tak') j++;
+  if (A.q9 && (A.q9.v === 'tak' || A.q9.v === 'nw')) j++;
+  if (A.q10 && (A.q10.v === 'tak' || A.q10.v === 'nw')) j++;
+  if (A.q13 && (A.q13.v === 'tak' || A.q13.v === 'nw')) j++;
+  if (A.q1 && A.q1.v === 'nw') j++;
+  return j;
+}
+
+function metrics() {
+  const answered = Object.keys(A).length;
+  const n = Object.values(A).filter(a => a.certain).length;
+  const F = (n / QUESTIONS.length) * 100;
+  const N = n > 0 ? 100 - 100 / Math.sqrt(n) : 0;
+  const J = judgmentCount();
+  const U = Math.max(40, 80 - 7 * J);
+  const W = n === 0 ? 0 : 0.35 * F + 0.25 * N + 0.40 * U;
+  return { answered, n, F, N, U, J, W: Math.round(W) };
+}
+
+function verdictOf(W, n) {
+  if (W >= 70 && n >= 8) return { label: 'Pomiar', cls: 'v-measure' };
+  if (W >= 50 && n >= 5) return { label: 'Opinia', cls: 'v-opinion' };
+  return { label: 'Nierozstrzygnięte', cls: 'v-void' };
+}
+
+function update() {
+  const m = metrics();
+  const v = verdictOf(m.W, m.n);
+  document.getElementById('wval').textContent = m.W;
+  document.getElementById('needle').style.bottom = Math.min(100, m.W) + '%';
+  document.getElementById('needle').style.background =
+    m.W >= 70 ? 'var(--measure)' : m.W >= 50 ? 'var(--judge)' : 'var(--void)';
+  const vd = document.getElementById('verdict');
+  vd.textContent = v.label;
+  vd.className = 'verdict ' + v.cls;
+  document.getElementById('tF').textContent = Math.round(m.F);
+  document.getElementById('tn').textContent = m.n + ' / 15';
+  document.getElementById('tN').textContent = Math.round(m.N);
+  document.getElementById('tU').textContent = m.U;
+  document.getElementById('tJ').textContent = m.J;
+  const left = QUESTIONS.length - m.answered;
+  document.getElementById('left').textContent =
+    left > 0 ? `pozostało ${left} ${left === 1 ? 'pytanie' : left < 5 ? 'pytania' : 'pytań'}` : 'komplet odpowiedzi';
+}
+update();
+
+document.getElementById('start').addEventListener('click', () =>
+  document.getElementById('app').scrollIntoView({ block: 'start' }));
+
+function is(q, ...vals) { return A[q] && vals.includes(A[q].v); }
+
+function buildFindings() {
+  const hard = [], judge = [], gaps = [];
+  const provider = is('q1','dostawca','oba');
+  const deployer = is('q1','stosujacy','oba');
+  const pro = is('q2','zawodowo');
+
+  if (is('q3','tak')) {
+    if (provider) {
+      hard.push({ t:'Chatbot musi ujawnić, że jest systemem AI',
+        law:'art. 50 ust. 1 · obowiązek dostawcy · od 02.08.2026',
+        p:'Zaprojektuj system tak, aby osoba dowiedziała się o kontakcie z AI na początku interakcji. Komunikat ma być czytelny, nie schowany w regulaminie.' });
+    }
+    if (deployer && !provider) {
+      judge.push({ t:'Chatbot u ciebie, obowiązek techniczny po stronie dostawcy',
+        law:'art. 50 ust. 1 · rozgraniczenie ról',
+        p:'Sprawdź w umowie z dostawcą, kto odpowiada za komunikat i czy narzędzie go realnie wyświetla. Za sposób prezentacji u klienta odpowiadasz ty.' });
+    }
+    if (is('q4','tak','nw')) {
+      judge.push({ t:'Powołujesz się na oczywistość kontekstu',
+        law:'art. 50 ust. 1 · wyjątek',
+        p:'Wyjątek działa tylko wtedy, gdy sztuczne pochodzenie rozmówcy jest oczywiste dla rozsądnego odbiorcy. Narzędzie tego nie rozstrzyga.' });
+    }
+  }
+
+  if (is('q6','tak')) {
+    const late = is('q7','tak');
+    hard.push({ t:'Wyniki twojego generatora muszą być znakowane maszynowo',
+      law:'art. 50 ust. 2 · obowiązek dostawcy' + (late ? ' · termin 02.12.2026' : ' · od 02.08.2026'),
+      p:'Zapewnij oznaczenie w formacie odczytywalnym maszynowo i wykrywalność sztucznego pochodzenia: metadane, znak wodny lub inne rozwiązanie pochodzenia treści.' +
+         (late ? ' System wprowadzony przed 2 sierpnia 2026 ma czas do 2 grudnia 2026.' : '') });
+  }
+
+  if (is('q8','tak') && pro) {
+    const art = is('q10','tak','nw');
+    (art ? judge : hard).push({ t:'Deepfake wymaga wyraźnego ujawnienia',
+      law:'art. 50 ust. 4 · obowiązek podmiotu stosującego · od 02.08.2026',
+      p:'Ujawnij jasno i wyraźnie, że obraz, nagranie lub film powstał sztucznie albo został zmanipulowany. Okres przejściowy na znakowanie maszynowe tego obowiązku nie przesuwa.' +
+         (art ? ' Przy treści artystycznej lub fikcyjnej ujawnienie ogranicza się tak, by nie utrudniało odbioru utworu. Zakres wyjątku ocenia prawnik.' : '') });
+  }
+
+  if (is('q9','tak','nw') && pro) {
+    judge.push({ t:'Teksty AI w sprawach interesu publicznego',
+      law:'art. 50 ust. 4 · obowiązek podmiotu stosującego',
+      p:'Obowiązek ujawnienia odpada, gdy treść przeszła kontrolę człowieka i ktoś ponosi redakcyjną odpowiedzialność za publikację. Ustal i udokumentuj, kto to jest.' });
+  }
+
+  if (is('q11','tak')) {
+    hard.push({ t:'Informujesz osoby o rozpoznawaniu emocji',
+      law:'art. 50 ust. 3 · obowiązek podmiotu stosującego · od 02.08.2026',
+      p:'Poinformuj osoby poddane działaniu systemu i przetwarzaj dane zgodnie z RODO. W zatrudnieniu i edukacji część zastosowań rozpoznawania emocji jest wprost zakazana od 2 lutego 2025.' });
+  }
+
+  if (is('q12','tak')) {
+    hard.push({ t:'Informujesz osoby o kategoryzacji biometrycznej',
+      law:'art. 50 ust. 3 · obowiązek podmiotu stosującego · od 02.08.2026',
+      p:'Poinformuj osoby poddane działaniu systemu. Sprawdź osobno, czy twój przypadek nie mieści się w praktykach zakazanych z art. 5.' });
+  }
+
+  if (is('q5','tak') && !is('q6','tak') && !is('q8','tak') && pro) {
+    hard.push({ t:'Publikujesz treści AI, ale bez deepfake i bez własnego generatora',
+      law:'art. 50 · zakres ograniczony',
+      p:'AI Act nie nakazuje widocznego oznaczania każdej treści zrobionej z pomocą AI. Sprawdź jednak, czy twój CMS i platformy społecznościowe zachowują metadane pochodzenia od dostawcy narzędzia.' });
+  }
+
+  if (is('q13','tak','nw')) {
+    judge.push({ t:'Działasz w obszarze z załącznika III',
+      law:'art. 6 i załącznik III · stosowanie od 02.12.2027',
+      p:'Rekrutacja, ocena pracowników, scoring, edukacja i dostęp do usług podstawowych to obszary wysokiego ryzyka. Klasyfikacji konkretnego systemu narzędzie nie przeprowadza. Masz czas do 2 grudnia 2027, a dostosowanie techniczne i umowne trwa dłużej, niż się wydaje.' });
+  }
+
+  if (is('q2','prywatnie')) {
+    judge.push({ t:'Publikujesz prywatnie',
+      law:'zakres podmiotowy AI Act',
+      p:'Osoby publikujące niezawodowo zasadniczo nie są podmiotem stosującym. Nadal obowiązują cię przepisy cywilne, karne, ochrona danych i regulaminy platform.' });
+  }
+
+  if (!is('q14','tak')) {
+    gaps.push({ t:'Brak udokumentowanych kompetencji AI',
+      law:'art. 4 · obowiązuje od 02.02.2025 · bez odroczenia',
+      p:'Musisz zapewnić, że osoby obsługujące systemy AI mają odpowiednie kompetencje, i umieć to wykazać. Sam fakt przeszkolenia bez dokumentacji nie wystarczy przed organem nadzoru.' });
+  }
+
+  if (!is('q15','tak')) {
+    gaps.push({ t:'Brak rejestru systemów AI',
+      law:'podstawa dowodowa dla całego art. 50',
+      p:'Zmapuj narzędzia pod kątem czterech sytuacji: interakcja z człowiekiem, treści syntetyczne, emocje i biometria, deepfake i teksty publiczne. Przypisz do każdego rolę prawną i osobę odpowiedzialną.' });
+  }
+
+  return { hard, judge, gaps };
+}
+
+function steps(f) {
+  const s = [];
+  s.push('Zrób rejestr systemów AI: nazwa, dostawca, rola prawna, punkt styku z człowiekiem, osoba odpowiedzialna.');
+  if (f.hard.some(h => h.law.includes('ust. 1')))
+    s.push('Wpisz komunikat o AI na starcie każdej rozmowy z botem i zrób zrzut ekranu jako dowód wdrożenia.');
+  if (f.hard.some(h => h.law.includes('ust. 2')))
+    s.push('Ustal z zespołem technicznym, jak twój generator znakuje wyniki maszynowo, i opisz to w dokumentacji.');
+  if (f.hard.concat(f.judge).some(h => h.law.includes('ust. 4')))
+    s.push('Przygotuj gotowe wzory etykiet dla materiałów syntetycznych i wpisz je do procesu publikacji.');
+  if (f.hard.some(h => h.law.includes('ust. 3')))
+    s.push('Napisz komunikat dla osób poddanych rozpoznawaniu emocji lub kategoryzacji biometrycznej i sprawdź podstawę w RODO.');
+  s.push('Sprawdź, czy CMS i platformy społecznościowe nie usuwają metadanych pochodzenia treści.');
+  s.push('Zaplanuj udokumentowane szkolenie kompetencji AI dla osób obsługujących te systemy.');
+  if (f.judge.length)
+    s.push('Zbierz pozycje oznaczone jako wymagające oceny i przekaż je prawnikowi jednym pakietem, zamiast pytać o każdą osobno.');
+  return s;
+}
+
+document.getElementById('calc').addEventListener('click', () => {
+  const m = metrics();
+  const v = verdictOf(m.W, m.n);
+  const f = buildFindings();
+  const d = new Date().toLocaleDateString('pl-PL', { day:'2-digit', month:'long', year:'numeric' });
+
+  const block = (arr, cls) => arr.map(i => `
+    <div class="item ${cls}">
+      <h4>${i.t}</h4>
+      <p class="law">${i.law}</p>
+      <p>${i.p}</p>
+      ${cls === 'judge' ? '<p class="flag">wymaga oceny prawnika</p>' : ''}
+    </div>`).join('');
+
+  let out = `
+    <h2>Raport przejrzystości AI</h2>
+    <p class="stamp">Wystawiony ${d} · silnik System X v1.4 · W = ${m.W} · status: ${v.label.toUpperCase()}</p>
+
+    <div class="rsec">
+      <h3>Rozliczenie wiarygodności</h3>
+      <p>Wynik ${m.W} przy progach ogłoszonych przed testem: 70 dla pomiaru, 50 dla opinii. Pokrycie F wyniosło ${Math.round(m.F)} przy ${m.n} odpowiedziach rozstrzygających na 15. Stabilność próby N wyniosła ${Math.round(m.N)}. Pewność metody U wyniosła ${m.U} po odjęciu ${m.J} pozycji ocennych.</p>
+      <p>${m.W >= 70
+        ? 'Status POMIAR oznacza, że dane wystarczają do wskazania obowiązków twardych. Nie oznacza zgodności z prawem.'
+        : m.W >= 50
+        ? 'Status OPINIA oznacza, że część odpowiedzi pozostała niepewna. Wynik traktuj jako kierunkowy, nie jako ustalenie.'
+        : 'Status NIEROZSTRZYGNIĘTE oznacza, że danych jest za mało. Uzupełnij odpowiedzi, zanim wyciągniesz wnioski.'}</p>
+    </div>`;
+
+  if (f.hard.length) out += `<div class="rsec"><h3>Obowiązki, które cię dotyczą</h3>${block(f.hard,'')}</div>`;
+  if (f.judge.length) out += `<div class="rsec"><h3>Pozycje, których narzędzie nie rozstrzyga</h3>${block(f.judge,'judge')}</div>`;
+  if (f.gaps.length) out += `<div class="rsec"><h3>Luki dowodowe</h3>${block(f.gaps,'gap')}</div>`;
+  if (!f.hard.length && !f.judge.length)
+    out += `<div class="rsec"><h3>Obowiązki, które cię dotyczą</h3><p>Z twoich odpowiedzi nie wynika żaden obowiązek twardy z art. 50. Sprawdź ponownie po każdej zmianie narzędzi, bo katalog uruchamia się automatycznie wraz z nowym zastosowaniem.</p></div>`;
+
+  out += `
+    <div class="rsec">
+      <h3>Czego to narzędzie nie sprawdza</h3>
+      <div class="refuse">
+        <p>Warunki odmowy ogłoszone przed testem, nie po zobaczeniu wyniku:</p>
+        <ol>
+          <li>Nie klasyfikuje systemu jako wysokiego ryzyka. To wymaga analizy z art. 6 i załącznika III.</li>
+          <li>Nie ocenia, czy kontekst czyni użycie AI oczywistym.</li>
+          <li>Nie ocenia, czy publikacja dotyczy interesu publicznego.</li>
+          <li>Nie ocenia zakresu wyjątku artystycznego i fikcyjnego.</li>
+          <li>Nie ocenia zgodności z RODO, prawem autorskim ani z art. 5 o praktykach zakazanych.</li>
+          <li>Nie wydaje opinii prawnych i nie zastępuje prawnika.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="rsec">
+      <h3>Plan na najbliższe 7 dni</h3>
+      <ol class="steps">${steps(f).map(x => `<li><span>${x}</span></li>`).join('')}</ol>
+    </div>
+
+    <div class="cta">
+      <h3>Potrzebujesz warstwy dowodowej, nie tylko listy obowiązków</h3>
+      <p>Buduję rejestry systemów AI, komunikaty ujawniające, logi zgodności i szkolenia kompetencji AI z art. 4. Część prawną zostawiam prawnikom, dowożę techniczną i operacyjną.</p>
+      <a href="https://architektkariery.com">architektkariery.com</a>
+      <a href="mailto:kontakt@architektkariery.com?subject=Raport%20przejrzysto%C5%9Bci%20AI%20-%20W%3D${m.W}">kontakt@architektkariery.com</a>
+    </div>
+
+    <div class="submitrow">
+      <button class="printbtn" onclick="window.print()">Zapisz jako PDF</button>
+      <button class="ghost" onclick="location.reload()">Wypełnij ponownie</button>
+    </div>`;
+
+  const r = document.getElementById('report');
+  r.innerHTML = out;
+  r.classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  r.scrollIntoView({ block: 'start' });
+});
+</script>
+</body>
+</html>
