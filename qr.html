@@ -1403,8 +1403,23 @@ const XScore = (() => {
   }
 
   /* Kolko z wynikiem. cx, cy, r w pikselach kadru. t w sekundach, moze byc null. */
-  function rysuj(g, cx, cy, r, x, t) {
-    const n = doPokazania(x), p = pasmo(n), tekst = String(n);
+  /* Barwa pierscienia idzie z TIERU gatunku, a nie z liczby punktow.
+     Powod: jesiotr przy 81 cm dostaje 50 punktow i wpadal w pasmo "rzadki",
+     czyli fioletowe, mimo ze jest gatunkiem z Tieru 5. Punkty opisuja OKAZ,
+     a tier opisuje GATUNEK; to sa dwie rozne rzeczy i mieszanie ich mylilo.
+     Teraz zloty pierscien znaczy Tier 5 zawsze, nawet przy malym okazie,
+     a liczba w srodku dalej mowi, jak dobry to egzemplarz. */
+  const PASMA_TIER = {
+    1: { ring: '#7A8290', cyfra: '#D6DCE6', nazwa: 'pospolity' },
+    2: { ring: '#5AA85E', cyfra: '#C9F0C4', nazwa: 'liczny' },
+    3: { ring: '#4C86C8', cyfra: '#CBE2FA', nazwa: 'rzadszy' },
+    4: { ring: '#9A5BC8', cyfra: '#E6CFFA', nazwa: 'rzadki' },
+    5: { ring: '#E4A824', cyfra: '#FFF0C0', nazwa: 'legendarny' },
+    6: { ring: '#D8543C', cyfra: '#FFD8C8', nazwa: 'mityczny' }
+  };
+  const pasmoTieru = t => PASMA_TIER[t] || PASMA_TIER[1];
+  function rysuj(g, cx, cy, r, x, t, tier) {
+    const n = doPokazania(x), p = tier ? pasmoTieru(tier) : pasmo(n), tekst = String(n);
     const puls = (t != null && n >= 100) ? 1 + 0.06 * Math.sin(t * 3.4) : 1;
     const R = r * puls, Ri = R * 0.74;
     g.save();
@@ -1454,7 +1469,7 @@ const XScore = (() => {
     rysuj(g, kartaW * u.cx, kartaH * u.cy, kartaW * u.r, x, t);
   }
 
-  return { policz, doPokazania, rysuj, naKarcie, pasmo, PASMA, GAT, DOM, PRZESUNIECIE, ALFA: 0.29172 };
+  return { policz, doPokazania, rysuj, naKarcie, pasmo, pasmoTieru, PASMA, PASMA_TIER, GAT, DOM, PRZESUNIECIE, ALFA: 0.29172 };
 })();
 window.XScore = XScore;
 
@@ -4086,7 +4101,50 @@ window.dopasowanieGlebokosci = dopasowanieGlebokosci;
 /* ============================================================
    Wplywanie i wyplywanie
    ============================================================ */
+/* ============================================================
+   CYKL LAWICY, szescdziesiat sekund.
+
+   Sekunda 0 do 58: lawica zyje normalnie, ryby wplywaja i wyplywaja.
+   Sekunda 58: WSZYSTKIE naraz plosza sie i uciekaja do najblizszej krawedzi
+   z poczwornym przyspieszeniem, wiec kadr pustoszeje w kilka sekund.
+   Sekunda 60: rusza nowa lawica, cala wplywa z brzegow.
+
+   To robi to samo, co wymuszone odswiezanie strony co minute, tylko bez
+   przerywania holu, bez gubienia rekordu sesji i bez czarnego mignięcia.
+   Przy okazji leczy najgorszy objaw awarii: gdyby cokolwiek zamrozilo
+   populacje, cykl i tak wymiata kadr i buduje go od nowa.
+
+   Twardy przeladunek strony jest pod adresem z ?reload, gdybys jednak
+   chcial dokladnie tego. Kosztuje rekord sesji i przerwana walke. */
+const CYKL = { okres: 60, ucieczka: 58, t: 0, faza: 'zyje' };
+window.CYKL = CYKL;
+function cyklLawicy(dt) {
+  CYKL.t += dt;
+  if (CYKL.faza === 'zyje' && CYKL.t >= CYKL.ucieczka) {
+    CYKL.faza = 'ucieka';
+    for (const f of school) {
+      if (f.caught || f.mood === 'strike') continue;
+      f.mood = 'odplywa';
+      f.face = f.x < Scene.W / 2 ? -1 : 1;
+      f.vTarget = f.face * f.base * 4.2;   /* plochliwie, nie spacerkiem */
+      f.hover = 0; f.turn = 999; f.pobyt = 0;
+    }
+  }
+  if (CYKL.t >= CYKL.okres) {
+    CYKL.t -= CYKL.okres; CYKL.faza = 'zyje';
+    /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
+    for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
+    const ile = POP.cel + Math.round(Math.random() * 3);
+    for (let i = 0; i < ile; i++) school.push(wplyw());
+    spawnT = POP.odstep[0];
+  }
+}
+
 function zarzadzajPopulacja(dt) {
+  cyklLawicy(dt);
+  /* W fazie ucieczki populacja sie nie uzupelnia, inaczej nowe ryby
+     wplywalyby w sam srodek exodusu. */
+  if (CYKL.faza === 'ucieka') return;
   /* 1. Odliczanie pobytu. Ryba zainteresowana przyneta albo na haczyku zostaje. */
   for (const f of school) {
     if (f.caught || f.mood === 'inspect' || f.mood === 'strike' || f.mood === 'odplywa') continue;
@@ -4442,7 +4500,21 @@ function drawCard(g, t) {
      karty zostala widoczna dookola. */
   if (typeof XScore !== 'undefined' && D.klucz && GATUNKI[D.klucz]) {
     const x = XScore.policz(D.klucz, GATUNKI[D.klucz], D.dl, D.waga);
-    XScore.rysuj(g, M.medal[0], M.medal[1], M.medal[2], x, t);
+    const tier = (window.TIER && TIER[D.klucz]) || 1;
+    XScore.rysuj(g, M.medal[0], M.medal[1], M.medal[2], x, t, tier);
+    /* Obwodka karty w barwie tieru. Pieciu osobnych ramek nie da sie tu
+       podmienic bez przemierzenia szesciu gniazd na kazdej z nich, wiec
+       tier czyta sie z koloru: obrys plus miekka poswiata dokola. */
+    const P = XScore.pasmoTieru(tier);
+    g.save();
+    g.strokeStyle = P.ring;
+    g.globalAlpha = 0.95;
+    g.lineWidth = 7;
+    g.strokeRect(4, 4, M.w - 8, M.h - 8);
+    g.globalAlpha = 0.30 + (tier >= 4 ? 0.14 * (0.5 + 0.5 * Math.sin(t * 3)) : 0);
+    g.lineWidth = 18;
+    g.strokeRect(10, 10, M.w - 20, M.h - 20);
+    g.restore();
   }
 
   /* --- szyld REKORD POLSKI, tylko gdy okaz bije rekord ---
@@ -4513,6 +4585,8 @@ const HapDiag = {
 };
 window.HapDiag = HapDiag;
 const MIX_PANEL = /[?&]mix\b/.test(location.search);
+/* Twarde przeladowanie co minute, gdyby cykl lawicy nie wystarczyl. */
+if (/[?&]reload\b/.test(location.search)) setTimeout(() => location.reload(), 60000);
 const HAP_PANEL = /[?&]hap\b/.test(location.search);
 
 const Hap = {
