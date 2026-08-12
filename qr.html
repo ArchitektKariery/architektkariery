@@ -3770,10 +3770,16 @@ function losujGatunek(r) {
   const st = (window.PORA && PORA.teraz) ? PORA.teraz() : null;
   const S = st ? { godzina: st.godzina, sezon: st.sezon, pogoda: st.pogoda }
               : { godzina: 12, sezon: 'lato', pogoda: 'pogodnie' };
-  const waga = (k) => (window.wagaGatunku ? wagaGatunku(k, GATUNKI[k], S) : GATUNKI[k].udzial)
+  /* Kazdy modul osobno i w klatce ochronnej. Gdyby ktorykolwiek rzucil wyjatek
+     albo jeszcze sie nie wczytal, waga spada do samego udzialu z rejestru,
+     zamiast wywalac cala funkcje. Bez tego jeden blad w module zamrazal
+     lawice na tych pietnastu rybach, ktore akurat byly w kadrze, i gracz
+     przez cala sesje ogladal ten sam zestaw gatunkow. */
+  const bezp = (f, dom) => { try { const v = f(); return (isFinite(v) && v > 0) ? v : dom; } catch (e) { return dom; } };
+  const waga = (k) => bezp(() => (window.wagaGatunku ? wagaGatunku(k, GATUNKI[k], S) : GATUNKI[k].udzial), GATUNKI[k].udzial)
     * (mn[k] || 1)
-    * ((typeof Pierwszenstwo !== 'undefined') ? Pierwszenstwo.wyrownaj(k) : 1)
-    * ((typeof Tiery !== 'undefined') ? Tiery.mnoznik(k) : 1);
+    * bezp(() => window.Pierwszenstwo ? Pierwszenstwo.wyrownaj(k) : 1, 1)
+    * bezp(() => window.Tiery ? Tiery.mnoznik(k) : 1, 1);
   /* Kupon odkrywcy: co Atlas.KUPON_MIN minut jedna ryba idzie wylacznie
      z puli nieodkrytych. Bez niego ogon rejestru jest nieosiagalny: przy
      stu testerach i dwustu godzinach kazdy ZADEN nie domknal atlasu,
@@ -3845,10 +3851,28 @@ window.glebokoscZ = glebokoscZ;
 function skalaZCm(cm, gk) { return cm * 1.3176 / GATUNKI[gk || 'ploc'].meta.w; }
 
 const school = [];
+/* Licznik gatunkow, ktore FAKTYCZNIE weszly do kadru. Do sprawdzenia, czy
+   rozklad tierow zgadza sie z zalozonym, bez zgadywania z pamieci.
+   Podglad: dopisz ?mix do adresu albo wywolaj QRYBY_MIX() w konsoli. */
+const MIX = { spawn: {}, razem: 0 };
+window.MIX = MIX;
+window.QRYBY_MIX = function () {
+  const T = window.TIER || {}, tt = {};
+  for (const k in MIX.spawn) { const t = T[k] || 1; tt[t] = (tt[t] || 0) + MIX.spawn[k]; }
+  const w = { razem: MIX.razem, tiery: {}, gatunki: {} };
+  for (const t in tt) w.tiery[t] = +(100 * tt[t] / MIX.razem).toFixed(2);
+  for (const k in MIX.spawn) w.gatunki[k] = +(100 * MIX.spawn[k] / MIX.razem).toFixed(2);
+  const teraz = {};
+  for (const f of school) { const t = T[f.gat] || 1; teraz[t] = (teraz[t] || 0) + 1; }
+  w.wKadrze = teraz;
+  console.table(w.tiery); console.log(w);
+  return w;
+};
 function makeFish(rng) {
   const r = rng || Math.random;
   /* Gatunek najpierw: od niego zaleza i glebokosc, i rozklad dlugosci. */
   const gk = losujGatunek(r);
+  MIX.spawn[gk] = (MIX.spawn[gk] || 0) + 1; MIX.razem++;
   const GG = GATUNKI[gk];
   /* Glebokosc z pietra typowego dla gatunku, nie z calego slupa wody. */
   const d = GG.glebia[0] + r() * (GG.glebia[1] - GG.glebia[0]);
@@ -4488,6 +4512,7 @@ const HapDiag = {
   }
 };
 window.HapDiag = HapDiag;
+const MIX_PANEL = /[?&]mix\b/.test(location.search);
 const HAP_PANEL = /[?&]hap\b/.test(location.search);
 
 const Hap = {
@@ -4940,6 +4965,27 @@ Scene.slots.overlay = (g, t) => {
   if (typeof Atlas !== 'undefined') Atlas.tik(dtOv);
   /* Zegar rysuje sie pod karta, zeby nie zaslanial jej, gdy jest otwarta. */
   if (typeof Zegar !== 'undefined') Zegar.rysuj(g, W, H, dtOv);
+  /* Panel rozkladu tierow pod adresem z ?mix. Pokazuje, co naprawde weszlo
+     do kadru od poczatku sesji i co siedzi w nim teraz. */
+  if (MIX_PANEL && window.MIX && MIX.razem > 0) {
+    const T = window.TIER || {}, tt = {}, tr = {};
+    for (const k in MIX.spawn) { const t = T[k] || 1; tt[t] = (tt[t] || 0) + MIX.spawn[k]; }
+    for (const f of school) { const t = T[f.gat] || 1; tr[t] = (tr[t] || 0) + 1; }
+    g.save();
+    g.font = '20px ui-monospace, monospace';
+    g.textAlign = 'left';
+    g.fillStyle = 'rgba(8,6,20,0.82)';
+    g.fillRect(90, 60, 300, 200);
+    g.fillStyle = '#E4A824';
+    g.fillText('spawn: ' + MIX.razem + ' ryb', 104, 88);
+    g.fillStyle = '#EDE6F5';
+    for (let t = 1; t <= 6; t++) {
+      if (!tt[t] && !tr[t]) continue;
+      const p = (100 * (tt[t] || 0) / MIX.razem).toFixed(2);
+      g.fillText('tier ' + t + '  ' + String(p).padStart(6) + '%   w kadrze ' + (tr[t] || 0), 104, 88 + t * 26);
+    }
+    g.restore();
+  }
   if (typeof HAP_PANEL !== 'undefined' && HAP_PANEL) drawHapPanel(g);
 };
 
