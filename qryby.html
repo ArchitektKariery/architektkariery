@@ -483,6 +483,8 @@ body.atlas-otwarty #szukajka{display:flex;animation:wjazd-szukajki .34s var(--sp
   font:inherit;font-size:12px;letter-spacing:.04em}
 #panelTresc input::placeholder{color:rgba(58,47,34,.42)}
 #panelTresc .drobne a{color:var(--tusz);font-weight:800;text-decoration:underline}
+#panelTresc .uid{font-family:monospace;font-size:10px;letter-spacing:0;
+  padding:2px 5px;border-radius:6px;background:rgba(20,18,16,.09);cursor:pointer}
 #panelTresc .komunikat a{color:var(--tusz);font-weight:800;text-decoration:underline}
 #panelTresc input#nickPole{width:100%;padding:9px 11px;border-radius:10px;
   background:rgba(20,18,16,.07);border:1.6px solid var(--tusz);color:#3A2F22;
@@ -6424,8 +6426,21 @@ window.Ruch = Ruch;
     const kiedy = Chmura.ostatniaKopia();
     const mail = Chmura.mail();
     return naglowek +
+      /* ============================================================
+         DWA ROZNE IDENTYFIKATORY, latwe do pomylenia.
+
+         Nizej, w sekcji URZADZENIE, stoi identyfikator ZAPISU: nadawany
+         lokalnie przy pierwszym uruchomieniu, sluzy do rozpoznania, czy
+         zapis w chmurze pochodzi z tego samego rodowodu.
+
+         Tutaj stoi identyfikator KONTA na serwerze, czyli auth.uid.
+         To jego wymaga baza przy nadawaniu uprawnien administratora,
+         i to jego brakowalo w instrukcji, przez co odsylala do zlego pola.
+         ============================================================ */
       '<div class="drobne">Zalogowany: <b>' + (mail || 'konto anonimowe') + '</b><br>' +
-      'Kopia na serwerze: <b>' + (kiedy ? new Date(kiedy).toLocaleTimeString('pl-PL') : 'jeszcze nie') + '</b></div>' +
+      'Kopia na serwerze: <b>' + (kiedy ? new Date(kiedy).toLocaleTimeString('pl-PL') : 'jeszcze nie') + '</b><br>' +
+      'Konto na serwerze: <b class="uid" onclick="Gracz.kopiujUid()">' + (Chmura.uid() || '\u2014') + '</b> ' +
+      '<a href="#" onclick="Gracz.kopiujUid();return false">kopiuj</a></div>' +
       stopka +
       '<button class="duzy" onclick="Gracz.synchronizuj()">SYNCHRONIZUJ TERAZ</button>' +
       (mail ? '' :
@@ -6511,6 +6526,14 @@ window.Ruch = Ruch;
       if (!oczekujacyZapis) return panelGracza('Nie ma czego wgrać.');
       Chmura.przyjmijZdalny(oczekujacyZapis); oczekujacyZapis = null;
       panelGracza('Wgrano zapis z serwera.');
+    },
+    kopiujUid() {
+      const u = Chmura.uid();
+      if (!u) return panelGracza('Najpierw załóż konto.');
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u);
+      } catch (e) {}
+      panelGracza('Identyfikator konta skopiowany:<br><b style="font-size:11px">' + u + '</b>');
     },
     wyloguj() { Chmura.wyloguj(); panelGracza('Wylogowano. Zapis został na telefonie.'); },
     wylogujPytaj() {
