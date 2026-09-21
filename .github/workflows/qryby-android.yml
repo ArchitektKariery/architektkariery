@@ -46,11 +46,13 @@ jobs:
       - name: Publish APK into website repository
         run: |
           mkdir -p downloads
+          cp android/app/build/outputs/apk/debug/app-debug.apk downloads/QRyby-0.1.2.apk
           cp android/app/build/outputs/apk/debug/app-debug.apk downloads/QRyby.apk
+          sha256sum downloads/QRyby-0.1.2.apk > downloads/QRyby-0.1.2.apk.sha256
           sha256sum downloads/QRyby.apk > downloads/QRyby.apk.sha256
           git config user.name "QRyby Builder"
           git config user.email "actions@users.noreply.github.com"
-          git add downloads/QRyby.apk downloads/QRyby.apk.sha256
+          git add downloads/QRyby-0.1.2.apk downloads/QRyby-0.1.2.apk.sha256 downloads/QRyby.apk downloads/QRyby.apk.sha256
           if git diff --cached --quiet; then
             echo "APK unchanged"
             exit 0
