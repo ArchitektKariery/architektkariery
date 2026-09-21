@@ -1,0 +1,51 @@
+name: QRyby one-shot clock repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/qryby-clock-repair.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair lake clock sizing and position
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("qryby.html")
+          s = p.read_text(encoding="utf-8")
+
+          old = "#lakeClock{left:auto;right:calc(12px + env(safe-area-inset-right));top:auto;bottom:calc(88px + env(safe-area-inset-bottom));min-width:96px;padding:6px 10px 5px;border-radius:11px;transform:scale(.5);transform-origin:bottom right}"
+          new = "#lakeClock{left:auto;right:calc(12px + env(safe-area-inset-right));top:auto;bottom:calc(88px + env(safe-area-inset-bottom));width:58px;min-width:58px;max-width:58px;height:34px;min-height:0;max-height:34px;padding:3px 4px 2px;border-radius:7px;box-sizing:border-box;transform:none;overflow:hidden}"
+
+          if s.count(old) != 1:
+              raise SystemExit(f"Expected exactly one current lakeClock rule, found {s.count(old)}")
+
+          s = s.replace(old, new)
+
+          old_b = "#lakeClock b{font-size:16px}"
+          new_b = "#lakeClock b{font-size:8px;line-height:1.05}"
+
+          if s.count(old_b) != 1:
+              raise SystemExit(f"Expected exactly one lakeClock b rule, found {s.count(old_b)}")
+
+          s = s.replace(old_b, new_b)
+          p.write_text(s, encoding="utf-8")
+
+      - name: Commit repair
+        run: |
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qryby.html
+          git diff --cached --quiet && exit 0
+          git commit -m "QRyby: repair compact bottom-right clock"
+          git push origin HEAD:main
