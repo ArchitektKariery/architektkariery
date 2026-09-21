@@ -1,0 +1,49 @@
+name: QRyby one-shot UI patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/qryby-ui-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Lower spawning panel by 4px
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("qryby.html")
+          s = p.read_text(encoding="utf-8")
+          edits = [
+              ("#tarla{top:calc(98px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:auto;width:80px;",
+               "#tarla{top:calc(102px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:auto;width:80px;"),
+              ("body.z-paskiem #tarla{top:calc(125px + env(safe-area-inset-top))}",
+               "body.z-paskiem #tarla{top:calc(129px + env(safe-area-inset-top))}"),
+              ("body.bez-konta #tarla{top:calc(126px + env(safe-area-inset-top))}",
+               "body.bez-konta #tarla{top:calc(130px + env(safe-area-inset-top))}"),
+              ("body.bez-konta.z-paskiem #tarla{top:calc(153px + env(safe-area-inset-top))}",
+               "body.bez-konta.z-paskiem #tarla{top:calc(157px + env(safe-area-inset-top))}")
+          ]
+          for old, new in edits:
+              if s.count(old) != 1:
+                  raise SystemExit(f"Expected exactly one match: {old}")
+              s = s.replace(old, new)
+          p.write_text(s, encoding="utf-8")
+
+      - name: Commit patch
+        run: |
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qryby.html
+          git diff --cached --quiet && exit 0
+          git commit -m "QRyby: lower spawning panel another 4px"
+          git push origin HEAD:main
