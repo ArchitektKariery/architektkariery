@@ -31,7 +31,7 @@ dependencies {
 }
 
 tasks.register('syncGame', Copy) {
-    from("${rootDir}/../qryby.html")
+    from("${rootDir}/../qryby-game.html")
     into("src/main/assets")
     rename { 'index.html' }
 }
