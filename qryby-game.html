@@ -15465,7 +15465,15 @@ const Onboarding = (() => {
 
   function boot() {
     if (!WL || booted || !window.Zapis || !Zapis.dane) return false;
-    if (!FORCE && !mozeLowic()) return false;
+    /* Samouczek tylko dla niezalogowanych.
+     Zalogowane, potwierdzone konto pomija onboarding niezaleznie od localStorage.
+     ?onboarding=1 nadal wymusza tryb testowy. */
+  if (!FORCE && mozeLowic()) {
+    booted = true;
+    step = 99;
+    hide(guide); hide(karta); clearTarget();
+    return true;
+  }
     booted = true;
     ostatnia = loadLast();
 
