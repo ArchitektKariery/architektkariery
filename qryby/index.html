@@ -22,6 +22,28 @@ body.ready #loading{display:none}
 const game=document.getElementById('game');
 game.addEventListener('load',()=>document.body.classList.add('ready'));
 
+/* Automatyczny samouczek ma być widoczny tylko bez pełnego konta.
+   Gra działa w tym samym originie, więc shell może bezpiecznie schować
+   warstwę onboardingową po odtworzeniu zalogowanej sesji. POMOC zostaje. */
+function syncOnboardingVisibility(){
+  try{
+    const w=game.contentWindow;
+    if(!w || !w.document) return;
+    const logged=!!(w.Chmura && w.Chmura.pelnyDostep && w.Chmura.pelnyDostep());
+    const guide=w.document.getElementById('onbGuide');
+    const card=w.document.getElementById('onbKarta');
+    if(guide) guide.style.display=logged?'none':'';
+    if(card) card.style.display=logged?'none':'';
+    if(logged && w.Onboarding && w.Onboarding.schowaj) w.Onboarding.schowaj();
+  }catch(_){}
+}
+game.addEventListener('load',()=>{
+  syncOnboardingVisibility();
+  setTimeout(syncOnboardingVisibility,300);
+  setTimeout(syncOnboardingVisibility,1200);
+});
+setInterval(syncOnboardingVisibility,500);
+
 /* PWA było etapem przejściowym. Czyścimy stary service worker/cache,
    żeby przeglądarka nie przywracała poprzedniego instalatora. */
 if('serviceWorker' in navigator){
