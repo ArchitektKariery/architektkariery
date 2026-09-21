@@ -16,67 +16,37 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0B0714}
 #game{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0B0714}
-#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#E8C765;background:#0B0714;font:800 12px/1.4 ui-monospace,monospace;letter-spacing:.18em;z-index:2}
+#loading{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:#0B0714;color:#E8C765;font:800 12px/1.4 ui-monospace,monospace;letter-spacing:.18em}
 body.ready #loading{display:none}
-#install{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;padding:12px 17px;border-radius:999px;border:1px solid rgba(232,199,101,.78);background:rgba(23,16,42,.96);color:#F3D985;font:800 11px/1 ui-monospace,monospace;letter-spacing:.08em;box-shadow:0 5px 20px rgba(0,0,0,.38)}
+#install{position:fixed;z-index:20;right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));height:40px;padding:0 14px;border-radius:22px;border:1px solid rgba(232,199,101,.78);background:rgba(23,16,42,.96);color:#F3D985;font:900 10px/1 ui-monospace,monospace;letter-spacing:.08em;box-shadow:0 5px 20px rgba(0,0,0,.38)}
 #install[hidden]{display:none}
-#installHelp{display:none;position:fixed;inset:0;z-index:30;background:rgba(5,3,11,.76);align-items:center;justify-content:center;padding:24px}
-#installHelp.on{display:flex}
-#installHelp>div{max-width:340px;padding:20px;border:1px solid rgba(232,199,101,.55);border-radius:16px;background:#17102A;color:#F4E6BA;font:700 13px/1.55 ui-monospace,monospace;box-shadow:0 12px 40px rgba(0,0,0,.45)}
-#installHelp b{display:block;margin-bottom:8px;color:#F3D985;font-size:15px}
-#installHelp button{margin-top:14px;width:100%;padding:10px;border-radius:10px;border:1px solid rgba(232,199,101,.5);background:#2A1D44;color:#F3D985;font:800 11px ui-monospace,monospace}
+#help{display:none;position:fixed;inset:0;z-index:30;background:rgba(5,3,11,.78);align-items:center;justify-content:center;padding:24px}
+#help.on{display:flex}
+#help>div{max-width:350px;padding:20px;border:1px solid rgba(232,199,101,.55);border-radius:16px;background:#17102A;color:#F4E6BA;font:700 13px/1.55 ui-monospace,monospace;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+#help b{display:block;margin-bottom:8px;color:#F3D985;font-size:15px}
+#help button{margin-top:14px;width:100%;padding:10px;border-radius:10px;border:1px solid rgba(232,199,101,.5);background:#2A1D44;color:#F3D985;font:900 11px ui-monospace,monospace}
 </style>
 </head>
 <body>
 <div id="loading">QRyby · ŁADOWANIE</div>
-<iframe id="game" src="/qryby.html" title="QRyby" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe>
-<button id="install" type="button">ZAINSTALUJ QRyby</button>
-<div id="installHelp" role="dialog" aria-modal="true">
-  <div>
-    <b>INSTALACJA QRyby</b>
-    Ta przeglądarka nie udostępnia systemowego instalatora PWA.
-    Otwórz tę samą stronę w Chrome lub Samsung Internet i wybierz
-    <strong>Zainstaluj aplikację</strong>. W DuckDuckGo możesz też sprawdzić
-    menu przeglądarki pod kątem opcji dodania strony do ekranu głównego.
-    <button id="installHelpClose" type="button">OK</button>
-  </div>
-</div>
+<iframe id="game" src="/qryby-game.html" title="QRyby" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe>
+<button id="install" type="button" hidden>⬇ ZAINSTALUJ</button>
+<div id="help" role="dialog" aria-modal="true"><div><b>ZAINSTALUJ QRyby</b><p>Ta przeglądarka nie pokazała systemowego instalatora PWA.</p><p>W Chrome albo Samsung Internet otwórz <strong>architektkariery.com/qryby</strong> i wybierz <strong>Zainstaluj aplikację</strong> lub <strong>Dodaj do ekranu głównego</strong>.</p><button id="closeHelp" type="button">OK</button></div></div>
 <script>
 const game=document.getElementById('game');
+const install=document.getElementById('install');
+const help=document.getElementById('help');
+const closeHelp=document.getElementById('closeHelp');
+let deferred=null;
 game.addEventListener('load',()=>document.body.classList.add('ready'));
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/qryby-sw.js',{scope:'/qryby'}).catch(()=>{}));
-}
-
-let installPrompt=null;
-const installBtn=document.getElementById('install');
-const help=document.getElementById('installHelp');
-const helpClose=document.getElementById('installHelpClose');
-const standalone=window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
-if(standalone) installBtn.hidden=true;
-
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  installPrompt=e;
-  installBtn.hidden=false;
-});
-installBtn.addEventListener('click',async()=>{
-  if(installPrompt){
-    installPrompt.prompt();
-    try{await installPrompt.userChoice;}catch(_){}
-    installPrompt=null;
-    installBtn.hidden=true;
-    return;
-  }
-  help.classList.add('on');
-});
-helpClose.addEventListener('click',()=>help.classList.remove('on'));
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('/qryby-sw.js',{scope:'/qryby'}).catch(()=>{}),{once:true});}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(!standalone)install.hidden=false;});
+addEventListener('appinstalled',()=>{deferred=null;install.hidden=true;});
+if(!standalone)setTimeout(()=>install.hidden=false,1400);
+install.addEventListener('click',async()=>{if(deferred){deferred.prompt();try{await deferred.userChoice}catch(_){}deferred=null;}else help.classList.add('on');});
+closeHelp.addEventListener('click',()=>help.classList.remove('on'));
 help.addEventListener('click',e=>{if(e.target===help)help.classList.remove('on');});
-window.addEventListener('appinstalled',()=>{
-  installPrompt=null;
-  installBtn.hidden=true;
-});
 </script>
 </body>
 </html>
