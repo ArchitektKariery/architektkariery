@@ -22,55 +22,18 @@ jobs:
           from pathlib import Path
           p = Path("qryby-game.html")
           s = p.read_text(encoding="utf-8")
-          old = """  function boot() {
-            if (!WL || booted || !window.Zapis || !Zapis.dane) return false;
-            if (!FORCE && !mozeLowic()) return false;
-            booted = true;
-            ostatnia = loadLast();
-
-            if (FORCE) step = 0;
-            else {
-              const raw = lsGet(KEY);
-              if (raw !== null && raw !== '') step = Math.max(0, Math.min(99, parseInt(raw,10) || 0));
-              else if (statZlowien() > 0) step = 99;  /* stary gracz: bez tutorialu */
-              else if (lsGet(OLD_FIRST_CAST) === '1') step = 1; /* migracja z 1A */
-              else step = 0;
-              zapisz();
-            }
-            render();
-            return true;
-          }"""
-          new = """  function boot() {
-            if (!WL || booted || !window.Zapis || !Zapis.dane) return false;
-
-            /* IX 2026 — samouczek tylko dla niezalogowanych.
-               Zalogowane, potwierdzone konto nigdy nie dostaje onboardingu,
-               niezaleznie od localStorage, liczby zlowien czy nowego urzadzenia.
-               ?onboarding=1 zostaje jako jawny tryb testowy. */
+          old = "    if (!FORCE && !mozeLowic()) return false;"
+          new = """    /* Samouczek tylko dla niezalogowanych.
+               Zalogowane, potwierdzone konto pomija onboarding niezaleznie od localStorage.
+               ?onboarding=1 nadal wymusza tryb testowy. */
             if (!FORCE && mozeLowic()) {
               booted = true;
               step = 99;
               hide(guide); hide(karta); clearTarget();
               return true;
-            }
-
-            booted = true;
-            ostatnia = loadLast();
-
-            if (FORCE) step = 0;
-            else {
-              const raw = lsGet(KEY);
-              if (raw !== null && raw !== '') step = Math.max(0, Math.min(99, parseInt(raw,10) || 0));
-              else if (statZlowien() > 0) step = 99;  /* stary gracz: bez tutorialu */
-              else if (lsGet(OLD_FIRST_CAST) === '1') step = 1; /* migracja z 1A */
-              else step = 0;
-              zapisz();
-            }
-            render();
-            return true;
-          }"""
+            }"""
           if old not in s:
-              raise SystemExit("Expected onboarding block not found")
+              raise SystemExit("Onboarding gate line not found")
           p.write_text(s.replace(old, new, 1), encoding="utf-8")
           PY
 
