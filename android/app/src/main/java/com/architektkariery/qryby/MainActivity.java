@@ -6,80 +6,78 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-import androidx.webkit.WebViewAssetLoader;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
+    private static final String GAME_URL = "https://architektkariery.com/qryby-game.html?app=android&v=2";
     private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Window window = getWindow();
-        window.setStatusBarColor(Color.BLACK);
-        window.setNavigationBarColor(Color.BLACK);
+        getWindow().setStatusBarColor(Color.BLACK);
+        getWindow().setNavigationBarColor(Color.BLACK);
         hideSystemBars();
 
-        webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(11, 7, 20));
-        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        try {
+            webView = new WebView(this);
+            webView.setBackgroundColor(Color.rgb(11, 7, 20));
+            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
-        settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        settings.setLoadWithOverviewMode(false);
-        settings.setUseWideViewPort(true);
+            WebSettings settings = webView.getSettings();
+            settings.setJavaScriptEnabled(true);
+            settings.setDomStorageEnabled(true);
+            settings.setDatabaseEnabled(true);
+            settings.setMediaPlaybackRequiresUserGesture(false);
+            settings.setLoadWithOverviewMode(false);
+            settings.setUseWideViewPort(true);
+            settings.setBuiltInZoomControls(false);
+            settings.setDisplayZoomControls(false);
 
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-                .build();
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri uri = request.getUrl();
-                if ("appassets.androidplatform.net".equals(uri.getHost())) return false;
-                String scheme = uri.getScheme();
-                if ("http".equals(scheme) || "https".equals(scheme)) {
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                    } catch (Exception ignored) {}
-                    return true;
+            webView.setWebChromeClient(new WebChromeClient());
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    Uri uri = request.getUrl();
+                    String host = uri.getHost();
+                    if (host != null && (host.equals("architektkariery.com") || host.endsWith(".architektkariery.com"))) {
+                        return false;
+                    }
+                    String scheme = uri.getScheme();
+                    if ("http".equals(scheme) || "https".equals(scheme)) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                            return true;
+                        } catch (Exception ignored) {}
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
-        webView.setWebChromeClient(new WebChromeClient());
+            });
 
-        setContentView(webView);
-        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+            setContentView(webView);
+            webView.loadUrl(GAME_URL);
+        } catch (Throwable t) {
+            Toast.makeText(this, "Nie udało się uruchomić silnika QRyb. Otwieram wersję online.", Toast.LENGTH_LONG).show();
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://architektkariery.com/qryby-game.html")));
+            } catch (Exception ignored) {}
+            finish();
+        }
     }
 
     private void hideSystemBars() {
         if (android.os.Build.VERSION.SDK_INT >= 30) {
-            WindowInsetsController c = getWindow().getInsetsController();
-            if (c != null) {
-                c.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                c.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         } else {
             getWindow().getDecorView().setSystemUiVisibility(
@@ -101,15 +99,22 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack();
-        else moveTaskToBack(true);
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            moveTaskToBack(true);
+        }
     }
 
     @Override
     protected void onDestroy() {
         if (webView != null) {
-            webView.stopLoading();
-            webView.destroy();
+            try {
+                webView.stopLoading();
+                webView.loadUrl("about:blank");
+                webView.removeAllViews();
+                webView.destroy();
+            } catch (Exception ignored) {}
         }
         super.onDestroy();
     }
