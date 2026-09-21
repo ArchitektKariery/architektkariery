@@ -22,8 +22,27 @@ jobs:
           from pathlib import Path
           p = Path("qryby-game.html")
           s = p.read_text(encoding="utf-8")
-          old = "    if (!FORCE && !mozeLowic()) return false;"
-          new = """    /* Samouczek tylko dla niezalogowanych.
+
+          start = s.find("const Onboarding = (() => {")
+          end = s.find("window.Onboarding = Onboarding;", start)
+          if start < 0 or end < 0:
+              raise SystemExit("Onboarding block not found")
+
+          b = s[start:end]
+
+          old = """  function mozeLowic() {
+              try { return !!(window.Chmura && Chmura.pelnyDostep && Chmura.pelnyDostep()); }
+              catch (e) { return false; }
+            }"""
+          new = """  function maKonto() {
+              try { return !!(window.Chmura && Chmura.zalogowany && Chmura.zalogowany()); }
+              catch (e) { return false; }
+            }"""
+          if old not in b:
+              raise SystemExit("Account helper not found")
+          b = b.replace(old, new, 1)
+
+          old = """    /* Samouczek tylko dla niezalogowanych.
                Zalogowane, potwierdzone konto pomija onboarding niezaleznie od localStorage.
                ?onboarding=1 nadal wymusza tryb testowy. */
             if (!FORCE && mozeLowic()) {
@@ -32,9 +51,100 @@ jobs:
               hide(guide); hide(karta); clearTarget();
               return true;
             }"""
-          if old not in s:
-              raise SystemExit("Onboarding gate line not found")
-          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          new = """    /* Samouczek jest tylko dla niezalogowanych.
+               Kazda istniejaca sesja konta pomija onboarding.
+               ?onboarding=1 nadal wymusza tryb testowy autora. */
+            if (!FORCE && maKonto()) {
+              booted = true;
+              step = 99;
+              hide(guide); hide(karta); clearTarget();
+              return true;
+            }"""
+          if old not in b:
+              raise SystemExit("Boot gate not found")
+          b = b.replace(old, new, 1)
+
+          old = """  function setStep(n, eventName, payload) {
+              if (!WL) return;
+              if (!booted && !boot()) return;"""
+          new = """  function setStep(n, eventName, payload) {
+              if (!WL) return;
+              if (!FORCE && maKonto()) return;
+              if (!booted && !boot()) return;"""
+          if old not in b:
+              raise SystemExit("setStep block not found")
+          b = b.replace(old, new, 1)
+
+          old = """    if (step === 99) return;
+              if (!mozeLowic() && !FORCE) return;"""
+          new = """    if (step === 99) return;
+              if (!FORCE && maKonto()) return;"""
+          if old not in b:
+              raise SystemExit("render gate not found")
+          b = b.replace(old, new, 1)
+
+          for old, new, label in [
+              (
+                  """  function pierwszyRzut() {
+              if (!booted && !boot()) return;""",
+                  """  function pierwszyRzut() {
+              if (!FORCE && maKonto()) return;
+              if (!booted && !boot()) return;""",
+                  "pierwszyRzut"
+              ),
+              (
+                  """  function pierwszaRyba(fish, pkt, tier) {
+              if (!booted && !boot()) return;""",
+                  """  function pierwszaRyba(fish, pkt, tier) {
+              if (!FORCE && maKonto()) return;
+              if (!booted && !boot()) return;""",
+                  "pierwszaRyba"
+              ),
+              (
+                  """  function poDecyzji(kier, C) {
+              if (!booted && !boot()) return;""",
+                  """  function poDecyzji(kier, C) {
+              if (!FORCE && maKonto()) return;
+              if (!booted && !boot()) return;""",
+                  "poDecyzji"
+              ),
+          ]:
+              if old not in b:
+                  raise SystemExit(label + " block not found")
+              b = b.replace(old, new, 1)
+
+          old = "    aktywny: () => step >= 0 && step !== 99"
+          new = "    aktywny: () => (FORCE || !maKonto()) && step >= 0 && step !== 99"
+          if old not in b:
+              raise SystemExit("active state not found")
+          b = b.replace(old, new, 1)
+
+          s = s[:start] + b + s[end:]
+          old_build = "window.QRYBY_BUILD = '2026-09-20-stage15.7-clock-persistent-ui';"
+          if old_build in s:
+              s = s.replace(
+                  old_build,
+                  "window.QRYBY_BUILD = '2026-09-21-stage15.8-onboarding-guests-only';",
+                  1
+              )
+
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          import re, subprocess
+          from pathlib import Path
+          html = Path("qryby-game.html").read_text(encoding="utf-8")
+          scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S)
+          for i, code in enumerate(scripts, 1):
+              q = Path("/tmp") / f"qryby_{i}.js"
+              q.write_text(code, encoding="utf-8")
+              r = subprocess.run(["node", "--check", str(q)], capture_output=True, text=True)
+              if r.returncode:
+                  raise SystemExit(f"JS syntax failed in script {i}:\n{r.stderr}")
+          print(f"{len(scripts)}/{len(scripts)} inline scripts PASS")
           PY
 
       - name: Commit patch
@@ -42,5 +152,5 @@ jobs:
           git config user.name "QRyby Builder"
           git config user.email "actions@users.noreply.github.com"
           git add qryby-game.html
-          git commit -m "Show tutorial only to logged-out players"
+          git commit -m "Fix tutorial for logged-out players only"
           git push
