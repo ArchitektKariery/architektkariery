@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-20-stage15.7-clock-persistent-ui';
+window.QRYBY_BUILD = '2026-09-21-stage15.8-onboarding-guests-only';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -15458,17 +15458,17 @@ const Onboarding = (() => {
   function statZlowien() {
     try { return Number(Zapis.dane().stat.zlowien || 0); } catch (e) { return 0; }
   }
-  function mozeLowic() {
-    try { return !!(window.Chmura && Chmura.pelnyDostep && Chmura.pelnyDostep()); }
+  function maKonto() {
+    try { return !!(window.Chmura && Chmura.zalogowany && Chmura.zalogowany()); }
     catch (e) { return false; }
   }
 
   function boot() {
     if (!WL || booted || !window.Zapis || !Zapis.dane) return false;
-    /* Samouczek tylko dla niezalogowanych.
-     Zalogowane, potwierdzone konto pomija onboarding niezaleznie od localStorage.
-     ?onboarding=1 nadal wymusza tryb testowy. */
-  if (!FORCE && mozeLowic()) {
+    /* Samouczek jest tylko dla niezalogowanych.
+     Kazda istniejaca sesja konta pomija onboarding.
+     ?onboarding=1 nadal wymusza tryb testowy autora. */
+  if (!FORCE && maKonto()) {
     booted = true;
     step = 99;
     hide(guide); hide(karta); clearTarget();
@@ -15497,6 +15497,7 @@ const Onboarding = (() => {
 
   function setStep(n, eventName, payload) {
     if (!WL) return;
+    if (!FORCE && maKonto()) return;
     if (!booted && !boot()) return;
     if (n <= step && step !== 99) return;
     step = n;
@@ -15554,7 +15555,7 @@ const Onboarding = (() => {
     if (!booted && !boot()) return;
     hide(guide); hide(karta); clearTarget();
     if (step === 99) return;
-    if (!mozeLowic() && !FORCE) return;
+    if (!FORCE && maKonto()) return;
 
     if (step === 0 && MAX_ONB_STEP >= 0) {
       html(guide, 'DOTKNIJ WODY', 'zarzuć wędkę');
@@ -15660,11 +15661,13 @@ const Onboarding = (() => {
   /* Zachowujemy nazwe z 1A, zeby hook cast() nie musial wiedziec,
      ze onboarding stal sie pelnym automatem. */
   function pierwszyRzut() {
+    if (!FORCE && maKonto()) return;
     if (!booted && !boot()) return;
     if (step === 0) setStep(1, 'onboarding_first_cast_done');
   }
 
   function pierwszaRyba(fish, pkt, tier) {
+    if (!FORCE && maKonto()) return;
     if (!booted && !boot()) return;
     const gk = fish && fish.gat ? fish.gat : '';
     if (step === 1) {
@@ -15677,6 +15680,7 @@ const Onboarding = (() => {
   }
 
   function poDecyzji(kier, C) {
+    if (!FORCE && maKonto()) return;
     if (!booted && !boot()) return;
     if (step !== 2) return;
     let pop = null;
@@ -15715,7 +15719,7 @@ const Onboarding = (() => {
     pokaz: render, schowaj: () => { hide(guide); hide(karta); clearTarget(); },
     pierwszyRzut, pierwszaRyba, poDecyzji,
     etap: () => step, zakres: () => BUILD_SCOPE,
-    aktywny: () => step >= 0 && step !== 99
+    aktywny: () => (FORCE || !maKonto()) && step >= 0 && step !== 99
   };
 })();
 window.Onboarding = Onboarding;
