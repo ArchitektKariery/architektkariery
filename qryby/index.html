@@ -7,26 +7,50 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="QRyby">
 <title>QRyby</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/qryby.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/qryby-icon-192.png">
+<link rel="apple-touch-icon" href="/qryby-icon-192.png">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0B0714}
 #game{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0B0714}
 #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#E8C765;background:#0B0714;font:800 12px/1.4 ui-monospace,monospace;letter-spacing:.18em;z-index:2}
 body.ready #loading{display:none}
+#install{display:none;position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;padding:12px 17px;border-radius:999px;border:1px solid rgba(232,199,101,.78);background:rgba(23,16,42,.96);color:#F3D985;font:800 11px/1 ui-monospace,monospace;letter-spacing:.08em;box-shadow:0 5px 20px rgba(0,0,0,.38)}
 </style>
 </head>
 <body>
 <div id="loading">QRyby · ŁADOWANIE</div>
 <iframe id="game" src="/qryby.html" title="QRyby" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe>
+<button id="install" type="button">ZAINSTALUJ QRyby</button>
 <script>
 const game=document.getElementById('game');
 game.addEventListener('load',()=>document.body.classList.add('ready'));
+
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/qryby-sw.js',{scope:'/qryby'}).catch(()=>{}));
 }
+
+let installPrompt=null;
+const installBtn=document.getElementById('install');
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  installPrompt=e;
+  installBtn.style.display='block';
+});
+installBtn.addEventListener('click',async()=>{
+  if(!installPrompt)return;
+  installPrompt.prompt();
+  try{await installPrompt.userChoice;}catch(_){}
+  installPrompt=null;
+  installBtn.style.display='none';
+});
+window.addEventListener('appinstalled',()=>{
+  installPrompt=null;
+  installBtn.style.display='none';
+});
 </script>
 </body>
 </html>
