@@ -1,0 +1,62 @@
+name: Build QRyby Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'qryby.html'
+      - 'android/**'
+      - '.github/workflows/qryby-android.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Build installable beta APK
+        working-directory: android
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Publish APK into website repository
+        run: |
+          mkdir -p downloads
+          cp android/app/build/outputs/apk/debug/app-debug.apk downloads/QRyby.apk
+          sha256sum downloads/QRyby.apk > downloads/QRyby.apk.sha256
+          git config user.name "QRyby Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add downloads/QRyby.apk downloads/QRyby.apk.sha256
+          if git diff --cached --quiet; then
+            echo "APK unchanged"
+            exit 0
+          fi
+          git commit -m "Build QRyby Android beta APK [skip ci]"
+          git push
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QRyby-Android-beta
+          path: android/app/build/outputs/apk/debug/app-debug.apk
