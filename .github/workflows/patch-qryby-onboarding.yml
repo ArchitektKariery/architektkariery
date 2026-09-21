@@ -1,4 +1,4 @@
-name: Patch QRyby onboarding
+name: Cleanup QRyby onboarding patch
 
 on:
   push:
@@ -11,125 +11,48 @@ permissions:
   contents: write
 
 jobs:
-  patch:
+  cleanup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Make onboarding logged-out only
+      - name: Keep only the onboarding change
         run: |
+          set -euo pipefail
+          BASE=6fa6eccabfb15833bfc720e857aeab7130ff3bde
+
+          # Restore the two shell files exactly as they were before this task.
+          git show "$BASE:qryby.html" > qryby.html
+          git show "$BASE:qryby/index.html" > qryby/index.html
+
+          # Restore unrelated build metadata; keep the Onboarding logic itself.
           python - <<'PY'
           from pathlib import Path
           p = Path("qryby-game.html")
           s = p.read_text(encoding="utf-8")
+          old = "window.QRYBY_BUILD = '2026-09-21-stage15.8-onboarding-guests-only';"
+          new = "window.QRYBY_BUILD = '2026-09-20-stage15.7-clock-persistent-ui';"
+          if old not in s:
+              raise SystemExit("Expected build marker not found")
+          s = s.replace(old, new, 1)
 
-          start = s.find("const Onboarding = (() => {")
-          end = s.find("window.Onboarding = Onboarding;", start)
-          if start < 0 or end < 0:
-              raise SystemExit("Onboarding block not found")
-
-          b = s[start:end]
-
-          old = """  function mozeLowic() {
-              try { return !!(window.Chmura && Chmura.pelnyDostep && Chmura.pelnyDostep()); }
-              catch (e) { return false; }
-            }"""
-          new = """  function maKonto() {
-              try { return !!(window.Chmura && Chmura.zalogowany && Chmura.zalogowany()); }
-              catch (e) { return false; }
-            }"""
-          if old not in b:
-              raise SystemExit("Account helper not found")
-          b = b.replace(old, new, 1)
-
-          old = """    /* Samouczek tylko dla niezalogowanych.
-               Zalogowane, potwierdzone konto pomija onboarding niezaleznie od localStorage.
-               ?onboarding=1 nadal wymusza tryb testowy. */
-            if (!FORCE && mozeLowic()) {
-              booted = true;
-              step = 99;
-              hide(guide); hide(karta); clearTarget();
-              return true;
-            }"""
-          new = """    /* Samouczek jest tylko dla niezalogowanych.
-               Kazda istniejaca sesja konta pomija onboarding.
-               ?onboarding=1 nadal wymusza tryb testowy autora. */
-            if (!FORCE && maKonto()) {
-              booted = true;
-              step = 99;
-              hide(guide); hide(karta); clearTarget();
-              return true;
-            }"""
-          if old not in b:
-              raise SystemExit("Boot gate not found")
-          b = b.replace(old, new, 1)
-
-          old = """  function setStep(n, eventName, payload) {
-              if (!WL) return;
-              if (!booted && !boot()) return;"""
-          new = """  function setStep(n, eventName, payload) {
-              if (!WL) return;
-              if (!FORCE && maKonto()) return;
-              if (!booted && !boot()) return;"""
-          if old not in b:
-              raise SystemExit("setStep block not found")
-          b = b.replace(old, new, 1)
-
-          old = """    if (step === 99) return;
-              if (!mozeLowic() && !FORCE) return;"""
-          new = """    if (step === 99) return;
-              if (!FORCE && maKonto()) return;"""
-          if old not in b:
-              raise SystemExit("render gate not found")
-          b = b.replace(old, new, 1)
-
-          for old, new, label in [
-              (
-                  """  function pierwszyRzut() {
-              if (!booted && !boot()) return;""",
-                  """  function pierwszyRzut() {
-              if (!FORCE && maKonto()) return;
-              if (!booted && !boot()) return;""",
-                  "pierwszyRzut"
-              ),
-              (
-                  """  function pierwszaRyba(fish, pkt, tier) {
-              if (!booted && !boot()) return;""",
-                  """  function pierwszaRyba(fish, pkt, tier) {
-              if (!FORCE && maKonto()) return;
-              if (!booted && !boot()) return;""",
-                  "pierwszaRyba"
-              ),
-              (
-                  """  function poDecyzji(kier, C) {
-              if (!booted && !boot()) return;""",
-                  """  function poDecyzji(kier, C) {
-              if (!FORCE && maKonto()) return;
-              if (!booted && !boot()) return;""",
-                  "poDecyzji"
-              ),
-          ]:
-              if old not in b:
-                  raise SystemExit(label + " block not found")
-              b = b.replace(old, new, 1)
-
-          old = "    aktywny: () => step >= 0 && step !== 99"
-          new = "    aktywny: () => (FORCE || !maKonto()) && step >= 0 && step !== 99"
-          if old not in b:
-              raise SystemExit("active state not found")
-          b = b.replace(old, new, 1)
-
-          s = s[:start] + b + s[end:]
-          old_build = "window.QRYBY_BUILD = '2026-09-20-stage15.7-clock-persistent-ui';"
-          if old_build in s:
-              s = s.replace(
-                  old_build,
-                  "window.QRYBY_BUILD = '2026-09-21-stage15.8-onboarding-guests-only';",
-                  1
-              )
+          required = [
+              "function maKonto()",
+              "Chmura.zalogowany && Chmura.zalogowany()",
+              "if (!FORCE && maKonto())",
+              "aktywny: () => (FORCE || !maKonto()) && step >= 0 && step !== 99",
+          ]
+          for needle in required:
+              if needle not in s:
+                  raise SystemExit("Missing onboarding guard: " + needle)
 
           p.write_text(s, encoding="utf-8")
           PY
+
+          # The temporary workflow must not remain in the product repo.
+          rm -f .github/workflows/patch-qryby-onboarding.yml
 
       - name: Validate inline JavaScript
         run: |
@@ -147,10 +70,15 @@ jobs:
           print(f"{len(scripts)}/{len(scripts)} inline scripts PASS")
           PY
 
-      - name: Commit patch
+      - name: Verify scope and commit
         run: |
+          set -euo pipefail
           git config user.name "QRyby Builder"
           git config user.email "actions@users.noreply.github.com"
-          git add qryby-game.html
-          git commit -m "Fix tutorial for logged-out players only"
+
+          echo "Final diff versus pre-task baseline:"
+          git diff 6fa6eccabfb15833bfc720e857aeab7130ff3bde -- qryby-game.html qryby.html qryby/index.html .github/workflows/patch-qryby-onboarding.yml
+
+          git add -A
+          git commit -m "Isolate tutorial visibility change"
           git push
