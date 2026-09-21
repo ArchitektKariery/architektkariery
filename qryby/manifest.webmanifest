@@ -1,19 +1,21 @@
 {
-  "id": "/qryby/",
+  "id": "/qryby",
   "name": "QRyby",
   "short_name": "QRyby",
   "description": "Spokojna gra wędkarska o żyjącym jeziorze, kolekcji ryb i wspólnej ekologii.",
   "lang": "pl-PL",
-  "start_url": "/qryby/",
-  "scope": "/qryby/",
+  "start_url": "/qryby",
+  "scope": "/qryby",
   "display": "standalone",
   "display_override": ["fullscreen","standalone"],
   "orientation": "portrait",
   "background_color": "#0B0714",
   "theme_color": "#231838",
+  "prefer_related_applications": false,
   "categories": ["games","entertainment"],
   "icons": [
-    {"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"./icons/icon-maskable.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/qryby-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/qryby-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/qryby-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }
