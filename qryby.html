@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-20-stage15.7-clock-persistent-ui';
+window.QRYBY_BUILD = '2026-09-23-card-text-polish';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -21601,95 +21601,137 @@ function drawCard(g, t) {
 
   g.restore();
 
-  /* --- WSTEGA KOLEKCJI, POD KARTA ---
-     Wczesniej lezala na panelu i zaslaniala kamienie zywiolow. Teraz siedzi
-     pod dolna krawedzia karty, w tej samej osi, i skaluje sie razem z nia.
-     Trzy stany: NOWY GATUNEK bije rekord zyciowy, bo pierwsza sztuka jest
-     jednym i drugim naraz, a napis ma byc jeden. Licznik od drugiej sztuki. */
-  if (D.kolekcja) {
-    const K = D.kolekcja;
-    const napis = K.nowy ? 'NOWY GATUNEK'
-      : (K.rekord ? 'REKORD ŻYCIOWY' : (K.ile > 1 ? 'ZŁOWIONE ' + K.ile + '\u00D7' : null));
-    if (napis) {
-      const barwa = K.nowy ? '#8CE0A0' : (K.rekord ? '#F2D479' : '#B9AE93');
-      /* Kratka z 0,030 na 0,013 szerokosci kadru. Poprzedni napis mial
-         litery wysokie na jedna dziesiata ekranu i ciagnal sie od krawedzi
-         do krawedzi, wiec zabijal kadr, ktory ma byc bohaterem. Teraz to
-         podpis pod karta, a nie transparent: cienki pasek tla zamiast
-         plaszczyzny, spokojny puls i barwa przygaszona o jedna trzecia. */
-      const kW = Math.max(2, Math.round(target * 0.013));
-      const szer = cwidth(napis, kW);
-      const yW = cy + (KH / 2) * s * scale + target * 0.042;
-      g.save();
-      g.globalAlpha = 0.16 + 0.07 * Math.sin(t * 2.2);
-      g.fillStyle = barwa;
-      g.fillRect(cx - szer / 2 - kW * 3, yW - kW * 1.6, szer + kW * 6, 5 * kW + kW * 3.2);
-      g.restore();
-      g.save();
-      g.globalAlpha = 0.82;
-      ctextC(g, napis, cx, yW + Math.max(1, kW * 0.3), 'rgba(8,6,16,0.8)', kW);
-      ctextC(g, napis, cx, yW, barwa, kW);
-      g.restore();
-    }
-  }
-
   /* ============================================================
-     STAGE 9.1 — KRYTYCZNY STAN GATUNKU.
-     Ta sama definicja "NA SKRAJU" co w EKO: <=15% historycznego maksimum,
-     <=3 sztuki albo brak pary zdolnej do rozrodu.
-     ============================================================ */
-  if(k>=1&&Card.zagrozenie&&Card.swipe&&Card.czeka){
-    const ZG=Card.zagrozenie;
-    const kk=Math.max(3,Math.round(Scene.W*0.0102));
-    const yy=Scene.H*0.655;
-    g.save();g.globalAlpha=.94;
-    const w1=cwidth('! '+ZG.txt,kk);
-    const k2=Math.max(2,kk-1),w2=cwidth(ZG.sub,k2);
-    const ww=Math.max(w1,w2)+kk*8;
-    g.fillStyle='rgba(74,18,20,.72)';
-    g.fillRect(Scene.W/2-ww/2,yy-kk*2.6,ww,kk*15.2);
-    ctextC(g,'! '+ZG.txt,Scene.W/2,yy,'#FFD0B0',kk);
-    ctextC(g,ZG.sub,Scene.W/2,yy+kk*7.0,'#F2B29A',k2);
-    g.restore();
-  }
+   FINAL CARD TEXT POLISH — IX 2026.
+   Informacje pod karta ukladaja sie teraz w jeden pionowy stos:
+   kolekcja -> ostrzezenie -> historia -> podpowiedz gestu.
+   ============================================================ */
+const cardBottomY = cy + (KH / 2) * s;
+let infoY = cardBottomY + target * 0.030;
 
-  /* ============================================================
-     STAGE 2 — HISTORIA RYBY.
-     Maksymalnie dwie linie pod karta. Bez badge'a LEGENDARY, bez pulsowania.
-     Barwa robi sie odrobine cieplejsza tylko przy skrajnie niskiej populacji.
-     ============================================================ */
-  if (k >= 1 && Card.historia && Array.isArray(Card.historia.linie) && Card.historia.linie.length) {
-    const H = Card.historia;
-    const y0 = Scene.H * 0.695;
-    const kk = Math.max(3, Math.round(Scene.W * 0.0105));
-    const barwa = H.poziom >= 3 ? '#F1C67A' : (H.poziom >= 2 ? '#D8C792' : '#B9B5A2');
+/* Kolekcja: mala, kontrastowa plakietka pod karta. */
+if (D.kolekcja) {
+  const K = D.kolekcja;
+  const napis = K.nowy ? 'NOWY GATUNEK'
+    : (K.rekord ? 'REKORD ŻYCIOWY' : (K.ile > 1 ? 'ZŁOWIONE ' + K.ile + '\u00D7' : null));
+  if (napis) {
+    const barwa = K.nowy ? '#9DE7AF' : (K.rekord ? '#F2D479' : '#D2C7AC');
+    let kW = Math.max(3, Math.round(Scene.W * 0.0062));
+    const maxW = Scene.W * 0.82;
+    while (kW > 3 && cwidth(napis, kW) > maxW) kW--;
+    const szer = cwidth(napis, kW);
+    const padX = kW * 4.0, padY = kW * 1.8;
+    const boxH = 5 * kW + padY * 2;
+    const top = infoY - padY;
+
     g.save();
-    g.globalAlpha = 0.82;
-    for (let i = 0; i < H.linie.length; i++) {
-      ctextC(g, H.linie[i], Scene.W / 2, y0 + i * kk * 7.2 + 2, 'rgba(6,5,12,.72)', kk);
-      ctextC(g, H.linie[i], Scene.W / 2, y0 + i * kk * 7.2, barwa, kk);
-    }
+    g.globalAlpha = 0.96;
+    g.fillStyle = 'rgba(9,7,18,.88)';
+    g.fillRect(cx - szer / 2 - padX, top, szer + padX * 2, boxH);
+    g.strokeStyle = 'rgba(244,198,61,.32)';
+    g.lineWidth = Math.max(1, Math.round(kW * 0.34));
+    g.strokeRect(cx - szer / 2 - padX, top, szer + padX * 2, boxH);
+    ctextC(g, napis, cx, infoY + Math.max(1, Math.round(kW * .28)), 'rgba(5,4,10,.95)', kW);
+    ctextC(g, napis, cx, infoY, barwa, kW);
     g.restore();
-  }
 
-  /* podpowiedz pojawia sie dopiero, gdy karta stanie */
-  if (k >= 1) {
-    if (Card.swipe && Card.czeka) {
-      /* Same stemple siedza NA KARCIE (patrz wyzej) -- tu zostaje juz tylko
-         podpowiedz tekstowa, gasnaca w miare ciagniecia, zeby nie stala
-         w kadrze, gdy gracz juz wie, co robi. */
-      const moc = Math.max(0, Math.min(1, Math.abs(Card.dx) / SWIPE_PROG));
-      const a = 0.30 + 0.30 * (Math.sin(t * 2.2) * 0.5 + 0.5);
-      g.globalAlpha = Math.max(0, a * (1 - moc));
-      ctextC(g, 'PRZECIĄGNIJ KARTĘ', Scene.W / 2, Scene.H * 0.80, '#EADCF2', 4);
-      g.globalAlpha = 1;
-    } else {
-      const a = 0.35 + 0.35 * (Math.sin(t * 2.2) * 0.5 + 0.5);
-      g.globalAlpha = a;
-      ctextC(g, 'DOTKNIJ, ŻEBY ZAMKNĄĆ', Scene.W / 2, Scene.H * 0.80, '#EADCF2', 4);
-      g.globalAlpha = 1;
-    }
+    infoY = top + boxH + target * 0.018;
   }
+}
+
+/* Krytyczny stan gatunku: zwarty alert, nigdy przez ramke karty. */
+if (k >= 1 && Card.zagrozenie && Card.swipe && Card.czeka) {
+  const ZG = Card.zagrozenie;
+  let kk = Math.max(3, Math.round(Scene.W * 0.0064));
+  const l1 = '! ' + ZG.txt, l2 = ZG.sub || '';
+  const maxW = Scene.W * 0.84;
+  while (kk > 3 && Math.max(cwidth(l1, kk), cwidth(l2, Math.max(3, kk - 1))) > maxW) kk--;
+  const k2 = Math.max(3, kk - 1);
+  const w1 = cwidth(l1, kk), w2 = cwidth(l2, k2);
+  const ww = Math.max(w1, w2) + kk * 8;
+  const lineH1 = kk * 6.5, lineH2 = l2 ? k2 * 6.2 : 0;
+  const hh = lineH1 + lineH2 + kk * 3.8;
+
+  g.save();
+  g.globalAlpha = .98;
+  g.fillStyle = 'rgba(45,10,18,.92)';
+  g.fillRect(Scene.W / 2 - ww / 2, infoY, ww, hh);
+  g.strokeStyle = 'rgba(240,150,120,.55)';
+  g.lineWidth = Math.max(1, Math.round(kk * .35));
+  g.strokeRect(Scene.W / 2 - ww / 2, infoY, ww, hh);
+  const ty = infoY + kk * 1.8;
+  ctextC(g, l1, Scene.W / 2, ty + 2, 'rgba(6,4,8,.95)', kk);
+  ctextC(g, l1, Scene.W / 2, ty, '#FFD0B0', kk);
+  if (l2) {
+    const ty2 = ty + lineH1;
+    ctextC(g, l2, Scene.W / 2, ty2 + 2, 'rgba(6,4,8,.95)', k2);
+    ctextC(g, l2, Scene.W / 2, ty2, '#F2B29A', k2);
+  }
+  g.restore();
+  infoY += hh + target * 0.018;
+}
+
+/* Historia ryby: ribbon pod karta zamiast wielkich liter przez ramke. */
+if (k >= 1 && Card.historia && Array.isArray(Card.historia.linie) && Card.historia.linie.length) {
+  const H = Card.historia;
+  const linie = H.linie.slice(0, 2);
+  let kk = Math.max(3, Math.round(Scene.W * 0.0062));
+  const maxW = Scene.W * 0.84;
+  while (kk > 3 && linie.some(txt => cwidth(txt, kk) > maxW)) kk--;
+
+  const barwa = H.poziom >= 3 ? '#F4D48A' : (H.poziom >= 2 ? '#E4D3A2' : '#D5D0BD');
+  const txtW = Math.max(...linie.map(txt => cwidth(txt, kk)));
+  const padX = kk * 4.2, padY = kk * 2.0;
+  const lineH = kk * 6.6;
+  const boxW = Math.min(Scene.W * 0.90, txtW + padX * 2);
+  const boxH = padY * 2 + lineH * linie.length;
+  const bx = Scene.W / 2 - boxW / 2;
+  const by = infoY;
+
+  g.save();
+  g.globalAlpha = .98;
+  g.fillStyle = 'rgba(8,7,18,.90)';
+  g.fillRect(bx, by, boxW, boxH);
+  g.strokeStyle = H.poziom >= 3 ? 'rgba(244,198,61,.48)' : 'rgba(224,210,170,.24)';
+  g.lineWidth = Math.max(1, Math.round(kk * .32));
+  g.strokeRect(bx, by, boxW, boxH);
+
+  for (let i = 0; i < linie.length; i++) {
+    const ty = by + padY + i * lineH;
+    ctextC(g, linie[i], Scene.W / 2, ty + Math.max(1, Math.round(kk * .34)), 'rgba(4,3,9,.98)', kk);
+    ctextC(g, linie[i], Scene.W / 2, ty, barwa, kk);
+  }
+  g.restore();
+  infoY += boxH + target * 0.024;
+}
+
+/* Podpowiedz gestu: czytelna, osobna plakietka. */
+if (k >= 1) {
+  const napis = (Card.swipe && Card.czeka) ? 'PRZECIĄGNIJ KARTĘ' : 'DOTKNIJ, ŻEBY ZAMKNĄĆ';
+  const moc = (Card.swipe && Card.czeka)
+    ? Math.max(0, Math.min(1, Math.abs(Card.dx) / SWIPE_PROG))
+    : 0;
+  const fade = Math.max(0, 1 - moc);
+  let kk = Math.max(3, Math.round(Scene.W * 0.0060));
+  while (kk > 3 && cwidth(napis, kk) > Scene.W * 0.72) kk--;
+  const szer = cwidth(napis, kk);
+  const padX = kk * 4.0, padY = kk * 1.7;
+  const hintY = Math.min(Scene.H * 0.875, Math.max(Scene.H * 0.79, infoY));
+  const boxH = 5 * kk + padY * 2;
+  const boxX = Scene.W / 2 - szer / 2 - padX;
+  const boxY = hintY - padY;
+
+  g.save();
+  g.globalAlpha = (0.88 + 0.06 * Math.sin(t * 2.0)) * fade;
+  g.fillStyle = 'rgba(8,7,18,.82)';
+  g.fillRect(boxX, boxY, szer + padX * 2, boxH);
+  g.strokeStyle = 'rgba(244,230,194,.24)';
+  g.lineWidth = Math.max(1, Math.round(kk * .28));
+  g.strokeRect(boxX, boxY, szer + padX * 2, boxH);
+  ctextC(g, napis, Scene.W / 2, hintY + Math.max(1, Math.round(kk * .30)), 'rgba(4,3,9,.98)', kk);
+  ctextC(g, napis, Scene.W / 2, hintY, '#F4E6C2', kk);
+  g.restore();
+}
 }
 </script>
 <script>
