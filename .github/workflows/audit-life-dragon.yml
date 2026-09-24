@@ -1,0 +1,26 @@
+name: Audit QRyby Life Dragon
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/audit-life-dragon.py'
+      - '.github/workflows/audit-life-dragon.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit current QRyby architecture
+        run: python tools/audit-life-dragon.py
+      - name: Commit audit report
+        run: |
+          git config user.name "QRyby Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/life-dragon-audit.txt
+          git commit -m "Audit QRyby for Life Dragon integration [skip ci]"
+          git push
