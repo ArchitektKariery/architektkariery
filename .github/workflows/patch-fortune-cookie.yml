@@ -1,0 +1,40 @@
+name: Patch QRyby Fortune Cookie
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/patch-fortune-cookie.py'
+      - '.github/workflows/patch-fortune-cookie.yml'
+
+concurrency:
+  group: qryby-fortune-cookie-patch
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply and validate fortune cookie
+        run: python tools/patch-fortune-cookie.py
+
+      - name: Commit production HTML
+        run: |
+          git config user.name "QRyby Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git commit -m "Add Ciastko z wróżbą to QRyby [skip ci]"
+          git push
