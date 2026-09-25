@@ -9,7 +9,7 @@ if MARK in c:
     print("Pasmo 8 patch already applied")
     sys.exit(0)
 
-parts=sorted(Path("tools").glob("card8.part*"))
+parts=sorted(Path("tools").glob("card8mini.part*"))
 if len(parts)!=8:
     raise RuntimeError(f"expected 8 card8 parts, got {len(parts)}")
 card8="".join(x.read_text(encoding="utf-8").strip() for x in parts)
@@ -91,7 +91,7 @@ c=c[:m.start()]+seg2+c[m.end():]
 
 # ------------------------------------------------------------------
 # Dedicated Pasmo 8 card art.
-slot8='"8":{"ark":[5,3,214,329],"art":[0.085,0.155,0.83,0.47],"panel":[0.10,0.655,0.80,0.225],"barL":[0.14,0.882,0.31,0.062],"barR":[0.55,0.882,0.31,0.062],"medal":[0.17,0.105,0.085]}'
+slot8='"8":{"ark":[3,2,122,188],"art":[0.085,0.155,0.83,0.47],"panel":[0.10,0.655,0.80,0.225],"barL":[0.14,0.882,0.31,0.062],"barR":[0.55,0.882,0.31,0.062],"medal":[0.17,0.105,0.085]}'
 m=re.search(r'window\.RAMKA_SLOTY=\{[\s\S]*?\};\s*window\.RAMKA1_SRC=',c)
 if not m: raise RuntimeError("RAMKA_SLOTY block not found")
 block=m.group(0)
