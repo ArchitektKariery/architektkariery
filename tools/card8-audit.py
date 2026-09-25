@@ -1,18 +1,27 @@
 from pathlib import Path
-import re
 c=Path("qryby.html").read_text(encoding="utf-8")
-patterns=[
-("loops7",r"for\s*\([^\n]{0,100}(?:<=\s*7|<\s*8)[^\n]{0,100}\)"),
-("min7",r"Math\.min\(7[^\n]{0,150}"),
-("atlas-tabs",r".{0,100}(?:zaklad|pasmo|PASMO).{0,160}(?:1|7).{0,120}"),
-("lak",r"const\s+LAK\s*=.{0,1500}"),
-("tiers",r"\[1,\s*2,\s*3,\s*4,\s*5,\s*6,\s*7\]"),
+terms=[
+"function openCard(fish, lenCm, fromX, fromY)",
+"const TierArt = {};",
+"function drawCard(g, t)",
+"const SUFIT_PASMA =",
+"const DOLNA_PASMA =",
+"const PASMA_TIER =",
+"const punkty = (slug, g, L, W) =>",
+"const tierZeScore =",
+"const tierRyby =",
+"window.RAMKA_SLOTY=",
+"const RAMKI =",
+"const LAK = {",
+"function zakladki(W, H)",
+"function sprawdzKolekcje()",
+"ukryjMityczna",
+"stworzenie z wróżby"
 ]
 out=[]
-for title,pat in patterns:
- ms=list(re.finditer(pat,c,re.I|re.S))
- out.append(f"===== {title} {len(ms)} =====\n")
- for m in ms[:80]:
-  out.append(f"@@ {m.start()} @@\n"+c[max(0,m.start()-1800):min(len(c),m.end()+4000)]+"\n")
+for term in terms:
+ i=c.find(term)
+ out.append(f"\n===== {term} @ {i} =====\n")
+ if i>=0: out.append(c[max(0,i-2600):min(len(c),i+12500)])
 Path("tools/card8-audit.txt").write_text("".join(out),encoding="utf-8")
-print("atlas/tier8 audit")
+print("production anchors audit")
