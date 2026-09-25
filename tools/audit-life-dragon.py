@@ -1,34 +1,34 @@
 from pathlib import Path
 import re
 
-p=Path("qryby.html")
-c=p.read_text(encoding="utf-8")
+c=Path("qryby.html").read_text(encoding="utf-8")
 
-def section(title, pattern, flags=0, radius=2600, max_hits=8):
-    out=[f"\n===== {title} =====\n"]
-    hits=list(re.finditer(pattern,c,flags))
-    out.append(f"HITS: {len(hits)}\n")
-    for n,m in enumerate(hits[:max_hits],1):
+def sec(title, pattern, radius=1800, max_hits=10, flags=re.I):
+    ms=list(re.finditer(pattern,c,flags))
+    o=[f"\n===== {title} | HITS {len(ms)} =====\n"]
+    for j,m in enumerate(ms[:max_hits],1):
         a=max(0,m.start()-radius); b=min(len(c),m.end()+radius)
-        out.append(f"\n--- HIT {n} @ {m.start()} ---\n")
-        out.append(c[a:b])
-        out.append("\n")
-    return "".join(out)
+        o.append(f"\n--- {j} @ {m.start()} ---\n{c[a:b]}\n")
+    return "".join(o)
 
-parts=[
-    f"LEN={len(c)}\n",
-    section("BUILD", r"window\.QRYBY_BUILD[^\n]*"),
-    section("GATUNKI", r"(?:const|let|var)\s+GATUNKI\s*=|window\.GATUNKI"),
-    section("SPECIES NAMES/SLUGS", r"smokosz|morswin|zolw|żółw|karas|szczupak", re.I),
-    section("ATLAS", r"atlas", re.I),
-    section("EKO", r"\beko\b|ekosystem", re.I),
-    section("EXTINCTION", r"wymar|extinct|krytycz", re.I),
-    section("POPULATION", r"populac|population", re.I),
-    section("SEX", r"samiec|samica|plec|płeć|gender", re.I),
-    section("SHOAL SCHOOL", r"school|lawic|ławic", re.I),
-    section("CATCH", r"zlow|złow|catch|caught|polow", re.I),
-    section("FISH RENDER", r"sprite|drawImage|obraz|img|image", re.I),
-    section("FORTUNE", r"FortuneCookie|fortune", re.I),
+parts=[f"LEN={len(c)}\n"]
+targets=[
+("GATUNKI START-END", r"const\s+GATUNKI\s*=|window\.GATUNKI\s*=|Object\.keys\(GATUNKI\)"),
+("MYTHICAL SPECIES", r"morswin|smokosz|smokosza|zolw|żółw"),
+("SPRITE SOURCES", r"MORSWIN_(?:SRC|META)|SMOKOSZ_(?:SRC|META)|window\.[A-Z0-9_]+_(?:SRC|META)"),
+("FISH FACTORY", r"function\s+makeFish\w*|makeFishZLimitemSurowy|nadajTozsamosc"),
+("SHOAL GENERATION", r"function\s+\w*(?:lawic|ławic|shoal|school)\w*|school\s*=\s*\[\]|school\.push|NOWA LAWICA|Nowa ławica"),
+("MOVEMENT", r"function\s+\w*(?:plyw|pływ|ruch|fish)\w*|\.x\s*\+=|\.vx|fala|ogon"),
+("RENDER FISH", r"drawImage\(|function\s+\w*(?:rysuj|render)\w*|Scene\.slots\.underwater"),
+("ATLAS FUNCTIONS", r"function\s+\w*atlas\w*|atlasHTML|pokazAtlas|ATLAS|Atlas"),
+("ATLAS UNKNOWN", r"odkryt|odkry|poznan|nieznan|\?\?\?|brak zdjęcia|brak zdjecia"),
+("EKO FUNCTIONS", r"function\s+\w*eko\w*|ekoHTML|EKOSYSTEM|Ekosystem"),
+("POPULATION CORE", r"const\s+Popul|window\.Popul|populacj|liczbaPopulacji|wymar"),
+("SEX CORE", r"samiec|samica|plec|płeć|gender"),
+("CATCH FLOW", r"fish_caught|zlowion|złowion|zlap|złap|schowajRybe|wypusc|wypuść"),
+("SAVE DEFAULTS", r"const\s+Zapis|window\.Zapis|function\s+dane\(|monety\s*:|fortuneEffects"),
+("FORTUNE MODULE", r"const\s+FortuneCookie|function\s+purchase\(|fortunePending|DEFINICJE\s*=\s*\["),
 ]
+for t,p in targets: parts.append(sec(t,p))
 Path("tools/life-dragon-audit.txt").write_text("\n".join(parts),encoding="utf-8")
-print("audit written")
+print("target audit written",len(parts))
