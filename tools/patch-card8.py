@@ -10,10 +10,10 @@ if MARK in c:
     sys.exit(0)
 
 parts=sorted(Path("tools").glob("card8mini.part*"))
-if len(parts)!=8:
-    raise RuntimeError(f"expected 8 card8 parts, got {len(parts)}")
+if len(parts)!=4:
+    raise RuntimeError(f"expected 4 compact card8 parts, got {len(parts)}")
 card8="".join(x.read_text(encoding="utf-8").strip() for x in parts)
-if len(card8)!=45412 or not card8.startswith("iVBORw0KGgo"):
+if len(card8)!=19112 or not card8.startswith("iVBORw0KGgo"):
     raise RuntimeError(f"bad card8 payload: {len(card8)}")
 
 def once(old,new,label):
