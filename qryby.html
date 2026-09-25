@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-24-fortune-cookie-v1';
+window.QRYBY_BUILD = '2026-09-25-life-dragon-v1';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -9780,6 +9780,33 @@ const UDZIAL_DOCELOWY = {
   for (const k in UDZIAL_DOCELOWY) if (GATUNKI[k]) GATUNKI[k].udzial = UDZIAL_DOCELOWY[k];
 })();
 
+
+/* ============================================================
+   SMOK ZYCIA — pierwszy legendarny mieszkaniec QRyb.
+   Nie ma naturalnej populacji i nigdy nie trafia do zwyklej puli.
+   Istnieje tylko jako jednorazowe wydarzenie z Ciastka z wrozba.
+   Sprite: pixel-art dostarczony przez autora gry. */
+(function dodajSmokaZycia() {
+  if (typeof GATUNKI === 'undefined' || GATUNKI.smok_zycia) return;
+  const baza = GATUNKI.smokosz || GATUNKI.wegorz || GATUNKI.ploc;
+  GATUNKI.smok_zycia = Object.assign({}, baza, {
+    nazwa: 'Smok Życia',
+    src: 'data:image/png;base64,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',
+    meta: { w: 96, h: 72 },
+    udzial: 0,
+    bezEko: true,
+    legendarny: true,
+    falaZwoj: 3.2
+  });
+  /* Dlugie stworzenie ma pracowac CALYM cialem: kilka przesuwajacych sie
+     zgiec zamiast pojedynczego machniecia ogonem. */
+  GATUNKI.smok_zycia.fala = Math.max(5.4, (baza.fala || 3) * 1.35);
+  GATUNKI.smok_zycia.ogon = Math.max(6.8, (baza.ogon || 4) * 1.35);
+  GATUNKI.smok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
+  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 7;
+  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 7;
+})();
+
 /* Wczytanie atlasow. */
 let gotowe = 0, ileGatunkow = Object.keys(GATUNKI).length;
 for (const k in GATUNKI) {
@@ -10435,6 +10462,7 @@ window.MIX = MIX;
    Zostaje tylko blysk tafli na 0,3 s, zeby oko wiedzialo, ze cos sie stalo. */
 const NOWA = { blysk: 0 };
 function nowaLawica() {
+  if(window.SmokZycia) SmokZycia.koniecLawicy();
   /* wedka i przyneta puszczaja */
   if (typeof G !== 'undefined') {
     if (G.hooked) { G.hooked.caught = false; G.hooked.mood = 'idle'; G.hooked = null; }
@@ -10479,11 +10507,14 @@ function nowaLawica() {
   /* Zaneta gwarantujaca podmienia jedna sztuke, zanim ktokolwiek zobaczy
      lawice. Funkcja siedzi w pozniejszym bloku skryptu, wiec pytamy o nia
      przez typeof: przy pierwszych klatkach po starcie moze jeszcze nie byc. */
-  if (typeof wstawGwarant === 'function') wstawGwarant();
-  if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
-  if (window.FortuneCookie) {
-    try { FortuneCookie.afterShoal(school); } catch (e) {}
-    try { FortuneCookie.consumeShoal(); } catch (e) {}
+  const __smokEvent = !!(window.SmokZycia && SmokZycia.zastapLawiceJesliCzeka(school));
+  if (!__smokEvent) {
+    if (typeof wstawGwarant === 'function') wstawGwarant();
+    if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
+    if (window.FortuneCookie) {
+      try { FortuneCookie.afterShoal(school); } catch (e) {}
+      try { FortuneCookie.consumeShoal(); } catch (e) {}
+    }
   }
 
   /* liczniki sesji od zera, kolekcja zostaje */
@@ -11608,7 +11639,7 @@ window.Ruch = Ruch;
     return '<h3>WRÓŻBA</h3><div class="fortune-reveal">' +
       '<div class="fortune-quote">„' + escHTML(f.quote) + '”</div>' +
       '<div class="fortune-result">' + escHTML(f.tekst) +
-      '<span class="fortune-fish">DOTYCZY: ' + escHTML(naz) + '</span></div>' +
+      (f.legendary ? '' : '<span class="fortune-fish">DOTYCZY: ' + escHTML(naz) + '</span>') + '</div>' +
       '<div class="fortune-sign">WRÓŻBA SIĘ SPEŁNIŁA</div></div>' +
       '<button class="odb fortune-odbierz">DZIĘKUJĘ, FORTUNO</button>';
   }
@@ -17443,7 +17474,7 @@ const Ksiega = (() => {
 
     g.textAlign = 'center';
     g.fillStyle = '#2A2018'; g.font = F(w * 0.070, 1);
-    g.fillText(znany ? G2.nazwa : '\u003F \u003F \u003F', SR, y + h * 0.103);
+    g.fillText(znany ? G2.nazwa : (k === 'smok_zycia' ? 'stworzenie z wróżby' : '? ? ?'), SR, y + h * 0.103);
 
     g.strokeStyle = 'rgba(42,32,24,.38)'; g.lineWidth = Math.max(1, w * 0.004);
     g.beginPath(); g.moveTo(L, y + h * 0.136); g.lineTo(P, y + h * 0.136); g.stroke();
@@ -17581,7 +17612,8 @@ const Ksiega = (() => {
       dzolej_rudogrzywy: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
       japoniec: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
       smokosz: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
-      krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.'
+      krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
+      smok_zycia: 'stworzenie z wróżby'
     };
     let szept = SZEPT_PORA.obojetna;
     if (SZEPT_MITYCZNE[k]) {
@@ -19089,7 +19121,8 @@ const FortuneCookie = (() => {
     {id:'wielkosc',quote:'Wielkość nie jest najważniejsza.',tekst:'Przez 900 ławic ten gatunek będzie miał około 35% normalnego rozmiaru.',lawic:900,sizeMult:.35},
     {id:'najlepsze',quote:'Najlepsze rzeczy wymagają cierpliwości.',tekst:'Szansa na ten gatunek spada o 85% przez 400 ławic.',lawic:400,spawnMult:.15},
     {id:'rocznik',quote:'Każdy rocznik ma swój charakter.',tekst:'Przez 700 ławic gatunek pojawia się o połowę rzadziej i jest o połowę mniejszy.',lawic:700,spawnMult:.5,sizeMult:.5},
-    {id:'po_stronie',quote:'Los jest po Twojej stronie.',tekst:'…ale nie po stronie tej ryby. 95% jej szansy na pojawienie się znika przez 200 ławic.',lawic:200,spawnMult:.05}
+    {id:'po_stronie',quote:'Los jest po Twojej stronie.',tekst:'…ale nie po stronie tej ryby. 95% jej szansy na pojawienie się znika przez 200 ławic.',lawic:200,spawnMult:.05},
+    {id:'smok_zycia',quote:'Życie zawsze znajduje drogę.',tekst:'W następnej ławicy czeka stworzenie z wróżby.',legendary:'smok_zycia'}
   ];
   function stan(){
     if(typeof Zapis==='undefined')return null;
@@ -19104,7 +19137,7 @@ const FortuneCookie = (() => {
     return d.fortuneEffects.filter(e=>e&&e.slug===slug&&e.left>0&&def(e.id));
   }
   function species(){
-    return Object.keys(window.GATUNKI||{}).filter(k=>GATUNKI[k]&&!GATUNKI[k].zepsuty)
+    return Object.keys(window.GATUNKI||{}).filter(k=>GATUNKI[k]&&!GATUNKI[k].zepsuty&&!GATUNKI[k].bezEko)
       .sort((a,b)=>String(GATUNKI[a].nazwa||a).localeCompare(String(GATUNKI[b].nazwa||b),'pl'));
   }
   function nazwa(slug){return(window.GATUNKI&&GATUNKI[slug]&&GATUNKI[slug].nazwa)||String(slug||'').toUpperCase()}
@@ -19115,7 +19148,8 @@ const FortuneCookie = (() => {
     if((d.monety||0)<PRICE)return{ok:false,powod:'ZA MAŁO QRYB'};
     const f=draw();
     d.monety-=PRICE;
-    d.fortuneEffects.push({slug:slug,id:f.id,left:f.lawic,od:f.lawic,kiedy:Date.now()});
+    if (!f.legendary)
+      d.fortuneEffects.push({slug:slug,id:f.id,left:f.lawic,od:f.lawic,kiedy:Date.now()});
     d.fortuneHistory.unshift({slug:slug,id:f.id,kiedy:Date.now()});
     d.fortuneHistory=d.fortuneHistory.slice(0,20);
     d.fortunePending={slug:slug,id:f.id,kiedy:Date.now()};
@@ -19127,7 +19161,19 @@ const FortuneCookie = (() => {
     const q=d.fortunePending,f=def(q.id);
     return(q.slug&&f)?{slug:q.slug,id:q.id,def:f}:null;
   }
-  function clearPending(){const d=stan();if(!d)return;d.fortunePending=null;Zapis.zapisz()}
+  function clearPending(){
+    const d=stan();if(!d)return;
+    if(d.fortunePending&&d.fortunePending.id==='smok_zycia')
+      d.fortuneLegendaryNextShoal='smok_zycia';
+    d.fortunePending=null;Zapis.zapisz();
+  }
+  function legendaryReady(){
+    const d=stan();return !!(d&&d.fortuneLegendaryNextShoal==='smok_zycia');
+  }
+  function consumeLegendary(){
+    const d=stan();if(!d||!legendaryReady())return false;
+    d.fortuneLegendaryNextShoal=null;Zapis.zapisz();return true;
+  }
   function spawnMultiplier(slug){
     let m=1;
     for(const e of aktywne(slug)){const f=def(e.id);if(f&&f.spawnMult!==undefined)m*=f.spawnMult}
@@ -19177,10 +19223,73 @@ const FortuneCookie = (() => {
     if(d.fortuneEffects.length!==n)changed=true;
     if(changed)Zapis.zapisz();
   }
-  return{PRICE,species,nazwa,def,purchase,pending,clearPending,spawnMultiplier,adjustFish,afterShoal,consumeShoal,
+  return{PRICE,species,nazwa,def,purchase,pending,clearPending,legendaryReady,consumeLegendary,
+    spawnMultiplier,adjustFish,afterShoal,consumeShoal,
     active:slug=>aktywne(slug).map(e=>Object.assign({},e,{def:def(e.id)}))};
 })();
+
 window.FortuneCookie=FortuneCookie;
+
+/* ============================================================
+   SMOK ZYCIA — wydarzenie lawicy.
+   Flaga z ciastka jest zuzywana dopiero przy stworzeniu NASTEPNEJ lawicy.
+   W tej lawicy nie ma zadnej innej ryby i system nie dosypuje nowych sztuk. */
+const SmokZycia = (() => {
+  let aktywna = false;
+
+  function stworz() {
+    const T = window.QRYBY_TEST || (window.QRYBY_TEST = {});
+    const poprzedni = T.wymus;
+    let f = null;
+    try {
+      T.wymus = 'smok_zycia';
+      f = makeFish();
+    } finally {
+      if (poprzedni) T.wymus = poprzedni; else delete T.wymus;
+    }
+    if (!f) return null;
+    f.gat = 'smok_zycia';
+    f.legendarny = true;
+    f.osobnik = null; f.plec = '';
+    f.pobyt = 9999;
+    f.base = Math.max(13, (f.base || 24) * 0.62);
+    f.vx = -Math.abs(f.base); f.vTarget = f.vx; f.face = -1;
+    f.x = Scene.W * 0.82;
+    f.home = Math.max(f.gMin || 120, Math.min(f.gMax || Scene.BED - 90, Scene.SURFACE + (Scene.BED-Scene.SURFACE)*0.52));
+    f.y = f.home;
+    f.turn = 7.5; f.hover = 0;
+    f.phase = Math.random() * Math.PI * 2;
+    f.machnij = 1.18;
+    return f;
+  }
+
+  function zastapLawiceJesliCzeka(arr) {
+    if (!window.FortuneCookie || !FortuneCookie.legendaryReady || !FortuneCookie.legendaryReady()) return false;
+    const f = stworz(); if (!f) return false;
+    arr.length = 0; arr.push(f);
+    FortuneCookie.consumeLegendary();
+    aktywna = true;
+    try {
+      if (typeof Ruch !== 'undefined' && Ruch.powiedz) Ruch.powiedz('WRÓŻBA SIĘ SPEŁNIA…');
+      if (navigator.vibrate) navigator.vibrate([35,70,35,110,70]);
+    } catch(e) {}
+    return true;
+  }
+  function aktywnaLawica(){ return aktywna; }
+  function koniecLawicy(){ aktywna=false; }
+
+  function poZlowieniu() {
+    let ile=0;
+    try {
+      if (window.Eko && Eko.odrodzWymarle) ile=(Eko.odrodzWymarle()||[]).length;
+      if (typeof Ruch !== 'undefined' && Ruch.powiedz)
+        Ruch.powiedz(ile ? ('SMOK ŻYCIA · ODRODZIŁ ' + ile + ' GAT.') : 'SMOK ŻYCIA · ŻYCIE WRACA DO JEZIORA');
+      if (navigator.vibrate) navigator.vibrate([60,60,100,90,160]);
+    } catch(e) {}
+  }
+  return {zastapLawiceJesliCzeka,aktywnaLawica,koniecLawicy,poZlowieniu};
+})();
+window.SmokZycia=SmokZycia;
 
 window.ZANETY_RZADKOSC = (function () {
   const out = { pospolita: [], rzadka: [], epicka: [] };
@@ -20397,11 +20506,13 @@ function cyklLawicy(dt) {
   }
   if (CYKL.t >= CYKL.okres) {
     CYKL.t -= CYKL.okres; CYKL.faza = 'zyje';
+    if(window.SmokZycia) SmokZycia.koniecLawicy();
     /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
     for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
     const ile = POP.cel + Math.round(Math.random() * 3);
     for (let i = 0; i < ile; i++) school.push(wplyw());
     spawnT = POP.odstep[0];
+    const __smokAuto = !!(window.SmokZycia && SmokZycia.zastapLawiceJesliCzeka(school));
     /* ============================================================
        BLAD ZASTANY (znaleziony IX 2026 przy okazji dodawania nowej
        zanety, ktora potrzebowala tego samego haka): wymiana lawicy
@@ -20420,14 +20531,17 @@ function cyklLawicy(dt) {
        (if(!z) return;) i podmiana nigdy sie nie odbywala. Module 18 mial
        to w dobrej kolejnosci od zawsze (wstaw NAJPIERW, zuzyj POTEM) --
        ten blok teraz robi dokladnie to samo, w tej samej kolejnosci. */
-    if (typeof wstawGwarant === 'function') wstawGwarant();
-    if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
+    if (!__smokAuto) {
+      if (typeof wstawGwarant === 'function') wstawGwarant();
+      if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
+    }
     if (typeof Zapis !== 'undefined') Zapis.zuzyjLawice();
   }
 }
 
 function zarzadzajPopulacja(dt) {
   cyklLawicy(dt);
+  if(window.SmokZycia && SmokZycia.aktywnaLawica()) return;
   /* W fazie ucieczki populacja sie nie uzupelnia, inaczej nowe ryby
      wplywalyby w sam srodek exodusu.
      FAZA 'siec' dziala tak samo, ale z innego powodu: po zarzuceniu
@@ -21178,6 +21292,7 @@ function openCard(fish, lenCm, fromX, fromY) {
   if (typeof Zapis !== 'undefined' && typeof XScore !== 'undefined' && GATUNKI[gk]) {
     const pkt = XScore.punkty(gk, GATUNKI[gk], lenCm, w);
     kolekcja = Zapis.zlowiono(gk, lenCm, w, pkt);
+      if(gk==='smok_zycia' && window.SmokZycia) SmokZycia.poZlowieniu();
     try { if (window.Progression) Progression.poZlowieniu(); } catch (e) {}
     /* Zawody licza sie z tej samej liczby, co atlas. Jedno zrodlo punktow,
        zero szans na rozjechanie sie tablicy z wlasnym rekordem. */
@@ -26551,6 +26666,7 @@ const Eko = (() => {
   function popStartowa(gk) {
     const G2 = (typeof GATUNKI !== 'undefined') ? GATUNKI[gk] : null;
     if (!G2) return CFG.POP_MIN_START;
+    if (G2.bezEko) return 0;
     return CFG.POP_PASMA[pasmoGat(gk)] || CFG.POP_MIN_START;
   }
 
@@ -26795,7 +26911,8 @@ const Eko = (() => {
      gatunku, ktorego zostalo mniej niz dziesiec. */
   CFG.PROG_KRONIKI = 10;
 
-  function zatrzymano(gk, plec) {          /* swipe w prawo, ryba do wiaderka */
+  function zatrzymano(gk, plec) {
+    if (GATUNKI[gk] && GATUNKI[gk].bezEko) return 0;          /* swipe w prawo, ryba do wiaderka */
     const ubylo = zmien(gk, -1, plec, 'zatrzymana');
     if (ubylo) {
       const zostalo = populacja(gk);
@@ -27753,12 +27870,36 @@ const Eko = (() => {
     }
   }
 
+
+  /* TYLKO Smok Zycia moze przejsc przez te drzwi. Zwykle tarlo nadal nie
+     wskrzesza wymarlych. Kazdy wymarly gatunek wraca jako 1 samiec + 1 samica. */
+  function odrodzWymarle() {
+    if (!maPrawoDoSwiata()) return [];
+    const E = stan(), out = [];
+    if (!E || !E.gat) return out;
+    for (const gk in E.gat) {
+      if (GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      if (!r || (!r.wymarly && r.n > 0)) continue;
+      r.n=2; r.m=1; r.f=1; r.wymarly=false; r.kiedyWymarl=0;
+      r.max=Math.max(r.max||0,2); r.min=Math.min(r.min||0,0); r.indyw=true;
+      if (E.osob) E.osob[gk]=[];
+      try { materializuj(gk); } catch(e) {}
+      out.push(gk);
+      zapisz('odrodzenie',gk,'Smok Życia przywrócił gatunek: 1 samiec + 1 samica',2);
+    }
+    window.__wagiTab=null;
+    if (typeof Zapis!=='undefined') Zapis.zapisz();
+    try { if (Eko.Serwer && Eko.Serwer.odrodzWymarle) Eko.Serwer.odrodzWymarle(); } catch(e) {}
+    return out;
+  }
+
   return { CFG, stan, rekord, populacja, wymarly, trybIndywidualny,
            tikGodow, parujeSie, paraGodowa, ikra, zakonczGody,
            tikKohort, pokolenia, nowaKohorta, losujScenariusz,
            genSrednia, genZPopulacji, zmieszajGeny, przesunSrednia, odejmijZeSredniej,
            materializuj, wezOsobnika, zwolnij, usunOsobnika, osobniki,
-           zmien, zatrzymano, wypuszczono, drapieznikZjadl,
+           zmien, zatrzymano, wypuszczono, drapieznikZjadl, odrodzWymarle,
            mnoznikLosowania, losujPlec, moznaRozmnazac,
            karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
            szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
@@ -28268,13 +28409,26 @@ Eko.Serwer = (function () {
     return true;
   }
 
+  async function odrodzWymarle() {
+    if (!dostepny()) return [];
+    try {
+      const w = await rpc('eko_odrodz_wymarle', {});
+      if (Array.isArray(w)) {
+        for (const r of w) if (r && r.gat) wpiszStan(r.gat, r);
+        if (typeof Zapis !== 'undefined') Zapis.zapisz();
+        return w;
+      }
+    } catch(e) {}
+    return [];
+  }
+
   /* Zasiew: wypisuje SQL z biezacymi populacjami, do wklejenia raz
      w Supabase. Dzieki temu swiat na serwerze startuje z tymi samymi
      liczbami, ktore gra liczy lokalnie, zamiast z okraglych zmyslen. */
   function zasiewSQL() {
     const w = [];
     for (const k in GATUNKI) {
-      if (GATUNKI[k].zepsuty) continue;
+      if (GATUNKI[k].zepsuty || GATUNKI[k].bezEko) continue;
       const r = Eko.rekord(k);
       w.push("('" + k + "'," + r.n + "," + r.m + "," + r.f + "," + r.n + "," + r.n + ")");
     }
@@ -28322,7 +28476,7 @@ Eko.Serwer = (function () {
     } catch (e) { return false; }
   }
 
-  return { dostepny, pobierz, zmien, doslij, zasiewSQL, wpiszStan,
+  return { dostepny, pobierz, zmien, doslij, zasiewSQL, wpiszStan, odrodzWymarle,
            wpis, kronikaWspolna, odswiezKronike };
 })();
 
