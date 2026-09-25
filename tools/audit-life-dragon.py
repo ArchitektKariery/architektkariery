@@ -1,18 +1,43 @@
 from pathlib import Path
-import re
 c=Path("qryby.html").read_text(encoding="utf-8")
 
-out=[f"LEN={len(c)}\n"]
-patterns=[
- ("FUNCTIONS", r"function\s+([A-Za-z0-9_]*(?:atlas|Atlas|stron|Stron|eko|Eko|zlow|Zlow|zlap|Zlap|catch|Catch|decyz|Decyz|polow|Polow|wymar|Wymar|popul|Popul|osobnik|Osobnik|odrod|Odrod|nowaLawica|rysuj|render)[A-Za-z0-9_]*)\s*\("),
- ("OBJECTS", r"(?:const|let|var)\s+(Eko|EkoPanel|Ksiega|Zapis|Card|FishAtlas|Populacja|POP)\s*="),
- ("TOKENS", r"nowaWAtlasie|fish_caught|fish_kept|fish_released|wymar(?:ly|łe|le|cie|cie)?|ODKRYT|nieodkryt|atlas\.odk|stat\.atlas|stat\.ryby|stat\.gat|osobnik|liczbaPopulacji|smokosz:\s*\{|morswin:\s*\{")
+terms=[
+"function odkryj",
+".odkryj(",
+"odkryj(",
+"atlas[gk]",
+"atlas[f.gat]",
+"nowaWAtlasie",
+"function wezOsobnika",
+"wezOsobnika(",
+"osobnicy",
+"function usunOsobnika",
+"function odlow",
+"function zabierz",
+"function wypusc",
+"function populacja",
+"window.Eko = Eko",
+"return { CFG",
+"return {CFG",
 ]
-for title,pat in patterns:
-    ms=list(re.finditer(pat,c,re.I))
-    out.append(f"\n===== {title} {len(ms)} =====\n")
-    for n,m in enumerate(ms[:80],1):
-        a=max(0,m.start()-1200); b=min(len(c),m.end()+2600)
-        out.append(f"\n--- {n} @ {m.start()} :: {m.group(0)} ---\n{c[a:b]}\n")
+out=[f"LEN={len(c)}\n"]
+for term in terms:
+    pos=0; hits=[]
+    while True:
+        i=c.find(term,pos)
+        if i<0: break
+        hits.append(i); pos=i+len(term)
+        if len(hits)>=12: break
+    out.append(f"\n===== {term} | {len(hits)} =====\n")
+    for n,i in enumerate(hits,1):
+        a=max(0,i-2600); b=min(len(c),i+5200)
+        out.append(f"\n--- {n} @ {i} ---\n{c[a:b]}\n")
+# Direct atlas-book slice around the renderer region.
+for title,a,b in [
+    ("KSIEGA_RENDER",5709000,5748000),
+    ("EKO_CORE",6161500,6208000),
+    ("CATCH_CARD",5980000,6048000)
+]:
+    out.append(f"\n===== {title} {a}:{b} =====\n{c[a:b]}\n")
 Path("tools/life-dragon-audit.txt").write_text("".join(out),encoding="utf-8")
-print("symbol audit",len(out))
+print("final focused audit written")
