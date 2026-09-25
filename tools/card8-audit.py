@@ -1,21 +1,18 @@
 from pathlib import Path
+import re
 c=Path("qryby.html").read_text(encoding="utf-8")
-anchors=[
-("XScore","const XScore ="),
-("CardDraw","function drawCard(g, t)"),
-("Ramki","window.RAMKA_SLOTY="),
-("TierSources","window.RAMKA7_SRC="),
-("LifeDragon","SMOK ZYCIA — pierwszy legendarny"),
-("AtlasHidden","stworzenie z wróżby")
+patterns=[
+("loops7",r"for\s*\([^\n]{0,100}(?:<=\s*7|<\s*8)[^\n]{0,100}\)"),
+("min7",r"Math\.min\(7[^\n]{0,150}"),
+("atlas-tabs",r".{0,100}(?:zaklad|pasmo|PASMO).{0,160}(?:1|7).{0,120}"),
+("lak",r"const\s+LAK\s*=.{0,1500}"),
+("tiers",r"\[1,\s*2,\s*3,\s*4,\s*5,\s*6,\s*7\]"),
 ]
-out=[f"LEN={len(c)}\n"]
-for title,term in anchors:
-    i=c.find(term)
-    out.append(f"\n===== {title} @ {i} =====\n")
-    if i>=0:
-        before=3000 if title!="XScore" else 1000
-        after={"XScore":42000,"CardDraw":36000,"Ramki":18000,"TierSources":6000,"LifeDragon":12000,"AtlasHidden":9000}[title]
-        out.append(c[max(0,i-before):min(len(c),i+after)])
-        out.append("\n")
+out=[]
+for title,pat in patterns:
+ ms=list(re.finditer(pat,c,re.I|re.S))
+ out.append(f"===== {title} {len(ms)} =====\n")
+ for m in ms[:80]:
+  out.append(f"@@ {m.start()} @@\n"+c[max(0,m.start()-1800):min(len(c),m.end()+4000)]+"\n")
 Path("tools/card8-audit.txt").write_text("".join(out),encoding="utf-8")
-print("focused card8 audit written")
+print("atlas/tier8 audit")
