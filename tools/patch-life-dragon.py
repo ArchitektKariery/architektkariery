@@ -337,8 +337,9 @@ c=c[:m.start()]+insert+c[m.end():]
 
 # ------------------------------------------------------------------
 # 6) Atlas secrecy.
-once("""    g.fillText(znany ? G2.nazwa : '\u003F \u003F \u003F', SR, y + h * 0.103);""",
-"""    g.fillText(znany ? G2.nazwa : (k === 'smok_zycia' ? 'stworzenie z wróżby' : '\u003F \u003F \u003F'), SR, y + h * 0.103);""","atlas hidden title")
+re_once(r"    g\.fillText\(znany \? G2\.nazwa : [^,]+, SR, y \+ h \* 0\.103\);",
+"""    g.fillText(znany ? G2.nazwa : (k === 'smok_zycia' ? 'stworzenie z wróżby' : '? ? ?'), SR, y + h * 0.103);""",
+"atlas hidden title")
 
 once("""      krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.'""",
 """      krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
