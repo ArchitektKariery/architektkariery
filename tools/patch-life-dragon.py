@@ -330,7 +330,7 @@ re_once(r"(function zatrzymano\(gk, plec\)\s*\{)",
         "legendary keep eko skip")
 
 # Hook once into the real catch registration.
-m=re.search(r"((?:const|let)\s+kolekcja\s*=\s*Zapis\.zlowiono\([^;]+;)",c)
+m=re.search(r"(kolekcja\s*=\s*Zapis\.zlowiono\([^;]+;)",c)
 if not m: raise RuntimeError("catch registration not found")
 insert=m.group(1)+"\n      if(gk==='smok_zycia' && window.SmokZycia) SmokZycia.poZlowieniu();"
 c=c[:m.start()]+insert+c[m.end():]
