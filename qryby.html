@@ -27009,6 +27009,7 @@ const Eko = (() => {
     const E = stan(); if (!E) return [];
     const out = [];
     for (const gk in E.gat) {
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
       const r = E.gat[gk];
       out.push({ gat: gk, n: r.n, m: r.m, f: r.f, max: r.max, min: r.min,
                  indyw: r.indyw, wymarly: r.wymarly,
