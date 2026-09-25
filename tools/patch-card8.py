@@ -92,15 +92,13 @@ c=c[:m.start()]+seg2+c[m.end():]
 # ------------------------------------------------------------------
 # Dedicated Pasmo 8 card art.
 slot8='"8":{"ark":[3,2,122,188],"art":[0.085,0.155,0.83,0.47],"panel":[0.10,0.655,0.80,0.225],"barL":[0.14,0.882,0.31,0.062],"barR":[0.55,0.882,0.31,0.062],"medal":[0.17,0.105,0.085]}'
-m=re.search(r'window\.RAMKA_SLOTY=\{[\s\S]*?\};\s*window\.RAMKA1_SRC=',c)
-if not m: raise RuntimeError("RAMKA_SLOTY block not found")
-block=m.group(0)
+start=c.find("window.RAMKA_SLOTY={")
+if start<0: raise RuntimeError("RAMKA_SLOTY start not found")
+end=c.find("};",start)
+if end<0: raise RuntimeError("RAMKA_SLOTY end not found")
+block=c[start:end+2]
 if '"8":' in block: raise RuntimeError("RAMKA_SLOTY already contains 8 unexpectedly")
-block2=block.replace("};\nwindow.RAMKA1_SRC=",","+slot8+"};\nwindow.RAMKA1_SRC=",1)
-if block2==block:
-    block2=block.replace("};window.RAMKA1_SRC=",","+slot8+"};window.RAMKA1_SRC=",1)
-if block2==block: raise RuntimeError("could not append slot8")
-c=c[:m.start()]+block2+c[m.end():]
+c=c[:end]+","+slot8+c[end:]
 
 # Add the clean text-free card art after tier 7.
 m=re.search(r'window\.RAMKA7_SRC="data:image/png;base64,[^"]+";',c)
