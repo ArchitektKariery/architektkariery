@@ -1,0 +1,26 @@
+name: Audit QRyby Card 8
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/card8-audit.py'
+      - '.github/workflows/card8-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit card architecture
+        run: python tools/card8-audit.py
+      - name: Commit report
+        run: |
+          git config user.name "QRyby Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/card8-audit.txt
+          git commit -m "Audit QRyby card 8 integration [skip ci]"
+          git push
