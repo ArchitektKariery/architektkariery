@@ -1,2032 +1,890 @@
+iter, wiec "szcz" znajduje szczupaka, a "SUM" suma. Pusty filtr znaczy
+     cala ksiega. Przy kazdej zmianie filtru bufory stron sie kasuja
+     i ksiega wraca na pierwsza karte, bo indeksy przestaja pasowac.
+     ============================================================ */
+  let filtr = '';
+  const bezOgonkow = s => String(s || '').toLowerCase()
+    .replace(/\u0105/g, 'a').replace(/\u0107/g, 'c').replace(/\u0119/g, 'e')
+    .replace(/\u0142/g, 'l').replace(/\u0144/g, 'n').replace(/\u00F3/g, 'o')
+    .replace(/\u015B/g, 's').replace(/\u017A/g, 'z').replace(/\u017C/g, 'z');
+  let porzadekCache = null;
+  /* ============================================================
+     PASMO DLA ATLASU: KLASA, NIE tierGatunku.
+     tierGatunku liczy tier z X-Score DOMINANTY gatunku i jest CELOWO
+     scinany na 6 (Math.min(6, ...)) -- to jest wlasciwe dla karty
+     konkretnego POLOWU (nagroda za odkrycie, karta zlowionej sztuki),
+     bo tamta skala liczy sie z punktow, nie z pasma. Dla atlasu chcemy
+     co innego: do ktorego pasma NALEZY gatunek, a to jest wprost KLASA.
+     Uzycie tierGatunku tutaj mieszalo pasmo 7 z pasmem 6 w jedna
+     alfabetyczna kupe (obie dostawaly 6 z tego samego sciecia) i to byl
+     powod, dla ktorego gatunki pasma 7 wygladaly na wrzucone losowo. */
+  const pasmoAtlasu = k => (window.KLASA && KLASA[k]) || 1;
+  function porzadekAtlasu() {
+    if (porzadekCache) return porzadekCache;
+    const t = pasmoAtlasu;
+    porzadekCache = Object.keys(GATUNKI).sort((a, b) => {
+      const ta = t(a), tb = t(b);
+      if (ta !== tb) return ta - tb;
+      return String(GATUNKI[a].nazwa || a).localeCompare(String(GATUNKI[b].nazwa || b), 'pl');
+    });
+    return porzadekCache;
+  }
+  const klucze = () => {
+    if (tryb === 'pomoc') return POMOC.map((p, i) => 'p' + i);
+    const wsz = porzadekAtlasu();
+    if (!filtr) return wsz;
+    const f = bezOgonkow(filtr);
+    const w = wsz.filter(k => bezOgonkow(GATUNKI[k].nazwa).includes(f) || bezOgonkow(k).includes(f));
+    return w.length ? w : wsz;
+  };
+  function ustawFiltr(s) {
+    const nowy = String(s || '').trim();
+    if (nowy === filtr) return;
+    filtr = nowy;
+    bufory.clear();
+    strona = 0; docelowa = 0; post = 0; kier = 0; ciagnie = false; wraca = false;
+  }
+  const bufory = new Map();
 
-===== function zmien( 2 =====
-a `eko_wpis` czekaly na serwerze
-       od poczatku i nigdy nie byly wolane.
-       Prywatne wpisy (pokolenie, drapieznik, reset) zostaja lokalne:
-       to dziennik diagnostyczny jednego gracza, nie feed. Bramka jest
-       po OBU stronach -- tutaj i w samej funkcji SQL. */
-    if (CFG.TYPY_PUBLICZNE.indexOf(typ) >= 0 && nick) {
+  /* Ksiega rysuje sie na kanwie, a ikony, licznik i przycisk lawicy to
+     elementy HTML lezace NAD kanwa. Dopoki zostawaly na wierzchu, nachodzily
+     na strone i mieszaly sie z trescia. Otwarcie ksiegi schodzi je z drogi
+     jednym przelacznikiem na body, zgaszenie trwa tyle samo co otwarcie. */
+  function przelacznikHUD(stan) {
+    if (typeof document !== 'undefined' && document.body && document.body.classList) {
+      document.body.classList.toggle('ksiega-otwarta', !!stan);
+      /* Pasek wyszukiwania nalezy do atlasu, nie do instrukcji. */
+      document.body.classList.toggle('atlas-otwarty', !!stan && tryb === 'atlas');
+    }
+  }
+  function otworz(nr, jaki) {
+    tryb = jaki || 'atlas';
+    otwarta = true; wej = 0; post = 0; kier = 0; ciagnie = false; wraca = false;
+    bufory.clear();                       /* dwa tryby, dwa zestawy stron */
+    if (nr === null || nr === undefined || nr < 0) { strona = 0; docelowa = 0; }
+    przelacznikHUD(true);
+    if (nr !== null && nr !== undefined && nr >= 0) { strona = nr; docelowa = nr; }
+  }
+  function zamknij() {
+    otwarta = false; post = 0; ciagnie = false; przelacznikHUD(false);
+    if (window.__bookReturnMenu) {
+      window.__bookReturnMenu = false;
+      setTimeout(() => { if (window.otworzMasterMenu) window.otworzMasterMenu(); }, 190);
+    }
+  }
+
+  function przewroc(k) {
+    if (post > 0 || ciagnie) return;
+    const n = klucze().length;
+    kier = k; docelowa = (strona + k + n) % n; post = 0.0001; wraca = false;
+  }
+  /* --- prowadzenie palcem --- */
+  let ostatniRuch = 0;
+  function chwyc() { if (post > 0 && !ciagnie) return false; ciagnie = true; wraca = false; ostatniRuch = Date.now(); return true; }
+  function ciagnij(u) {
+    if (!ciagnie) return;
+    const n = klucze().length;
+    const k = u < 0 ? 1 : -1;                    /* w lewo ciagnie nastepna */
+    if (k !== kier || post === 0) { kier = k; docelowa = (strona + k + n) % n; }
+    /* Sufit 0,94, a nie 1. Przy pelnym obrocie w trakcie ciagniecia kartka
+       zostawala zamrozona na rewersie, czyli lustrzanym odbiciu strony,
+       bo tik nie rusza sie, dopoki palec trzyma. Tak wygladal blad, przy
+       ktorym cala strona byla odbita. */
+    post = Math.min(0.94, Math.abs(u));
+    ostatniRuch = Date.now();
+  }
+  function pusc(szybko) {
+    if (!ciagnie) return;
+    ciagnie = false;
+    if (post > PROG || szybko) { wraca = false; }
+    else { wraca = true; }
+  }
+  function tik(dt) {
+    if (otwarta && wej < 1) wej = Math.min(1, wej + dt / 0.34);
+
+    /* Straznik: gdy palec zniknal bez pointerup, na przyklad przy zmianie
+       aplikacji albo powiadomieniu, ciagniecie konczy sie samo po 900 ms
+       i kartka wraca na miejsce zamiast zostac w powietrzu. */
+    if (ciagnie && Date.now() - ostatniRuch > 900) { ciagnie = false; wraca = post <= PROG; }
+    if (!otwarta || ciagnie || post <= 0) return;
+    const krok = dt / CZAS;
+    if (wraca) {
+      post -= krok * 1.6;
+      if (post <= 0) { post = 0; kier = 0; wraca = false; }
+    } else {
+      post += krok;
+      if (post >= 1) { post = 0; strona = docelowa; kier = 0; }
+    }
+  }
+
+  /* ---------- bufor jednej strony ---------- */
+  function bufor(idx, w, h) {
+    const _gatBuf = (tryb === 'atlas') ? klucze()[idx] : '';
+    const _obsBuf = (tryb === 'atlas' && window.MysteryHints)
+      ? MysteryHints.lista(_gatBuf).length : 0;
+    const klucz = tryb + idx + '@' + Math.round(w) + 'x' + Math.round(h) + '@' +
+      ((tryb === 'atlas' && typeof Zapis !== 'undefined') ? Zapis.ile(_gatBuf) : 0) + '@o' + _obsBuf;
+    let b = bufory.get(klucz);
+    if (b) return b;
+    const c = document.createElement('canvas');
+    c.width = Math.max(2, Math.round(w)); c.height = Math.max(2, Math.round(h));
+    tresc(c.getContext('2d'), 0, 0, c.width, c.height, idx);
+    /* Bufory kasuja sie same, zeby pamiec nie rosla przez cala sesje. */
+    if (bufory.size > 8) bufory.delete(bufory.keys().next().value);
+    bufory.set(klucz, c);
+    return c;
+  }
+
+  /* ---------- papier ---------- */
+  function papier(g, x, y, w, h) {
+    /* Stage 9: papier bardziej jak terenowy dziennik, mniej jak plaski panel.
+       To renderuje sie tylko przy budowie cache strony, nie co klatke. */
+    g.fillStyle = '#EBDDBe';
+    g.fillRect(x, y, w, h);
+
+    const wash = g.createLinearGradient(0, y, 0, y + h);
+    wash.addColorStop(0, 'rgba(255,248,226,.18)');
+    wash.addColorStop(.52, 'rgba(255,248,226,0)');
+    wash.addColorStop(1, 'rgba(104,72,38,.045)');
+    g.fillStyle = wash; g.fillRect(x,y,w,h);
+
+    /* Cien przy grzbiecie i lekka ciemniejsza krawedz zewnetrzna. */
+    const gr = g.createLinearGradient(x, 0, x + w * 0.11, 0);
+    gr.addColorStop(0, 'rgba(112,84,46,0.22)'); gr.addColorStop(1, 'rgba(112,84,46,0)');
+    g.fillStyle = gr; g.fillRect(x, y, w * 0.11, h);
+    const g2 = g.createLinearGradient(x + w, 0, x + w * 0.82, 0);
+    g2.addColorStop(0, 'rgba(112,84,46,0.16)'); g2.addColorStop(1, 'rgba(112,84,46,0)');
+    g.fillStyle = g2; g.fillRect(x + w * 0.82, y, w * 0.18, h);
+
+    /* Kilkanascie prawie niewidocznych wlokien papieru.
+       Deterministyczne: strona nie migocze miedzy przebudowami cache. */
+    g.save();
+    g.lineWidth = Math.max(.55, w*.0018);
+    for (let i=0;i<15;i++) {
+      const yy = y + h*(.045 + i*.061 + .005*Math.sin(i*2.7));
+      const x1 = x + w*(.07 + .05*Math.sin(i*1.91));
+      const x2 = x + w*(.93 - .04*Math.cos(i*2.17));
+      g.strokeStyle = i%3===0 ? 'rgba(88,62,34,.028)' : 'rgba(255,250,230,.045)';
+      g.beginPath();
+      g.moveTo(x1,yy);
+      g.quadraticCurveTo((x1+x2)/2, yy + Math.sin(i*3.1)*1.6, x2, yy + Math.cos(i*1.8)*.9);
+      g.stroke();
+    }
+    g.restore();
+  }
+
+  /* ---------- sylwetka nieodkrytego mitycznego ---------- */
+  /* ============================================================
+     BLAD ZGLOSZONY: pasmo 7 mialo zostac ukryte az do zlowienia
+     ("znak zapytania bez pokazania, zeby nie psuc niespodzianki"),
+     ale rycina w atlasie idzie ZAWSZE w pelnym kolorze dla kazdego
+     gatunku (patrz komentarz "RYCINA JEST ZAWSZE" nizej) -- ta zasada
+     jest SWIADOMA i dobra dla zwyklego rejestru: kolorowa rycina to
+     podpowiedz, czego szukac w wodzie. Dla mitycznych dziala odwrotnie,
+     bo tam niespodzianka jest cala nagroda.
+     Rozwiazanie stoi WYLACZNIE dla pasma 7: reszta rejestru (1-6)
+     zostaje przy starej, zamierzonej zasadzie bez zadnej zmiany.
+     DRUGA POPRAWKA: nawet czarna sylwetka zdradzala ksztalt, wiec
+     zeszla do zera -- nieodkryte pasmo 7 to teraz sam znak zapytania
+     na pustym tle strony, bez ani jednego piksela gatunku. */
+
+  /* ---------- tresc strony ---------- */
+  function tresc(g, x, y, w, h, idx) {
+    if (tryb === 'pomoc') return trescPomocy(g, x, y, w, h, idx);
+    const k = klucze()[idx], G2 = GATUNKI[k];
+    const znany = (typeof Zapis !== 'undefined') && Zapis.ile(k) > 0;
+    papier(g, x, y, w, h);
+    const L = x + w * 0.115, P = x + w * 0.885, SR = x + w / 2;
+    const F = (px, gruby) => (gruby ? 'bold ' : '') + Math.round(px) + 'px system-ui,-apple-system,sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+
+    /* ============================================================
+       STAGE 9 — NAGLOWEK ATLASU.
+       Ma wygladac jak karta terenowego katalogu: seria + numer strony,
+       dopiero potem nazwa okazu. Pasma nie zdradzamy przed odkryciem.
+       ============================================================ */
+    const pasmoStrony = pasmoAtlasu(k);
+    g.textBaseline = 'alphabetic';
+
+    g.textAlign = 'left';
+    g.fillStyle = 'rgba(42,32,24,.46)';
+    g.font = F(w * 0.028, 1);
+    g.fillText(znany ? ('ATLAS ŁOWISKA · PASMO ' + pasmoStrony) : 'ATLAS ŁOWISKA',
+      L, y + h * 0.047);
+
+    g.textAlign = 'right';
+    g.font = F(w * 0.028);
+    g.fillText(String(idx + 1).padStart(2,'0') + ' / ' + String(klucze().length).padStart(2,'0'),
+      P, y + h * 0.047);
+
+    g.textAlign = 'center';
+    g.fillStyle = '#2A2018'; g.font = F(w * 0.070, 1);
+    g.fillText(znany ? G2.nazwa : '\u003F \u003F \u003F', SR, y + h * 0.103);
+
+    g.strokeStyle = 'rgba(42,32,24,.38)'; g.lineWidth = Math.max(1, w * 0.004);
+    g.beginPath(); g.moveTo(L, y + h * 0.136); g.lineTo(P, y + h * 0.136); g.stroke();
+
+    /* Rycina w podwojnej ramie — bardziej tablica badawcza niz okno UI. */
+    const ry = y + h * 0.160, rh = h * 0.268;
+    g.fillStyle = 'rgba(104,137,145,.055)';
+    g.fillRect(L, ry, P-L, rh);
+    g.strokeStyle = 'rgba(42,32,24,.40)'; g.lineWidth = Math.max(1, w * 0.005);
+    g.strokeRect(L, ry, P - L, rh);
+    g.strokeStyle = 'rgba(42,32,24,.16)'; g.lineWidth = Math.max(1, w * 0.0025);
+    g.strokeRect(L + w*.014, ry + w*.014, (P-L) - w*.028, rh - w*.028);
+
+    /* Narożne znaczniki pomiarowe. */
+    const mk=w*.025, ox=w*.012;
+    g.strokeStyle='rgba(42,32,24,.32)'; g.lineWidth=Math.max(1,w*.003);
+    for (const [xx,yy,sx,sy] of [
+      [L+ox,ry+ox,1,1],[P-ox,ry+ox,-1,1],
+      [L+ox,ry+rh-ox,1,-1],[P-ox,ry+rh-ox,-1,-1]]) {
+      g.beginPath();
+      g.moveTo(xx,yy); g.lineTo(xx+sx*mk,yy);
+      g.moveTo(xx,yy); g.lineTo(xx,yy+sy*mk);
+      g.stroke();
+    }
+    const img = G2.img;
+    if (img && img.complete && img.naturalWidth) {
+      const sk = Math.min((P - L) * 0.84 / G2.meta.w, rh * 0.78 / G2.meta.h);
+      const dw = G2.meta.w * sk, dh = G2.meta.h * sk;
+      const dx = L + (P - L - dw) / 2, dy = ry + (rh - dh) / 2;
+      /* ============================================================
+         RYCINA JEST ZAWSZE. Czarna sylwetka nie mowila nikomu nic: gracz
+         widzial w wodzie kolorowa rybe i nie mial jak jej dopasowac do
+         cienia w ksiedze. Teraz kazda strona pokazuje gatunek w pelnym
+         kolorze i to ona jest podpowiedzia, czego szukac. Ukryte zostaje
+         WYLACZNIE to, co jest nagroda za zlowienie: nazwa, opis, rekordy
+         i stempel pasma. Nieodkryta rycina jest tylko lekko przygaszona,
+         zeby bylo widac, ze karta nie jest jeszcze zdobyta.
+         ============================================================ */
+      if (znany) g.drawImage(img, dx, dy, dw, dh);
+      else if ((window.KLASA && KLASA[k]) === 7) {
+        /* Pasmo 7, nieodkryte: NIC z wygladu gatunku, nawet sylwetka --
+           tylko znak zapytania na pustym tle strony, tak samo jak
+           w naglowku. Dla mitycznych niespodzianka jest cala nagroda,
+           wiec nawet ksztalt ma zostac tajemnica az do zlowienia. */
+        g.fillStyle = 'rgba(233,220,190,.90)';
+        g.font = 'bold ' + Math.round(rh * 0.4) + 'px system-ui,-apple-system,sans-serif';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText('?', L + (P - L) / 2, ry + rh / 2);
+      } else {
+        g.save(); g.globalAlpha = 0.62;
+        g.drawImage(img, dx, dy, dw, dh);
+        g.restore();
+      }
+    }
+
+    /* podpis ryciny */
+    g.textAlign='left';
+    g.textBaseline='alphabetic';
+    g.fillStyle='rgba(42,32,24,.36)';
+    g.font=F(w*.024,1);
+    g.fillText(znany ? 'RYCINA TERENOWA · OKAZ ZAREJESTROWANY' : 'RYCINA TERENOWA · NIEPOTWIERDZONA',
+      L + w*.020, ry + rh - h*.012);
+
+    /* ============================================================
+       STEMPEL WOSKOWY PASMA.
+       Lak odbity w prawym gornym rogu strony, w barwie pasma. Krawedz jest
+       nierowna, bo wosk nigdy nie zastyga w kolo: promien chodzi sinusem
+       o kilka procent, a ziarno bierze sie z numeru gatunku, wiec kazdy
+       stempel wyglada troche inaczej, ale zawsze tak samo dla tej samej ryby.
+       Na stronie nieodkrytej stempla nie ma, bo pasma jeszcze nie znasz.
+       ============================================================ */
+    if (znany) {
+      const t = pasmoAtlasu(k);
+      const B = LAK[t] || LAK[1];
+      const sx2 = x + w * 0.845, sy2 = y + h * 0.088, r0 = w * 0.072;
+      g.save();
+      /* cien pod lakiem */
+      g.fillStyle = 'rgba(40,28,14,.28)';
+      g.beginPath(); g.arc(sx2 + r0 * 0.06, sy2 + r0 * 0.09, r0, 0, 6.2832); g.fill();
+      /* plama wosku */
+      const zia = (idx * 37) % 100;
+      g.beginPath();
+      for (let a = 0; a <= 6.2832; a += 0.06) {
+        const rr = r0 * (1 + 0.040 * Math.sin(a * 7 + zia) + 0.028 * Math.sin(a * 4 - zia * 0.7)
+                            + 0.018 * Math.sin(a * 11 + zia * 1.3));
+        const px2 = sx2 + Math.cos(a) * rr, py2 = sy2 + Math.sin(a) * rr;
+        if (a === 0) g.moveTo(px2, py2); else g.lineTo(px2, py2);
+      }
+      g.closePath();
+      const gr2 = g.createRadialGradient(sx2 - r0 * 0.3, sy2 - r0 * 0.35, r0 * 0.1, sx2, sy2, r0);
+      gr2.addColorStop(0, B[1]); gr2.addColorStop(1, B[0]);
+      g.fillStyle = gr2; g.fill();
+      g.strokeStyle = B[2]; g.lineWidth = Math.max(1, w * 0.004); g.stroke();
+      /* wytloczenie: cyfra pasma i podpis */
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = 'rgba(255,240,220,.92)';
+      g.font = '700 ' + Math.round(r0 * 0.95) + 'px system-ui,-apple-system,sans-serif';
+      g.fillText(String(t), sx2, sy2 - r0 * 0.10);
+      g.font = '700 ' + Math.round(r0 * 0.30) + 'px system-ui,-apple-system,sans-serif';
+      g.fillText('PASMO', sx2, sy2 + r0 * 0.50);
+      g.restore();
+    }
+
+    /* sekcje */
+    const mo = (typeof Zapis !== 'undefined') ? Zapis.najlepszy(k) : null;
+    const kg = w2 => (w2 / 1000).toFixed(2).replace('.', ',');
+    /* ============================================================
+       SZEPT O PORZE. Nie liczba, nie godzina, nie mnoznik. Jedno zdanie,
+       ktore mowi gdzie szukac, ale nie mowi ile z tego bedzie. Stoi na
+       kazdej stronie, takze nieodkrytej, bo to plotka, a nie rekord:
+       ma prowadzic do ryby, a nie nagradzac za jej zlowienie.
+       ============================================================ */
+    const SZEPT_PORA = {
+      dzienna:     'Podobno bierze wtedy, gdy słońce stoi wysoko nad wodą.',
+      zmierzchowa: 'Rybacy mówią, że rusza się w godzinie, gdy światło się łamie.',
+      nocna:       'Widywano ją głównie po zmroku, gdy tafla robi się czarna.',
+      obojetna:    'Nie zauważono, żeby pora dnia robiła jej różnicę.'
+    };
+    /* ============================================================
+       PLOTKA O PASMIE SIODMYM. Mityczne nie maja wpisu w OKNA.EKO --
+       zamiast zwyklego wazenia pora/sezon/pogoda maja TWARDE bramy
+       (OKNO_GODZIN, OKNO_OPADU, OKNO_KSIEZYCA) albo nie maja zadnej.
+       Cztery kategorie tych bram nie mieszcza sie w czterech kategoriach
+       SZEPT_PORA (dzien/zmierzch/noc/obojetnie), wiec dostaja wlasny,
+       osobny slownik zamiast probowac wcisnac deszcz czy pelnie ksiezyca
+       w jedna z istniejacych czterech plotek. Ten sam warunek co reszta
+       sekcji: stoi na kazdej stronie, takze nieodkrytej. */
+    const SZEPT_MITYCZNE = {
+      ksiaznik: 'Podobno pokazuje się wyłącznie na granicy dnia i nocy — o świcie albo o zmierzchu.',
+      smucior: 'Widywano go tylko nocą. Nigdy w dzień.',
+      nessy: 'Rybacy twierdzą, że wypływa jedynie wtedy, gdy pada deszcz.',
+      kupid: 'Podobno pokazuje się raz w miesiącu, wyłącznie w pełnię księżyca.',
+      tyrios_morski: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
+      minog_majlowy: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
+      dzolej_rudogrzywy: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
+      japoniec: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
+      smokosz: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
+      krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.'
+    };
+    let szept = SZEPT_PORA.obojetna;
+    if (SZEPT_MITYCZNE[k]) {
+      szept = SZEPT_MITYCZNE[k];
+    } else {
       try {
-        if (window.Eko && Eko.Serwer && Eko.Serwer.dostepny()) Eko.Serwer.wpis(gk, typ, tekst, ile || 0, nick);
+        const eko = (typeof OKNA !== 'undefined' && OKNA.EKO) ? OKNA.EKO[k] : null;
+        if (eko && SZEPT_PORA[eko[0]]) szept = SZEPT_PORA[eko[0]];
       } catch (e) {}
     }
-    if (E.kronika.length > CFG.KRONIKA_MAX)
-      E.kronika.splice(0, E.kronika.length - CFG.KRONIKA_MAX);
-  }
-
-  /* ============================================================
-     JEDYNA DROGA ZMIANY POPULACJI.
-     Wszystko -- zatrzymanie ryby, drapieznik, przyszla reprodukcja --
-     przechodzi tedy. Dzieki temu niezmiennik "populacja >= 0" jest
-     pilnowany w JEDNYM miejscu, a nie w kazdym wywolaniu z osobna.
-     Zwraca ILE FAKTYCZNIE ubylo/przybylo, nie ile proszono: przy
-     populacji 1 i probie odjecia 3 zwroci 1. To jest ta bezpieczna,
-     atomowa mutacja, ktorej wymaga specyfikacja przy rownoleglych
-     graczach -- kto pierwszy, ten bierze reszte, nikt nie schodzi ponizej
-     zera.
-     ============================================================ */
-  /* ============================================================
-     BEZ KONTA Z MAILEM POPULACJA SIE NIE RUSZA (IX 2026).
-     `zmien` to JEDYNE wejscie do liczb jeziora -- lowienie, wypuszczanie,
-     tarlo, siec, drapiezniki, wszystko idzie tedy. Bramka siedzi wiec
-     tutaj, a nie w kilkunastu miejscach wywolania.
-
-     Zgloszenie Andrzeja brzmialo: "jakis anonim wylowil ryby mityczne,
-     to niedopuszczalne". Konto anonimowe mialo wazna sesje, wiec
-     `Chmura.zalogowany()` zwracalo prawde i nic go nie zatrzymywalo.
-     Teraz liczy sie `pelnyDostep`, czyli konto Z MAILEM.
-
-     Gra bez konta dziala dalej jako pokaz: mozna zarzucac, lowic
-     i ogladac karty. Swiat po prostu tego nie odnotowuje.
-     ============================================================ */
-  function maPrawoDoSwiata() {
-    try { return !!(window.Chmura && Chmura.pelnyDostep && Chmura.pelnyDostep()); }
-    catch (e) { return false; }
-  }
-
-  function zmien(gk, delta, plec, powod) {
-    if (!maPrawoDoSwiata()) return 0;
-    const r = rekord(gk); if (!r) return 0;
+    const wiedzaMyst = (window.MysteryHints && Features.is('mysteryHints'))
+      ? MysteryHints.wiedza(k, znany, szept)
+      : szept;
+    const obserMyst = (window.MysteryHints && Features.is('mysteryHints'))
+      ? MysteryHints.obserwacje(k)
+      : '—';
+    const archMyst = (window.MysteryHints && Features.is('mysteryHints') && MysteryHints.archiwum)
+      ? MysteryHints.archiwum(k)
+      : '';
+    const sek = [
+      ['WIEDZA', wiedzaMyst],
+      ['OBSERWACJE', obserMyst],
+      ['OPIS', znany ? (OPISY_ATLAS[k] || '') : '\u2014'],
+      ['REKORD POLSKI', znany ? (G2.rekordDl + ' cm \u00B7 ' + kg(G2.rekordWaga) + ' kg') : '\u2014'],
+      ['TWÓJ REKORD', (mo && mo.n) ? (mo.cm + ' cm \u00B7 ' + kg(mo.g) + ' kg \u00B7 ' + mo.pkt + ' pkt') : 'brak'],
+      ['REKORD SPOŁECZNOŚCI', (() => {
+        const s = (typeof Zapis !== 'undefined' && Zapis.spoleczny) ? Zapis.spoleczny(k) : null;
+        return s ? (s.cm + ' cm \u00B7 ' + kg(s.g) + ' kg \u00B7 ' + s.pkt + ' pkt \u00B7 ' + s.nick) : 'brak';
+      })()]
+    ];
+    if (archMyst) sek.splice(2, 0, ['ARCHIWUM BADACZA', archMyst]);
     /* ============================================================
-       SERWER MA PIERWSZENSTWO. Gdy wspolna populacja jest wlaczona,
-       prawdziwe odejmowanie robi baza (atomowo, patrz `Eko.Serwer`),
-       a to ponizej jest tylko NATYCHMIASTOWYM PODGLADEM, zeby kadr
-       i panel nie czekaly na siec. Odpowiedz serwera nadpisze ten
-       podglad, takze gdy okaze sie gorsza -- bo ktos inny zdazyl
-       pierwszy. Tego wymaga sekcja XIX: przyblizenie na ekranie jest
-       dopuszczalne, mutacja autorytatywna nie.
+       SKLAD SEKCJI Z DOPASOWANIEM DO WYSOKOSCI STRONY.
+
+       BLAD: wysokosc wiersza i wielkosc pisma byly stale, a liczba sekcji
+       urosla z czterech do pieciu. Przy dluzszym opisie tekst przejezdzal
+       przez stopke i "REKORD SPOLECZNOSCI" nakladal sie na "ZLOWIONE 3 x".
+
+       Teraz sklad idzie dwoma przebiegami. Pierwszy tylko MIERZY, ile
+       wierszy naprawde wyjdzie przy tej szerokosci kolumny. Drugi rysuje,
+       ale wczesniej dzieli dostepna wysokosc przez zmierzona i tym ilorazem
+       skaluje interlinie oraz oba stopnie pisma. Skala jest przycieta do
+       przedzialu 0,74 do 1,00: powyzej jedynki tekst nie rosnie, bo strona
+       ma wygladac tak samo dla plotki i dla suma, a ponizej 0,74 zrobilby
+       sie nieczytelny. Krotsze strony rysuja sie dokladnie jak dotad.
        ============================================================ */
-    if (window.Eko && Eko.Serwer && Eko.Serwer.dostepny()) {
-      try { Eko.Serwer.zmien(gk, delta, plec); } catch (e) {}
-    }
-    if (delta < 0 && r.n <= 0) return 0;
-    const faktyczna = (delta < 0) ? -Math.min(-delta, r.n) : delta;
-    if (!faktyczna) return 0;
+    const GORA = y + h * 0.458, DOL = y + h * 0.905;
+    const lh0 = h * 0.035;
 
-    r.n += faktyczna;
-    /* Plec: gdy znana, ruszamy konkretny licznik; gdy nie, proporcjonalnie.
-       Sumy m+f trzymamy rowne n, bo na nich stoi reguła "sa same samice,
-       wiec gatunek nie moze sie juz rozmnazac". */
-    if (plec === 'm' || plec === 'f') {
-      const pole = plec;
-      r[pole] = Math.max(0, (r[pole] || 0) + faktyczna);
-    } else {
-      const udzM = r.n > 0 ? (r.m / Math.max(1, r.m + r.f)) : 0.5;
-      const dm = Math.round(faktyczna * udzM);
-      r.m = Math.max(0, r.m + dm);
-      r.f = Math.max(0, r.f + (faktyczna - dm));
+    /* przebieg mierzacy: ile wierszy zajmie kazda sekcja */
+    function ileWierszy(tre, font) {
+      g.font = font;
+      const slowa = String(tre).split(' ');
+      let lin = '', n = 0;
+      for (const sl of slowa) {
+        const prob = lin ? lin + ' ' + sl : sl;
+        if (g.measureText(prob).width > (P - L) && lin) { n++; lin = sl; }
+        else lin = prob;
+      }
+      if (lin) n++;
+      return n;
     }
-    if (r.m + r.f !== r.n) {                 /* korekta zaokraglen */
-      const nadmiar = (r.m + r.f) - r.n;
-      if (nadmiar > 0) { const z = Math.min(nadmiar, r.f); r.f -= z; r.m -= (nadmiar - z); }
-      else { r.f -= nadmiar; }
-      r.m = Math.max(0, r.m); r.f = Math.max(0, r.f);
-    }
-
-    if (r.n > r.max) r.max = r.n;
-    if (r.n < r.min) r.min = r.n;
-
-    /* Histereza progu -- specyfikacja wprost zabrania migotania
-       99 -> indywidualny -> 100 -> agregat -> 99. */
-    if (!r.indyw && r.n < CFG.PROG_INDYWIDUALNY) {
-      r.indyw = true;
-      zapisz('indyw', gk, 'przejscie na liczenie pojedynczych sztuk', r.n);
-      /* Rekordy powstaja OD RAZU przy przekroczeniu progu, nie leniwie przy
-         pierwszym pokazaniu ryby. Inaczej populacja przez chwile byla by
-         "indywidualna" bez ani jednego osobnika, a kazde odjecie w tym
-         oknie rozjezdzaloby liczbe sztuk z liczba rekordow. */
-      try { materializuj(gk); } catch (e) {}
-    } else if (r.indyw && r.n >= CFG.PROG_POWROTU) {
-      r.indyw = false;
-      zapisz('agregat', gk, 'populacja odbudowana', r.n);
+    /* Trzy podejscia zamiast jednego. Pomiar przy pelnym piśmie zawyza
+       potrzebe, bo mniejsza czcionka mieści wiecej znakow w wierszu i tekst
+       zawija sie na mniej linii. Bez iteracji strona kurczylaby sie mocniej,
+       niz trzeba. Petla zbiega w dwoch krokach, trzeci to bezpiecznik. */
+    let skala = 1;
+    for (let i = 0; i < 3; i++) {
+      let wierszy = 0;
+      for (const [, tre] of sek) wierszy += ileWierszy(tre, F(w * 0.040 * skala));
+      /* naglowek 0,92 wiersza, odstep po sekcji 0,5 wiersza */
+      const trzeba = (wierszy + sek.length * 0.92 + sek.length * 0.5) * lh0 * skala;
+      const nowa = Math.max(0.74, Math.min(1, skala * (DOL - GORA) / trzeba));
+      if (Math.abs(nowa - skala) < 0.012) { skala = nowa; break; }
+      skala = nowa;
     }
 
-    /* WYMARCIE JEST TRWALE. Zaden kod ponizej nie ma prawa tego cofnac. */
-    if (r.n === 0 && !r.wymarly) {
-      r.wymarly = true; r.kiedyWymarl = Date.now();
-      /* TABELA WAG MA CACHE 400 ms, wiec bez tego gatunek dalby sie
-         jeszcze losowac przez ulamek sekundy PO wymarciu. Zalozenie
-         projektu brzmi inaczej: wymarly znika z puli i nie ma zadnej
-         sciezki, ktora moglaby go przywrocic przypadkiem. Zerujemy
-         bufor, zeby nastepne losowanie liczylo wagi od nowa.
-         Znalezione przez niestabilny test (1 przebieg na 8): asercja
-         "w 40 000 losowan ANI RAZU nie wypadl" trafiala czasem na
-         tabele zbudowana jeszcze przed wymarciem. */
-      if (typeof window !== 'undefined') window.__wagiTab = null;
-      r.m = 0; r.f = 0;
-      zapisz('wymarcie', gk, 'gatunek wymarl na tym serwerze', 0);
-      /* ============================================================
-         UNIEWAZNIENIE TABELI WAG. Znalezione testem: `losujGatunek`
-         trzyma tabele wag przez 400 ms (optymalizacja z 20,7 us do 0,4 us
-         na losowanie). Bez tej linii wymarly gatunek NADAL wypadal przez
-         te 400 ms -- niezmiennik "wymarly nie moze sie pojawic" byl
-         lamany przez cztery dziesiate sekundy po kazdym wymarciu.
-         Zerujemy tabele, wiec nastepne losowanie liczy wagi od nowa
-         i widzi juz mnoznik 0.
-         ============================================================ */
-      window.__wagiTab = null;
+    const fT = F(w * 0.031 * skala, 1), fW = F(w * 0.038 * skala), lh = lh0 * skala;
+    let yy = GORA + lh;
+    g.textAlign = 'left';
+
+    function zawin(tre, font, szer) {
+      g.font=font;
+      const slowa=String(tre).split(' '), linie=[]; let lin='';
+      for(const sl of slowa){
+        const prob=lin ? lin+' '+sl : sl;
+        if(g.measureText(prob).width>szer && lin){linie.push(lin);lin=sl;}
+        else lin=prob;
+      }
+      if(lin) linie.push(lin);
+      return linie;
     }
-    /* Rzadkosc = procent populacji, wiec kolejny spawn ma od razu widziec
-       nowa proporcje, bez czekania na wygasniecie cache. */
-    window.__wagiTab = null;
-    if (typeof Zapis !== 'undefined') Zapis.zapisz();
-    return faktyczna;
-  }
 
-  /* ---- wejscia z gry ---- */
-  /* Prog, ponizej ktorego zabranie sztuki jest wydarzeniem publicznym.
-     Wprost ze specyfikacji: kronika ma pokazywac, KTO zlowil ryba
-     gatunku, ktorego zostalo mniej niz dziesiec. */
-  CFG.PROG_KRONIKI = 10;
+    for (const [tyt, tre] of sek) {
+      const specjalna = tyt === 'WIEDZA' || tyt === 'OBSERWACJE';
 
-  function zatrzymano(gk, plec) {          /* swipe w prawo, ryba do wiaderka */
-    const ubylo = zmien(gk, -1, plec, 'zatrzymana');
-    if (ubylo) {
-      const zostalo = populacja(gk);
-      if (zostalo < CFG.PROG_KRONIKI) {
-        zapisz('rzadka-zlowiona', gk,
-               'zabrał sztukę, zostało ' + zostalo, zostalo, mojNick());
+      if (specjalna) {
+        const linie=zawin(tre,fW,(P-L)-w*.050);
+        const boxH=(linie.length*lh)+lh*1.48;
+        g.fillStyle = tyt === 'WIEDZA'
+          ? 'rgba(150,110,42,.085)'
+          : 'rgba(77,111,112,.075)';
+        g.fillRect(L, yy-lh*.72, P-L, boxH);
+
+        g.fillStyle = tyt === 'WIEDZA' ? '#86611D' : '#4D6E6F';
+        g.fillRect(L, yy-lh*.72, w*.010, boxH);
+
+        g.font=fT;
+        g.fillText(tyt, L+w*.026, yy);
+        yy += lh*.92;
+
+        g.font=fW; g.fillStyle='#2A2018';
+        for(const lin of linie){g.fillText(lin,L+w*.026,yy);yy+=lh;}
+        yy += lh*.58;
+      } else {
+        g.font=fT; g.fillStyle='#8A6524';
+        g.fillText(tyt,L,yy);
+
+        /* mala linia po tytule jak w katalogu okazow */
+        const tw=g.measureText(tyt).width;
+        g.strokeStyle='rgba(42,32,24,.12)';
+        g.lineWidth=Math.max(1,w*.002);
+        g.beginPath();
+        g.moveTo(L+tw+w*.025,yy-lh*.18);
+        g.lineTo(P,yy-lh*.18);
+        g.stroke();
+
+        yy += lh*.88;
+        g.font=fW; g.fillStyle='#2A2018';
+        const linie=zawin(tre,fW,P-L);
+        for(const lin of linie){g.fillText(lin,L,yy);yy+=lh;}
+        yy += lh*.42;
       }
     }
-    retu
-   const diag = window.__ekoDiag = {
-      nazwa: nazwa, body: ciało || {}, start: Date.now(), status: 'pending', blad: ''
-    };
-    try {
-      const wynik = await Chmura.wolajRpc(nazwa, ciało || {});
-      diag.status = 'ok';
-      diag.ms = Date.now() - diag.start;
-      diag.odp = Array.isArray(wynik) && wynik[0] ? wynik[0] : wynik;
-      return wynik;
-    } catch (e) {
-      diag.status = 'error';
-      diag.ms = Date.now() - diag.start;
-      diag.blad = String((e && e.message) || e || 'error');
-      throw e;
-    }
+
+    /* stopka atlasowa */
+    g.strokeStyle='rgba(42,32,24,.24)'; g.lineWidth=Math.max(1,w*.003);
+    g.beginPath(); g.moveTo(L,y+h*.918); g.lineTo(P,y+h*.918); g.stroke();
+
+    g.textAlign='left'; g.font=F(w*.028,1);
+    g.fillStyle=znany ? '#6B4E1C' : 'rgba(42,32,24,.40)';
+    g.fillText(znany ? ('OKAZÓW W REJESTRZE · '+Zapis.ile(k)) : 'STATUS · NIEODKRYTA',
+      L,y+h*.955);
+
+    g.textAlign='right'; g.font=F(w*.026);
+    g.fillStyle='rgba(42,32,24,.36)';
+    g.fillText('QRyby · ATLAS',P,y+h*.955);
   }
 
-  function kolejka() {
-    const D = (typeof Zapis !== 'undefined') ? Zapis.dane() : null;
-    if (!D) return [];
-    if (!D.ekoKolejka) D.ekoKolejka = [];
-    return D.ekoKolejka;
-  }
+  /* ---------- strona instrukcji ----------
+     Krok po kroku, duzym drukiem, z numerem na marginesie. Typografia
+     o polowe wieksza niz w atlasie, bo to ma sie czytac bez okularow. */
+  /* ---------- strona instrukcji ----------
+     Typografia liczona z szerokosci strony, wiec wyglada tak samo na kazdym
+     telefonie. Cztery zasady, ktore odrozniaja instrukcje od sciany tekstu:
+       1. numer w kolku, nie sama cyfra, zeby oko mialo sie czego zlapac
+       2. tekst wyrownany do jednej osi, nie do numeru
+       3. odstep miedzy punktami wiekszy niz miedzy wierszami jednego punktu,
+          bo to on grupuje tresc
+       4. tresc pionowo wysrodkowana w kolumnie, a nie wypychana od gory,
+          wiec strona z trzema punktami nie wyglada na niedokonczona
+     ---------------------------------------- */
+  function trescPomocy(g, x, y, w, h, idx) {
+    const P = POMOC[idx];
+    if (P.c) return trescCennika(g, x, y, w, h, idx);
+    papier(g, x, y, w, h);
+    const L = x + w * 0.10, PR = x + w * 0.90, SR = x + w / 2;
+    const F = (px, gr) => (gr ? '700 ' : '') + Math.round(px) + 'px system-ui,-apple-system,sans-serif';
 
-  /* Wpisanie odpowiedzi serwera do lokalnego bufora. Serwer wygrywa
-     zawsze -- takze gdy mowi cos gorszego, niz gracz widzial. */
-  function wpiszStan(gat, w) {
-    if (!w) return;
-    const r = Eko.rekord(gat); if (!r) return;
-    r.n = w.n; r.m = w.samcow; r.f = w.samic;
-    r.wymarly = !!w.wymarly;
-    if (r.n > r.max) r.max = r.n;
-    if (r.n < r.min) r.min = r.n;
-    r.indyw = r.n < Eko.CFG.PROG_INDYWIDUALNY;
-    /* Kazda zmiana n zmienia procent populacji. */
-    window.__wagiTab = null;
-  }
+    /* naglowek */
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = '#2A2018'; g.font = F(w * 0.068, 1);
+    g.fillText(P.t, SR, y + h * 0.105);
+    g.fillStyle = 'rgba(42,32,24,.40)'; g.font = F(w * 0.032);
+    g.fillText((idx + 1) + ' \u2044 ' + POMOC.length, SR, y + h * 0.142);
+    g.strokeStyle = 'rgba(42,32,24,.30)'; g.lineWidth = Math.max(1, w * 0.004);
+    g.beginPath(); g.moveTo(L, y + h * 0.168); g.lineTo(PR, y + h * 0.168); g.stroke();
 
-  /* Pobranie CALEJ tabeli. Wolane przy starcie i co ODSWIEZ_MS, zeby
-     gracz widzial skutki cudzych polowow bez przeladowania gry. */
-  async function pobierz() {
-    const k = konfiguracja(); if (!k || trwa) return false;
-    trwa = true;
-    try {
-      const o = await fetch(k.url + '/rest/v1/eko_populacja?select=*', {
-        headers: { 'apikey': k.klucz, 'Authorization': 'Bearer ' + k.klucz }
-      });
-      if (!o.ok) return false;
-      const dane = await o.json();
-      if (!Array.isArray(dane) || !dane.length) return false;
-      for (const w of dane) wpiszStan(w.gat, w);
-      ostatniOdczyt = Date.now();
-      if (typeof Zapis !== 'undefined') Zapis.zapisz();
-      return true;
-    } catch (e) { return false; }
-    finally { trwa = false; }
-  }
-
-  /* Jedyna droga zmiany populacji, gdy serwer jest wlaczony.
-     Nie czeka na odpowiedz, zeby nie zamrazac kadru -- bufor lokalny
-     zmienia sie od razu, a odpowiedz serwera go potem prostuje. */
-  function zmien(gat, delta, plec) {
-    if (!dostepny()) return false;
-    const zad = { gat: gat, delta: delta, plec: plec || null, t: Date.now() };
-    rpc('eko_zmien', { p_gat: gat, p_delta: delta, p_plec: plec || null })
-      .then(w => { if (Array.isArray(w) && w[0]) wpiszStan(gat, w[0]); })
-      .catch(() => {
-        const K = kolejka();
-        K.push(zad);
-        if (K.length > KOLEJKA_MAX) K.splice(0, K.length - KOLEJKA_MAX);
-        if (typeof Zapis !== 'undefined') Zapis.zapisz();
-      });
-    return true;
-  }
-
-  /* Doslanie tego, co nie przeszlo. Po kolei, zeby nie zasypac serwera
-     i zeby kolejnosc odejmowania byla zachowana. */
-  async function doslij() {
-    const K = kolejka();
-    while (K.length) {
-      const z = K[0];
-      try {
-        const w = await rpc('eko_zmien', { p_gat: z.gat, p_delta: z.delta, p_plec: z.plec });
-        if (Array.isArray(w) && w[0]) wpiszStan(z.gat, w[0]);
-        K.shift();
-      } catch (e) { return false; }
-    }
-    if (typeof Zapis !== 'undefined') Zapis.zapisz();
-    return true;
-  }
-
-  /* Zasiew: wypisuje SQL z biezacymi populacjami, do wklejenia raz
-     w Supabase. Dzieki temu swiat na serwerze startuje z tymi samymi
-     liczbami, ktore gra liczy lokalnie, zamiast z okraglych zmyslen. */
-  function zasiewSQL() {
-    const w = [];
-    for (const k in GATUNKI) {
-      if (GATUNKI[k].zepsuty) continue;
-      const r = Eko.rekord(k);
-      w.push("('" + k + "'," + r.n + "," + r.m + "," + r.f + "," + r.n + "," + r.n + ")");
-    }
-    return 'insert into eko_populacja (gat,n,samcow,samic,max_hist,min_hist) values\n'
-         + w.join(',\n') + '\non conflict (gat) do nothing;';
-  }
-
-  if (dostepny()) {
-    pobierz().then(() => doslij());
-    setInterval(() => { pobierz().then(() => doslij()); }, ODSWIEZ_MS);
-  }
-
-  /* Wpis do WSPOLNEJ kroniki. Nie czeka na odpowiedz i nie przeszkadza
-     grze, gdy serwer milczy -- feed to ozdoba, nie mechanika. */
-  function wpis(gat, typ, txt, n, nick) {
-    if (!dostepny()) return false;
-    rpc('eko_wpis', { p_gat: gat, p_typ: typ, p_txt: String(txt || ''),
-                      p_n: n || 0, p_nick: String(nick || '').slice(0, 16) })
-      .catch(() => {});
-    return true;
-  }
-
-  /* Odczyt wspolnej kroniki. Bufor, zeby otwarcie panelu nie strzelalo
-     za kazdym przerysowaniem: panel przerysowuje sie przy kazdej zmianie,
-     a feed nie musi byc swiezszy niz co pol minuty. */
-  let bufKron = [], bufKronT = 0;
-  const KRON_MS = 30000;
-  function kronikaWspolna() { return bufKron; }
-  async function odswiezKronike(ile) {
-    const k = konfiguracja(); if (!k) return false;
-    if (Date.now() - bufKronT < KRON_MS) return false;
-    bufKronT = Date.now();
-    try {
-      const o = await fetch(k.url + '/rest/v1/eko_kronika'
-        + '?select=gat,typ,txt,n,nick,kiedy'
-        + '&typ=in.(rzadka-zlowiona,narybek)'
-        + '&nick=neq.'
-        + '&order=kiedy.desc&limit=' + (ile || 20), {
-        headers: { 'apikey': k.klucz, 'Authorization': 'Bearer ' + k.klucz }
-      });
-      if (!o.ok) return false;
-      const dane = await o.json();
-      if (Array.isArray(dane)) bufKron = dane;
-      return true;
-    } catch (e) { return false; }
-  }
-
-  return { dostepny, pobierz, zmien, doslij, zasiewSQL, wpiszStan,
-           wpis, kronikaWspolna, odswiezKronike };
-})();
-
-/* ============================================================
-   PRODUCT STAGE 2 — RYBA MA HISTORIE.
-   TYLKO interpretacja istniejacych danych:
-     - aktualna populacja gatunku,
-     - udzial w calym jeziorze ("1 na N ryb"),
-     - ostatni znany publiczny odlow z kroniki serwera.
-
-   Nie zmienia spawnu, X-Score, ceny, populacji ani rekordow.
-   Pospolite gatunki milcza — narracja pojawia sie tylko wtedy, gdy
-   informacja ma emocjonalna wartosc.
-   ============================================================ */
-const RzadkoscNarracja = (() => {
-  const WL = !!(window.Features && Features.is('rarityStory'));
-  const FORCE = /(?:\?|&)rarity=1(?:&|$)/.test(location.search);
-
-  function liczba(n) {
-    return Math.max(0, Math.round(Number(n) || 0)).toLocaleString('pl-PL');
-  }
-
-  function wiekTekst(kiedy) {
-    const t = new Date(kiedy).getTime();
-    if (!isFinite(t)) return '';
-    const ms = Math.max(0, Date.now() - t);
-    const min = Math.floor(ms / 60000);
-    if (min < 60) return min <= 1 ? 'PRZED CHWILĄ' : min + ' MIN TEMU';
-    const h = Math.floor(min / 60);
-    if (h < 24) return h === 1 ? '1 GODZ. TEMU' : h + ' GODZ. TEMU';
-    const d = Math.floor(h / 24);
-    if (d < 30) return d === 1 ? 'WCZORAJ' : d + ' DNI TEMU';
-    const mies = Math.floor(d / 30);
-    return mies === 1 ? '1 MIES. TEMU' : mies + ' MIES. TEMU';
-  }
-
-  function ostatniOdlow(gk) {
-    try {
-      if (!window.Eko || !Eko.Serwer || !Eko.Serwer.kronikaWspolna) return null;
-      const k = Eko.Serwer.kronikaWspolna() || [];
-      return k.find(x => x && x.gat === gk && x.typ === 'rzadka-zlowiona') || null;
-    } catch (e) { return null; }
-  }
-
-  function surowe(gk) {
-    if (!WL |
-
-===== return { resetPopulacji 0 =====
-
-===== window.Eko = Eko 1 =====
-random() - 0.5) * 2 * CFG.MUTACJA;
-      const v = (pa + pb) / 2 + mut;
-      g[c] = Math.round(Math.max(0.02, Math.min(0.98, v)) * 100) / 100;
-    }
-    return g;
-  }
-
-  /* Przesuniecie sredniej gatunku. `waga` to udzial zmiany w populacji:
-     jedna ryba z tysiaca prawie nic nie znaczy, pokolenie 300 sztuk
-     w populacji 400 -- bardzo duzo. */
-  function przesunSrednia(gk, gen, waga) {
-    const sr = genSrednia(gk); if (!sr || !gen) return;
-    const w = Math.max(0, Math.min(1, waga));
-    for (const c of CFG.CECHY) {
-      const cel = (gen[c] !== undefined) ? gen[c] : sr[c];
-      sr[c] = Math.round((sr[c] * (1 - w) + cel * w) * 1000) / 1000;
-    }
-  }
-
-  /* Odwrotnosc: cechy ZABRANEJ ryby wypadaja ze sredniej. To jest silnik
-     doboru przez gracza -- jesli konsekwentnie zabiera najwieksze,
-     srednia rozmiaru spada. */
-  function odejmijZeSredniej(gk, gen) {
-    const r = rekord(gk); if (!r || !gen || r.n <= 0) return;
-    const sr = genSrednia(gk);
-    const w = 1 / Math.max(1, r.n);
-    for (const c of CFG.CECHY) {
-      const v = (gen[c] !== undefined) ? gen[c] : sr[c];
-      /* srednia po usunieciu jednej sztuki o cechach v */
-      const nowa = (sr[c] * (r.n + 1) - v) / Math.max(1, r.n);
-      sr[c] = Math.round(Math.max(0.02, Math.min(0.98, nowa)) * 1000) / 1000;
-    }
-  }
-
-  return { CFG, stan, rekord, populacja, wymarly, trybIndywidualny,
-           tikGodow, parujeSie, paraGodowa, ikra, zakonczGody,
-           tikKohort, pokolenia, nowaKohorta, losujScenariusz,
-           genSrednia, genZPopulacji, zmieszajGeny, przesunSrednia, odejmijZeSredniej,
-           materializuj, wezOsobnika, zwolnij, usunOsobnika, osobniki,
-           zmien, zatrzymano, wypuszczono, drapieznikZjadl,
-           mnoznikLosowania, losujPlec, moznaRozmnazac,
-           karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
-           szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
-           tarloPary, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
-           sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
-           meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
-           podsumowanie, kronika, zapisz, popStartowa };
-})();
-window.Eko = Eko;
-
-/* ============================================================
-   ZEGAR CYKLU POKOLEN. Co 4 sekundy, a nie co klatke: etapy trwaja
-   minuty, wiec liczenie ich sześćdziesiąt razy na sekunde byloby czysta
-   strata mocy na telefonie (patrz wpisy o wydajnosci wyzej).
-   Pierwszy tik od razu po wczytaniu obsluguje CZAS OFFLINE: `tikKohort`
-   przerabia w petli tyle etapow, ile faktycznie minelo od ostatniej
-   sesji, wiec pokolenie zalozone wczoraj dochodzi do konca, zamiast
-   czekac na gracza. Bezpiecznik na 12 etapow w petli chroni przed
-   absurdalnym skokiem zegara urzadzenia.
-   ============================================================ */
-(function zegarPokolen() {
-  const tik = () => { try { Eko.tikKohort(); } catch (e) {} };
-  tik();
-  setInterval(tik, 4000);
-})();
-
-
-/* ============================================================
-   ZAKLADKA EKOSYSTEM (faza 12).
-   Filozofia z sekcji XXXII: gracz ma poczuc, ze swiat zyje, a nie
-   obslugiwac arkusz rybacki. Dlatego na wierzchu sa tylko trzy rzeczy --
-   ile ryb, w ktora strone idzie i czy grozi im wymarcie -- a liczby
-   szczegolowe (plec, ikra, pokolenia) pojawiaja sie dopiero tam, gdzie
-   cos sie faktycznie dzieje.
-   Panel rysuje istniejaca funkcja `pokazPanel` z `18`, wiec styl,
-   animacja i zamykanie sa te same co w atlasie. Zadnego drugiego panelu.
-   ============================================================ */
-(function zakladkaEkosystemu() {
-  const btn = document.getElementById('ekosystem');
-  if (!btn) return;
-
-  const lb = n => (n || 0).toLocaleString('pl-PL');
-  function nazwa(gk) {
-    try { return (GATUNKI[gk] && GATUNKI[gk].nazwa) || gk; } catch (e) { return gk; }
-  }
-  function czestoscTxt(gk) {
-    let p = 0, co = Infinity;
-    try { p = Eko.udzialPopulacji(gk); co = Eko.coIleLawic(gk, 12); } catch (e) {}
-    const proc = p * 100;
-    const pct = proc >= 1 ? proc.toFixed(2)
-              : proc >= 0.01 ? proc.toFixed(3)
-              : proc >= 0.0001 ? proc.toFixed(4)
-              : proc > 0 ? proc.toFixed(6) : '0';
-    let law;
-    if (!isFinite(co)) law = 'nie występuje';
-    else if (co <= 1.15) law = 'praktycznie każda ławica';
-    else if (co < 10) law = 'średnio co ' + co.toFixed(1).replace('.', ',') + ' ławicy';
-    else law = 'średnio co ' + Math.round(co).toLocaleString('pl-PL') + ' ławic';
-    return pct.replace('.', ',') + '% jeziora · ' + law;
-  }
-  /* Stan gatunku jednym slowem. To jest ta warstwa, ktora gracz czyta
-     najpierw -- liczba mowi ile, a to mowi CO Z TYM ZROBIC. */
-  /* ============================================================
-     STATUS LICZONY WZGLEDEM WLASNEJ POPULACJI, nie wzgledem stalego progu.
-     Pierwsza wersja uznawala za zagrozony kazdy gatunek ponizej stu sztuk
-     -- a to jest prog TRYBU INDYWIDUALNEGO, czyli decyzja techniczna
-     o tym, jak liczyc ryby, nie o tym, czy gatunek ginie. Zmierzone:
-     64 z 81 gatunkow ladowalo w "wymagaja uwagi", i WSZYSTKIE 64 mialy
-     populacje ROWNA startowej. Jesiotr zawsze byl rzadki -- to nie znaczy,
-     ze wlasnie wymiera. Slowo "zagrozony" przy 64 pozycjach przestaje
-     cokolwiek znaczyc.
-     Teraz liczy sie SPADEK wzgledem historycznego maksimum. Gatunek,
-     ktory ma tyle, ile mial zawsze, jest stabilny -- niezaleznie od tego,
-     czy to 12 sztuk czy 4000. Alarm wlacza sie dopiero wtedy, gdy
-     populacja realnie sie kurczy.
-     ============================================================ */
-  function status(r) {
-    if (r.wymarly) return { txt: 'WYMARŁ', kl: 'zly' };
-    if (!r.rozmnazalny) return { txt: 'BEZ PARY', kl: 'zly' };
-    const baza = Math.max(1, r.max || r.n);
-    const udzial = r.n / baza;
-    if (udzial <= 0.15) return { txt: 'NA SKRAJU', kl: 'zly' };
-    if (udzial <= 0.45) return { txt: 'W ODWROCIE', kl: 'uwaga' };
-    if (r.n <= 3) return { txt: 'NA SKRAJU', kl: 'zly' };
-    if (udzial >= 0.95) return { txt: 'NIETKNIĘTY', kl: 'dobry' };
-    return { txt: 'STABILNY', kl: '' };
-  }
-  /* Do gornej sekcji trafia tylko to, co NAPRAWDE wymaga uwagi. */
-  function pilny(x) {
-    const st = status(x);
-    return st.kl === 'zly' || st.kl === 'uwaga';
-  }
-
-  function czasKroniki(kiedy) {
-    const d = new Date(kiedy);
-    if (isNaN(d)) return '--';
-    const teraz = new Date();
-    const dzien = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    const dzis = new Date(teraz.getFullYear(), teraz.getMonth(), teraz.getDate()).getTime();
-    const rozn = Math.round((dzis - dzien) / 86400000);
-    const godz = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    if (rozn === 0) return 'DZISIAJ · ' + godz;
-    if (rozn === 1) return 'WCZORAJ · ' + godz;
-    return String(d.getDate()).padStart(2, '0') + '.' +
-           String(d.getMonth() + 1).padStart(2, '0') + ' · ' + godz;
-  }
-
-  function kronikaSwiataHTML() {
-    const kid = 'ekoKronika' + 'Swiata';
-    if (window.Progression && !Progression.dostep('chronicle')) {
-      return '<div id="' + kid + '"
-
-===== function pokazStrone 0 =====
-
-===== function strona 0 =====
-
-===== function rysujAtlas 0 =====
-
-===== Zapis.dane().atlas 0 =====
-
-===== d.atlas 5 =====
-nst s2 = sanujZapis(d);
-    if (!s2) return { ok: false, powod: 'Kod jest uszkodzony.' };
-    return { ok: true, zlowien: s2.stat.zlowien || 0,
-             gatunkow: Object.keys(s2.atlas || {}).filter(k => s2.atlas[k] && s2.atlas[k].n > 0).length,
-             monety: s2.monety || 0, utworzone: s2.utworzone || 0 };
-  }
-
-  /* ============================================================
-     REKORDY SPOLECZNOSCI BEZ SERWERA.
-
-     Kod zapasowy juz istnieje i zawiera caly atlas nadawcy. Wystarczy wiec
-     wkleic kod znajomego, zeby jego rekordy stanely obok twoich. Ta funkcja
-     bierze z cudzego kodu WYLACZNIE najlepsze wyniki i nick. Monety, zadania,
-     seria i zaneta sa ignorowane: cudzy kod nie moze niczego dodac do twojego
-     konta poza liczba do pobicia. Wlasny kod wklejony tutaj nie robi nic.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q04 (audyt IX 2026): XSS przez nick z kodu znajomego.
-     Wlasny nick jest filtrowany przy wpisywaniu, ale nick WCZYTANY
-     z cudzego kodu byl tylko przycinany do 16 znakow i szedl prosto do
-     komunikatu wstawianego przez innerHTML. Szesnascie znakow wystarcza
-     na znacznik z atrybutem zdarzenia. Kod znajomego to dane z zewnatrz
-     -- wklejone z czatu, forum, czegokolwiek -- wiec traktujemy je jak
-     kazde inne niezaufane wejscie.
-     Filtrujemy U ZRODLA, przy imporcie: do `dane.spoleczne` nie ma prawa
-     trafic nic poza literami, cyframi, spacja i kilkoma znakami. Dzieki
-     temu bezpieczne staja sie WSZYSTKIE miejsca, ktore ten nick pozniej
-     wyswietlaja, a nie tylko te, o ktorych ktos pamietal. */
-  function czystyNick(x) {
-    return String(x == null ? '' : x)
-      .replace(/[^\p{L}\p{N} ._\-]/gu, '')   // tylko litery/cyfry/spacja/kropka/podkreslnik/myslnik
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 16) || 'ANONIM';
-  }
-  window.czystyNick = czystyNick;
-
-  function dolaczKod(t) {
-    let d;
-    try { d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim())))); }
-    catch (e) { return { ok: false, powod: 'To nie wygląda na kod gry.' }; }
-    if (!d || d.v !== WERSJA || !d.atlas) return { ok: false, powod: 'Kod jest z innej wersji gry.' };
-    if (d.id && d.id === dane.id) return { ok: false, powod: 'To twój własny kod.' };
-    const nick = czystyNick(d.profil && d.profil.nick);
-    let nowych = 0, lepszych = 0;
-    for (const slug in d.atlas) {
-      const a = d.atlas[slug];
-      if (!a || !a.n || !(a.pkt > 0)) continue;
-      const b = dane.spoleczne[slug];
-      if (!b) nowych++;
-      else if (a.pkt > b.pkt) lepszych++;
-      else continue;
-      dane.spoleczne[slug] = { cm: a.cm, g: a.g, pkt: a.pkt, nick: nick };
-    }
-    if (nowych || lepszych) teraz();
-    return { ok: true, nick: nick, nowych: nowych, lepszych: lepszych };
-  }
-
-  wczytaj();
-  window.addEventListener('pagehide', teraz);
-  window.addEventListener('visibilitychange', () => { if (document.hidden) teraz(); });
-
-  function odswiezono() {
-    nowaDoba(); dane.stat.dobaOdswiezen++; zapisz();
-    /* ZLECENIA: termin liczy sie w LAWICACH (tabela LAWIC_PASMA w `47`),
-       wiec to jest jego jedyny tykajacy zegar. Tedy przechodzi KAZDA
-       wymiana lawicy. */
-    if (window.Zlecenia) {
-      const w = Zlecenia.lawicaMinela();
-      if (w && w.co === 'przepadlo' && typeof Ruch !== 'undefined')
-        Ruch.powiedz('ZLECENIE PRZEPADŁO  -' + w.kaucja, true);
-      if (window.__odswiezPasekZlecen) window.__odswiezPasekZlecen();
-    }
-  }
-
-  /* Zaneta zuzywa sie na LAWICE, nie na czas: jedna wymiana ławicy, czy to
-     z zegara czy z przycisku, to jedna jednostka. Dzieki temu gracz sam
-     decyduje, jak szybko ja spala. */
-  function zuzyjLawice() {
-    const z = dane.zaneta;
-    if (!z) return;
-    z.zostalo--;
-    if (z.zostalo <= 0) dane.zaneta = null;
-    zapisz();
-  }
-  /* ============================================================
-     KAMIENIE MILOWE DOBY.
-     Dwa liczniki placa same, bez odbierania: co 1000 wymian lawicy i co
-     500 punktow zebranych od polnocy wpada 100 qryb. Progi licza sie
-     narastajaco, wiec przeskoczenie kilku naraz wyplaca kilka razy,
-     a zerowanie o polnocy kasuje takze pamiec wyplat.
-     ============================================================ */
-  const PROG_LAWIC = 1000, PROG_PUNKTOW = 500, NAGRODA_PROGU = 100;
-  /* ============================================================
-     DOMKNIECIE PASM I ATLASU.
-     Placi sie RAZ za kazde pasmo i raz za caly atlas. Wyplacone znaczniki
-     leza w zapisie, wiec nagroda nie powtorzy sie po przeladowaniu ani po
-     wczytaniu kodu zapasowego.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q13 (audyt IX 2026, decyzja projektowa Andrzeja: "podejmij
-     decyzje"). Bylo: ta funkcja grupowala gatunki wedlug `tierGatunku`
-     (przelicza X-Score TYPOWEGO okazu na przedzial 1-6 -- funkcja
-     legalna i nadal uzywana do NAGRODA_ODKRYCIA, tam nic nie zmieniam).
-     Atlas i jego zakladki grupuja wedlug `KLASA` (stala klasyfikacja
-     gatunku, 1-7) -- patrz `pasmoAtlasu` w 21. Dla 46 z 80 gatunkow te
-     dwa systemy dawaly RÓŻNY numer pasma, wiec zamkniecie WIDOCZNEJ
-     zakladki atlasu (np. caly komplet pasma 2 na ekranie) nie musialo
-     wcale odpalic wyplaty za "pasmo 2" -- bo ta funkcja liczyla wlasny,
-     niewidoczny podzial.
-     Naprawa: zero parametru, zero drugiego zrodla prawdy. Grupowanie
-     TU jest dokladnie tym samym wyrazeniem co `pasmoAtlasu` w 21 --
-     ten sam kod, nie "rownowazny kod w dwoch miejscach", zeby nie dalo
-     sie znowu rozjechac przy kolejnej zmianie. Petla 1..7, bo KLASA ma
-     siedem pasm (bylo 1..6 -- pasmo mityczne bylo poza zasiegiem, wiec
-     dziesiec gatunkow mitycznych nie mialo wlasnej nagrody za komplet
-     mimo osobnej zakladki w atlasie). NAGRODA_PASMA[7] dopisana nizej. */
-  function sprawdzKolekcje() {
-    if (!dane.progi) dane.progi = {};
-    if (!dane.progi.pasma) dane.progi.pasma = {};
-    const wszystkie = Object.keys(window.GATUNKI || {});
-    if (!wszystkie.length) return null;
-    const pasmoAtlasu = k => (window.KLASA && KLASA[k]) || 1;
-    let ile = 0; const powody = [];
-    for (let t = 1; t <= 7; t++) {
-      if (dane.progi.pasma[t]) continue;
-      const wPasmie = wszystkie.filter(k => pasmoAtlasu(k) === t);
-      if (!wPasmie.length) continue;
-      if (wPasmie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-        dane.progi.pasma[t] = 1;
-        ile += (window.NAGRODA_PASMA || {})[t] || 0;
-        powody.push('PASMO ' + t + ' KOMPLETNE');
+    /* rozmierzenie: najpierw licze, ile miejsca zajmie tresc, potem ja stawiam */
+    const r = Math.max(9, w * 0.030);           /* promien kolka z numerem */
+    const lewy = L + r * 2.6, szer = PR - lewy;
+    const fT = F(w * 0.046), lh = h * 0.046, przerwa = h * 0.030;
+    g.font = fT;
+    const bloki = P.a.map(txt => {
+      const slowa = txt.split(' ');
+      const linie = []; let lin = '';
+      for (const sl of slowa) {
+        const prob = lin ? lin + ' ' + sl : sl;
+        if (g.measureText(prob).width > szer && lin) { linie.push(lin); lin = sl; }
+        else lin = prob;
       }
-    }
-    if (!dane.progi.atlas && wszystkie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-      dane.progi.atlas = 1;
-      ile += window.NAGRODA_ATLASU || 0;
-      powody.push('CAŁY ATLAS');
-    }
+      if (lin) linie.push(lin);
+      return linie;
+    });
+    const wysokosc = bloki.reduce((a, b) => a + b.length * lh + przerwa, -przerwa);
+    const gora = y + h * 0.20, dol = y + h * 0.90;
+    let yy = gora + Math.max(0, (dol - gora - wysokosc) / 2) + lh * 0.7;
+
+    bloki.forEach((linie, n) => {
+      /* kolko z numerem, wysrodkowane na PIERWSZYM wierszu punktu */
+      const cy2 = yy - lh * 0.32;
+      g.beginPath(); g.arc(L + r, cy2, r, 0, 6.2832);
+      g.fillStyle = '#E3C55B'; g.fill();
+      g.strokeStyle = '#2A2018'; g.lineWidth = Math.max(1.4, w * 0.005); g.stroke();
+      g.fillStyle = '#2A2018'; g.font = F(r * 1.05, 1);
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(String(n + 1), L + r, cy2 + r * 0.04);
+      /* tekst punktu */
+      g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+      g.font = fT; g.fillStyle = '#2A2018';
+      for (const lin of linie) { g.fillText(lin, lewy, yy); yy += lh; }
+      yy += przerwa;
+    });
+
+    /* stopka: na ostatniej stronie mowi, jak wyjsc, na reszcie jak isc dalej */
+    g.textAlign = 'center'; g.font = F(w * 0.030, 1);
+    g.fillStyle = 'rgba(42,32,24,.42)';
+    g.fillText(idx + 1 < POMOC.length ? 'PRZESU\u0143 PALCEM W BOK' : 'PRZESU\u0143 W D\u00D3\u0141, ABY ZAMKN\u0104\u0106',
+      SR, y + h * 0.945);
+  }
+
+  /* ---------- strona cennika ----------
+     Dwie kolumny, nazwa z lewej, kwota z prawej, kropkowana linia miedzy
+     nimi. Kwoty wyrownane do prawej krawedzi, wiec czytaja sie jak rachunek,
+     a nie jak wyliczanka. Bez numerow w kolkach, bo to nie sa kroki. */
+  function trescCennika(g, x, y, w, h, idx) {
+    const P = POMOC[idx];
+    papier(g, x, y, w, h);
+    const L = x + w * 0.10, PR = x + w * 0.90, SR = x + w / 2;
+    const F = (px, gr) => (gr ? '700 ' : '') + Math.round(px) + 'px system-ui,-apple-system,sans-serif';
+
+    /* naglowek */
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = '#2A2018'; g.font = F(w * 0.058, 1);
+    g.fillText(P.t, SR, y + h * 0.105);
+    g.fillStyle = 'rgba(42,32,24,.40)'; g.font = F(w * 0.032);
+    g.fillText((idx + 1) + ' \u2044 ' + POMOC.length, SR, y + h * 0.142);
+    g.strokeStyle = 'rgba(42,32,24,.30)'; g.lineWidth = Math.max(1, w * 0.004);
+    g.beginPath(); g.moveTo(L, y + h * 0.168); g.lineTo(PR, y + h * 0.168); g.stroke();
+
     /* ============================================================
-       NAPRAWA Q08 (audyt IX 2026): PODWOJNA WYPLATA.
-       Bylo tu: `if (ile > 0) { dane.monety += ile; zapisz(); }` -- czyli ta
-       funkcja SAMA wyplacala nagrode, a jednoczesnie zwracala jej wysokosc
-       do openCard (26), ktore d
- s2.monety || 0, utworzone: s2.utworzone || 0 };
-  }
-
-  /* ============================================================
-     REKORDY SPOLECZNOSCI BEZ SERWERA.
-
-     Kod zapasowy juz istnieje i zawiera caly atlas nadawcy. Wystarczy wiec
-     wkleic kod znajomego, zeby jego rekordy stanely obok twoich. Ta funkcja
-     bierze z cudzego kodu WYLACZNIE najlepsze wyniki i nick. Monety, zadania,
-     seria i zaneta sa ignorowane: cudzy kod nie moze niczego dodac do twojego
-     konta poza liczba do pobicia. Wlasny kod wklejony tutaj nie robi nic.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q04 (audyt IX 2026): XSS przez nick z kodu znajomego.
-     Wlasny nick jest filtrowany przy wpisywaniu, ale nick WCZYTANY
-     z cudzego kodu byl tylko przycinany do 16 znakow i szedl prosto do
-     komunikatu wstawianego przez innerHTML. Szesnascie znakow wystarcza
-     na znacznik z atrybutem zdarzenia. Kod znajomego to dane z zewnatrz
-     -- wklejone z czatu, forum, czegokolwiek -- wiec traktujemy je jak
-     kazde inne niezaufane wejscie.
-     Filtrujemy U ZRODLA, przy imporcie: do `dane.spoleczne` nie ma prawa
-     trafic nic poza literami, cyframi, spacja i kilkoma znakami. Dzieki
-     temu bezpieczne staja sie WSZYSTKIE miejsca, ktore ten nick pozniej
-     wyswietlaja, a nie tylko te, o ktorych ktos pamietal. */
-  function czystyNick(x) {
-    return String(x == null ? '' : x)
-      .replace(/[^\p{L}\p{N} ._\-]/gu, '')   // tylko litery/cyfry/spacja/kropka/podkreslnik/myslnik
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 16) || 'ANONIM';
-  }
-  window.czystyNick = czystyNick;
-
-  function dolaczKod(t) {
-    let d;
-    try { d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim())))); }
-    catch (e) { return { ok: false, powod: 'To nie wygląda na kod gry.' }; }
-    if (!d || d.v !== WERSJA || !d.atlas) return { ok: false, powod: 'Kod jest z innej wersji gry.' };
-    if (d.id && d.id === dane.id) return { ok: false, powod: 'To twój własny kod.' };
-    const nick = czystyNick(d.profil && d.profil.nick);
-    let nowych = 0, lepszych = 0;
-    for (const slug in d.atlas) {
-      const a = d.atlas[slug];
-      if (!a || !a.n || !(a.pkt > 0)) continue;
-      const b = dane.spoleczne[slug];
-      if (!b) nowych++;
-      else if (a.pkt > b.pkt) lepszych++;
-      else continue;
-      dane.spoleczne[slug] = { cm: a.cm, g: a.g, pkt: a.pkt, nick: nick };
-    }
-    if (nowych || lepszych) teraz();
-    return { ok: true, nick: nick, nowych: nowych, lepszych: lepszych };
-  }
-
-  wczytaj();
-  window.addEventListener('pagehide', teraz);
-  window.addEventListener('visibilitychange', () => { if (document.hidden) teraz(); });
-
-  function odswiezono() {
-    nowaDoba(); dane.stat.dobaOdswiezen++; zapisz();
-    /* ZLECENIA: termin liczy sie w LAWICACH (tabela LAWIC_PASMA w `47`),
-       wiec to jest jego jedyny tykajacy zegar. Tedy przechodzi KAZDA
-       wymiana lawicy. */
-    if (window.Zlecenia) {
-      const w = Zlecenia.lawicaMinela();
-      if (w && w.co === 'przepadlo' && typeof Ruch !== 'undefined')
-        Ruch.powiedz('ZLECENIE PRZEPADŁO  -' + w.kaucja, true);
-      if (window.__odswiezPasekZlecen) window.__odswiezPasekZlecen();
-    }
-  }
-
-  /* Zaneta zuzywa sie na LAWICE, nie na czas: jedna wymiana ławicy, czy to
-     z zegara czy z przycisku, to jedna jednostka. Dzieki temu gracz sam
-     decyduje, jak szybko ja spala. */
-  function zuzyjLawice() {
-    const z = dane.zaneta;
-    if (!z) return;
-    z.zostalo--;
-    if (z.zostalo <= 0) dane.zaneta = null;
-    zapisz();
-  }
-  /* ============================================================
-     KAMIENIE MILOWE DOBY.
-     Dwa liczniki placa same, bez odbierania: co 1000 wymian lawicy i co
-     500 punktow zebranych od polnocy wpada 100 qryb. Progi licza sie
-     narastajaco, wiec przeskoczenie kilku naraz wyplaca kilka razy,
-     a zerowanie o polnocy kasuje takze pamiec wyplat.
-     ============================================================ */
-  const PROG_LAWIC = 1000, PROG_PUNKTOW = 500, NAGRODA_PROGU = 100;
-  /* ============================================================
-     DOMKNIECIE PASM I ATLASU.
-     Placi sie RAZ za kazde pasmo i raz za caly atlas. Wyplacone znaczniki
-     leza w zapisie, wiec nagroda nie powtorzy sie po przeladowaniu ani po
-     wczytaniu kodu zapasowego.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q13 (audyt IX 2026, decyzja projektowa Andrzeja: "podejmij
-     decyzje"). Bylo: ta funkcja grupowala gatunki wedlug `tierGatunku`
-     (przelicza X-Score TYPOWEGO okazu na przedzial 1-6 -- funkcja
-     legalna i nadal uzywana do NAGRODA_ODKRYCIA, tam nic nie zmieniam).
-     Atlas i jego zakladki grupuja wedlug `KLASA` (stala klasyfikacja
-     gatunku, 1-7) -- patrz `pasmoAtlasu` w 21. Dla 46 z 80 gatunkow te
-     dwa systemy dawaly RÓŻNY numer pasma, wiec zamkniecie WIDOCZNEJ
-     zakladki atlasu (np. caly komplet pasma 2 na ekranie) nie musialo
-     wcale odpalic wyplaty za "pasmo 2" -- bo ta funkcja liczyla wlasny,
-     niewidoczny podzial.
-     Naprawa: zero parametru, zero drugiego zrodla prawdy. Grupowanie
-     TU jest dokladnie tym samym wyrazeniem co `pasmoAtlasu` w 21 --
-     ten sam kod, nie "rownowazny kod w dwoch miejscach", zeby nie dalo
-     sie znowu rozjechac przy kolejnej zmianie. Petla 1..7, bo KLASA ma
-     siedem pasm (bylo 1..6 -- pasmo mityczne bylo poza zasiegiem, wiec
-     dziesiec gatunkow mitycznych nie mialo wlasnej nagrody za komplet
-     mimo osobnej zakladki w atlasie). NAGRODA_PASMA[7] dopisana nizej. */
-  function sprawdzKolekcje() {
-    if (!dane.progi) dane.progi = {};
-    if (!dane.progi.pasma) dane.progi.pasma = {};
-    const wszystkie = Object.keys(window.GATUNKI || {});
-    if (!wszystkie.length) return null;
-    const pasmoAtlasu = k => (window.KLASA && KLASA[k]) || 1;
-    let ile = 0; const powody = [];
-    for (let t = 1; t <= 7; t++) {
-      if (dane.progi.pasma[t]) continue;
-      const wPasmie = wszystkie.filter(k => pasmoAtlasu(k) === t);
-      if (!wPasmie.length) continue;
-      if (wPasmie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-        dane.progi.pasma[t] = 1;
-        ile += (window.NAGRODA_PASMA || {})[t] || 0;
-        powody.push('PASMO ' + t + ' KOMPLETNE');
-      }
-    }
-    if (!dane.progi.atlas && wszystkie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-      dane.progi.atlas = 1;
-      ile += window.NAGRODA_ATLASU || 0;
-      powody.push('CAŁY ATLAS');
-    }
-    /* ============================================================
-       NAPRAWA Q08 (audyt IX 2026): PODWOJNA WYPLATA.
-       Bylo tu: `if (ile > 0) { dane.monety += ile; zapisz(); }` -- czyli ta
-       funkcja SAMA wyplacala nagrode, a jednoczesnie zwracala jej wysokosc
-       do openCard (26), ktore doliczalo te sama kwote do `bonus` i wyplacalo
-       ja DRUGI RAZ. Komplet pasma 2 placil 4200 zamiast 2200.
-       Teraz ta funkcja tylko ZAZNACZA progi jako odebrane i MOWI, ile sie
-       nalezy. Wyplaca wylacznie openCard, przez `bonus` -- jedno miejsce
-       zmie
- s2.utworzone || 0 };
-  }
-
-  /* ============================================================
-     REKORDY SPOLECZNOSCI BEZ SERWERA.
-
-     Kod zapasowy juz istnieje i zawiera caly atlas nadawcy. Wystarczy wiec
-     wkleic kod znajomego, zeby jego rekordy stanely obok twoich. Ta funkcja
-     bierze z cudzego kodu WYLACZNIE najlepsze wyniki i nick. Monety, zadania,
-     seria i zaneta sa ignorowane: cudzy kod nie moze niczego dodac do twojego
-     konta poza liczba do pobicia. Wlasny kod wklejony tutaj nie robi nic.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q04 (audyt IX 2026): XSS przez nick z kodu znajomego.
-     Wlasny nick jest filtrowany przy wpisywaniu, ale nick WCZYTANY
-     z cudzego kodu byl tylko przycinany do 16 znakow i szedl prosto do
-     komunikatu wstawianego przez innerHTML. Szesnascie znakow wystarcza
-     na znacznik z atrybutem zdarzenia. Kod znajomego to dane z zewnatrz
-     -- wklejone z czatu, forum, czegokolwiek -- wiec traktujemy je jak
-     kazde inne niezaufane wejscie.
-     Filtrujemy U ZRODLA, przy imporcie: do `dane.spoleczne` nie ma prawa
-     trafic nic poza literami, cyframi, spacja i kilkoma znakami. Dzieki
-     temu bezpieczne staja sie WSZYSTKIE miejsca, ktore ten nick pozniej
-     wyswietlaja, a nie tylko te, o ktorych ktos pamietal. */
-  function czystyNick(x) {
-    return String(x == null ? '' : x)
-      .replace(/[^\p{L}\p{N} ._\-]/gu, '')   // tylko litery/cyfry/spacja/kropka/podkreslnik/myslnik
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 16) || 'ANONIM';
-  }
-  window.czystyNick = czystyNick;
-
-  function dolaczKod(t) {
-    let d;
-    try { d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim())))); }
-    catch (e) { return { ok: false, powod: 'To nie wygląda na kod gry.' }; }
-    if (!d || d.v !== WERSJA || !d.atlas) return { ok: false, powod: 'Kod jest z innej wersji gry.' };
-    if (d.id && d.id === dane.id) return { ok: false, powod: 'To twój własny kod.' };
-    const nick = czystyNick(d.profil && d.profil.nick);
-    let nowych = 0, lepszych = 0;
-    for (const slug in d.atlas) {
-      const a = d.atlas[slug];
-      if (!a || !a.n || !(a.pkt > 0)) continue;
-      const b = dane.spoleczne[slug];
-      if (!b) nowych++;
-      else if (a.pkt > b.pkt) lepszych++;
-      else continue;
-      dane.spoleczne[slug] = { cm: a.cm, g: a.g, pkt: a.pkt, nick: nick };
-    }
-    if (nowych || lepszych) teraz();
-    return { ok: true, nick: nick, nowych: nowych, lepszych: lepszych };
-  }
-
-  wczytaj();
-  window.addEventListener('pagehide', teraz);
-  window.addEventListener('visibilitychange', () => { if (document.hidden) teraz(); });
-
-  function odswiezono() {
-    nowaDoba(); dane.stat.dobaOdswiezen++; zapisz();
-    /* ZLECENIA: termin liczy sie w LAWICACH (tabela LAWIC_PASMA w `47`),
-       wiec to jest jego jedyny tykajacy zegar. Tedy przechodzi KAZDA
-       wymiana lawicy. */
-    if (window.Zlecenia) {
-      const w = Zlecenia.lawicaMinela();
-      if (w && w.co === 'przepadlo' && typeof Ruch !== 'undefined')
-        Ruch.powiedz('ZLECENIE PRZEPADŁO  -' + w.kaucja, true);
-      if (window.__odswiezPasekZlecen) window.__odswiezPasekZlecen();
-    }
-  }
-
-  /* Zaneta zuzywa sie na LAWICE, nie na czas: jedna wymiana ławicy, czy to
-     z zegara czy z przycisku, to jedna jednostka. Dzieki temu gracz sam
-     decyduje, jak szybko ja spala. */
-  function zuzyjLawice() {
-    const z = dane.zaneta;
-    if (!z) return;
-    z.zostalo--;
-    if (z.zostalo <= 0) dane.zaneta = null;
-    zapisz();
-  }
-  /* ============================================================
-     KAMIENIE MILOWE DOBY.
-     Dwa liczniki placa same, bez odbierania: co 1000 wymian lawicy i co
-     500 punktow zebranych od polnocy wpada 100 qryb. Progi licza sie
-     narastajaco, wiec przeskoczenie kilku naraz wyplaca kilka razy,
-     a zerowanie o polnocy kasuje takze pamiec wyplat.
-     ============================================================ */
-  const PROG_LAWIC = 1000, PROG_PUNKTOW = 500, NAGRODA_PROGU = 100;
-  /* ============================================================
-     DOMKNIECIE PASM I ATLASU.
-     Placi sie RAZ za kazde pasmo i raz za caly atlas. Wyplacone znaczniki
-     leza w zapisie, wiec nagroda nie powtorzy sie po przeladowaniu ani po
-     wczytaniu kodu zapasowego.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q13 (audyt IX 2026, decyzja projektowa Andrzeja: "podejmij
-     decyzje"). Bylo: ta funkcja grupowala gatunki wedlug `tierGatunku`
-     (przelicza X-Score TYPOWEGO okazu na przedzial 1-6 -- funkcja
-     legalna i nadal uzywana do NAGRODA_ODKRYCIA, tam nic nie zmieniam).
-     Atlas i jego zakladki grupuja wedlug `KLASA` (stala klasyfikacja
-     gatunku, 1-7) -- patrz `pasmoAtlasu` w 21. Dla 46 z 80 gatunkow te
-     dwa systemy dawaly RÓŻNY numer pasma, wiec zamkniecie WIDOCZNEJ
-     zakladki atlasu (np. caly komplet pasma 2 na ekranie) nie musialo
-     wcale odpalic wyplaty za "pasmo 2" -- bo ta funkcja liczyla wlasny,
-     niewidoczny podzial.
-     Naprawa: zero parametru, zero drugiego zrodla prawdy. Grupowanie
-     TU jest dokladnie tym samym wyrazeniem co `pasmoAtlasu` w 21 --
-     ten sam kod, nie "rownowazny kod w dwoch miejscach", zeby nie dalo
-     sie znowu rozjechac przy kolejnej zmianie. Petla 1..7, bo KLASA ma
-     siedem pasm (bylo 1..6 -- pasmo mityczne bylo poza zasiegiem, wiec
-     dziesiec gatunkow mitycznych nie mialo wlasnej nagrody za komplet
-     mimo osobnej zakladki w atlasie). NAGRODA_PASMA[7] dopisana nizej. */
-  function sprawdzKolekcje() {
-    if (!dane.progi) dane.progi = {};
-    if (!dane.progi.pasma) dane.progi.pasma = {};
-    const wszystkie = Object.keys(window.GATUNKI || {});
-    if (!wszystkie.length) return null;
-    const pasmoAtlasu = k => (window.KLASA && KLASA[k]) || 1;
-    let ile = 0; const powody = [];
-    for (let t = 1; t <= 7; t++) {
-      if (dane.progi.pasma[t]) continue;
-      const wPasmie = wszystkie.filter(k => pasmoAtlasu(k) === t);
-      if (!wPasmie.length) continue;
-      if (wPasmie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-        dane.progi.pasma[t] = 1;
-        ile += (window.NAGRODA_PASMA || {})[t] || 0;
-        powody.push('PASMO ' + t + ' KOMPLETNE');
-      }
-    }
-    if (!dane.progi.atlas && wszystkie.every(k => (dane.atlas[k] && dane.atlas[k].n > 0))) {
-      dane.progi.atlas = 1;
-      ile += window.NAGRODA_ATLASU || 0;
-      powody.push('CAŁY ATLAS');
-    }
-    /* ============================================================
-       NAPRAWA Q08 (audyt IX 2026): PODWOJNA WYPLATA.
-       Bylo tu: `if (ile > 0) { dane.monety += ile; zapisz(); }` -- czyli ta
-       funkcja SAMA wyplacala nagrode, a jednoczesnie zwracala jej wysokosc
-       do openCard (26), ktore doliczalo te sama kwote do `bonus` i wyplacalo
-       ja DRUGI RAZ. Komplet pasma 2 placil 4200 zamiast 2200.
-       Teraz ta funkcja tylko ZAZNACZA progi jako odebrane i MOWI, ile sie
-       nalezy. Wyplaca wylacznie openCard, przez `bonus` -- jedno miejsce
-       zmienia saldo, tak jak reszta n
-erdzony = ok;
-      Magazyn.pisz(K_SESJA, JSON.stringify(sesja));
-      powiadom();
-      return ok;
-    } catch (e) {
-      if (sesja) {
-        sesja.potwierdzony = false;
-        try { Magazyn.pisz(K_SESJA, JSON.stringify(sesja)); } catch (err) {}
-        powiadom();
-      }
-      return false;
-    }
-  }
-
-  /* ---------- logowanie ---------- */
-  async function anonim() {
-    const o = await zadanie('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ data: {} }) }, false);
-    if (!o || !o.access_token) throw new Error('Serwer nie zwrócił sesji. Włącz logowanie anonimowe w Supabase.');
-    zapiszSesje(o);
-    return o;
-  }
-  async function rejestracja(mail, haslo) {
-    const o = await zadanie('/auth/v1/signup', {
-      method: 'POST', body: JSON.stringify({ email: mail, password: haslo })
-    }, false);
-    if (o && o.access_token) zapiszSesje(o);
-    return o;
-  }
-  async function logowanie(mail, haslo) {
-    const o = await zadanie('/auth/v1/token?grant_type=password', {
-      method: 'POST', body: JSON.stringify({ email: mail, password: haslo })
-    }, false);
-    if (!o || !o.access_token) throw new Error('Zły mail albo hasło.');
-    zapiszSesje(o);
-    return o;
-  }
-  /* Dopiecie maila do konta anonimowego. Konto zostaje to samo, wiec zapis,
-     atlas i rekordy przezywaja operacje bez zadnego przenoszenia. */
-  async function dopnijMail(mail, haslo) {
-    await pewnyToken();
-    const o = await zadanie('/auth/v1/user', {
-      method: 'PUT', body: JSON.stringify({ email: mail, password: haslo })
-    }, true);
-    if (sesja) {
-      sesja.mail = mail;
-      sesja.potwierdzony = potwierdzonyZUsera(o);
-      Magazyn.pisz(K_SESJA, JSON.stringify(sesja));
-      powiadom();
-    }
-    return o;
-  }
-
-  /* ---------- kopia zapisu ---------- */
-  const K_KONTO = 'chmura.ostatnie';
-  function ostatnieKonto() { try { return Magazyn.czytaj(K_KONTO) || ''; } catch (e) { return ''; } }
-
-  function wiersz() {
-    const d = Zapis.dane();
-    return {
-      id: sesja.uid,
-      nick: (d.profil && d.profil.nick) || '',
-      stroj: (d.profil && d.profil.awatar && d.profil.awatar.stroj) || 'zielony',
-      zlowien: d.stat.zlowien || 0,
-      gatunkow: Object.keys(d.atlas || {}).length,
-      rekord_zycia: d.stat.rekordZycia || 0,
-      zapis: d,
-      zmieniono: new Date().toISOString()
-    };
-  }
-
-  async function wyslijTeraz() {
-    if (!konf || !sesja) return false;
-    if (wLocie) { zaleglosc = true; return false; }
-    wLocie = true;
-    try {
-      await pewnyToken();
-      await zadanie('/rest/v1/gracze', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify(wiersz())
-      }, true);
-      ostatniaKopia = Date.now(); blad = '';
-      /* Zapamietujemy, do ktorego konta poszla ostatnia kopia. Sluzy do
-         rozpoznania sytuacji, w ktorej gracz loguje sie na CUDZE konto. */
-      Magazyn.pisz(K_KONTO, sesja.uid);
-    } catch (e) {
-      blad = e.message || 'Nie udało się wysłać.';
-    } finally {
-      wLocie = false; powiadom();
-      if (zaleglosc) { zaleglosc = false; zaplanujWyslanie(); }
-    }
-    return !blad;
-  }
-  function zaplanujWyslanie() {
-    if (!konf || !sesja) return;
-    clearTimeout(timer);
-    timer = setTimeout(wyslijTeraz, ZWLOKA_WYSYL);
-  }
-
-  async function pobierz() {
-    await pewnyToken();
-    /* Bez identyfikatora zapytanie i tak by sie nie udalo, a blad 400
-       nic nikomu nie mowi. Lepiej powiedziec wprost, co jest nie tak. */
-    if (!sesja.uid) throw new Error('Sesja bez identyfikatora konta. Wyloguj się i zaloguj ponownie.');
-    const o = await zadanie('/rest/v1/gracze?select=zapis,zlowien,gatunkow,nick&id=eq.' + sesja.uid, {}, true);
-    return (o && o.length) ? o[0] : null;
-  }
-
-  /* ============================================================
-     SPOTKANIE DWOCH ZAPISOW.
-     Nigdy nie nadpisujemy niczego po cichu. Jesli na serwerze nie ma nic,
-     albo jest pusty poczatek, leci kopia lokalna. Jesli obie strony maja
-     dorobek, decyzja wraca do gracza razem z liczbami: ile zlowien tu,
-     ile tam. Zaden wariant nie kasuje drugiego bez pytania.
-     ============================================================ */
-  async function pierwszeSpotkanie() {
-    const zdalny = await pobierz();
-    const mojeZl = Zapis.dane().stat.zlowien || 0;
-    /* Rozpoznanie cudzego konta MUSI stac przed wyslaniem. Wczesniej stalo
-       nizej i nie lapalo najczestszego przypadku: konta, ktore nie ma jeszcze
-       ZADNEGO wiersza. Wtedy pierwsza galaz wysylala zapis bez pytania. */
-    const poprzednie = ostatnieKonto();
-    const puste = !zdalny || (zdalny.zlowien || 0) === 0;
-    if (puste && mojeZl > 0 && poprzednie && poprzednie !== sesja.uid) {
-      return { co: 'obce', tu: mojeZl, nick: (zdalny && zdalny.nick) || '' };
-    }
-    if (!zdalny) { await wyslijTeraz(); return { co: 'wyslano' }; }
-    /* Ten sam rodowod zapisu, czyli to samo id nadane przy pierwszym
-       uruchomieniu. Wtedy nie ma o co pytac: telefon jest zrodlem prawdy,
-       serwer kopia, wiec leci kopia. Bez tej linii kazde recznie wolane
-       SYNCHRONIZUJ TERAZ zglaszalo konflikt sam ze soba. */
-    if (zdalny.zapis && zdalny.zapis.id && zdalny.zapis.id === Zapis.id()) {
-      await wyslijTeraz(); return { co: 'wyslano' };
-    }
-    /* ============================================================
-       LOGOWANIE NA CUDZE KONTO.
-       Sprawdzenie stoi wyzej, przed pierwszym wyslaniem. Rozpoznajemy je
-       po ostatnim koncie, do ktorego szla kopia: jesli identyfikator sie
-       zmienil, a na telefonie jest dorobek, decyzja wraca do gracza.
+       UKLAD LICZONY, NIE ZGADYWANY.
+       Poprzednia wersja stawiala wiersze od stalego miejsca i klada przypis
+       na stalej wysokosci, wiec przy jedenastu pozycjach jedno wchodzilo
+       na drugie. Teraz najpierw licze, ile miejsca zajmie CALA tresc razem
+       z przypisem, potem rozdzielam je proporcjonalnie, a odstepy skalują
+       sie same. Dolozenie kolejnego wiersza niczego nie rozwali.
        ============================================================ */
-    const ichZl = zdalny.zlowien || 0;
-    if (ichZl === 0) { await wyslijTeraz(); return { co: 'wyslano' }; }
-    if (mojeZl === 0) { Zapis.wczytajObiekt(zdalny.zapis); return { co: 'pobrano', ile: ichZl }; }
-    return { co: 'konflikt', tu: mojeZl, tam: ichZl, zapis: zdalny.zapis };
-  }
-  function przyjmijZdalny(zapisZdalny) {
-    Zapis.wczytajObiekt(zapisZdalny);
-    powiadom();
-  }
+    const maPodpis = P.c.some(r => r[2]);
+    const fW = F(w * 0.044), fK = F(w * 0.046, 1), fP = F(w * 0.030);
+    const hWiersz = h * (maPodpis ? 0.042 : 0.038);
+    const hPodpis = h * 0.030;
+    const przerwa = h * 0.024;
+    let potrzeba = 0;
+    for (const r of P.c) potrzeba += hWiersz + (r[2] ? hPodpis : 0) + przerwa;
+    const przypisH = P.s ? h * 0.085 : 0;
+    const gora = y + h * 0.205, dol = y + h * 0.895 - przypisH;
+    const luz = Math.max(0, (dol - gora - potrzeba) / 2);
+    let yy = gora + luz + hWiersz * 0.8;
 
-  /* ============================================================
-     REKORDY SWIATA.
-     Jedno zapytanie do widoku, ktory oddaje najlepszy wynik na gatunek
-     w calej bazie razem z nickiem. Wynik ladu je w tym samym miejscu,
-     z ktorego atlas czyta rekordy wklejone z kodu znajomego, wiec strona
-     ryby nie wie i nie musi wiedziec, skad przyszla liczba.
-     Czytane bez logowania: widok jest publiczny do odczytu.
-     ============================================================ */
-  /* ============================================================
-     RANKING OGOLNY.
-
-     Widok tablica jest publiczny do odczytu, wiec czyta sie go BEZ konta
-     i bez logowania. Konta bez nicku do niego nie wchodza: pusty nick
-     w rankingu to smiec, a nie zawodnik, i tak jest to zapisane w samym
-     widoku, nie tutaj.
-
-     Sortowanie robi baza: rekord zycia, potem gatunki, potem zlowienia.
-     Klient bierze pierwsza setke i nic nie przelicza.
-     ============================================================ */
-  async function tablicaSwiata(ile) {
-    if (!konf) throw new Error('Nie masz podłączone
-iejow.
-
-   Dzięki temu nie tworzymy drugiego zapisu XP, ktory moglby rozjechac sie
-   z chmura. Ten sam save na drugim telefonie daje ten sam poziom.
-   ============================================================ */
-const Progression = (() => {
-  const WL = !!(window.Features && Features.is('progression70'));
-  const LAST_KEY = 'qryby.progression.last_level.v1';
-  let testLevel = null;
-
-  const MILESTONES = [
-    {lvl:1, key:'core',         nazwa:'WĘDKA I JEZIORO',      opis:'łowienie i podstawowy świat'},
-    {lvl:2, key:'world',        nazwa:'WIADRO · ATLAS · EKO', opis:'pierwsze narzędzia po pierwszym połowie'},
-    {lvl:3, key:'tasks',        nazwa:'ZADANIA',               opis:'dzienne cele'},
-    {lvl:5, key:'share',        nazwa:'KARTA POŁOWU',          opis:'udostępnianie trofeów'},
-    {lvl:7, key:'shop',         nazwa:'STRAGAN',               opis:'zanęty i kosmetyka'},
-    {lvl:10,key:'worldDigest',  nazwa:'CO SIĘ ZMIENIŁO',       opis:'zmiany jeziora od ostatniej wizyty'},
-    {lvl:12,key:'jobs',         nazwa:'OGŁOSZENIA',            opis:'zlecenia ze świata gry'},
-    {lvl:15,key:'league',       nazwa:'LIGA',                  opis:'turnieje'},
-    {lvl:20,key:'observations', nazwa:'ZESZYT OBSERWACJI',     opis:'własne tropy pogody, pory i księżyca'},
-    {lvl:30,key:'demography',   nazwa:'DEMOGRAFIA',            opis:'samce i samice w populacji'},
-    {lvl:40,key:'frequency',    nazwa:'CZĘSTOŚĆ',              opis:'udział gatunku w jeziorze i ławicach'},
-    {lvl:50,key:'chronicle',    nazwa:'PEŁNA KRONIKA',         opis:'archiwum wspólnego jeziora'},
-    {lvl:60,key:'trends',       nazwa:'ANALIZA WZORCÓW',       opis:'dwa najsilniejsze tropy naraz'},
-    {lvl:70,key:'research',     nazwa:'DZIENNIK BADACZA',      opis:'pełny skrót własnego archiwum obserwacji'}
-  ];
-
-  const BUTTONS = {
-    wiaderko:'world', atlas:'world', ekosystem:'world',
-    zadania:'tasks', shareCatch:'share', sklep:'shop',
-    zleceniaTablica:'jobs', turnieje:'league'
-  };
-
-  function zrodla(){
-    let catches=0,species=0,best=0,tournaments=0;
-    try{
-      const d=Zapis.dane();
-      catches=Math.max(0,Number(d.stat&&d.stat.zlowien)||0);
-      for(const a of Object.values(d.atlas||{})){
-        if(!a || !(Number(a.n)>0)) continue;
-        species++;
-        best += Math.max(0,Math.min(100,Number(a.pkt)||0));
+    for (const [co, ile, pod] of P.c) {
+      /* nazwa z lewej */
+      g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+      g.font = fW; g.fillStyle = '#2A2018';
+      g.fillText(co, L, yy);
+      const konNazwy = L + g.measureText(co).width;
+      /* kwota z prawej */
+      g.textAlign = 'right'; g.font = fK; g.fillStyle = '#7A5C1E';
+      g.fillText(ile, PR, yy);
+      const poczKwoty = PR - g.measureText(ile).width;
+      /* kropki tylko tam, gdzie naprawde jest miejsce */
+      const odKropek = konNazwy + w * 0.03, doKropek = poczKwoty - w * 0.03;
+      if (doKropek - odKropek > w * 0.06) {
+        g.fillStyle = 'rgba(42,32,24,.24)';
+        for (let kx = odKropek; kx < doKropek; kx += w * 0.020)
+          g.fillRect(kx, yy - h * 0.005, w * 0.005, w * 0.005);
       }
-      tournaments=Array.isArray(d.turniejeHistoria)?d.turniejeHistoria.length:0;
-    }catch(e){}
-    const xp=catches*10 + species*75 + best*3 + tournaments*250;
-    return {xp,catches,species,best,tournaments};
-  }
-
-  /* Prog 70 ~= 75 tys. punktow rozwoju. Wczesne poziomy ida szybko,
-     potem tempo rosnie bez sztucznego "grindu za logowanie". */
-  function prog(lvl){
-    const n=Math.max(0,Math.min(69,(Number(lvl)||1)-1));
-    return 15*n*n + 50*n;
-  }
-
-  function poziomZXP(xp){
-    let lo=1,hi=70;
-    while(lo<hi){
-      const mid=Math.ceil((lo+hi)/2);
-      if(prog(mid)<=xp) lo=mid; else hi=mid-1;
-    }
-    return lo;
-  }
-
-  function level(){
-    if(testLevel!==null) return Math.max(1,Math.min(70,Number(testLevel)||1));
-    return poziomZXP(zrodla().xp);
-  }
-
-  function stan(){
-    const d=zrodla(),lvl=level(),a=prog(lvl),b=lvl<70?prog(lvl+1):a;
-    const frac=lvl>=70?1:Math.max(0,Math.min(1,(d.xp-a)/Math.max(1,b-a)));
-    return {lvl,xp:d.xp,from:a,to:b,frac,catches:d.catches,species:d.species,
-            best:d.best,tournaments:d.tournaments};
-  }
-
-  function milestone(key){return MILESTONES.find(x=>x.key===key)||null;}
-  function wymagany(key){const m=milestone(key);return m?m.lvl:1;}
-  function dostep(key){return !WL || level()>=wymagany(key);}
-
-  function esc(s){
-    return String(s==null?'':s).replace(/[&<>"']/g,c=>({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    })[c]);
-  }
-
-  function html(){
-    if(!WL) return '';
-    const s=stan(),next=MILESTONES.find(x=>x.lvl>s.lvl)||null;
-    const pct=Math.round(s.frac*100);
-    let h='<div class="prog-card">'
-      +'<div class="prog-top"><div class="prog-lvl"><small>POZIOM WĘDKARZA</small>'+s.lvl+' / 70</div>'
-      +'<div class="prog-xp">'+s.xp.toLocaleString('pl-PL')+' pkt rozwoju<br>'
-      +s.catches.toLocaleString('pl-PL')+' połowów · '+s.species+' gat.</div></div>'
-      +'<div class="prog-bar"><i style="width:'+pct+'%"></i></div>';
-
-    if(next){
-      h+='<div class="prog-next">NASTĘPNIE · L'+next.lvl+' <b>'+esc(next.nazwa)+'</b>'
-        +'<span class="prog-desc">'+esc(next.opis)+'</span></div>';
-    }else{
-      h+='<div class="prog-next"><b>PEŁNY DOSTĘP DO NARZĘDZI JEZIORA</b>'
-        +'<span class="prog-desc">poziom 70 nie zwiększa szans na ryby</span></div>';
-    }
-
-    const idx=MILESTONES.findIndex(x=>x.lvl>s.lvl);
-    const od=idx<0?Math.max(0,MILESTONES.length-4):Math.max(0,idx-1);
-    const doI=idx<0?MILESTONES.length:Math.min(MILESTONES.length,idx+4);
-    h+='<div class="prog-road">';
-    for(const m of MILESTONES.slice(od,doI)){
-      const cl=m.lvl<=s.lvl?' on':(next&&m.key===next.key?' next':'');
-      h+='<div class="prog-row'+cl+'"><span class="prog-n">L'+m.lvl+'</span>'
-        +'<span><span class="prog-title">'+esc(m.nazwa)+'</span>'
-        +'<span class="prog-desc">'+esc(m.opis)+'</span></span></div>';
-    }
-    return h+'</div></div>';
-  }
-
-  function blocked(key){
-    const m=milestone(key);
-    if(!m) return false;
-    try{
-      if(window.Ruch) Ruch.powiedz('OD POZIOMU '+m.lvl+' · '+m.nazwa,true);
-      if(window.Telemetry) Telemetry.event('progression_gate_hit',{
-        feature:key,required_level:m.lvl,current_level:level()
-      });
-    }catch(e){}
-    return true;
-  }
-
-  function refreshLocks(){
-    if(!WL) return;
-    for(const [id,key] of Object.entries(BUTTONS)){
-      const el=document.getElementById(id);
-      if(!el) continue;
-      if(dostep(key)) el.removeAttribute('data-prog-lock');
-      else el.setAttribute('data-prog-lock',String(wymagany(key)));
-    }
-  }
-
-  function poZlowieniu(){
-    if(!WL) return;
-    const now=level();
-    let prev=now;
-    try{
-      const raw=localStorage.getItem(LAST_KEY);
-      prev=raw===null?now:Math.max(1,Math.min(70,Number(raw)||now));
-    }catch(e){}
-    if(now<prev) prev=now; /* reset zapisu nie moze zablokowac przyszlych level-upow */
-    if(now>prev){
-      const unlocked=MILESTONES.filter(x=>x.lvl>prev&&x.lvl<=now);
-      const naj=unlocked.length?unlocked[unlocked.length-1]:null;
-      try{
-        if(window.Ruch) Ruch.powiedz('POZIOM '+now+(naj?' · '+naj.nazwa:''),true);
-        if(window.Telemetry) Telemetry.event('player_level_up',{
-          from_level:prev,to_level:now,unlocks:unlocked.map(x=>x.key).join(',')
-        });
-      }catch(e){}
-    }
-    try{localStorage.setItem(LAST_KEY,String(now));}catch(e){}
-    refreshLocks();
-  }
-
-  function init(){
-    if(!WL) return;
-    try{
-      if(localStorage.getItem(LAST_KEY)===null)
-        localStorage.setItem(LAST_KEY,String(level()));
-    }catch(e){}
-    refreshLocks();
-  }
-
-  /* Jedna bramka dla wszystkich fizycznych przyciskow. */
-  document.addEventListener('click',e=>{
-    if(!WL) return;
-    const b=e.target&&e.target.closest?e.target.closest('button[id]'):null;
-    if(!b) return;
-    const key=BUTTONS[b.id];
-    if(!key || dostep(key)) return;
- 
-
-===== atlas[gk] 0 =====
-
-===== atlas[f.gat] 0 =====
-
-===== Onboarding.pierwszaRyba( 1 =====
-c i co 500 punktow. Wyplacaja sie
-         same, ale pokazuja sie tym samym przelewem co rekordy, zeby gracz
-         wiedzial, skad przyszly monety. */
-      const prog = Zapis.sprawdzProgi();
-      if (prog > 0 && typeof Ruch !== 'undefined') {
-        setTimeout(() => Ruch.zaRekord(prog, ['KAMIEŃ MILOWY']), bonus > 0 ? 2200 : 300);
+      yy += hWiersz;
+      /* podpis pod wierszem */
+      if (pod) {
+        g.textAlign = 'left'; g.font = fP; g.fillStyle = 'rgba(42,32,24,.52)';
+        g.fillText(pod, L, yy);
+        yy += hPodpis;
       }
-      if (lenCm > G3.cmMax) pchnij('olbrzym', 1);
-      /* NAPRAWA Q09 (audyt IX 2026): DWA ZNACZENIA SLOWA "SERIA".
-         `stat.seria` to licznik kolejnych zlowien BEZ WZGLEDU NA GATUNEK,
-         a `dane.seria` (zglaszane wyzej, przy S.ile) to seria TEGO SAMEGO
-         gatunku. Oba szly do zadan pod nazwa 'seria', a zadanie bierze
-         wieksza wartosc -- wiec "Zbuduj serie 2 ryb tego samego gatunku"
-         zaliczalo sie po zlowieniu dwoch ROZNYCH ryb. Wszystkie zadania
-         tego typu w puli mowia wprost "tego samego gatunku", wiec zostaje
-         tylko zgloszenie z S.ile. Sam licznik `stat.seria` liczy sie dalej,
-         bo korzystaja z niego statystyki -- po prostu nie udaje juz serii
-         gatunkowej. */
-      Zapis.dane().stat.seria = (Zapis.dane().stat.seria || 0) + 1;
-      if (zrob.length) nagrody = zrob;
+      yy += przerwa;
     }
-  }
-  Card.data = { klucz: gk, gatunek: GATUNKI[gk].nazwa, dl: lenCm, waga: w,
-                tier: pasmoKarty, pasmo: pasmoKarty,
-                fish: fish, kolekcja: kolekcja, nagrody: nagrody };
-  Card.zagrozenie = zagrozenieGatunkuNaKarcie(gk);
-  try {
-    if(Card.zagrozenie&&window.Telemetry)Telemetry.event('critical_fish_card_shown',{
-      species:gk,population:Card.zagrozenie.n,males:Card.zagrozenie.m,females:Card.zagrozenie.f
-    });
-  } catch(e){}
-  try {
-    if (window.Telemetry) {
-      const tx = (typeof XScore !== 'undefined') ? XScore.punkty(gk, GATUNKI[gk], lenCm, w) : 0;
-      const tp = { species: gk, score: tx, tier: pasmoKarty, band: pasmoKarty };
-      Telemetry.onceSession('first_catch', tp);
-      Telemetry.event('fish_caught', tp);
-    }
-  } catch (e) {}
-  try { if (window.MysteryHints) MysteryHints.record(gk); } catch (e) {}
-  try {
-    if (window.Onboarding) {
-      const tx2 = (typeof XScore !== 'undefined') ? XScore.punkty(gk, GATUNKI[gk], lenCm, w) : 0;
-      Onboarding.pierwszaRyba(fish, tx2, pasmoKarty);
-    }
-  } catch (e) {}
-  /* Rekord sesji: najwyzszy X-Score od wejscia na strone. Liczony tu, a nie
-     przy rysowaniu karty, bo karte mozna zamknac zanim sie ja obejrzy. */
-  if (typeof XScore !== 'undefined' && typeof Zegar !== 'undefined') {
-    const x = XScore.punkty(gk, GATUNKI[gk], lenCm, w);
-    if (x > Zegar.rekordSesji) Zegar.rekordSesji = x;
-    if (typeof Zapis !== 'undefined') {
-      const st = Zapis.dane().stat;
-      if (x > (st.dobaRekord || 0)) { st.dobaRekord = x; Zapis.zapisz(); }
-    }
-  }
-  /* Plec na karcie (IX 2026, prosba Andrzeja). Brana z samej ryby, bo
-     `nadajTozsamosc` nadaje ja KAZDEJ sztuce -- takze przy duzych
-     populacjach, gdzie nie ma rekordu osobnika. */
-  Card.plec = (fish && fish.plec) || null;
-  Card.from.x = fromX; Card.from.y = fromY;
-  if (window.CardPerf) CardPerf.reset();
-  if (window.CardRaster) CardRaster.reset();
-  Card.t = 0; Card.open = true;
-  Card.historia = null; Card.historiaTelemetry = false;
-  try { if (window.RzadkoscNarracja) RzadkoscNarracja.przygotujKarte(gk); } catch (e) {}
-  /* Stan swipe zerowany przy KAZDYM otwarciu. Card.swipe/czeka ustawia
-     wyzej sama logika wiaderka -- tu tylko czyscimy resztki po poprzedniej
-     karcie, zeby niedokonczony gest nie przeciekl na nastepna rybe. */
-  Card.dx = 0; Card.ciagniemy = false; Card.decyzja = null; Card.wylot = 0;
-  /* Karta jest bohaterem kadru, wiec HUD na czas jej trwania znika.
-     Wczesniej okragly przycisk lawicy stal nad nia i zaslanial rog ramki. */
-  if (document.body && document.body.classList) document.body.classList.add('karta-otwarta');
-  if (navigator.vibrate) { try { navigator.vibrate([18, 34, 18]); } catch (e) {} }
-}
-/* ============================================================
-   DECYZJA SWIPE. Wolana raz, w chwili puszczenia palca za progiem.
-   'wiaderko' -- ryba idzie do wiaderka (albo pyta o wymiane, gdy pelne:
-                 ta sciezka zostaje dokladnie taka, jaka byla)
-   'woda'     -- ryba odplywa. Zero monet, ale i zero zajetego miejsca.
-                 Atlas, rekord, punkty i zadania juz sie policzyly przy
-                 otwieraniu karty i NIE sa cofane -- wypuszczenie nie
-                 kasuje tego, ze rybe zlowiles.
-   ============================================================ */
-function decyzjaKarty(kier) {
-  if (!Card.swipe || !Card.czeka || Card.decyzja) return;
-  const C = Card.czeka;
-  Card.decyzja = kier;
-  try {
-    if (window.Telemetry) {
-      const tp = {
-        decision: kier === 'wiaderko' ? 'keep' : 'release',
-        species: C.gk || '',
-        score: C.pkt || 0,
-        sex: Card.plec || '',
-        mythic: !!Card.mit
-      };
-      Telemetry.onceSession('first_decision', tp);
-      Telemetry.event(kier === 'wiaderko' ? 'fish_kept' : 'fish_released', tp);
-    }
-  } catch (e) {}
-  if (kier === 'wiaderko' && Card.mit) {
-    /* Mityczna zatrzymana: pelna stawka i sztuka znika ze swiata. */
-    const nagroda = window.NAGRODA_MITYCZNA || 10000000;
-    if (typeof Zapis !== 'undefined') {
-      const Dm = Zapis.dane();
-      Dm.monety = (Dm.monety || 0) + nagroda;
-      Zapis.zapisz();
-    }
-    if (window.Eko) {
-      if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
-    }
-    if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
-      Ruch.zaRekord(nagroda, ['MITYCZNA ZABRANA']);
-    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(20);
-  } else if (kier === 'wiaderko') {
-    /* EKOSYSTEM: zatrzymana ryba UBYWA z populacji serwera. Wypuszczona
-       nie -- to jest cala roznica miedzy dwoma stronami swipe'a i jedyne
-       miejsce, w ktorym gracz sam decyduje o losie gatunku.
-       Plec brana z faktycznego skladu populacji, wiec przy samych
-       samicach kazda zabrana sztuka to samica. */
-    if (window.Eko) {
-      /* Ryba z tozsamoscia znika jako KONKRETNY osobnik. Id przenosi sie
-         z ryby na karte przy jej otwarciu (patrz `Card.czeka` nizej). */
-      if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
-    }
-    if (window.Wiaderko && !Wiaderko.dodaj(C.gk, C.cm, C.w, C.pkt, Card.plec)) {
-      /* Wiaderko pelne: ta sama sciezka co przed swipe'em -- pytamy
-         o wymiane zamiast po cichu tracic sztuke. */
-      if (typeof pokazPytanieWymiany === 'function') pokazPytanieWymiany(C.gk, C.cm, C.w, C.pkt, Card.plec);
-      else if (typeof Ruch !== 'undefined') Ruch.powiedz('WIADERKO PEŁNE', true);
-    }
-    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(14);
-  } else {
-    /* ============================================================
-       NAGRODA ZA WYPUSZCZENIE (IX 2026, decyzja Andrzeja: "za wypuszczenie
-       ryby KAZDEJ -- 5000 qryb. Edukacyjnie zeby bylo warto wypuszczac").
-       Stala, niezalezna od gatunku, rozmiaru i punktow -- i to jest sedno.
-       Gdyby placila proporcjonalnie do wartosci ryby, byla by tylko drugim
-       kanalem sprzedazy. Stala kwota 
 
-===== Telemetry.event('fish_caught' 1 =====
-ush('SERIA \u00D7' + S.ile);
+    if (P.s) {
+      g.textAlign = 'center'; g.font = F(w * 0.032);
+      g.fillStyle = 'rgba(42,32,24,.55)';
+      const slowa = P.s.split(' '); let lin = '', n = 0;
+      const yb = y + h * 0.885 - przypisH * 0.4;
+      for (const sl of slowa) {
+        const prob = lin ? lin + ' ' + sl : sl;
+        if (g.measureText(prob).width > (PR - L) && lin) { g.fillText(lin, SR, yb + n * h * 0.038); n++; lin = sl; }
+        else lin = prob;
       }
-
-      if (bonus > 0) {
-        Zapis.dane().monety = (Zapis.dane().monety || 0) + bonus;
-        Zapis.zapisz();
-        if (typeof Ruch !== 'undefined') Ruch.zaRekord(bonus, powody);
-      }
-      /* Kamienie milowe doby: co 1000 lawic i co 500 punktow. Wyplacaja sie
-         same, ale pokazuja sie tym samym przelewem co rekordy, zeby gracz
-         wiedzial, skad przyszly monety. */
-      const prog = Zapis.sprawdzProgi();
-      if (prog > 0 && typeof Ruch !== 'undefined') {
-        setTimeout(() => Ruch.zaRekord(prog, ['KAMIEŃ MILOWY']), bonus > 0 ? 2200 : 300);
-      }
-      if (lenCm > G3.cmMax) pchnij('olbrzym', 1);
-      /* NAPRAWA Q09 (audyt IX 2026): DWA ZNACZENIA SLOWA "SERIA".
-         `stat.seria` to licznik kolejnych zlowien BEZ WZGLEDU NA GATUNEK,
-         a `dane.seria` (zglaszane wyzej, przy S.ile) to seria TEGO SAMEGO
-         gatunku. Oba szly do zadan pod nazwa 'seria', a zadanie bierze
-         wieksza wartosc -- wiec "Zbuduj serie 2 ryb tego samego gatunku"
-         zaliczalo sie po zlowieniu dwoch ROZNYCH ryb. Wszystkie zadania
-         tego typu w puli mowia wprost "tego samego gatunku", wiec zostaje
-         tylko zgloszenie z S.ile. Sam licznik `stat.seria` liczy sie dalej,
-         bo korzystaja z niego statystyki -- po prostu nie udaje juz serii
-         gatunkowej. */
-      Zapis.dane().stat.seria = (Zapis.dane().stat.seria || 0) + 1;
-      if (zrob.length) nagrody = zrob;
+      if (lin) g.fillText(lin, SR, yb + n * h * 0.038);
     }
+
+    g.textAlign = 'center'; g.font = F(w * 0.030, 1);
+    g.fillStyle = 'rgba(42,32,24,.42)';
+    g.fillText(idx + 1 < POMOC.length ? 'PRZESU\u0143 PALCEM W BOK' : 'PRZESU\u0143 W D\u00d3\u0141, ABY ZAMKN\u0104\u0106',
+      SR, y + h * 0.945);
   }
-  Card.data = { klucz: gk, gatunek: GATUNKI[gk].nazwa, dl: lenCm, waga: w,
-                tier: pasmoKarty, pasmo: pasmoKarty,
-                fish: fish, kolekcja: kolekcja, nagrody: nagrody };
-  Card.zagrozenie = zagrozenieGatunkuNaKarcie(gk);
-  try {
-    if(Card.zagrozenie&&window.Telemetry)Telemetry.event('critical_fish_card_shown',{
-      species:gk,population:Card.zagrozenie.n,males:Card.zagrozenie.m,females:Card.zagrozenie.f
-    });
-  } catch(e){}
-  try {
-    if (window.Telemetry) {
-      const tx = (typeof XScore !== 'undefined') ? XScore.punkty(gk, GATUNKI[gk], lenCm, w) : 0;
-      const tp = { species: gk, score: tx, tier: pasmoKarty, band: pasmoKarty };
-      Telemetry.onceSession('first_catch', tp);
-      Telemetry.event('fish_caught', tp);
-    }
-  } catch (e) {}
-  try { if (window.MysteryHints) MysteryHints.record(gk); } catch (e) {}
-  try {
-    if (window.Onboarding) {
-      const tx2 = (typeof XScore !== 'undefined') ? XScore.punkty(gk, GATUNKI[gk], lenCm, w) : 0;
-      Onboarding.pierwszaRyba(fish, tx2, pasmoKarty);
-    }
-  } catch (e) {}
-  /* Rekord sesji: najwyzszy X-Score od wejscia na strone. Liczony tu, a nie
-     przy rysowaniu karty, bo karte mozna zamknac zanim sie ja obejrzy. */
-  if (typeof XScore !== 'undefined' && typeof Zegar !== 'undefined') {
-    const x = XScore.punkty(gk, GATUNKI[gk], lenCm, w);
-    if (x > Zegar.rekordSesji) Zegar.rekordSesji = x;
-    if (typeof Zapis !== 'undefined') {
-      const st = Zapis.dane().stat;
-      if (x > (st.dobaRekord || 0)) { st.dobaRekord = x; Zapis.zapisz(); }
-    }
+
+  /* ---------- geometria ksiegi ---------- */
+  function obszar(W, H) {
+    const w = Math.min(W * 0.92, H * 0.64), h = Math.min(H * 0.88, w * 1.42);
+    return { x: (W - w) / 2, y: (H - h) / 2, w: w, h: h };
   }
-  /* Plec na karcie (IX 2026, prosba Andrzeja). Brana z samej ryby, bo
-     `nadajTozsamosc` nadaje ja KAZDEJ sztuce -- takze przy duzych
-     populacjach, gdzie nie ma rekordu osobnika. */
-  Card.plec = (fish && fish.plec) || null;
-  Card.from.x = fromX; Card.from.y = fromY;
-  if (window.CardPerf) CardPerf.reset();
-  if (window.CardRaster) CardRaster.reset();
-  Card.t = 0; Card.open = true;
-  Card.historia = null; Card.historiaTelemetry = false;
-  try { if (window.RzadkoscNarracja) RzadkoscNarracja.przygotujKarte(gk); } catch (e) {}
-  /* Stan swipe zerowany przy KAZDYM otwarciu. Card.swipe/czeka ustawia
-     wyzej sama logika wiaderka -- tu tylko czyscimy resztki po poprzedniej
-     karcie, zeby niedokonczony gest nie przeciekl na nastepna rybe. */
-  Card.dx = 0; Card.ciagniemy = false; Card.decyzja = null; Card.wylot = 0;
-  /* Karta jest bohaterem kadru, wiec HUD na czas jej trwania znika.
-     Wczesniej okragly przycisk lawicy stal nad nia i zaslanial rog ramki. */
-  if (document.body && document.body.classList) document.body.classList.add('karta-otwarta');
-  if (navigator.vibrate) { try { navigator.vibrate([18, 34, 18]); } catch (e) {} }
-}
-/* ============================================================
-   DECYZJA SWIPE. Wolana raz, w chwili puszczenia palca za progiem.
-   'wiaderko' -- ryba idzie do wiaderka (albo pyta o wymiane, gdy pelne:
-                 ta sciezka zostaje dokladnie taka, jaka byla)
-   'woda'     -- ryba odplywa. Zero monet, ale i zero zajetego miejsca.
-                 Atlas, rekord, punkty i zadania juz sie policzyly przy
-                 otwieraniu karty i NIE sa cofane -- wypuszczenie nie
-                 kasuje tego, ze rybe zlowiles.
-   ============================================================ */
-function decyzjaKarty(kier) {
-  if (!Card.swipe || !Card.czeka || Card.decyzja) return;
-  const C = Card.czeka;
-  Card.decyzja = kier;
-  try {
-    if (window.Telemetry) {
-      const tp = {
-        decision: kier === 'wiaderko' ? 'keep' : 'release',
-        species: C.gk || '',
-        score: C.pkt || 0,
-        sex: Card.plec || '',
-        mythic: !!Card.mit
-      };
-      Telemetry.onceSession('first_decision', tp);
-      Telemetry.event(kier === 'wiaderko' ? 'fish_kept' : 'fish_released', tp);
-    }
-  } catch (e) {}
-  if (kier === 'wiaderko' && Card.mit) {
-    /* Mityczna zatrzymana: pelna stawka i sztuka znika ze swiata. */
-    const nagroda = window.NAGRODA_MITYCZNA || 10000000;
-    if (typeof Zapis !== 'undefined') {
-      const Dm = Zapis.dane();
-      Dm.monety = (Dm.monety || 0) + nagroda;
-      Zapis.zapisz();
-    }
-    if (window.Eko) {
-      if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
-    }
-    if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
-      Ruch.zaRekord(nagroda, ['MITYCZNA ZABRANA']);
-    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(20);
-  } else if (kier === 'wiaderko') {
-    /* EKOSYSTEM: zatrzymana ryba UBYWA z populacji serwera. Wypuszczona
-       nie -- to jest cala roznica miedzy dwoma stronami swipe'a i jedyne
-       miejsce, w ktorym gracz sam decyduje o losie gatunku.
-       Plec brana z faktycznego skladu populacji, wiec przy samych
-       samicach kazda zabrana sztuka to samica. */
-    if (window.Eko) {
-      /* Ryba z tozsamoscia znika jako KONKRETNY osobnik. Id przenosi sie
-         z ryby na karte przy jej otwarciu (patrz `Card.czeka` nizej). */
-      if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
-    }
-    if (window.Wiaderko && !Wiaderko.dodaj(C.gk, C.cm, C.w, C.pkt, Card.plec)) {
-      /* Wiaderko pelne: ta sama sciezka co przed swipe'em -- pytamy
-         o wymiane zamiast po cichu tracic sztuke. */
-      if (typeof pokazPytanieWymiany === 'function') pokazPytanieWymiany(C.gk, C.cm, C.w, C.pkt, Card.plec);
-      else if (typeof Ruch !== 'undefined') Ruch.powiedz('WIADERKO PEŁNE', true);
-    }
-    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(14);
-  } else {
-    /* ============================================================
-       NAGRODA ZA WYPUSZCZENIE (IX 2026, decyzja Andrzeja: "za wypus
 
-===== Telemetry.event("fish_caught" 0 =====
+  /* ---------- rysowanie ---------- */
+  function rysuj(g, W, H) {
+    if (!otwarta) return;
+    const O = obszar(W, H);
+    g.save();
 
-===== nowaWAtlasie = 2 =====
- sie
-         nic, a przerysowanie budowalo cala liste ryb od nowa i przewijanie
-         wracalo na gore. Nie dalo sie dojechac do konca listy.
+    /* Stage 13: jezioro najpierw schodzi z uwagi, potem ksiega osiada.
+       Ruch jest krotki i bez bounce, zeby nie wygladala jak popup. */
+    const e0 = Math.max(0, Math.min(1, wej));
+    const e = 1 - Math.pow(1 - e0, 3);
+    g.fillStyle = 'rgba(6,5,10,' + (0.48 + 0.42 * e) + ')';
+    g.fillRect(0, 0, W, H);
 
-         Formularz nie ma zadnych danych na zywo, wiec go po prostu nie
-         ruszamy. Odswieza sie sam, gdy gracz wroci na MOJE TURNIEJE.
-         ============================================================ */
-      if (zakladkaT === 'nowy') return;
-      panelTurniejow();
-    });
-    /* Zamkniecie panelu dowolna droga zwalnia odpytywanie. */
-    const p = document.getElementById('panel');
-    if (!p) return;
-    const obs = new MutationObserver(() => { if (!p.classList.contains('on')) Z.tempoPanelu(false); });
-    obs.observe(p, { attributes: true, attributeFilter: ['class'] });
-  }, 0);
+    g.translate(W/2, H/2);
+    g.scale(0.94 + 0.06*e, 0.94 + 0.06*e);
+    g.translate(-W/2, -H/2);
+    g.globalAlpha = e;
 
-  {
-    const pk = document.getElementById('pasekKonta');
-    if (pk) pk.addEventListener('click', () => {
-      const bp = document.getElementById('zapisz');
-      if (bp) zrodlo = bp;
-      panelGracza();
-    });
-  }
-  guzik('zapisz', () => {
-    /* Panel otwarty znaczy, ze gracz patrzy na tablice: przyspieszamy
-       odpytywanie z pietnastu sekund do trzech. Zamkniecie panelu wraca
-       do wolnego tempa, bo wtedy wystarczy pasek nad woda. */
-    if (window.Zawody) window.Zawody.tempoPanelu(true);
-    panelGracza();
-  });
+    /* okladka i grzbiet */
+    g.fillStyle = '#432C14'; g.fillRect(O.x - 15, O.y - 15, O.w + 30, O.h + 30);
+    g.strokeStyle = '#B08840'; g.lineWidth = 2;
+    g.strokeRect(O.x - 8, O.y - 8, O.w + 16, O.h + 16);
+    g.fillStyle = '#301E0C'; g.fillRect(O.x - 15, O.y - 15, 15, O.h + 30);
 
+    const bw = Math.round(O.w), bh = Math.round(O.h);
+    const podSpodem = (post > 0 && kier > 0) ? docelowa : strona;
+    g.drawImage(bufor(podSpodem, bw, bh), O.x, O.y, O.w, O.h);
 
-  const b = document.getElementById('atlas');
-  if (!b) return;
-  b.addEventListener('touchstart', stop, { passive: true });
-  b.addEventListener('pointerdown', stop);
-  b.addEventListener('click', e => {
-    e.preventDefault(); e.stopPropagation();
-    if (navigator.vibrate) { try { navigator.vibrate(10); } catch (err) {} }
-    if (Ksiega.czyOtwarta()) { Ksiega.zamknij(); return; }
-    /* Jesli czeka nowo odkryta ryba, ksiega otwiera sie na jej stronie. */
-    let doPokazania = null;
-    if (typeof Zapis !== 'undefined') {
-      const nw = Zapis.dane().stat.nowaWAtlasie;
-      /* BLAD: indeks liczyl sie z Object.keys(GATUNKI), czyli z kolejnosci
-         wpisywania do pliku. Odkad strony ida pasmami, ksiega otwierala sie
-         na zupelnie innej rybie. Teraz pyta ksiege o jej wlasny porzadek. */
-      if (nw && GATUNKI[nw]) { doPokazania = Ksiega.indeksGatunku(nw); }
-      if (nw) { Zapis.dane().stat.nowaWAtlasie = ''; Zapis.zapisz(); }
-    }
-    window.__bookReturnMenu = !window.__quickNavInvoke;
-    Ksiega.otworz(doPokazania, 'atlas');
-  });
-  /* ============================================================
-     STEROWANIE KSIEGA.
-
-     Poprzednia wersja liczyla strefy dotkniecia wzgledem CALEGO EKRANU,
-     a ksiega zajmuje jego srodkowe dwie trzecie. Stukniecie obok ksiegi,
-     ale po jej lewej stronie, wypadalo w lewej polowie ekranu i przewracalo
-     kartke wstecz, chociaz palec byl poza ksiega. Stad wrazenie, ze przy
-     zlym kliknieciu kartka idzie w druga strone.
-
-     Teraz wszystko liczy sie w TYCH SAMYCH WSPOLRZEDNYCH, w ktorych ksiega
-     jest rysowana. Kanwa ma object-fit cover, wiec przeliczam punkt dotyku
-     przez te sama skale i to samo obciecie, ktorego uzywa rysowanie.
-
-       przeciagniecie   kartka idzie ZA PALCEM, w czasie rzeczywistym;
-                        puszczenie powyzej jednej trzeciej domyka obrot,
-                        ponizej odklada kartke z powrotem
-       szybki rzut      domyka obrot niezaleznie od dystansu
-       stukniecie w lewa polowe ksiegi   strona wstecz
-       stukniecie w prawa polowe ksiegi  strona dalej
-       stukniecie POZA ksiega            zamkniecie
-     ============================================================ */
-  const plotno = document.getElementById('scene');
-  function doSceny(cx, cy) {
-    const r = plotno.getBoundingClientRect();
-    const sk = Math.max(r.width / Scene.W, r.height / Scene.H);
-    return { x: (cx - r.left - (r.width - Scene.W * sk) / 2) / sk,
-             y: (cy - r.top - (r.height - Scene.H * sk) / 2) / sk };
-  }
-  let x0 = 0, y0 = 0, t0 = 0, gest = false, ciagnie = false, wKsiedze = false;
-  const PROG_RUCHU = 9;
-  const hold = document.getElementById('hold') || document.body;
-
-  hold.addEventListener('pointerdown', e => {
-    if (!Ksiega.czyOtwarta()) return;
-    e.stopPropagation();
-    const p = doSceny(e.clientX, e.clientY), O = Ksiega.obszar(Scene.W, Scene.H);
-    wKsiedze = p.x > O.x - 15 && p.x < O.x + O.w + 15 && p.y > O.y - 15 && p.y < O.y + O.h + 15;
-    x0 = e.clientX; y0 = e.clientY; t0 = Date.now();
-    gest = true; ciagnie = false;
-  }, true);
-
-  hold.addEventListener('pointermove', e => {
-    if (!Ksiega.czyOtwarta() || !gest) return;
-    e.stopPropagation();
-    const dx = e.clientX - x0, dy = e.clientY - y0;
-    if (!ciagnie) {
-      if (Math.abs(dx) < PROG_RUCHU || Math.abs(dx) < Math.abs(dy)) return;
-      if (!Ksiega.chwyc()) return;
-      ciagnie = true;
-    }
-    const r = plotno.getBoundingClientRect();
-    const O = Ksiega.obszar(Scene.W, Scene.H);
-    const sk = Math.max(r.width / Scene.W, r.height / Scene.H);
-    Ksiega.ciagnij(dx / (O.w * sk * 0.78));
-  }, true);
-
-  function koniec(e) {
-    if (!Ksiega.czyOtwarta() || !gest) return;
-    gest = false;
-    const dx = e.clientX - x0, dy = e.clientY - y0, dt = Date.now() - t0;
-    if (ciagnie) {
-      ciagnie = false;
-      Ksiega.pusc(Math.abs(dx) / Math.max(1, dt) > 0.65);   /* rzut kciukiem */
-      return;
-    }
-    /* Przeciagniecie w pionie, w KTORAKOLWIEK strone, zamyka ksiege.
-       Odruch bywa rozny: jedni odkladaja ksiazke na stol, drudzy odsuwaja
-       ja od siebie. Oba maja dzialac. */
-    if (Math.abs(dy) > 90 && Math.abs(dy) > Math.abs(dx) * 1.4) { Ksiega.zamknij(); return; }
-    if (Math.abs(dx) > PROG_RUCHU || Math.abs(dy) > PROG_RUCHU) return;
-    const p = doSceny(e.clientX, e.clientY);
-    const K = Ksiega.krzyzyk(Scene.W, Scene.H);
-    if (Math.hypot(p.x - K.x, p.y - K.y) < K.r) { Ksiega.zamknij(); return; }
-    /* Zakladki pasm maja pierwszenstwo przed strefami przewracania, bo leza
-       pod ksiega, czyli tam, gdzie inaczej wypadloby zamkniecie. */
-    for (const z of Ksiega.zakladki(Scene.W, Scene.H)) {
-      if (p.x >= z.x && p.x <= z.x + z.w && p.y >= z.y - 6 && p.y <= z.y + z.h + 6) {
-        Ksiega.doPasma(z.t);
-        if (navigator.vibrate) { try { navigator.vibrate(9); } catch (err) {} }
-        return;
-      }
-    }
-    /* Dotkniecie GDZIEKOLWIEK na ekranie przewraca strone: lewa polowa
-       ekranu wstecz, prawa dalej. Zamkniecie ma teraz wlasne miejsce,
-       wiec stukniecie obok ksiegi nie musi juz nic zamykac. */
-    /* NAPRAWA Q14 (audyt IX 2026): `e.clientX` to wspolrzedna wzgledem CALEGO
-       OKNA, a porownywalismy ja z polowa szerokosci samej sceny -- bez
-       przesuniecia sceny od lewej krawedzi. Na telefonie scena zaczyna sie
-       w x=0, wiec dzialalo; na komputerze przy oknie 1440 px scena 560 px
-       zaczyna sie na x=440, wiec klikniecie lewej cwiartki (clientX=580)
-       bylo porownywane z 280 i wychodzilo "prawa strona". Powyzej 1120 px
-       szerokosci okna PRAKTYCZNIE CALA scena liczyla sie jako "dalej".
-       Teraz porownujemy ze srodkiem sceny w tym samym ukladzie wspolrzednych
-       co clientX (rect.left + rect.width/2). */
-    const rp = plotno.getBoundingClientRect();
-    Ksiega.przewroc(e.clientX > (rp.left + rp.width / 2) ? 1 : -1);
-  }
-  /* ===============================
-lata, ['ZLECENIE WYKONANE']);
-      if (window.__odswiezPasekZlecen) window.__odswiezPasekZlecen();
-    }
-    const bonusProg = Zapis.sprawdzProgi();
-    if (bonusProg > 0 && typeof Ruch !== 'undefined') Ruch.zaRekord(bonusProg, ['PROG DOBY']);
-    if (typeof Zadania !== 'undefined') {
-      const G3 = GATUNKI[gk], t = Math.ceil(pkt / 10);
-      const zrob = [];
-      const pchnij = (typ, ile, g2) => { for (const z of Zadania.zdarzenie(typ, ile, g2)) zrob.push(z); };
-      pchnij('zlow', 1); pchnij('gat', 1, gk); pchnij('punkty', pkt);
-      pchnij('karta', pkt); pchnij('dlugosc', Math.round(lenCm)); pchnij('waga', w);
-      /* Q11: zadanie dobowe czyta zbior gatunkow Z TEJ DOBY, nie kolekcje
-         calego zycia. Stary zapis (bez pola dobaGat) dostaje pusta liste
-         z nowaDoba(), wiec zaczyna liczyc od dzis -- bez awarii. */
-      pchnij('gatunki', (Zapis.dobaGat ? Zapis.dobaGat().length : 0));
-      /* Nowe typy: wartosc DOKLADNA karty, dlugosc serii, srednia dobowa
-         i licznik lawic dnia. Wszystkie licza sie z danych, ktore i tak
-         przechodza przez zapis, wiec nie kosztuja nic dodatkowego. */
-      pchnij('dokladnie', pkt);
-      const st2 = Zapis.dane().stat;
-      if (st2.dobaSztuk > 0) pchnij('srednia', Math.floor(st2.dobaPunkty / st2.dobaSztuk));
-      pchnij('lawice', st2.dobaOdswiezen || 0);
-      if (t >= 2) pchnij('tier2', 1);
-      if (t >= 3) pchnij('tier3', 1);
-      if (t >= 4) pchnij('tier4', 1);
-      /* NAPRAWA Q10 (audyt IX 2026): bylo `t === 5` i `t === 6`, mimo ze
-         opisy zadan mowia "pasmo 5 LUB WYZEJ". Ryba za 65 pkt (t=7) nie
-         zaliczala ani piatki, ani szostki; ryba za 55 pkt (t=6) nie
-         zaliczala piatki. Teraz >= jak w progach 2-4 powyzej -- caly ciag
-         jest wreszcie spojny i zgodny z tym, co obiecuje tekst zadania. */
-      if (t >= 5) pchnij('tier5', 1);
-      if (t >= 6) pchnij('tier6', 1);
-      if (kolekcja && kolekcja.nowy) {
-        pchnij('nowy', 1);
-        /* Zapamietujemy, KTORA ryba czeka na obejrzenie w atlasie.
-           Ikona ksiegi dostaje wykrzyknik, a dotkniecie otwiera od razu
-           na jej stronie, zamiast na tej, ktora byla ostatnio. */
-        Zapis.dane().stat.nowaWAtlasie = gk;
-        Zapis.zapisz();
-      }
-      if (kolekcja && kolekcja.rekord && !kolekcja.nowy) pchnij('rekord', 1);
-      if (lenCm >= G3.rekordDl || w >= G3.rekordWaga) pchnij('rekordPL', 1);
-
+    if (post > 0) {
       /* ============================================================
-         MONETY ZA REKORDY.
-         Nagroda idzie POZA zadaniami, bo rekord nie jest zadaniem na dzis,
-         tylko czyms, co zdarza sie samo. Trzy progi, trzy rzedy wielkosci:
-           rekord Polski      100 qryb, wypada raz na czterdziesci minut
-           rekord zyciowy     200 qryb, rzadszy im dluzej grasz
-           odkrycie gatunku   od 100 w pasmie pierwszym do 1000 w szostym
-           domkniecie pasma   od 1000 do 6000, caly atlas 50 000
-           seria              10 qryb przy dwoch, potem podwojenie na krok
-           rekord spolecznosci 5000 qryb, na razie nieosiagalny, bo wymaga
-                              serwera; kod jest gotowy i czeka
-         Sumuje sie w jeden przelew, zeby platki nie leciały dwa razy. */
-      let bonus = 0; const powody = [];
-      if (lenCm >= G3.rekordDl || w >= G3.rekordWaga) { bonus += 100; powody.push('REKORD POLSKI'); }
-      if (kolekcja && kolekcja.rekord && !kolekcja.nowy) { bonus += 200; powody.push('REKORD ŻYCIOWY'); }
-      if (typeof Spolecznosc !== 'undefined' && Spolecznosc.bije &&
-          Spolecznosc.bije(gk, pkt)) { bonus += 5000; powody.push('REKORD SPOŁECZNOŚCI'); }
+         OBROT BEZ LUSTRA.
 
-      /* ODKRYCIE GATUNKU. Stawka rosnie z pasmem, w ktorym gatunek ZWYKLE
-         wypada, a nie z pasma tej konkretnej sztuki: inaczej ta sama ryba
-         placilaby raz sto, raz tysiac, zaleznie od tego, jak duzy okaz
-         akurat sie trafil. */
-      if (kolekcja && kolekcja.nowy && typeof tierGatunku === 'function') {
-        bonus += NAGRODA_ODKRYCIA[tierGatunku(gk)] || 100;
-        powody.push('NOWY GATUNEK');
-        /* Q13: sprawdzKolekcje juz nie przyjmuje parametru -- grupuje
-           sama, wedlug KLASA, dokladnie jak zakladki atlasu w 21. */
-        const dop = Zapis.sprawdzKolekcje();
-        if (dop && dop.ile) { bonus += dop.ile; for (const p of dop.powody) powody.push(p); }
-      }
+         Poprzedni model traktowal kartke jak fizyczna karte z rewersem:
+         po polowie obrotu rysowal strone docelowa w odbiciu lustrzanym.
+         W prawdziwej ksiazce to dziala, bo rewers jest ZADRUKOWANY po
+         drugiej stronie papieru i czyta sie normalnie. Na ekranie mamy
+         jedna strone naraz, wiec odbicie bylo po prostu odbiciem: tekst
+         szedl od prawej do lewej i to widac bylo na zrzucie.
 
-      /* Ekonomia serii (audyt IX 2026, potem korekta na wyrazna prosbe:
-         "sufit to 50000", oraz osobno "serii niech nie przerywa nowa
-         lawica" -- patrz komentarz przy nowaLawica() w 18). Sufit
-         podniesiony z 5000 do 50000: formula dziala jak dawniej (podwajanie
-         czuc realnie: 10, 20, 40...) do serii ok. 14 (~40 960), pozniej
-         plaski sufit. Dwudziestorybna seria daje teraz maksymalnie okolo
-         530 000 lacznie -- wiecej niz jedna nagroda za komplet atlasu, ale
-         wciaz skonczone, bez przepelnienia Number.MAX_SAFE_INTEGER nawet
-         przy absurdalnie dlugich seriach.
-         UWAGA na kombinacje z druga zmiana z tej samej prosby: skoro
-         "NOWA LAWICA" guzikiem juz NIE przerywa serii, mechanizm chroniacy
-         przed "klikaj w kolko, az przyplynie ten sam gatunek" zniknal --
-         a sufit 50000 (dziesiec razy wiekszy niz poprzedni 5000) sprawia,
-         ze ta sama dziura placi teraz dziesiec razy wiecej za probe bez
-         ryzyka. Wprowadzone na wprost, bo tak padlo zyczenie -- ale to
-         realny kompromis midzy wygoda a odpornoscia ekonomii na exploit,
-         nie oczywista, bezpieczna poprawka. */
-      if (S && S.ile >= 2) {
-        bonus += Math.min(50000, 10 * Math.pow(2, S.ile - 2));
-        powody.push('SERIA \u00D7' + S.ile);
-      }
+         Model wlasciwy dla pojedynczej strony jest prostszy i czytelniejszy:
+           dalej   strona biezaca odchyla sie od grzbietu i znika,
+                   odslaniajac lezaca pod spodem strone docelowa
+           wstecz  strona docelowa nasuwa sie od grzbietu i przykrywa biezaca
+         W obu wypadkach os obrotu jest przy grzbiecie, a szerokosc idzie
+         cosinusem kata, wiec ruch zwalnia przy koncu tak jak papier.
+         Zadnego odbicia nie ma w ogole.
+         ============================================================ */
+      const kat = post * (Math.PI / 2);
+      const szer = (kier > 0) ? Math.cos(kat) : Math.sin(kat);
+      const rysowana = (kier > 0) ? strona : docelowa;
+      const os = O.x;                       /* grzbiet jest po lewej */
 
-      if (bonus > 0) {
-        Zapis.dane().monety = (Zapis.dane().monety || 0) + bonus;
-        Zapis.zapisz();
-        if (typeof Ruch !== 'undefined') Ruch.zaRekord(bonus, powody);
-      }
-      /* Kamienie milowe doby: co 1000 lawic i co 500 punktow. Wyplacaja sie
-         same, ale pokazuja sie tym samym przelewem co rekordy, zeby gracz
-         wiedzial, skad przyszly monety. */
-      const prog = Zapis.sprawdzProgi();
-      if (prog > 0 && typeof Ruch !== 'undefined') {
-        setTimeout(() => Ruch.zaRekord(prog, ['KAMIEŃ MILOWY']), bonus > 0 ? 2200 : 300);
-      }
-      if (lenCm > G3.cmMax) pchnij('olbrzym', 1);
-      /* NAPRAWA Q09 (audyt IX 2026): DWA ZNACZENIA SLOWA "SERIA".
-         `stat.seria` to licznik kolejnych zlowien BEZ WZGLEDU NA GATUNEK,
-         a `dane.seria` (zglaszane wyzej, przy S.ile) to seria TEGO SAMEGO
-         gatunku. Oba szly do zadan pod nazwa 'seria', a zadanie bierze
-         wieksza wartosc -- wiec "Zbuduj serie 2 ryb tego samego gatunku"
-         zaliczalo sie po zlowieniu dwoch ROZNYCH ryb. Wszystkie zadania
-         tego typu w puli mowia wprost "tego samego gatunku", wiec zostaje
-         tylko zgloszenie z S.ile. Sam licznik `stat.seria` liczy sie dalej,
-         bo korzystaja z niego statystyki -- po prostu nie udaje juz serii
-         gatunkowej. */
-      Zapis.dane().stat.seria = (Zapis.dane().stat.seria || 0) + 1;
-      if (zrob.length) nagrody = zrob;
+      /* cien pod krawedzia ruchomej strony */
+      const kraw = os + O.w * szer;
+      const gc = g.createLinearGradient(kraw, 0, kraw + O.w * 0.34, 0);
+      gc.addColorStop(0, 'rgba(26,16,6,' + (0.40 * Math.sin(post * Math.PI)) + ')');
+      gc.addColorStop(1, 'rgba(26,16,6,0)');
+      g.save(); g.beginPath(); g.rect(O.x, O.y, O.w, O.h); g.clip();
+      g.fillStyle = gc; g.fillRect(O.x, O.y, O.w, O.h);
+      g.restore();
+
+      g.save();
+      g.beginPath(); g.rect(O.x, O.y, O.w, O.h); g.clip();
+      g.translate(os, O.y + O.h / 2);
+      g.scale(Math.max(0.004, szer), 1 + 0.03 * Math.sin(post * Math.PI));
+      g.translate(0, -O.h / 2);
+      g.drawImage(bufor(rysowana, bw, bh), 0, 0, O.w, O.h);
+      /* papier ustawiony ukosem lapie mniej swiatla */
+      g.fillStyle = 'rgba(30,20,8,' + (0.34 * Math.sin(post * Math.PI)) + ')';
+      g.fillRect(0, 0, O.w, O.h);
+      g.restore();
     }
+
+    /* ---- strzalki po bokach ----
+       Dotad nie bylo widac, ze ksiega w ogole ma strony do przewracania.
+       Dwa szewrony przy zewnetrznych krawedziach, tuszem na papierze,
+       oddychaja powoli, zeby przyciagac oko bez migania. */
+    const puls = 0.72 + 0.28 * Math.sin(Date.now() / 620);
+    const sy = O.y + O.h / 2, r2 = Math.min(O.w, O.h) * 0.036;
+    g.save();
+    g.strokeStyle = 'rgba(42,32,24,' + (0.5 * puls) + ')';
+    g.lineWidth = Math.max(2.5, r2 * 0.34); g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const [sx, zn] of [[O.x + O.w * 0.055, 1], [O.x + O.w * 0.945, -1]]) {
+      g.beginPath();
+      g.moveTo(sx + zn * r2 * 0.5, sy - r2);
+      g.lineTo(sx - zn * r2 * 0.5, sy);
+      g.lineTo(sx + zn * r2 * 0.5, sy + r2);
+      g.stroke();
+    }
+    g.restore();
+
+    /* ---- krzyzyk zamkniecia na okladce ----
+       Wyjscie przez ponowne dotkniecie ikony ksiegi bylo nieintuicyjne,
+       bo ikona jest daleko od tresci i niczego nie zapowiada. */
+    const kx = O.x + O.w - 2, ky = O.y - 26, kr = 15;
+    g.save();
+    g.fillStyle = '#432C14'; g.strokeStyle = '#B08840'; g.lineWidth = 2;
+    g.beginPath(); g.arc(kx, ky, kr, 0, 6.2832); g.fill(); g.stroke();
+    g.strokeStyle = '#EFD9A6'; g.lineWidth = 2.6; g.lineCap = 'round';
+    g.beginPath();
+    g.moveTo(kx - 5.5, ky - 5.5); g.lineTo(kx + 5.5, ky + 5.5);
+    g.moveTo(kx + 5.5, ky - 5.5); g.lineTo(kx - 5.5, ky + 5.5);
+    g.stroke();
+    g.restore();
+
+    /* ---- zakladki pasm ---- */
+    if (tryb === 'atlas') {
+      const ks = klucze();
+      const teraz = pasmoAtlasu(ks[post > 0 ? docelowa : strona]);
+      for (const z of zakladki(W, H)) {
+        const B = LAK[z.t] || LAK[1];
+        const akt = z.t === teraz;
+        const yy2 = z.y - (akt ? 3 : 0), hh = z.h + (akt ? 3 : 0);
+        g.fillStyle = akt ? B[1] : B[0];
+        g.globalAlpha = akt ? 1 : 0.62;
+        g.beginPath();
+        g.moveTo(z.x, yy2);
+        g.lineTo(z.x + z.w, yy2);
+        g.lineTo(z.x + z.w - 3, yy2 + hh);
+        g.lineTo(z.x + 3, yy2 + hh);
+        g.closePath(); g.fill();
+        g.globalAlpha = 1;
+        g.strokeStyle = B[2]; g.lineWidth = 1.4; g.stroke();
+        g.fillStyle = 'rgba(255,240,220,.94)';
+        g.font = '700 ' + Math.round(hh * 0.52) + 'px system-ui,-apple-system,sans-serif';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(z.t), z.x + z.w / 2, yy2 + hh * 0.52);
+      }
+    }
+
+    /* wskaznik stron u dolu okladki */
+    const ile = klucze().length, poz = (post > 0 ? docelowa : strona);
+    const pw = O.w * 0.5, px0 = O.x + (O.w - pw) / 2, py0 = O.y + O.h + 7;
+    g.fillStyle = 'rgba(255,240,205,.20)'; g.fillRect(px0, py0, pw, 2);
+    g.fillStyle = '#E8C765';
+    g.fillRect(px0 + pw * (poz / (ile - 1)) - 6, py0 - 1, 12, 4);
+    g.restore();
   }
-  Card.data = { klucz: gk, gatunek: GATUNKI[gk].nazwa, dl: lenCm, waga: w,
-             
 
-===== nowaWAtlasie: 0 =====
-
-===== stat.zlowien++ 1 =====
-niejeHistoria
-      .filter(w => w && typeof w === 'object')
-      .map(w => ({ id: String(w.id || ''), nazwa: String(w.nazwa || 'TURNIEJ').slice(0, 24),
-                    minut: liczba(w.minut, 30, 1), gracze: liczba(w.gracze, 1, 1),
-                    miejsce: liczba(w.miejsce, 1, 1), nagroda: liczba(w.nagroda, 0, 0),
-                    kiedy: liczba(w.kiedy, 0, 0) }))
-      .slice(0, 30);
+  /* ============================================================
+     ZAKLADKI PASM.
+     Siedem jezyczkow przyklejonych do dolnej krawedzi okladki, w barwach
+     laku. Dotkniecie przenosi do PIERWSZEGO gatunku danego pasma, wiec
+     szukanie konkretnej ryby nie wymaga przewracania dziesiatkow stron.
+     Aktywne pasmo, czyli to, w ktorym stoi otwarta strona, jest wysuniete
+     i jasniejsze.
+     ============================================================ */
+  function zakladki(W, H) {
+    const O = obszar(W, H);
+    const sz = O.w / 7, wys = Math.max(20, O.h * 0.038);
+    const out = [];
+    for (let t = 1; t <= 7; t++)
+      out.push({ t: t, x: O.x + (t - 1) * sz, y: O.y + O.h + 4, w: sz - 3, h: wys });
     return out;
   }
-
-  function wczytaj() {
-    try {
-      const t = Magazyn.czytaj(KLUCZ);
-      if (t) {
-        const d = JSON.parse(t);
-        if (d && d.v === WERSJA) {
-          const s = sanujZapis(d);
-          if (s) dane = s;
-        }
-      }
-    } catch (e) {}
-    migruj(dane);
-  }
-  function teraz() {
-    if (!Magazyn.czyDziala()) return;
-    Magazyn.pisz(KLUCZ, JSON.stringify(dane));
-    /* Dysk jest zrodlem prawdy, chmura kopia. Wyslanie jest planowane,
-       nie natychmiastowe, i nigdy nie blokuje gry: brak sieci znaczy tylko
-       tyle, ze kopia poczeka do nastepnego razu. */
-    if (typeof Chmura !== 'undefined' && Chmura.zaplanujWyslanie) Chmura.zaplanujWyslanie();
-  }
-  function zapisz() {
-    if (!Magazyn.czyDziala()) return;
-    clearTimeout(timer);
-    timer = setTimeout(teraz, ZWLOKA);
+  /* Pierwszy gatunek danego pasma, liczony raz i zapamietany. */
+  const _pierwszy = {};
+  function doPasma(t) {
+    if (tryb !== 'atlas') return;
+    /* Bez cache: przy wlaczonym filtrze indeksy zmieniaja sie z kazda litera,
+       a zapamietany numer wskazywalby na rybe z zupelnie innego pasma.
+       Wyszukanie po nowej, uporzadkowanej liscie kosztuje jedno przejscie. */
+    const ks = klucze();
+    const nr = ks.findIndex(k => pasmoAtlasu(k) === t);
+    if (nr < 0) return;
+    strona = nr; docelowa = nr; post = 0; kier = 0; ciagnie = false; wraca = false;
   }
 
-  /* Zwraca opis tego, co ta sztuka wnosi do kolekcji. Wolane raz, przy
-     ladowaniu ryby, wiec karta moze od razu pokazac NOWY GATUNEK albo
-     REKORD ZYCIOWY, a licznik nie zmienia sie w trakcie ogladania. */
-  function zlowiono(slug, cm, waga, pkt) {
-    nowaDoba();
-    /* Dorobek doby liczy sie w PUNKTACH z kart, nie w sztukach: dwadziescia
-       uklei ma wazyc mniej niz jeden lipien. Sztuki leca obok, do zadan. */
-    dane.stat.dobaPunkty += pkt;
-    dane.stat.dobaSztuk++;
-    /* Q11: gatunek dopisany do zbioru DOBOWEGO (patrz nowaDoba). */
-    if (dane.stat.dobaGat.indexOf(slug) < 0) dane.stat.dobaGat.push(slug);
-    if (pkt > dane.stat.dobaRekord) dane.stat.dobaRekord = pkt;
-    const a = dane.atlas[slug] || (dane.atlas[slug] = { n: 0, cm: 0, g: 0, pkt: 0, kiedy: 0 });
-    const nowy = a.n === 0;
-    const rekord = pkt > a.pkt;
-    a.n++;
-    if (rekord) { a.cm = Math.round(cm * 10) / 10; a.g = waga; a.pkt = pkt; a.kiedy = Date.now(); }
-    dane.stat.zlowien++;
-    if (pkt > dane.stat.rekordZycia) dane.stat.rekordZycia = pkt;
-    zapisz();
-    return { nowy, rekord, ile: a.n, najlepszy: a.pkt };
+  /* Krzyzyk w tych samych wspolrzednych, w ktorych jest rysowany. */
+  function krzyzyk(W, H) {
+    const O = obszar(W, H);
+    return { x: O.x + O.w - 2, y: O.y - 26, r: 22 };
   }
+  return { otworz, zamknij, przewroc, tik, rysuj, obszar, krzyzyk, zakladki, doPasma, tryb: () => tryb,
+           ustawFiltr, filtr: () => filtr,
+           indeksGatunku: slug => porzadekAtlasu().indexOf(slug),
+           chwyc, ciagnij, pusc, czyOtwarta: () => otwarta,
+           strona: () => strona, ustaw: i => { strona = i; docelowa = i; },
+           wPolowie: () => post };
+})();
+window.Ksiega = Ksiega;
 
-  const kod = () => {
-    try { return btoa(unescape(encodeURIComponent(JSON.stringify(dane)))); }
-    catch (e) { return ''; }
-  };
-  function wczytajKod(t) {
-    try {
-      const d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim()))));
-      if (!d || d.v !== WERSJA) return false;
-      const s2 = sanujZapis(d);              // Q07
-      if (!s2) return false;
-      dane = migruj(s2); teraz(); return true;
-    } catch (e) { return false; }
-  }
-  /* ============================================================
-     NAPRAWA Q06 (audyt IX 2026): PRZYWRACANIE WLASNEJ KOPII.
-     `wczytajKod` powyzej robi dokladnie to, co potrzeba -- PELNE
-     zastapienie lokalnego stanu -- i istnial od dawna, ale audyt
-     znalazl, ze W CALYM PLIKU NIE MA ANI JEDNEGO WYWOLANIA GO Z
-     INTERFEJSU. Panel obiecywal "schowaj kod, wkleisz na innym
-     telefonie", ale nie bylo gdzie tego wkleic -- jedyne pole
-     tekstowe ("KOD ZNAJOMEGO") woła `dolaczKod`, ktora tylko DOKLEJA
-     cudze rekordy do `spoleczne`, nie zastepuje niczego.
-     Ta funkcja to podglad PRZED decyzja: dekoduje i waliduje (ta sama
-     `sanujZapis` co realne wczytanie) ale NICZEGO NIE ZMIENIA w `dane`,
-     zeby UI moglo pokazac "to masz teraz / to dostaniesz po przywroceniu"
-     i zapytac o potwierdzenie, zanim cokolwiek nadpisze. */
-  function podgladKodu(t) {
-    let d;
-    try { d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim())))); }
-    catch (e) { return { ok: false, powod: 'To nie wygląda na kod gry.' }; }
-    if (!d || d.v !== WERSJA) return { ok: false, powod: 'Kod jest z innej wersji gry.' };
-    const s2 = sanujZapis(d);
-    if (!s2) return { ok: false, powod: 'Kod jest uszkodzony.' };
-    return { ok: true, zlowien: s2.stat.zlowien || 0,
-             gatunkow: Object.keys(s2.atlas || {}).filter(k => s2.atlas[k] && s2.atlas[k].n > 0).length,
-             monety: s2.monety || 0, utworzone: s2.utworzone || 0 };
-  }
+/* ============================================================
+   PODPIECIE WYSZUKIWARKI.
+   Pole zyje poza kanwa, wiec musi samo pilnowac trzech rzeczy: zeby dotkniecie
+   w nie NIE przewracalo kartki, zeby zamkniecie ksiegi kasowalo filtr,
+   i zeby Enter zdejmowal klawiature zamiast wysylac formularz.
+   ============================================================ */
+(function podepnijSzukajke() {
+  const pole = document.getElementById('szukajRyb');
+  const x = document.getElementById('szukajX');
+  const box = document.getElementById('szukajka');
+  if (!pole || !box) return;
+  /* Dotkniecia w pasek nie ida do warstwy przewracania kartek. */
+  for (const zd of ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'click'])
+    box.addEventListener(zd, e => e.stopPropagation());
+  pole.addEventListener('input', () => Ksiega.ustawFiltr(pole.value));
+  pole.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pole.blur(); } });
+  x.addEventListener('click', () => { pole.value = ''; Ksiega.ustawFiltr(''); pole.blur(); });
+  /* Zamkniecie ksiegi zeruje filtr, zeby nastepne otwarcie zaczynalo od spisu. */
+  let bylo = false;
+  setInterval(() => {
+    const jest = Ksiega.czyOtwarta() && Ksiega.tryb() === 'atlas';
+    if (bylo && !jest && pole.value) { pole.value = ''; Ksiega.ustawFiltr(''); }
+    bylo = jest;
+  }, 400);
+})();
+/* Zabezpieczenie: gdyby ksiega z jakiegos powodu zostala zamknieta inna
+   droga niz przez zamknij(), HUD i tak wraca. Sprawdzenie co pol sekundy
+   kosztuje tyle co nic, a ratuje przed ekranem bez zadnego przycisku. */
+setInterval(() => {
+  const kl = document.body && document.body.classList;
+  if (!kl || typeof kl.contains !== 'function') return;
+  const ma = kl.contains('ksiega-otwarta');
+  if (ma !== Ksiega.czyOtwarta()) kl.toggle('ksiega-otwarta', Ksiega.czyOtwarta());
+}, 500);
 
-  /* ============================================================
-     REKORDY SPOLECZNOSCI BEZ SERWERA.
-
-     Kod zapasowy juz istnieje i zawiera caly atlas nadawcy. Wystarczy wiec
-     wkleic kod znajomego, zeby jego rekordy stanely obok twoich. Ta funkcja
-     bierze z cudzego kodu WYLACZNIE najlepsze wyniki i nick. Monety, zadania,
-     seria i zaneta sa ignorowane: cudzy kod nie moze niczego dodac do twojego
-     konta poza liczba do pobicia. Wlasny kod wklejony tutaj nie robi nic.
-     ============================================================ */
-  /* ============================================================
-     NAPRAWA Q04 (audyt IX 2026): XSS przez nick z kodu znajomego.
-     Wlasny nick jest filtrowany przy wpisywaniu, ale nick WCZYTANY
-     z cudzego kodu byl tylko przycinany do 16 znakow i szedl prosto do
-     komunikatu wstawianego przez innerHTML. Szesnascie znakow wystarcza
-     na znacznik z atrybutem zdarzenia. Kod znajomego to dane z zewnatrz
-     -- wklejone z czatu, forum, czegokolwiek -- wiec traktujemy je jak
-     kazde inne niezaufane wejscie.
-     Filtrujemy U ZRODLA, przy imporcie: do `dane.spoleczne` nie ma prawa
-     trafic nic poza literami, cyframi, spacja i kilkoma znakami. Dzieki
-     temu bezpieczne staja sie WSZYSTKIE miejsca, ktore ten nick pozniej
-     wyswietlaja, a nie tylko te, o ktorych ktos pamietal. */
-  function czystyNick(x) {
-    return String(x == null ? '' : x)
-      .replace(/[^\p{L}\p{N} ._\-]/gu, '')   // tylko litery/cyfry/spacja/kropka/podkreslnik/myslnik
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 16) || 'ANONIM';
-  }
-  window.czystyNick = czystyNick;
-
-  function dolaczKod(t) {
-    let d;
-    try { d = JSON.parse(decodeURIComponent(escape(atob(String(t).trim())))); }
-    catch (e) { return { ok: false, powod: 'To nie wygląda na kod gry.' }; }
-    if (!d || d.v !== WERSJA || !d.atlas) return { ok: false, powod: 'Kod jest z innej wersji gry.' };
-    if (d.id && d.id === dane.id) return { ok: false, powod: 'To twój własny kod.' };
-    const nick = czystyNick(d.profil && d.profil.nick);
-    let nowych = 0, lepszych = 0;
-    for (const slug in d.atlas) {
-      const a = d.atlas[slug];
-      if (!a || !a.n || !(a.pkt > 0)) continue;
-      const b = dane.spoleczne[slug];
-      if (!b) nowych++;
-      else if (a.pkt > b.pkt) lepszych++;
-      else continue;
-      dane.spoleczne[slug] = { cm: a.cm, g: a.g, pkt: a.pkt, nick: nick };
-    }
-    if (nowych || lepszych) teraz();
-    return { ok: true, nick: nick, nowych: nowych, lepszych: lepszych };
-  }
-
-  wczytaj();
-  window.addEventListener('pagehide', teraz);
-  window.addEventListener('visibilitychange', () => { if (document.hidden) teraz(); });
-
-  function odswiezono() {
-    nowaDoba(); dane.stat.dobaOdswiezen++; zapisz();
-    /* ZLECENIA: termin liczy sie w LAWICACH (tabela LAWIC_PASMA w `47`),
-       wiec to jest jego jedyny tykajacy zegar
-
-===== stat.zlowien += 0 =====
+const ZADANIA = [{"g":1,"t":"karta","c":12,"o":"Złów rybę na 12 punktów lub więcej","m":0.3,"i":0},{"g":1,"t":"tier2","c":1,"o":"Złów rybę pasma 2 lub wyżej","m":0.3,"i":1},{"g":1,"t":"karta","c":18,"o":"Złów rybę na 18 punktów lub więcej","m":0.4,"i":2},{"g":1,"t":"tier3","c":1,"o":"Złów rybę pasma 3 lub wyżej","m":0.5,"i":3},{"g":1,"t":"karta","c":24,"o":"Złów rybę na 24 punktów lub więcej","m":0.6,"i":4},{"g":1,"t":"punkty","c":60,"o":"Uzbieraj 60 punktów","m":0.7,"i":5},{"g":1,"t":"tier2","c":2,"o":"Złów 2 ryby pasma 2 lub wyżej","m":0.7,"i":6},{"g":1,"t":"zlow","c":3,"o":"Złów 3 ryby","m":0.8,"i":7},{"g":1,"t":"karta","c":30,"o":"Złów rybę na 30 punktów lub więcej","m":0.8,"i":8},{"g":1,"t":"tier4","c":1,"o":"Złów rybę pasma 4 lub wyżej","m":0.8,"i":9},{"g":1,"t":"seria","c":2,"o":"Zbuduj serię 2 ryb tego samego gatunku","m":0.9,"i":10},{"g":1,"t":"tier2","c":3,"o":"Złów 3 ryby pasma 2 lub wyżej","m":1.0,"i":11},{"g":1,"t":"tier3","c":2,"o":"Złów 2 ryby pasma 3 lub wyżej","m":1.0,"i":12},{"g":1,"t":"punkty","c":100,"o":"Uzbieraj 100 punktów","m":1.1,"i":13},{"g":1,"t":"karta","c":36,"o":"Złów rybę na 36 punktów lub więcej","m":1.2,"i":14},{"g":1,"t":"zlow","c":5,"o":"Złów 5 ryb","m":1.3,"i":15},{"g":1,"t":"tier3","c":3,"o":"Złów 3 ryby pasma 3 lub wyżej","m":1.5,"i":16},{"g":1,"t":"tier5","c":1,"o":"Złów rybę pasma 5 lub wyżej","m":1.5,"i":17},{"g":1,"t":"punkty","c":150,"o":"Uzbieraj 150 punktów","m":1.6,"i":18},{"g":1,"t":"tier2","c":5,"o":"Złów 5 ryb pasma 2 lub wyżej","m":1.6,"i":19},{"g":1,"t":"tier4","c":2,"o":"Złów 2 ryby pasma 4 lub wyżej","m":1.6,"i":20},{"g":1,"t":"gat","c":1,"o":"Złów 1 sztukę: PŁOĆ","m":1.7,"k":"ploc","i":21},{"g":1,"t":"karta","c":42,"o":"Złów rybę na 42 punktów lub więcej","m":1.9,"i":22},{"g":1,"t":"zlow","c":8,"o":"Złów 8 ryb","m":2.1,"i":23},{"g":1,"t":"gatunki","c":3,"o":"Złów 3 różne gatunki","m":2.2,"i":24},{"g":1,"t":"punkty","c":220,"o":"Uzbieraj 220 punktów","m":2.4,"i":25},{"g":1,"t":"tier3","c":5,"o":"Złów 5 ryb pasma 3 lub wyżej","m":2.4,"i":26},{"g":1,"t":"tier4","c":3,"o":"Złów 3 ryby pasma 4 lub wyżej","m":2.4,"i":27},{"g":1,"t":"wiadro","c":3,"o":"Miej 3 ryby naraz w wiaderku","m":2.5,"i":28},{"g":1,"t":"zlow","c":10,"o":"Złów 10 ryb","m":2.6,"i":29},{"g":1,"t":"tier2","c":8,"o":"Złów 8 ryb pasma 2 lub wyżej","m":2.6,"i":30},{"g":1,"t":"lawice","c":3,"o":"Wymień ławicę 3 razy","m":3.0,"i":31},{"g":1,"t":"zlow","c":12,"o":"Złów 12 ryb","m":3.1,"i":32},{"g":1,"t":"tier5","c":2,"o":"Złów 2 ryby pasma 5 lub wyżej","m":3.1,"i":33},{"g":1,"t":"gat","c":1,"o":"Złów 1 sztukę: OKOŃ","m":3.2,"k":"okon","i":34},{"g":1,"t":"punkty","c":300,"o":"Uzbieraj 300 punktów","m":3.3,"i":35},{"g":1,"t":"zlow","c":15,"o":"Złów 15 ryb","m":3.8,"i":36},
