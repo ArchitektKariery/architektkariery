@@ -1,7 +1,7 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: STAGE_9_READY_FOR_LAUNCH
-LIVE_FUNDING: OFF
+STATUS: LIVE
+LIVE_FUNDING: ON
 
 ## Parametry
 - cel: 500 000 000 QRYB
@@ -80,6 +80,14 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - funkcja startowa wymaga czystego DRAFT, pustej historii wpłat i LOCKED reward
 - start ustawia dokładnie 7 dni według duration_seconds
 - launch gate został przetestowany na ukrytym fixture i zadziałał poprawnie
-- właściwy Lucjan nadal NIE został uruchomiony
-- LIVE_FUNDING: OFF
-- READY_FOR_LAUNCH: YES
+- właściwy Lucjan został uruchomiony 2026-09-26 13:02:43 UTC
+- LIVE_FUNDING: ON
+- READY_FOR_LAUNCH: USED
+
+
+## LIVE START
+- event uruchomiony: 2026-09-26 13:02:43 UTC
+- koniec zbiórki: 2026-10-03 13:02:43 UTC
+- target: 500 000 000 QRYB
+- stan startowy: funding / visible / 0 QRYB / 0 darczyńców / reward locked
+- metadata funding_live=true
