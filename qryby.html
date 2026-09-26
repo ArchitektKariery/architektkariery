@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-25-life-dragon-tier8-v1';
+window.QRYBY_BUILD = '2026-09-26-lucjanek-stage2-v1';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -305,6 +305,64 @@ body.ksiega-otwarta #reset{
 #panelTresc .odn-stage-note{margin-top:9px;padding:7px 8px;border-left:3px solid #9a4d35;
   background:rgba(154,77,53,.08);font-size:9px;line-height:1.45;font-weight:700}
 #panelTresc .odn-disabled{width:100%;margin-top:10px;opacity:.58;cursor:default}
+
+/* ============================================================
+   ODNOWA GATUNKOW — etap 2: grafiki i animacje.
+   Nadal brak zapisu salda, RPC i Supabase. Stany 25/50/75/100
+   sa gotowe wizualnie; aktywuje je dopiero prawdziwy stan eventu.
+   ============================================================ */
+#panelTresc .odn-card{--odn-progress:0%}
+#panelTresc .odn-tank{position:relative;width:100%;height:100%;overflow:hidden;
+  border-radius:10px;background:#08060d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+#panelTresc .odn-water{position:absolute;inset:43% 0 0;
+  background:linear-gradient(180deg,rgba(63,132,150,.62),rgba(19,55,78,.92))}
+#panelTresc .odn-water::before{content:'';position:absolute;left:-20%;right:-20%;top:-4px;height:8px;
+  background:repeating-radial-gradient(ellipse at 50% 100%,rgba(151,227,235,.52) 0 3px,transparent 4px 12px);
+  animation:odn-fala 4.8s linear infinite}
+@keyframes odn-fala{from{transform:translateX(-8px)}to{transform:translateX(8px)}}
+#panelTresc .odn-fish{position:absolute;z-index:2;width:92%;height:92%;left:4%;top:4%;
+  object-fit:contain;image-rendering:pixelated;opacity:.08;transform:translateY(7px) scale(.82);
+  filter:saturate(.55) brightness(.72);transition:opacity .5s ease,transform .5s ease,filter .5s ease}
+#panelTresc .odn-tank .odn-roe{position:absolute;z-index:4;left:9px;bottom:4px}
+#panelTresc .odn-bubbles{position:absolute;z-index:3;inset:0;pointer-events:none}
+#panelTresc .odn-bubbles i{position:absolute;bottom:-8px;width:5px;height:5px;border-radius:50%;
+  border:1px solid rgba(201,244,248,.82);opacity:.7;animation:odn-babel 3.8s linear infinite}
+#panelTresc .odn-bubbles i:nth-child(1){left:16%;animation-delay:-.4s}
+#panelTresc .odn-bubbles i:nth-child(2){left:43%;width:4px;height:4px;animation-delay:-2.1s}
+#panelTresc .odn-bubbles i:nth-child(3){left:72%;width:6px;height:6px;animation-delay:-1.2s}
+#panelTresc .odn-bubbles i:nth-child(4){left:86%;width:3px;height:3px;animation-delay:-3.1s}
+@keyframes odn-babel{0%{transform:translateY(0) scale(.7);opacity:0}
+  15%{opacity:.7}100%{transform:translateY(-86px) scale(1.18);opacity:0}}
+#panelTresc .odn-meter i{width:var(--odn-progress)}
+#panelTresc .odn-card[data-tier="25"] .odn-fish{opacity:.18;transform:translateY(5px) scale(.86)}
+#panelTresc .odn-card[data-tier="50"] .odn-fish{opacity:.34;transform:translateY(3px) scale(.9);filter:saturate(.72) brightness(.82)}
+#panelTresc .odn-card[data-tier="75"] .odn-fish{opacity:.58;transform:translateY(1px) scale(.95);filter:saturate(.86) brightness(.93)}
+#panelTresc .odn-card[data-tier="100"] .odn-fish{opacity:.96;transform:none;filter:none;animation:odn-ryba 2.8s ease-in-out infinite}
+#panelTresc .odn-card[data-tier="50"] .odn-roe,
+#panelTresc .odn-card[data-tier="75"] .odn-roe{opacity:.68}
+#panelTresc .odn-card[data-tier="100"] .odn-roe{opacity:.16}
+@keyframes odn-ryba{0%,100%{transform:translateX(-2px) translateY(1px)}50%{transform:translateX(2px) translateY(-2px)}}
+#panelTresc .odn-milestones{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}
+#panelTresc .odn-milestones span{position:relative;padding:6px 2px 5px;border-radius:7px;text-align:center;
+  border:1px solid rgba(72,40,28,.14);background:rgba(89,49,31,.045);opacity:.5;
+  font-size:7px;line-height:1.2;font-weight:800}
+#panelTresc .odn-milestones span b{display:block;font-size:8px;margin-bottom:2px}
+#panelTresc .odn-milestones span.akt{opacity:1;border-color:rgba(135,47,42,.45);background:rgba(181,61,53,.10)}
+#panelTresc .odn-history{margin-top:9px;padding:8px;border-radius:8px;border:1px dashed rgba(72,40,28,.28);
+  background:rgba(255,255,255,.22)}
+#panelTresc .odn-history b{display:block;font-size:9px;letter-spacing:.08em}
+#panelTresc .odn-history span{display:block;margin-top:4px;font-size:9px;line-height:1.4;opacity:.62}
+#panelTresc .odn-stamp{display:none;position:absolute;right:9px;top:56px;z-index:7;
+  transform:rotate(-8deg);padding:6px 8px;border:3px double #7b201d;border-radius:7px;
+  color:#7b201d;background:rgba(255,239,208,.88);font-size:12px;font-weight:1000;letter-spacing:.08em;
+  box-shadow:0 2px 0 rgba(55,20,15,.18)}
+#panelTresc .odn-stamp small{display:block;font-size:7px;letter-spacing:.05em;text-align:center}
+#panelTresc .odn-card[data-state="funded"] .odn-stamp,
+#panelTresc .odn-card[data-state="sold"] .odn-stamp{display:block;animation:odn-stempel .42s cubic-bezier(.2,.9,.25,1.25)}
+@keyframes odn-stempel{from{opacity:0;transform:rotate(-8deg) scale(1.7)}to{opacity:1;transform:rotate(-8deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  #panelTresc .odn-water::before,#panelTresc .odn-bubbles i,#panelTresc .odn-fish,#panelTresc .odn-roe{animation:none!important}
+}
 
 /* IKONA I PANEL WIADERKA. */
 .ik-wiadro .palak,.ik-wiadro .korpus,.ik-wiadro .woda{fill:none;stroke:currentColor;
@@ -11612,25 +11670,42 @@ window.Ruch = Ruch;
     id: 'lucjanek',
     nazwa: 'LUCJANEK',
     cel: 500000000,
-    czasDni: 7
+    czasDni: 7,
+    zebrano: 0,
+    darczyncy: 0,
+    stan: 'preview'
   });
   const zanGraf = Z => (window.ZANETA_GRAF && window.ZANETA_GRAF[Z.graf]) || '';
 
   function odnowaKafel() {
     const E = ODNOWA_PREVIEW;
-    return '<div class="odn-card">' +
-      '<div class="odn-head"><div class="odn-hero" aria-hidden="true">' +
-      '<span class="odn-roe"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>' +
-      '<div class="odn-title"><b>IKRA · ' + E.nazwa + '</b>' +
+    const pct = Math.max(0, Math.min(100, Math.round((E.zebrano / E.cel) * 100)));
+    const tier = pct >= 100 ? 100 : pct >= 75 ? 75 : pct >= 50 ? 50 : pct >= 25 ? 25 : 0;
+    const ms = [
+      [0,'IKRA'],[25,'PULS'],[50,'ROZWÓJ'],[75,'MŁODA RYBA'],[100,'POWRÓT']
+    ].map(x => '<span class="' + (pct >= x[0] ? 'akt' : '') + '"><b>' + x[0] +
+      '%</b>' + x[1] + '</span>').join('');
+    return '<div class="odn-card" data-tier="' + tier + '" data-state="' + E.stan +
+      '" style="--odn-progress:' + pct + '%">' +
+      '<div class="odn-stamp">URATOWANE<small>IKRA WYPRZEDANA</small></div>' +
+      '<div class="odn-head"><div class="odn-hero" aria-hidden="true"><div class="odn-tank">' +
+      '<span class="odn-water"></span><span class="odn-bubbles"><i></i><i></i><i></i><i></i></span>' +
+      '<img class="odn-fish" src="assets/lucjanek/lucjanek-128.png" alt="">' +
+      '<span class="odn-roe"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>' +
+      '</div></div><div class="odn-title"><b>IKRA · ' + E.nazwa + '</b>' +
       '<small>PIERWSZA SPOŁECZNOŚCIOWA ODNOWA GATUNKU</small></div></div>' +
-      '<div class="odn-progress"><div class="odn-numbers"><span>0 QRYB</span><span>' +
-      qryb(E.cel) + ' QRYB</span></div><div class="odn-meter" aria-label="Postęp zbiórki"><i></i></div></div>' +
+      '<div class="odn-progress"><div class="odn-numbers"><span>' + qryb(E.zebrano) +
+      ' QRYB</span><span>' + qryb(E.cel) + ' QRYB</span></div>' +
+      '<div class="odn-meter" aria-label="Postęp zbiórki"><i></i></div>' +
+      '<div class="odn-milestones">' + ms + '</div></div>' +
       '<div class="odn-meta"><div class="odn-chip"><b>' + E.czasDni +
-      ' DNI</b>od uruchomienia zbiórki</div><div class="odn-chip"><b>0 DARCZYŃCÓW</b>historia wpłat pojawi się tutaj</div></div>' +
+      ' DNI</b>od uruchomienia zbiórki</div><div class="odn-chip"><b>' + E.darczyncy +
+      ' DARCZYŃCÓW</b>wspólny cel całej społeczności</div></div>' +
       '<div class="odn-story">Społeczność zbiera wspólnie <b>' + qryb(E.cel) +
       ' QRYB</b>. Po osiągnięciu celu EKO automatycznie uruchomi tarło Lucjanka w jednym z przygotowanych scenariuszy.</div>' +
-      '<div class="odn-stage-note">ETAP 1 · PODGLĄD INTERFEJSU. Saldo gracza i serwer nie są jeszcze dotykane.</div>' +
-      '<button class="odb odn-disabled" disabled>WPŁATY W NASTĘPNYM ETAPIE</button></div>';
+      '<div class="odn-history"><b>HISTORIA WPŁAT</b><span>Brak wpłat — to nadal bezpieczny podgląd. Dane serwerowe zostaną podłączone w etapie 4.</span></div>' +
+      '<div class="odn-stage-note">ETAP 2 · GRAFIKA I ANIMACJE GOTOWE. Portfel gracza i Supabase nadal nie są dotykane.</div>' +
+      '<button class="odb odn-disabled" disabled>WPŁATY JESZCZE WYŁĄCZONE</button></div>';
   }
 
   function zanKafel(id, m, mam) {
