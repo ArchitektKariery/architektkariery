@@ -177,7 +177,17 @@
             : 'Wpłata zakończona.';
           input.value = '';
           await refresh();
-          setTimeout(() => window.location.reload(), 900);
+          try {
+            const cardNow = document.querySelector('#panelTresc .odn-card');
+            const saldo = cardNow && cardNow.parentElement
+              ? Array.from(cardNow.parentElement.querySelectorAll('*')).find(el =>
+                  /^Masz\s+[0-9\s\u202f]+\s+qryb$/i.test((el.textContent || '').trim())
+                )
+              : null;
+            if (saldo) saldo.textContent = 'Masz ' + fmt(
+              Number.isFinite(newBalance) ? newBalance : Math.max(0, localBalance - accepted)
+            ) + ' qryb';
+          } catch (e) {}
         } catch (err) {
           console.warn('[QRyby][Odnowa] wpłata nieudana', err);
           const m = String(err && (err.message || err) || '');
@@ -307,14 +317,17 @@
     if (chips[1]) chips[1].innerHTML = '<b>' + fmt(event.donor_count) +
       ' DARCZYŃCÓW</b>wspólny cel całej społeczności';
 
-    const note = card.querySelector('.odn-stage-note');
-    if (note) {
-      note.textContent = event.state === 'failed'
-        ? 'ZBIÓRKA ZAKOŃCZONA · CEL NIEOSIĄGNIĘTY · WPŁATY PRZEPADŁY · BRAK TARŁA'
+    const story = card.querySelector('.odn-story');
+    if (story) {
+      story.textContent = event.state === 'failed'
+        ? 'Zbiórka zakończyła się bez osiągnięcia celu.'
         : (event.state === 'funded' || event.state === 'completed')
-          ? 'CEL OSIĄGNIĘTY · IKRA WYPRZEDANA · NAGRODA OCZEKUJE NA EKO'
-          : 'LIVE · POSTĘP I HISTORIA WPŁAT Z SERWERA';
+          ? 'Cel osiągnięty. Ikra Lucjanka została przekazana do jeziora.'
+          : 'Po osiągnięciu celu ikra Lucjanka zostanie wpuszczona do jeziora.';
     }
+
+    const note = card.querySelector('.odn-stage-note');
+    if (note) note.style.display = 'none';
 
     renderHistory(card, rows);
     ensureContributionControls(card, event);
