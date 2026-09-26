@@ -83,3 +83,5 @@ elif new_build not in s:
 
 p.write_text(s,encoding="utf-8")
 print("fight performance cache applied")
+
+# trigger-fight-perf
