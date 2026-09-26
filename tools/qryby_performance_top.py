@@ -81,3 +81,5 @@ for title,rx in [
 Path("docs/qryby-performance-top.txt").write_text("\n".join(out),encoding="utf-8")
 print("top functions",[(x[0],x[1],x[2]) for x in funcs[:15]])
 print("counts",counts)
+
+# trigger-top
