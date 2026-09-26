@@ -1,1717 +1,1318 @@
 
-###   troc: {
+### function mnoznikLosowania
 
---- hit 1 @ 5309834 ---
+--- hit 1 @ 6220740 ---
 
- /* 1 sztuka na 1143 placi */
-    src: window.PISKORZ_SRC, meta: window.PISKORZ_META,
-    mouth: { fx: 0.4924, fy: 0.14 },
-    /* Najsmuklejszy sprite w tablicy: 132x25, proporcja 5.28. Ciało weglowate,
-       wiec fala 7.0 przy wykladniku 1.3, czyli falowanie ida przez calego,
-       nie tylko przez ogon. */
-    fala: 7.0, ogon: 4.2, wykl: 1.3,
-    /* NAPRAWA "cialo lancuchowe" (IX 2026): patrz falaZwoj przy wegorzu
-       wyzej -- ten sam zabieg, sprawdzony na tym konkretnym sprite cie. */
-    falaZwoj: 2.6,
-    /* dlugosc: dominanta 18 cm, rekord 30 cm przy 1 na 8192, sufit +25% (zasieg gatunku) */
-    mu: 2.9084, sigma: 0.1343, cmMin: 7, cmMax: 37.5, rekordDl: 30,
-    /* kondycja: rekord wagi 150 g tez 1 na 8192 */
-    kMu: -5.3989, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 150, wagaMax: 188,
-    glebia: [0.9, 0.99],
-    sila: 0.7, pukanie: 0, kruchyPysk: 0,
-    wibracja: [24, 26, 24, 26, 40]
-  },
-
-  /* ---------- partia piata: pietro kolekcjonerskie ----------
-     Dziewiec gatunkow rzadszych niz 1 na 4000 placi. Zaden nie wplynie na
-     to, co gracz lowi na co dzien: razem to 0.0157% populacji. Sa dla atlasu.
-     ------------------------------------------------------ */
-  troc: {
-    nazwa: 'TROĆ', udzial: 0.0005,          /* 1 sztuka na 4000 placi */
-    src: window.TROC_SRC, meta: window.TROC_META,
-    mouth: { fx: 0.4848, fy: 0.0455 },
-    fala: 3.6, ogon: 5.6, wykl: 2.0,
-    /* dlugosc: dominanta 60 cm, rekord 105 cm przy 1 na 8192, sufit +25% (WW 1993) */
-    mu: 4.1159, sigma: 0.1467, cmMin: 24, cmMax: 131.25, rekordDl: 105,
-    /* kondycja: rekord wagi 14600 g tez 1 na 8192 */
-    kMu: -4.5636, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 14600, wagaMax: 18250,
-    glebia: [0.2, 0.8],
-    sila: 3.8, pukanie: 1, kruchyPysk: 0,
-    wibracja: [52, 34, 52, 34, 98]
-  },
-  certa: {
-    nazwa: 'CERTA', udzial: 0.00035,          /* 1 sztuka na 5714 placi */
-    src: window.CERTA_SRC, meta: window.CERTA_META,
-    mouth: { fx: 0.4924, fy: 0.0283 },
-    /* Rekord szacowany. Certa jest na liscie WW, ale nie znalazlem jej wartosci
-       w zrodlach, ktore da sie zweryfikowac. Podmien, gdy trafisz na liczbe. */
-    fala: 4.0, ogon: 5.4, wykl: 1.9,
-    /* dlugosc: dominanta 35 cm, rekord 55 cm przy 1 na 8192, sufit +25% (szacunek, brak w liscie WW) */
-    mu: 3.5642, sigma: 0.1032, cmMin: 14, cmMax: 58.75, rekordDl: 47,
-    /* kondycja: rekord wagi 1400 g tez 1 na 8192 */
-    kMu: -4.9430, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 1400, wagaMax: 1750,
-    glebia: [0.6, 0.95],
-    sila: 2.1, pukanie: 0, kruchyPysk: 0,
-    wibracja: [40, 28, 74]
-  },
-  sieja: {
-    nazwa: 'SIEJA', udzial: 0.0003,          /* 1 sztuka na 6667 placi */
-    src: window.SIEJA_SRC, meta: window.SIEJA_META,
-    mouth: { fx: 0.4924, fy: 0.0294 },
-    fala: 4.4, ogon: 5.2, wykl: 1.8,
-    /* dlugosc: dominanta 40 cm, rekord 78 cm przy 1 na 8192, sufit +25% (WW 2022) */
-    mu: 3.7191, sigma: 0.1738, cmMin: 16, cmMax: 97.5, rekordDl: 78,
-    /* kondycja: rekord wagi 5200 g tez 1 na 8192 */
-    kMu: -4.677, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 5200, wagaMax: 6500,
-    glebia: [0.5, 0.95],
-    sila: 1.8, pukanie: 0, kruchyPysk: 1.4,
-    wibracja: [38, 28, 68]
-  },
-  glowacz_bialopletwy: {
-    nazwa: 'GŁOWACZ BIAŁOPŁETWY', udzial: 0.000225,          /* 1 sztuka na 8888 placi */
-    src: window.GLOWACZ_BIALOPLETWY_SRC, meta: window.GLOWACZ_BIALOPLETWY_META,
-    mouth: { fx: 0.4924, fy: 0.0246 },
-    /* Oba glowacze przyszly bez podpisu i roznia sie tylko pletwami.
-       Ten ma duze, jasne pletwy piersiowe z drobnym prazkowaniem, wiec
-       obstawiam bialopletwego. Jesli odwrotnie, zamien same nazwy. */
-    fala: 3.0, ogon: 5.8, wykl: 2.1,
-    /* dlugosc: dominanta 9 cm, rekord 14 cm przy 1 na 8192, sufit +25% (zasieg gatunku) */
-    mu: 2.2109, sigma: 0.1167, cmMin: 4, cmMax: 17.5, rekordDl: 14,
-    /* kondycja: rekord wagi 40 g tez 1 na 8192 */
-    kMu: -4.4608, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 40, wagaMax: 50,
-    glebia: [0.9, 0.99],
-    sila: 0.35, pukanie: 1, kruchyPysk: 0,
-    wibracja: [16, 18, 24]
-  },
-  strzebla_potokowa: {
-    nazwa: 'STRZEBLA POTOKOWA', udzial: 0.0002,          /* 1 sztuka na 10000 placi */
-    src: window.STRZEBLA_POTOKOWA_SRC, meta: window.STRZEBLA_POTOKOWA_META,
-    mouth: { fx: 0.4924, fy: 0.0652 },
-    fala: 4.8, ogon: 5.0, wykl: 1.7,
-    /* dlugosc: dominanta 8 cm, rekord 13 cm przy 1 na 8192, sufit +25% (zasieg gatunku) */
-    mu: 2.0958, sigma: 0.1279, cmMin: 3, cmMax: 16.25, rekordDl: 13,
-    /* kondycja: rekord wagi 25 g tez 1 na 8192 */
-    kMu: -4.6909, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 25, wagaMax: 31,
-    glebia: [0.15, 0.65],
-    sila: 0.3, pukanie: 0, kruchyPysk: 0,
-    wibracja: [14, 16, 22]
-  },
-  piekielnica: {
-    nazwa: 'PIEKIELNICA', udzial: 0.000175,          /* 1 sztuka na 11428 placi */
-    src: window.PIEKIELNICA_SRC, meta: window.PIEKIELNICA_META,
-    mouth: { fx: 0.4924, fy: 0.0294 },
-    fala: 5.0, ogon: 5.0, wykl: 1.7,
-    /* dlugosc: dominanta 9 cm, rekord 14 cm przy 1 na 8192, sufit +25% (zasieg gatunku) */
-    mu: 2.2109, sigma: 0.1167, cmMin: 4, cmMax: 17.5, rekordDl: 14,
-    /* kondycja: rekord wagi 30 g tez 1 na 8192 */
-    kMu: -4.7484, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 30, wagaMax: 38,
-    glebia: [0.2, 0.7],
-    sila: 0.35, pukanie: 0, kruchyPysk: 0,
-    wibracja: [16, 16, 24]
-  },
-  pstrag_zrodlany: {
-    nazwa: 'PSTRĄG ŹRÓDLANY', udzial: 0.00015,          /* 1 sztuka na 13333 placi */
-    src: window.PSTRAG_ZRODLANY_SRC, meta: window.PSTRAG_ZRODLANY_META,
-    mouth: { fx: 0.4773, fy: 0.0 },
-    fala: 3.8, ogon: 5.4, wykl: 2.0,
-    /* dlugosc: dominanta 28 cm, rekord 58 cm przy 1 na 8192, sufit +25% (WW 2008) */
-    mu: 3.3679, sigma: 0.1888, cmMin: 11, cmMax: 72.5, rekordDl: 58,
-    /* kondycja: rekord wagi 2520 g tez 1 na 8192 */
-    kMu: -4.5005, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 2520, wagaMax: 3150,
-    glebia: [0.2, 0.75],
-    sila: 2.5, pukanie: 1, kruchyPysk: 0,
-    wibracja: [44, 30, 44, 30, 84]
-  },
-  cierniczek: {
-    nazwa: 'CIERNICZEK', udzial: 0.0001,          /* 1 sztuka na 20000 placi */
-    src: window.CIERNICZEK_SRC, meta: window.CIERNICZEK_META,
-    mouth: { fx: 0.4924, f
-
-###   sandacz: {
-
---- hit 1 @ 5289093 ---
-
-kielb: {
-    nazwa: 'KIEŁB', udzial: 0.117647,          /* 1 sztuka na 17.0 placi */
-    src: window.KIELB_SRC, meta: window.KIELB_META,
-    mouth: { fx: 0.4924, fy: 0.1161 },
-    fala: 5.4, ogon: 4.8, wykl: 1.6,
-    /* dlugosc: dominanta 11 cm, rekord 20 cm przy 1 na 8192, sufit +25% (zasieg) */
-    mu: 2.4223, sigma: 0.1563, cmMin: 4, cmMax: 25.0, rekordDl: 20,
-    /* kondycja: rekord wagi 120 g tez 1 na 8192 */
-    kMu: -4.3796, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 120, wagaMax: 150,
-    glebia: [0.75, 0.98],
-    sila: 0.5, pukanie: 0, kruchyPysk: 0,
-    wibracja: [18, 18, 28]
-  },
-  klen: {
-    nazwa: 'KLEŃ', udzial: 0.029851,          /* 1 sztuka na 67.0 placi */
-    src: window.KLEN_SRC, meta: window.KLEN_META,
-    mouth: { fx: 0.4924, fy: -0.0283 },
-    fala: 4.4, ogon: 5.2, wykl: 1.8,
-    /* dlugosc: dominanta 28 cm, rekord 63.2 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 3.3763, sigma: 0.2099, cmMin: 11, cmMax: 79.0, rekordDl: 63.2,
-    /* kondycja: rekord wagi 3710 g tez 1 na 8192 */
-    kMu: -4.357, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 3710, wagaMax: 4638,
-    glebia: [0.1, 0.6],
-    sila: 1.9, pukanie: 0, kruchyPysk: 0,
-    wibracja: [38, 28, 70]
-  },
-  sandacz: {
-    nazwa: 'SANDACZ', udzial: 0.015038,          /* 1 sztuka na 133.0 placi */
-    src: window.SANDACZ_SRC, meta: window.SANDACZ_META,
-    mouth: { fx: 0.4924, fy: 0.0603 },
-    fala: 2.8, ogon: 6.2, wykl: 2.3,
-    /* dlugosc: dominanta 45 cm, rekord 109 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 3.8582, sigma: 0.2271, cmMin: 18, cmMax: 136.25, rekordDl: 109,
-    /* kondycja: rekord wagi 15600 g tez 1 na 8192 */
-    kMu: -4.5461, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 15600, wagaMax: 19500,
-    glebia: [0.55, 0.98],
-    sila: 3.2, pukanie: 1, kruchyPysk: 1.6,
-    wibracja: [50, 34, 50, 34, 96]
-  },
-  sliz: {
-    nazwa: 'ŚLIZ', udzial: 0.015038,          /* 1 sztuka na 133.0 placi */
-    src: window.SLIZ_SRC, meta: window.SLIZ_META,
-    mouth: { fx: 0.4924, fy: 0.0833 },
-    fala: 5.8, ogon: 4.6, wykl: 1.5,
-    /* dlugosc: dominanta 10 cm, rekord 16 cm przy 1 na 8192, sufit +25% (zasieg) */
-    mu: 2.3179, sigma: 0.1239, cmMin: 4, cmMax: 20.0, rekordDl: 16,
-    /* kondycja: rekord wagi 40 g tez 1 na 8192 */
-    kMu: -4.8498, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 40, wagaMax: 50,
-    glebia: [0.85, 0.99],
-    sila: 0.4, pukanie: 0, kruchyPysk: 0,
-    wibracja: [16, 18, 24]
-  },
-  koza: {
-    nazwa: 'KOZA', udzial: 0.015038,          /* 1 sztuka na 133.0 placi */
-    src: window.KOZA_SRC, meta: window.KOZA_META,
-    mouth: { fx: 0.4924, fy: 0.0952 },
-    fala: 6.0, ogon: 4.6, wykl: 1.5,
-    /* dlugosc: dominanta 8 cm, rekord 13 cm przy 1 na 8192, sufit +25% (zasieg) */
-    mu: 2.0958, sigma: 0.1279, cmMin: 3, cmMax: 16.25, rekordDl: 13,
-    /* kondycja: rekord wagi 20 g tez 1 na 8192 */
-    kMu: -4.9141, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 20, wagaMax: 25,
-    glebia: [0.85, 0.99],
-    sila: 0.35, pukanie: 0, kruchyPysk: 0,
-    wibracja: [14, 16, 22]
-  },
-  szczupak: {
-    nazwa: 'SZCZUPAK', udzial: 0.045455,          /* 1 sztuka na 44.0 placi */
-    src: window.SZCZUPAK_SRC, meta: window.SZCZUPAK_META,
-    mouth: { fx: 0.4924, fy: 0.0375 },
-    fala: 2.6, ogon: 6.4, wykl: 2.3,
-    /* dlugosc: dominanta 55 cm, rekord 128 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 4.0546, sigma: 0.2174, cmMin: 22, cmMax: 160.0, rekordDl: 128,
-    /* kondycja: rekord wagi 24100 g tez 1 na 8192 */
-    kMu: -4.5986, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 24100, wagaMax: 30125,
-    glebia: [0.15, 0.85],
-    sila: 3.0, pukanie: 1, kruchyPysk: 0,
-    wibracja: [54, 30, 54, 30, 100]
-  },
-  lin: {
-    nazwa: 'LIN', udzial: 0.060606,          /* 1 sztuka na 33.0 placi */
-    src: window.LIN_SRC, meta: window.LIN_META,
-    mouth: { fx: 0.4924, fy: 0.0467 },
-    fala: 3.2, ogon: 5.6, wykl: 2.1,
-    /* dlugosc: dominanta 32 cm, rekord 65 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 3.4996, sigma: 0.184, cmMin: 13, cmMax: 81.25, rekordDl: 65,
-    /* kondycja: rekord wagi 4500 g tez 1 na 8192 */
-    kMu: -4.2663, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 4500, wagaMax: 5625,
-    glebia: [0.65, 0.98],
-    sila: 2.2, pukanie: 0, kruchyPysk: 0,
-    wibracja: [42, 30, 76]
-  },
-  leszcz: {
-    nazwa: 'LESZCZ', udzial: 0.5,          /* 1 sztuka na 4.0 placi */
-    src: window.LESZCZ_SRC, meta: window.LESZCZ_META,
-    mouth: { fx: 0.4924, fy: 0.0562 },
-    fala: 3.0, ogon: 5.4, wykl: 2.2,
-    /* dlugosc: dominanta 33 cm, rekord 72 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 3.5371, sigma: 0.2016, cmMin: 13, cmMax: 90.0, rekordDl: 72,
-    /* kondycja: rekord wagi 6950 g tez 1 na 8192 */
-    kMu: -4.1257, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 6950, wagaMax: 8688,
-    glebia: [0.55, 0.98],
-    sila: 1.3, pukanie: 0, kruchyPysk: 1.8,
-    wibracja: [34, 26, 62]
-  },
-  pstrag: {
-    nazwa: 'PSTRĄG POTOKOWY', udzial: 0.011494,          /* 1 sztuka na 174.0 placi */
-    src: window.PSTRAG_SRC, meta: window.PSTRAG_META,
-    mouth: { fx: 0.4924, fy: 0.0283 },
-    fala: 3.8, ogon: 5.4, wykl: 2.0,
-    /* dlugosc: dominanta 25 cm, rekord 77.5 cm przy 1 na 8192, sufit +25% (WW) */
-    mu: 3.3007, sigma: 0.2861, cmMin: 10, cmMax: 96.88, rekordDl: 77.5,
-    /* kondycja: rekord wagi 5526 g tez 1 na 8192 */
-    kMu: -4.5354, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 5526, wagaMax: 6908,
-    glebia: [0.15, 0.7],
-    sila: 2.4, pukanie: 1, kruchyPysk: 0,
-    wibracja: [46, 30, 46, 30, 86]
-  },
-  wegorz: {
-    nazwa: 'WĘGORZ', udzial: 0.002,          /* 1 sztuka na 1000 placi */
-    src: window.WEGORZ_SRC, meta: window.WEGORZ_META,
-    mouth: { fx: 0.4924, fy: 0.0217 },
-    /* Sprite podmieniony na prosty profil z boku. Poprzedni przyszedl zwiniety
-       w petle, 132x52, i fala musiala byc wyciszona do 1.2 / 2.0, bo skladanie
-       paskami rozjezdzalo petle na boki. Teraz 132x23, proporcja 5.74, wiec
-       idzie pelna wartosc wlasciwa dla wegorza: falowanie przez cale cialo,
-       nie tylko przez ogon. Paszcza zjechala z fy -0.221 na +0.022, czyli
-       z 22 procent wysokosci ponad srodkiem na sam srodek, tam gdzie ma byc. */
-    fala: 8.0, ogon: 4.0, wykl: 1.2,
-    /* NAPRAWA "cialo lancuchowe" (IX 20
-
-###   glowacica: {
-
---- hit 1 @ 5321316 ---
-
-ala: 3.6, ogon: 5.6, wykl: 2.0,
-    /* dlugosc: dominanta 75 cm, rekord 130 cm przy 1 na 8192, sufit +25% (WW 1999) */
-    mu: 4.3383, sigma: 0.1443, cmMin: 30, cmMax: 162.5, rekordDl: 130,
-    /* kondycja: rekord wagi 30400 g tez 1 na 8192 */
-    kMu: -4.4737, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 30400, wagaMax: 38000,
-    glebia: [0.2, 0.8],
-    sila: 4.4, pukanie: 1, kruchyPysk: 0,
-    wibracja: [58, 38, 58, 38, 110]
-  },
-  ciosa: {
-    nazwa: 'CIOSA', udzial: 1.5e-05,          /* 1 sztuka na 133333 placi */
-    src: window.CIOSA_SRC, meta: window.CIOSA_META,
-    mouth: { fx: 0.4924, fy: -0.0323 },
-    /* Gatunek rozpoznany z sylwetki, arkusz bez podpisu. Podmiana nazwy z rekordami
-       to dwie linie, reszta wiersza pasuje. */
-    fala: 4.6, ogon: 5.2, wykl: 1.8,
-    /* dlugosc: dominanta 35 cm, rekord 55 cm przy 1 na 8192, sufit +25% (szacunek, brak w liscie WW) */
-    mu: 3.5696, sigma: 0.1193, cmMin: 14, cmMax: 68.75, rekordDl: 55,
-    /* kondycja: rekord wagi 1200 g tez 1 na 8192 */
-    kMu: -5.1601, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 1200, wagaMax: 1500,
-    glebia: [0.1, 0.55],
-    sila: 1.6, pukanie: 0, kruchyPysk: 1.5,
-    wibracja: [34, 26, 58]
-  },
-  glowacica: {
-    nazwa: 'GŁOWACICA', udzial: 0.0000115,          /* 1 sztuka na 173913 placi */
-    src: window.GLOWACICA_SRC, meta: window.GLOWACICA_META,
-    mouth: { fx: 0.4924, fy: -0.0319 },
-    fala: 3.4, ogon: 5.8, wykl: 2.0,
-    /* dlugosc: dominanta 70 cm, rekord 120 cm przy 1 na 8192, sufit +25% (WW 2001) */
-    mu: 4.2685, sigma: 0.1415, cmMin: 28, cmMax: 150.0, rekordDl: 120,
-    /* kondycja: rekord wagi 20300 g tez 1 na 8192 */
-    kMu: -4.6408, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 20300, wagaMax: 25375,
-    glebia: [0.35, 0.9],
-    sila: 4.6, pukanie: 1, kruchyPysk: 0,
-    wibracja: [60, 38, 60, 38, 114]
-  },
-  koza_zlotawa: {
-    nazwa: 'KOZA ZŁOTAWA', udzial: 5.5e-05,          /* 1 sztuka na 36363 placi */
-    src: window.KOZA_ZLOTAWA_SRC, meta: window.KOZA_ZLOTAWA_META,
-    mouth: { fx: 0.4848, fy: 0.125 },
-    fala: 6.0, ogon: 4.6, wykl: 1.5,
-    /* dlugosc: dominanta 7 cm, rekord 11 cm przy 1 na 8192, sufit +25% (zasieg gatunku) */
-    mu: 1.9602, sigma: 0.1193, cmMin: 3, cmMax: 13.75, rekordDl: 11,
-    /* kondycja: rekord wagi 12 g tez 1 na 8192 */
-    kMu: -4.9369, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 12, wagaMax: 15,
-    glebia: [0.88, 0.99],
-    sila: 0.3, pukanie: 0, kruchyPysk: 0,
-    wibracja: [12, 14, 20]
-  },
-  jesiotr: {
-    nazwa: 'JESIOTR OSTRONOSY', udzial: 3e-06,          /* 1 sztuka na 666666 placi */
-    src: window.JESIOTR_SRC, meta: window.JESIOTR_META,
-    mouth: { fx: 0.4924, fy: 0.0938 },
-    /* Gatunek rozpoznany z sylwetki, arkusz bez podpisu. Podmiana nazwy z rekordami
-       to dwie linie, reszta wiersza pasuje. */
-    fala: 3.0, ogon: 5.4, wykl: 2.1,
-    /* dlugosc: dominanta 90 cm, rekord 200 cm przy 1 na 8192, sufit +25% (szacunek, gatunek reintrodukowany) */
-    mu: 4.5423, sigma: 0.2061, cmMin: 36, cmMax: 250.0, rekordDl: 200,
-    /* kondycja: rekord wagi 60000 g tez 1 na 8192 */
-    kMu: -5.0322, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 60000, wagaMax: 75000,
-    glebia: [0.8, 0.99],
-    sila: 4.8, pukanie: 1, kruchyPysk: 0,
-    wibracja: [66, 42, 66, 42, 124]
-  },
-  /* ============================================================
-     ROZDYMKA. Piate pasmo, ale gatunek nie z polskiego rejestru:
-     tak jak barakuda czy tyrios_morski, dostaje wlasna biologie
-     zamiast wchodzic do EKO/KOREKTA, wiec zero pory doby, sezonu
-     i pogody -- bierze sie tak samo o kazdej porze.
-
-     DWIE TEKSTURY JEDNEGO GATUNKU. src/meta to stan normalny.
-     srcNadety dzieli TO SAMO okno 132x96 co meta: obie tekstury
-     zajmuja identyczna klatke, wiec zadne inne miejsce w kodzie
-     (haczyk, pysk, karta) nie musi wiedziec, ktora akurat plynie.
-     Zamiana siedzi wylacznie w obrazRyby(G2, f), po polu f.nadety,
-     ktore ustawia zachowanie 'nadymanie' w module zachowan.
+unek nie moze wypasc NIGDY (niezmiennik specyfikacji).
+     Poza tym skalujemy pierwiastkiem ze stosunku do populacji startowej:
+     wprost proporcjonalnie byloby zbyt gwaltowne (polowa populacji =
+     polowa spotkan), a pierwiastek daje odczuwalna, ale lagodna zmiane.
+     Sufit 1,6 zeby przelowiona reszta swiata nie zalala kadru jednym
+     gatunkiem, ktory akurat sie odbudowal.
      ============================================================ */
-  rozdymka: {
-    nazwa: 'ROZDYMKA', udzial: 6.5e-05,
-    src: window.ROZDYMKA_SRC, meta: window.ROZDYMKA_META,
-    srcNadety: window.ROZDYMKA_NADETA_SRC,
-    mouth: { fx: 0.4924, fy: 0.01 },
-    /* Cialo sztywne, plywa mało falujac -- podobnie jak zolw czy konik,
-       ruch idzie w koncowkach, nie w calym tulowiu. */
-    fala: 1.4, ogon: 1.6, wykl: 2.3,
-    /* dlugosc: dominanta 20 cm, rekord 45 cm przy 1 na 8192, sufit +25% */
-    mu: 3.0395, sigma: 0.2092, cmMin: 9, cmMax: 56.25, rekordDl: 45,
-    /* kondycja: gatunek okragly i ciezki na swoja dlugosc, gestszy niz ploc.
-       rekord wagi 5300 g tez 1 na 8192 */
-    kMu: -3.371, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 5300, wagaMax: 6625,
-    glebia: [0.35, 0.85],
-    sila: 0.9, pukanie: 0, kruchyPysk: 0,
-    wibracja: [16, 20, 16, 20, 26]
-  },
+  /* ============================================================
+     RZADKOSC LICZONA Z POPULACJI (IX 2026, polecenie Andrzeja).
 
-  /* ---------- partia siodma: rejestr domkniety ----------
-     Pstrag teczowy, lipien i dwa minogi. Po nich w tablicy siedzi
-     wszystkie 61 gatunkow z rejestru, bez ani jednej dziury.
-     ------------------------------------------------ */
-  pstrag_teczowy: {
-    nazwa: 'PSTRĄG TĘCZOWY', udzial: 0.0074906,          /* 1 sztuka na 267 placi */
-    src: window.PSTRAG_TECZOWY_SRC, meta: window.PSTRAG_TECZOWY_META,
-    mouth: { fx: 0.4924, fy: 0.0263 },
-    fala: 3.8, ogon: 5.4, wykl: 2.0,
-    /* dlugosc: dominanta 30 cm, rekord 75 cm przy 1 na 8192, sufit +25% (WW 1993) */
-    mu: 3.4563, sigma: 0.2348, cmMin: 12, cmMax: 93.75, rekordDl: 75,
-    /* kondycja: rekord wagi 7300 g tez 1 na 8192 */
-    kMu: -4.1799, kSigma: 0.22, kKlamp: 0.528,
-    rekordWaga: 7300, wagaMax: 9125,
-    glebia: [0.15, 0.7],
-    sila: 2.7, pukanie: 1, kruchyPysk: 0,
-    wibracja: [46, 30, 46, 30, 88]
-  },
-  lipien: {
-    nazwa: 'LIPIEŃ', udzial: 0.00025,          /* 1 sztuka na 8000 placi */
-    src: window.LIPIEN_SRC, meta: window.LIPIEN_META,
-    /* Sprite przyszedl odbity: pysk byl po lewej, wiec lipien plynal ogonem
-       naprzod, a haczyk lapal go za pletwe ogonowa. Odbity, pysk przeliczony. */
-    mouth: { fx: 0.4924, fy: 0.1532 },
-    fala: 4.0, ogon: 5.2, wykl: 1.9,
-    /* dlugosc: dominanta 30 cm, rekord 54 cm przy 1 na 8192, s
+     BYLO: waga gatunku brala sie z `udzial` w rejestrze, czyli ze stalej
+     wpisanej przy gatunku, a populacja dokladala sie osobno przez
+     `mnoznikLosowania` (pierwiastek z n/popStartowa, przyciety do 1,6).
+     Rejestr rozpinal sie od ploci do jesiotra w stosunku okolo 666 000:1.
 
-### function przygotujGatunki
+     JEST: waga TO populacja. Gatunek, ktorego plywa 4000 sztuk, wypada
+     tyle razy czesciej od gatunku o 12 sztukach, ile wynosi stosunek
+     tych liczb. Rejestr dalej rzadzi, ale posrednio: to on ustalil
+     populacje startowe, wiec ploc startuje z tysiacami, a jesiotr
+     z dwunastoma. Roznica jest taka, ze od teraz liczba w jeziorze
+     jest JEDYNYM zrodlem rzadkosci -- przelowienie widac od razu
+     w tym, co bierze, a odbudowa tak samo.
 
-NOT FOUND
+     ALFA steruje ostroscia. 1,0 to czysta proporcja. Powyzej 1 rzadkie
+     gatunki robia sie jeszcze rzadsze, ponizej 1 roznice sie splaszczaja.
+     ============================================================ */
+  CFG.ALFA_RZADKOSCI = 1.0;
 
-
-### G2.img =
-
---- hit 1 @ 5378018 ---
-
-5wUYBOiKNXM9YWgc+e15+S8zPj04FsE/86lm81+QqtMtHx6gY8m3tOTjLuOmaCHUxIcdb+lCQK9CW4n6KnZtsV8y0QPw7Fl3neLqO/7IDdBAl2cgD0AtQitvM7xuGaZG0LU3UNZvTGgWD6Wp2ocVirjjs0CffkWWl+nVbULbluJhR+yAo2gfgmrTre/L34qAOAhJ+GLklGJzsbLj7FD56IliQH/rjL3I1aJ0gFjuJ3cUYB+dAMrkpKqJUMs71d/BYsJtJ7MIshbogXJ+7cf0CK7Yn2DWoZZI6MKibGtAHAtpd4GEHvd7MMxUcWeayhGLHMhajp8Pckivhi3qQqNdLsd5SXAONJ//0oXplXruxNLIq+7izUp4zeJ6cK875MuEwoRc7Lz9MGFHoqBRBu/6PmJuxItdCl6qpn1zuVpQkGvdWPoUV+392SqmXBFnRf45/8Pg/oI8FFJ+rmxYAAAAASUVORK5CYII=',
-    meta: { w: 96, h: 72 },
-    udzial: 0,
-    bezEko: true,
-    legendarny: true,
-    falaZwoj: 3.2
-  });
-  /* Dlugie stworzenie ma pracowac CALYM cialem: kilka przesuwajacych sie
-     zgiec zamiast pojedynczego machniecia ogonem. */
-  GATUNKI.smok_zycia.fala = Math.max(5.4, (baza.fala || 3) * 1.35);
-  GATUNKI.smok_zycia.ogon = Math.max(6.8, (baza.ogon || 4) * 1.35);
-  GATUNKI.smok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
-  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
-  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
-})();
-
-/* Wczytanie atlasow. */
-let gotowe = 0, ileGatunkow = Object.keys(GATUNKI).length;
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  G2.img = new Image();
-  /* Licznik rusza tak samo po bledzie. Bez tego jeden brakujacy PNG z 61
-     zostawia FishAtlas.ready na false na zawsze i lawica nie rysuje sie
-     wcale, bez sladu w konsoli. Zepsuty gatunek dostaje flage i wypada
-     z losowania, reszta plywa dalej. */
-  G2.img.onload = () => { G2.kontur = zKonturem(G2.img); gotowe++; };
-  G2.img.onerror = () => { G2.zepsuty = true; gotowe++; console.warn('QRyby: nie wczytal sie sprite gatunku ' + k); };
-  G2.img.src = G2.src;
-}
-
-/* Druga tekstura, dla gatunkow ktore ja maja (na razie: rozdymka). Zupelnie
-   osobny obrazek, osobny licznik: jesli sie nie wczyta, gatunek pozostaje
-   grywalny w swoim stanie normalnym i po prostu nigdy nie pokaze drugiego --
-   to NIE jest powod, zeby blokowac reszte lawicy tak jak robi to G2.zepsuty. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.srcNadety) continue;
-  G2.imgNadety = new Image();
-  G2.imgNadety.onload = () => { G2.konturNadety = zKonturem(G2.imgNadety); };
-  G2.imgNadety.onerror = () => { console.warn('QRyby: nie wczytal sie drugi sprite gatunku ' + k); };
-  G2.imgNadety.src = G2.srcNadety;
-}
-
-/* Pelny zestaw klatek, dla gatunkow ktore go maja (na razie: ksiaznik).
-   Kazda klatka to WLASNY Image i WLASNY kontur: brak jednej nie blokuje
-   reszty zestawu ani gatunku w ogole, tak samo jak przy srcNadety. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.klatkiSrc) continue;
-  G2.klatkiImg = {}; G2.klatkiKontur = {};
-  for (const nazwa in G2.klatkiSrc) {
-    const im = new Image();
-    im.onload = (function (n2) { return function () { G2.klatkiKontur[n2] = zKonturem(im); }; })(nazwa);
-    im.onerror = (function (n2) { return function () {
-      console.warn('QRyby: nie wczytala sie klatka ' + n2 + ' gatunku ' + k);
-    }; })(nazwa);
-    im.src = G2.klatkiSrc[nazwa];
-    G2.klatkiImg[nazwa] = im;
+  function wagaZPopulacji(gk) {
+    const r = rekord(gk); if (!r) return 0;
+    if (r.n <= 0 || r.wymarly) return 0;     /* wymarly znika z puli, bez sciezki powrotu */
+    return Math.pow(r.n, CFG.ALFA_RZADKOSCI);
   }
-}
 
-/* Zgodnosc wstecz: reszta kodu pyta o FishAtlas dla konkretnej ryby. */
-const FishAtlas = {
-  get ready() { return gotowe >= ileGatunkow; },
-  get img() { return GATUNKI.ploc.img; },
-  get meta() { return GATUNKI.ploc.meta; }
-};
-/* Atlas i wymiary danej ryby. */
-function gat(f) { return GATUNKI[(f && f.gat) || 'ploc']; }
-window.gat = gat;
-
-/* Paszcza zmierzona na sprite: czubek pyska lezy +0.492 szerokosci
-   i +0.024 wysokosci od srodka klatki. To jest punkt chwytu. */
-const MOUTH = { fx: 0.492, fy: 0.024, r: 13 };
-/* Promien chwytu proporcjonalny do dlugosci ryby, 14% szerokosci sprite a,
-   z podloga 5 px. Przy 11% i podlodze 4 px ponad polowa atakow chybiala
-   i czas do brania rosl z 8.7 na 13 sekund. Teraz chybia okolo 15 procent,
-   czyli tyle, zeby nieudane podejscia dalej sie zdarzaly. */
-function mouthR(f) { return Math.max(5, 0.14 * gat(f).meta.w * f.s); }
-window.mouthR = mouthR;
-
-/* Przelicznik dlugosci: skala osobnika na centymetry prawdziwej ploci.
-   s / 1.875 to skala anatomiczna, razy 132 px sprite a, razy 1.423 cm na piksel.
-   Przy zmianie przesady trzeba ruszyc ten wspolczynnik razem ze skala,
-   inaczej karta zaczyna klamac. */
-function fishCm(f) { return Math.round(f.cm !== undefined ? f.cm : f.s * 100.2); }
-window.fishCm = fishCm;
-
-/* Swiatowa pozycja paszczy, z uwzglednieniem kierunku, skali i obrotu. */
-/* Kierunek: normalnie z predkosci, ale ryba na haczyku ma go
-   zablokowany w f.face, zeby nie przerzucala sie przy kazdym szarpnieciu. */
-function faceOf(f) { return f.face !== undefined ? f.face : (f.vx < 0 ? -1 : 1); }
-
-/* Ustawia rybe przodem do celu, ale dopiero gdy cel jest wyraznie z boku.
-   Histereza 26 px nie pozwala jej migac, gdy przechodzi przez pion celu. */
-function faceTowards(f, tx, hyst) {
-  const d = tx - f.x;
-  const h = hyst === undefined ? 26 : hyst;
-  if (Math.abs(d) > h) f.face = d > 0 ? 1 : -1;
-  else if (f.face === undefined) f.face = d > 0 ? 1 : -1;
-  return f.face;
-}
-window.faceTowards = faceTowards;
-
-/* Poziome przesuniecie paszczy od srodka ciala, w pikselach swiata. */
-function mouthDX(f) { return gat(f).mouth.fx * gat(f).meta.w * f.s; }
-window.mouthDX = mouthDX;
-window.faceOf = faceOf;
-
-/* Kolejnosc transformacji w drawFish: translate -> scale(dir,1) -> rotate(theta).
-   Lustro dziala PRZED obrotem, wiec ten sam theta podnosi glowe w obie strony.
-   Wczesniej odwracalem theta przy dir<0 i ryba plynaca w lewo wisiala
-   glowa w dol, ogonem do gory. */
-function mouthOf(f, angle) {
-  const G2 = gat(f), M = G2.meta, MO = G2.mouth;
-  const dir = faceOf(f);
-  const ox = MO.fx * M.w * f.s, oy = MO.fy * M.h * (f.sy !== undefined ? f.sy : f.s);
-  const a = angle || 0;
-  const c = Math.cos(a), sn = Math.sin(a);
-  return [f.x + dir * (ox * c - oy * sn), f.y + (ox * sn + oy * c)];
-}
-window.mouthOf = mouthOf;
-window.MOUTH = MOUTH;
-
-/* ============================================================
-   POPULACJA
-   Ryby naprawde wplywaja i wyplywaja z kadru. Kazda przyplywajaca
-   losuje rozmiar od nowa, wiec gracz polujacy na duza sztuke ma po co czekac.
-   ============================================================ */
-const PO
-
-### new Image();
-
---- hit 1 @ 1975204 ---
-
-= 1180;           /* gorna krawedz kamieni */
-const REFL_END = 1155;      /* dokad siega falowanie */
-
-const cv = $('#scene');
-const g = cv.getContext('2d');
-cv.width = W; cv.height = H;
-g.imageSmoothingEnabled = false;
-
-/* Bufor wody: gradient plus odbicia skladane osobno,
-   potem przenoszone na ekran paskami z przesunieciem. */
-/* Warstwy wolne (niebo, chmury dalekie i srednie) przesuwaja sie
-   o ulamek piksela na klatke, wiec odswiezamy je 12 razy na sekunde,
-   a nie 60. Roznica jest niewidoczna, koszt spada szescioktornie. */
-const sbuf = document.createElement('canvas');
-sbuf.width = W; sbuf.height = SURFACE + 4;
-const sg = sbuf.getContext('2d');
-sg.imageSmoothingEnabled = false;
-let sbufAge = 9;
-let frameNo = 0;
-
-const wbuf = document.createElement('canvas');
-wbuf.width = W; wbuf.height = H - SURFACE;
-const wg = wbuf.getContext('2d');
-wg.imageSmoothingEnabled = true;
-
-/* Odbicia skladane w pelnej rozdzielczosci. Wersja w polowie byla tansza,
-   ale po powiekszeniu dawala na wodzie widoczne bloki 2x2. */
-const rbuf = document.createElement('canvas');
-rbuf.width = W; rbuf.height = H - SURFACE;
-const rg = rbuf.getContext('2d');
-rg.imageSmoothingEnabled = true;
-
-const atlas = new Image();
-let ready = false, bladWczytania = false;
-const F = window.ATLAS_FRAMES;
-atlas.onload = () => { buildBed(); bakeWeeds(); ready = true; };
-/* NAPRAWA dostepnosc (audyt IX 2026): "glowny atlas tla ustawia ready
-   przez onload, ale nie ma analogicznej sciezki onerror z czytelnym
-   ekranem awarii". Obrazek jest osadzony jako base64 (caly plik to
-   JEDEN plik HTML, zero requestow sieciowych), wiec normalny blad
-   sieci tu nie wystapi -- ale gdyby dane base64 byly kiedys uszkodzone
-   przy budowaniu pliku, `ready` zostawaloby `false` NA ZAWSZE, a cala
-   petla rysujaca (14, `if (ready) {...}`) w ogole nic by nie rysowala:
-   pusty, czarny ekran bez zadnej informacji, na zawsze. Teraz przy
-   bledzie odpalamy prosty zastepczy widok zamiast ciszy. */
-atlas.onerror = () => {
-  bladWczytania = true;
-  cv.width = Scene.W; cv.height = Scene.H;
-  g.fillStyle = '#0B0A12';
-  g.fillRect(0, 0, Scene.W, Scene.H);
-  g.fillStyle = '#F4E6C2';
-  g.font = '14px sans-serif';
-  g.textAlign = 'center';
-  g.fillText('Nie udało się wczytać grafiki sceny.', Scene.W / 2, Scene.H / 2 - 10);
-  g.fillText('Odśwież stronę.', Scene.W / 2, Scene.H / 2 + 12);
-};
-atlas.src = window.ATLAS_SRC;
-
-/* Opakowania z metoda buforem: to samo rysowanie, ale zrodlem jest gotowa
-   kanwa, a nie wycinek arkusza. Potrzebne do chmur z nalozona mgla. */
-sprS.buforem = function (kan, dx, dy, dw, dh, alpha) {
-  if (alpha !== undefined) sg.globalAlpha = alpha;
-  sg.drawImage(kan, 0, 0, dw, dh, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
-  if (alpha !== undefined) sg.globalAlpha = 1;
-};
-function sprS(name, dx, dy, dw, dh, alpha) {
-  const f = F[name];
-  if (alpha !== undefined) sg.globalAlpha = alpha;
-  sg.drawImage(atlas, f.x, f.y, f.w, f.h, Math.round(dx), Math.round(dy),
-    Math.round(dw || f.w), Math.round(dh || f.h));
-  if (alpha !== undefined) sg.globalAlpha = 1;
-}
-spr.buforem = function (kan, dx, dy, dw, dh, alpha) {
-  if (alpha !== undefined) g.globalAlpha = alpha;
-  g.drawImage(kan, 0, 0, dw, dh, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
-  if (alpha !== undefined) g.globalAlpha = 1;
-};
-function spr(name, dx, dy, dw, dh, alpha) {
-  const f = F[name];
-  if (alpha !== undefined) g.globalAlpha = alpha;
-  g.drawImage(atlas, f.x, f.y, f.w, f.h, Math.round(dx), Math.round(dy),
-    Math.round(dw || f.w), Math.round(dh || f.h));
-  if (alpha !== undefined) g.globalAlpha = 1;
-}
-function sprW(name, dx, dy, dw, dh, alpha) {
-  const f = F[name];
-  if (alpha !== undefined) wg.globalAlpha = alpha;
-  wg.drawImage(atlas, f.x, f.y, f.w, f.h, Math.round(dx), Math.round(dy),
-    Math.round(dw || f.w), Math.round(dh || f.h));
-  if (alpha !== undefined) wg.globalAlpha = 1;
-}
-function sprR(name, dx, dy, dw, dh, alpha) {
-  const f = F[name];
-  rg.globalAlpha = alpha === undefined ? 1 : alpha;
-  rg.drawImage(atlas, f.x, f.y, f.w, f.h, Math.round(dx), Math.round(dy),
-    Math.round(dw), Math.round(dh));
-  rg.globalAlpha = 1;
-}
-
-/* Okresy skrocone o 20 procent wzgledem pierwotnych 7.3 / 11.7 / 19.1 / 9.1 / 13.7 / 23.3 / 31.9,
-   dalej niewspolmierne, wiec wzor nadal sie nie powtarza. */
-const P = { a: 6.08, b: 9.75, c: 15.92, d: 7.58, e: 11.42, f: 19.42, g: 26.58 };
-const w2 = (t, per, phase) => Math.sin(t / per * TAU + phase);
-
-/* ============================================================
-   Chmury: trzy plany glebi, kazdy z wlasnym tempem
-   ============================================================ */
-const clouds = [];
-/* Kazda chmura dostaje RANGE od 0 do 1. Rysuje sie tylko wtedy, gdy
-   zachmurzenie z PORA jest wyzsze od jej rangi, a przy samym progu blednie
-   zamiast znikac skokiem. Wczesniej wszystkie dwadziescia dziewiec bylo
-   zawsze na niebie i dlatego niebo bylo zawsze zapchane.
-
-   Rangi rosna razem z planem: najpierw pojawiaja sie blade chmurki
-   dalekiego planu, potem srodkowy, a wielkie klebowiska pierwszego planu
-   dopiero przy pelnym zaciagnieciu. Dzieki temu pogodnie wyglada jak
-   pogodnie, a nie jak burza z mniejsza alfa. */
-let ileWWarstwie = [0, 0, 0];
-function addCloud(name, y, scale, speed, alpha, layer, x0) {
-  const f = F[name];
-  const i = ileWWarstwie[layer]++;
-  clouds.push({
-    name: name, x: x0 !== undefined ? x0 : rnd(-200, W), y: y, s: scale, v: speed, a: alpha, layer: layer,
-    w: f.w * scale, h: f.h * scale, kolej: i,
-    bob: rnd(0, TAU), bf: rnd(0.028, 0.055), bam: rnd(0.8, 2.2)
-  });
-}
-/* Wywolywane raz po zbudowaniu wszystkich warstw. */
-function nadajRangi() {
-  for (const c of clouds) {
-    const wWarstwie = (c.kolej + 0.5) / Math.max(1, ileWWarstwie[c.layer]);
-    c.ranga = Math.min(0.999, wWarstwie * 0.55 + (c.layer / 2) * 0.45);
+  function mnoznikLosowania(gk) {
+    const r = rekord(gk); if (!r) return 1;
+    if (r.n <= 0) return 0;
+    const baza = popStartowa(gk) || 1;
+    return Math.max(0.05, Math.min(1.6, Math.sqrt(r.n / baza)));
   }
-}
-/* Mnoznik przezroczystosci chmury przy danym zachmurzeniu. */
-function widocznoscChmury(c, zachm) {
-  return Math.max(0, Math.min(1, (zachm - c.ranga) / 0.12));
-}
-/* Niebo oryginalu jest wypelnione po brzegi i gestnieje ku horyzontowi,
-   wiec chmury ukladamy w trzech planach, z naciskiem na dol. */
-const CL = ['cloud1','cloud2','cloud
 
---- hit 2 @ 2000176 ---
-
-let brzegT = 0;
-
-/* ============================================================
-   PAS BRZEGU SKLEJONY W JEDEN OBRAZ.
-
-   PROBLEM WYDAJNOSCI: trzy warstwy po 900 px, kazda kafelkowana na
-   szerokosc kadru, dawaly do szesciu wywolan drawImage na klatke, razem
-   okolo 450 tysiecy pikseli przepisywanych szescdziesiat razy na sekunde.
-   Poprzedni pojedynczy pas lasu kosztowal osiem razy mniej i telefon to
-   odczul: klatki zaczely sie zacinac.
-
-   ROZWIAZANIE: paralaksa jest bardzo wolna, najszybsza warstwa robi
-   0,26 px na sekunde. Miedzy dwoma wypiekami, czyli co osma klatke,
-   najdalszy plan przesuwa sie o 0,035 piksela. Nie ma zatem powodu
-   skladac tego na kazdej klatce. Skladamy raz przy wypieku, na jednym
-   buforze o szerokosci kadru, a w petli rysowania zostaje JEDEN drawImage.
-
-   Szesc blitow schodzi do jednego, a przepisywana powierzchnia z 450
-   tysiecy pikseli do 51 tysiecy.
-   ============================================================ */
-let brzegPas = null;      /* kontekst 2d gotowego pasa */
-let brzegPasY = 0;        /* gorna krawedz pasa w kadrze */
-
-(function ladujBrzeg() {
-  if (!window.BRZEG_SRC) return;
-  for (const k of BRZEG_KLUCZE) {
-    const im = new Image();
-    im.onload = () => { brzegObrazy[k] = im; brzegGotowy++; if (brzegGotowy === 3) bakeBrzeg(); };
-    im.src = window.BRZEG_SRC[k];
+  /* Plec pojedynczej sztuki -- losowana z FAKTYCZNEGO skladu populacji,
+     wiec gdy zostana same samice, kazda zlowiona sztuka bedzie samica. */
+  function losujPlec(gk) {
+    const r = rekord(gk); if (!r || r.n <= 0) return Math.random() < 0.5 ? 'm' : 'f';
+    return (Math.random() * (r.m + r.f) < r.m) ? 'm' : 'f';
   }
-})();
 
-function bufBrzegu(k, im) {
-  if (!brzegBufy[k]) {
-    const c = document.createElement('canvas');
-    c.width = im.width; c.height = im.height;
-    const cx = c.getContext('2d');
-    cx.imageSmoothingEnabled = false;
-    brzegBufy[k] = cx;
+  /* Czy gatunek moze sie jeszcze rozmnazac. Specyfikacja: gatunek moze byc
+     funkcjonalnie martwy ZANIM dojdzie do zera, i nie wolno tego
+     naprawiac po cichu. */
+  function moznaRozmnazac(gk) {
+    const r = rekord(gk);
+    return !!(r && !r.wymarly && r.m > 0 && r.f > 0);
   }
-  return brzegBufy[k];
-}
 
-/* Ile pikseli warstwa przejechala od startu. Modulo szerokosci kafla. */
-function przesuwBrzegu(k, t) {
-  return ((t * BRZEG_V[k]) % 900 + 900) % 900;
-}
+  /* Procent jeziora i wynikajaca z niego srednia liczba lawic do
+     zobaczenia co najmniej jednej sztuki. Dla sredniej lawicy przyjmujemy
+     12 ryb, zgodnie z rzeczywistym kadrem. */
+  function udzialPopulacji(gk) {
+    const suma = sumaPopulacji();
+    if (!(suma > 0)) return 0;
+    return Math.max(0, populacja(gk)) / suma;
+  }
+  function coIleLawic(gk, rybNaLawice) {
+    const p = udzialPopulacji(gk);
+    if (!(p > 0)) return Infinity;
+    const n = Math.max(1, +(rybNaLawice || 12));
+    const q = 1 - Math.pow(1 - Math.min(1, p), n);
+    return q > 0 ? 1 / q : Infinity;
+  }
 
-/* Tonowanie kazdej warstwy paleta pory doby, a potem sklejenie ich
-   w jeden gotowy pas o szerokosci kadru. Wolane co osma klatke. */
-function bakeBrzeg() {
-  if (brzegGotowy < 3) return;
-  const nb = barwaNieba();
-  const jasNieba = 0.299 * nb[0] + 0.587 * nb[1] + 0.114 * nb[2];
-  const barwa = 'rgb(' + nb.map(v => Math.round(v)).join(',') + ')';
-  for (const k of BRZEG_KLUCZE) {
-    const im = brzegObrazy[k];
-    const b = bufBrzegu(k, im);
-    b.clearRect(0, 0, im.width, im.height);
-    b.drawImage(im, 0, 0);
-    const mgla = BRZEG_MGLA[k], cien = BRZEG_CIEN[k];
-    if (!mgla && !cien) continue;
-    b.globalCompositeOperation = 'source-atop';
-    if (mgla) {
-      b.globalAlpha = mgla; b.fillStyle = barwa;
-    } else {
-      /* Ciemne niebo: rozjasniamy. Jasne niebo: przyciemniamy.
-         Ta sama regula co w chmuraZGlebia, zeby plan bliski nigdy
-         nie zblizal sie do tla, tylko zawsze od niego odchodzil. */
-      b.globalAlpha = cien;
-      b.fillStyle = jasNieba < 110 ? 'rgba(255,246,226,1)' : 'rgba(18,12,30,1)';
+  function podsumowanie() {
+    const E = stan(); if (!E) return [];
+    const out = [];
+    for (const gk in E.gat) {
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      out.push({ gat: gk, n: r.n, m: r.m, f: r.f, max: r.max, min: r.min,
+                 indyw: r.indyw, wymarly: r.wymarly,
+                 rozmnazalny: r.m > 0 && r.f > 0 && !r.wymarly });
     }
-    b.fillRect(0, 0, im.width, im.height);
-    b.globalAlpha = 1;
-    b.globalCompositeOperation = 'source-over';
+    return out.sort((a, b) => b.n - a.n);
   }
 
-  /* sklejenie w jeden pas */
-  const najwyzsza = Math.max(brzegObrazy.daleki.height, brzegObrazy.sredni.height, brzegObrazy.bliski.height);
-  if (!brzegPas) {
-    const c = document.createElement('canvas');
-    c.width = W; c.height = najwyzsza + 16;
-    const cx = c.getContext('2d');
-    cx.imageSmoothingEnabled = false;
-    brzegPas = cx;
-  }
-  brzegPasY = SURFACE - najwyzsza;
-  const p = brzegPas;
-  p.clearRect(0, 0, W, p.canvas.height);
-  for (const k of BRZEG_KLUCZE) {
-    const im = brzegObrazy[k];
-    kafleBrzegu(p, brzegBufy[k].canvas, przesuwBrzegu(k, brzegT), najwyzsza - im.height, im.height);
-  }
-  /* wtopienie w tafle wchodzi juz tutaj, wiec gradient nie powstaje
-     na nowo przy kazdej klatce, tylko raz na wypiek */
-  const gd = p.createLinearGradient(0, najwyzsza - 10, 0, najwyzsza + 6);
-  gd.addColorStop(0, 'rgba(40,34,66,0)');
-  gd.addColorStop(0.55, 'rgba(52,40,78,0.55)');
-  gd.addColorStop(1, 'rgba(96,62,110,0.28)');
-  p.fillStyle = gd;
-  p.fillRect(0, najwyzsza - 10, W, 16);
-}
-
-/* Kafelkowanie jednej warstwy na dowolnym kontekscie. */
-function kafleBrzegu(ctx, kan, x0, y, wys) {
-  let x = (x0 % 900) - 900;
-  while (x < W) {
-    ctx.drawImage(kan, 0, 0, kan.width, kan.height, Math.round(x), y, kan.width, wys);
-    x += 900;
-  }
-}
-
-function drawBrzeg(t) {
-  brzegT = t;
-  if (brzegGotowy < 3) { drawTreeline(); return; }
-  if ((frameNo & 7) === 4 || !brzegPas) bakeBrzeg();
-  if (brzegPas) g.drawImage(brzegPas.canvas, 0, brzegPasY);
-}
-
-/* ============================================================
-   VISUAL AUDIT — STAGE 3 / KRAJOBRAZ
-
-   Fundament juz byl dobry: 3 plany brzegu, paralaksa, chmury,
-   pory dnia, odbicie i swietliki. Brakowalo KOMPOZYCJI KADRU.
-
-   Nowa zasada:
-   - srodek 72% szerokosci pozostaje spokojny i czytelny pod lowienie,
-   - boki kadru dostaja pierwszy plan (trzciny + niska roslinnosc),
-   - horyzont ma warstwe powietrza, ktora oddziela niebo od brzegu,
-   - male ptaki pojawiaja sie w dalekim planie tylko za dnia,
-   - pierwszy plan moze zaslonic rybe przy samej krawedzi: to celowe,
-     bo daje prawdziwa glebia "przed / za", a nie plaski kolaż.
-
-   Nie ruszamy tutaj fal, koloru toni ani fizyki wody — to Stage 4.
-   ============================================================ */
-const Krajobraz = (() => {
-  const SAFE_L = 0.14;
-  const SAFE_R = 0.86;
-
-  /* Deterministyczne ziarno — krajobraz nie zmienia ukladu po odswiezeniu.
-     Gracz zaczyna rozpoznawac "swoj" brzeg. */
-  let seed = 0x51A7B3;
-  function rr() {
-    seed = (seed * 1664525 + 1013904223) >>> 0;
-    return seed / 4294967296;
+  function kronika(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika.slice(-(ile || 20)).reverse();
   }
 
-  const trzciny = [];
-  function dodajTrzciny(strona, ile) {
-    for (let i = 0; i < ile; i++) {
-      const q = rr();
-      const odKrawedzi = Math.pow(q, 1.55);
-      const x = strona < 0
-        ? W * (0.008 + odKrawedzi * (SAFE_L - 0.012))
-        : W * (0.992 - odKrawedzi * (1 - SAFE_R - 0.012));
-      const h = 50 + rr() * 110;
-      trzciny.push({
-        x,
-        rootY:SURFACE + 5 + rr() * 12,
-        h,
-        lean:(rr() - .5) * 8,
-        amp:1.3 + rr() * 3.0,
-        per:5.8 + rr() * 6.5,
-        ph:rr() * TAU,
-        thick:rr() < .35 ? 2 : 1,
-        head:rr() < .32,
-        side:strona
-      });
+  /* KRONIKA PUBLICZNA. Pelna kronika to dziennik diagnostyczny -- leca
+     w nia gody przerwane, zjedzenia przez drapieznika i kazde drgniecie
+     populacji. Do feedu widocznego dla wszystkich ida DWA typy zdarzen
+     i nic wiecej, dokladnie tak, jak brzmi specyfikacja:
+       - kto zlowil ryba gatunku ponizej dziesieciu sztuk,
+       - kto dopuscil tarlo i z jakim wynikiem.
+     Wpisy bez nicku (sprzed zalogowania) zostaja odfiltrowane, bo feed
+     bez autora nie niesie tej informacji, o ktora chodzi. */
+  /* Feed widzi DWA typy: kto zlowil rybe gatunku ponizej dziesieciu sztuk
+     i ile ryb dolaczylo do populacji dzieki czyjemus tarlu. Samo zlozenie
+     ikry (`tarlo-wlasne`) zostaje w prywatnym dzienniku. */
+  CFG.TYPY_PUBLICZNE = ['rzadka-zlowiona', 'narybek'];
+
+  function kronikaPubliczna(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika
+      .filter(w => CFG.TYPY_PUBLICZNE.indexOf(w.typ) >= 0 && w.nick)
+      .slice(-(ile || 20)).reverse();
+  }
+
+  /* ============================================================
+     TRYB INDYWIDUALNY (faza 11). Ponizej PROG_INDYWIDUALNY kazda
+     pozostala ryba przestaje byc statystyka i staje sie TRWALYM BYTEM
+     z wlasnym numerem, plcia, data urodzin i cechami.
+
+     PO CO: dopoki populacja to sama liczba, spadek z 12 do 11 nic nie
+     znaczy. Gdy sa to konkretne sztuki, zabranie ostatniej samicy jest
+     wydarzeniem -- i to jest cala dramaturgia, o ktora chodzi.
+
+     RYBA, KTORA ZNIKA Z EKRANU, NIE PRZESTAJE ISTNIEC. To jest
+     najwazniejszy niezmiennik tej fazy: `zwolnij` tylko odznacza, ze
+     osobnik nie jest akurat pokazywany. Z populacji usuwa go wylacznie
+     `usunOsobnika`, wolane przy zatrzymaniu przez gracza albo zjedzeniu
+     przez drapieznika.
+
+     ROZMIAR ZAPISU: rekordy powstaja tylko ponizej stu sztuk na gatunek,
+     wiec nawet przy kilkunastu gatunkach w trybie indywidualnym to setki,
+     nie setki tysiecy wpisow. Powyzej progu nie ma ich wcale -- tego
+     wprost wymaga specyfikacja (zadnych rekordow per ryba przy duzych
+     populacjach).
+     ============================================================ */
+  function listaOsobnikow(gk) {
+    const E = stan(); if (!E) return [];
+    if (!E.osob) E.osob = {};
+    if (!E.osob[gk]) E.osob[gk] = [];
+    return E.osob[gk];
+  }
+
+  /* Cechy dziedziczne w zalazku: na razie losowane, ale pole `gen` jest
+     juz na miejscu, zeby faza genetyki miala gdzie usiasc bez migracji
+     zapisu. Wartosci 0..1, srodek to przecietny osobnik. */
+  function losujGeny() {
+    const r = () => Math.round((0.35 + Math.random() * 0.3) * 100) / 100;
+    return { rozmiar: r(), wzrost: r(), plochliwosc: r(), plodnosc: r() };
+  }
+
+  function nowyOsobnik(gk, plec, nr) {
+    return {
+      id: gk.toUpperCase().slice(0, 6) + '-' + String(nr).padStart(4, '0'),
+      plec: plec,
+      ur: Date.now(),
+      gen: genZPopulacji(gk),
+      naEkranie: false
+    };
+  }
+
+  /* Wolane przy przejsciu ponizej progu. Tworzy tyle rekordow, ile
+     faktycznie zostalo sztuk, z zachowaniem proporcji plci -- populacja
+     nie zmienia sie ani o jeden, zmienia sie tylko sposob jej opisu. */
+  function materializuj(gk) {
+    const r = rekord(gk); if (!r) return;
+    const lista = listaOsobnikow(gk);
+    if (lista.length >= r.n) return;
+    let nr = lista.length;
+    let brakM = Math.max(0, r.m - lista.filter(o => o.plec === 'm').length);
+    let brakF = Math.max(0, r.f - lista.filter(o => o.plec === 'f').length);
+    while (lista.length < r.n && (brakM > 0 || brakF > 0)) {
+      const plec = (brakM >= brakF) ? 'm' : 'f';
+      if (plec === 'm') brakM--; else brakF--;
+      lista.push(nowyOsobnik(gk, plec, ++nr));
+    }
+    zapisz('indyw', gk, 'kazda sztuka ma teraz wlasny numer', lista.length);
+  }
+
+  /* Osobnik do pokazania na ekranie. Zwraca TEGO SAMEGO, ktory juz
+     plywa, dopoki go nie zwolnimy -- dzieki temu ta sama ryba moze
+     wracac miedzy lawicami, zamiast byc losowana od nowa. */
+  function wezOsobnika(gk) {
+    const r = rekord(gk);
+    if (!r || !r.indyw || r.n <= 0) return null;
+    materializuj(gk);
+    const lista = listaOsobnikow(gk);
+    const wolni = lista.filter(o => !o.naEkranie);
+    if (!wolni.length) return null;
+    const o = wolni[Math.floor(Math.random() * wolni.length)];
+    o.naEkranie = true;
+    return o;
+  }
+
+  /* Ryba wyplynela z kadru. ZOSTAJE w populacji -- to jest cala roznica
+     miedzy trybem indywidualnym a zwyklym losowaniem. */
+  function zwolnij(gk, id) {
+  
+
+### mnoznikLosowania(gk)
+
+--- hit 1 @ 6220749 ---
+
+moze wypasc NIGDY (niezmiennik specyfikacji).
+     Poza tym skalujemy pierwiastkiem ze stosunku do populacji startowej:
+     wprost proporcjonalnie byloby zbyt gwaltowne (polowa populacji =
+     polowa spotkan), a pierwiastek daje odczuwalna, ale lagodna zmiane.
+     Sufit 1,6 zeby przelowiona reszta swiata nie zalala kadru jednym
+     gatunkiem, ktory akurat sie odbudowal.
+     ============================================================ */
+  /* ============================================================
+     RZADKOSC LICZONA Z POPULACJI (IX 2026, polecenie Andrzeja).
+
+     BYLO: waga gatunku brala sie z `udzial` w rejestrze, czyli ze stalej
+     wpisanej przy gatunku, a populacja dokladala sie osobno przez
+     `mnoznikLosowania` (pierwiastek z n/popStartowa, przyciety do 1,6).
+     Rejestr rozpinal sie od ploci do jesiotra w stosunku okolo 666 000:1.
+
+     JEST: waga TO populacja. Gatunek, ktorego plywa 4000 sztuk, wypada
+     tyle razy czesciej od gatunku o 12 sztukach, ile wynosi stosunek
+     tych liczb. Rejestr dalej rzadzi, ale posrednio: to on ustalil
+     populacje startowe, wiec ploc startuje z tysiacami, a jesiotr
+     z dwunastoma. Roznica jest taka, ze od teraz liczba w jeziorze
+     jest JEDYNYM zrodlem rzadkosci -- przelowienie widac od razu
+     w tym, co bierze, a odbudowa tak samo.
+
+     ALFA steruje ostroscia. 1,0 to czysta proporcja. Powyzej 1 rzadkie
+     gatunki robia sie jeszcze rzadsze, ponizej 1 roznice sie splaszczaja.
+     ============================================================ */
+  CFG.ALFA_RZADKOSCI = 1.0;
+
+  function wagaZPopulacji(gk) {
+    const r = rekord(gk); if (!r) return 0;
+    if (r.n <= 0 || r.wymarly) return 0;     /* wymarly znika z puli, bez sciezki powrotu */
+    return Math.pow(r.n, CFG.ALFA_RZADKOSCI);
+  }
+
+  function mnoznikLosowania(gk) {
+    const r = rekord(gk); if (!r) return 1;
+    if (r.n <= 0) return 0;
+    const baza = popStartowa(gk) || 1;
+    return Math.max(0.05, Math.min(1.6, Math.sqrt(r.n / baza)));
+  }
+
+  /* Plec pojedynczej sztuki -- losowana z FAKTYCZNEGO skladu populacji,
+     wiec gdy zostana same samice, kazda zlowiona sztuka bedzie samica. */
+  function losujPlec(gk) {
+    const r = rekord(gk); if (!r || r.n <= 0) return Math.random() < 0.5 ? 'm' : 'f';
+    return (Math.random() * (r.m + r.f) < r.m) ? 'm' : 'f';
+  }
+
+  /* Czy gatunek moze sie jeszcze rozmnazac. Specyfikacja: gatunek moze byc
+     funkcjonalnie martwy ZANIM dojdzie do zera, i nie wolno tego
+     naprawiac po cichu. */
+  function moznaRozmnazac(gk) {
+    const r = rekord(gk);
+    return !!(r && !r.wymarly && r.m > 0 && r.f > 0);
+  }
+
+  /* Procent jeziora i wynikajaca z niego srednia liczba lawic do
+     zobaczenia co najmniej jednej sztuki. Dla sredniej lawicy przyjmujemy
+     12 ryb, zgodnie z rzeczywistym kadrem. */
+  function udzialPopulacji(gk) {
+    const suma = sumaPopulacji();
+    if (!(suma > 0)) return 0;
+    return Math.max(0, populacja(gk)) / suma;
+  }
+  function coIleLawic(gk, rybNaLawice) {
+    const p = udzialPopulacji(gk);
+    if (!(p > 0)) return Infinity;
+    const n = Math.max(1, +(rybNaLawice || 12));
+    const q = 1 - Math.pow(1 - Math.min(1, p), n);
+    return q > 0 ? 1 / q : Infinity;
+  }
+
+  function podsumowanie() {
+    const E = stan(); if (!E) return [];
+    const out = [];
+    for (const gk in E.gat) {
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      out.push({ gat: gk, n: r.n, m: r.m, f: r.f, max: r.max, min: r.min,
+                 indyw: r.indyw, wymarly: r.wymarly,
+                 rozmnazalny: r.m > 0 && r.f > 0 && !r.wymarly });
+    }
+    return out.sort((a, b) => b.n - a.n);
+  }
+
+  function kronika(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika.slice(-(ile || 20)).reverse();
+  }
+
+  /* KRONIKA PUBLICZNA. Pelna kronika to dziennik diagnostyczny -- leca
+     w nia gody przerwane, zjedzenia przez drapieznika i kazde drgniecie
+     populacji. Do feedu widocznego dla wszystkich ida DWA typy zdarzen
+     i nic wiecej, dokladnie tak, jak brzmi specyfikacja:
+       - kto zlowil ryba gatunku ponizej dziesieciu sztuk,
+       - kto dopuscil tarlo i z jakim wynikiem.
+     Wpisy bez nicku (sprzed zalogowania) zostaja odfiltrowane, bo feed
+     bez autora nie niesie tej informacji, o ktora chodzi. */
+  /* Feed widzi DWA typy: kto zlowil rybe gatunku ponizej dziesieciu sztuk
+     i ile ryb dolaczylo do populacji dzieki czyjemus tarlu. Samo zlozenie
+     ikry (`tarlo-wlasne`) zostaje w prywatnym dzienniku. */
+  CFG.TYPY_PUBLICZNE = ['rzadka-zlowiona', 'narybek'];
+
+  function kronikaPubliczna(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika
+      .filter(w => CFG.TYPY_PUBLICZNE.indexOf(w.typ) >= 0 && w.nick)
+      .slice(-(ile || 20)).reverse();
+  }
+
+  /* ============================================================
+     TRYB INDYWIDUALNY (faza 11). Ponizej PROG_INDYWIDUALNY kazda
+     pozostala ryba przestaje byc statystyka i staje sie TRWALYM BYTEM
+     z wlasnym numerem, plcia, data urodzin i cechami.
+
+     PO CO: dopoki populacja to sama liczba, spadek z 12 do 11 nic nie
+     znaczy. Gdy sa to konkretne sztuki, zabranie ostatniej samicy jest
+     wydarzeniem -- i to jest cala dramaturgia, o ktora chodzi.
+
+     RYBA, KTORA ZNIKA Z EKRANU, NIE PRZESTAJE ISTNIEC. To jest
+     najwazniejszy niezmiennik tej fazy: `zwolnij` tylko odznacza, ze
+     osobnik nie jest akurat pokazywany. Z populacji usuwa go wylacznie
+     `usunOsobnika`, wolane przy zatrzymaniu przez gracza albo zjedzeniu
+     przez drapieznika.
+
+     ROZMIAR ZAPISU: rekordy powstaja tylko ponizej stu sztuk na gatunek,
+     wiec nawet przy kilkunastu gatunkach w trybie indywidualnym to setki,
+     nie setki tysiecy wpisow. Powyzej progu nie ma ich wcale -- tego
+     wprost wymaga specyfikacja (zadnych rekordow per ryba przy duzych
+     populacjach).
+     ============================================================ */
+  function listaOsobnikow(gk) {
+    const E = stan(); if (!E) return [];
+    if (!E.osob) E.osob = {};
+    if (!E.osob[gk]) E.osob[gk] = [];
+    return E.osob[gk];
+  }
+
+  /* Cechy dziedziczne w zalazku: na razie losowane, ale pole `gen` jest
+     juz na miejscu, zeby faza genetyki miala gdzie usiasc bez migracji
+     zapisu. Wartosci 0..1, srodek to przecietny osobnik. */
+  function losujGeny() {
+    const r = () => Math.round((0.35 + Math.random() * 0.3) * 100) / 100;
+    return { rozmiar: r(), wzrost: r(), plochliwosc: r(), plodnosc: r() };
+  }
+
+  function nowyOsobnik(gk, plec, nr) {
+    return {
+      id: gk.toUpperCase().slice(0, 6) + '-' + String(nr).padStart(4, '0'),
+      plec: plec,
+      ur: Date.now(),
+      gen: genZPopulacji(gk),
+      naEkranie: false
+    };
+  }
+
+  /* Wolane przy przejsciu ponizej progu. Tworzy tyle rekordow, ile
+     faktycznie zostalo sztuk, z zachowaniem proporcji plci -- populacja
+     nie zmienia sie ani o jeden, zmienia sie tylko sposob jej opisu. */
+  function materializuj(gk) {
+    const r = rekord(gk); if (!r) return;
+    const lista = listaOsobnikow(gk);
+    if (lista.length >= r.n) return;
+    let nr = lista.length;
+    let brakM = Math.max(0, r.m - lista.filter(o => o.plec === 'm').length);
+    let brakF = Math.max(0, r.f - lista.filter(o => o.plec === 'f').length);
+    while (lista.length < r.n && (brakM > 0 || brakF > 0)) {
+      const plec = (brakM >= brakF) ? 'm' : 'f';
+      if (plec === 'm') brakM--; else brakF--;
+      lista.push(nowyOsobnik(gk, plec, ++nr));
+    }
+    zapisz('indyw', gk, 'kazda sztuka ma teraz wlasny numer', lista.length);
+  }
+
+  /* Osobnik do pokazania na ekranie. Zwraca TEGO SAMEGO, ktory juz
+     plywa, dopoki go nie zwolnimy -- dzieki temu ta sama ryba moze
+     wracac miedzy lawicami, zamiast byc losowana od nowa. */
+  function wezOsobnika(gk) {
+    const r = rekord(gk);
+    if (!r || !r.indyw || r.n <= 0) return null;
+    materializuj(gk);
+    const lista = listaOsobnikow(gk);
+    const wolni = lista.filter(o => !o.naEkranie);
+    if (!wolni.length) return null;
+    const o = wolni[Math.floor(Math.random() * wolni.length)];
+    o.naEkranie = true;
+    return o;
+  }
+
+  /* Ryba wyplynela z kadru. ZOSTAJE w populacji -- to jest cala roznica
+     miedzy trybem indywidualnym a zwyklym losowaniem. */
+  function zwolnij(gk, id) {
+    const l
+
+### wagaZPopulacji
+
+--- hit 1 @ 6220529 ---
+
+n ubylo;
+  }
+
+  /* ============================================================
+     WAGA DO LOSOWANIA. To jest miejsce, w ktorym populacja zaczyna
+     STEROWAC swiatem, zamiast tylko go opisywac.
+     0 -> gatunek nie moze wypasc NIGDY (niezmiennik specyfikacji).
+     Poza tym skalujemy pierwiastkiem ze stosunku do populacji startowej:
+     wprost proporcjonalnie byloby zbyt gwaltowne (polowa populacji =
+     polowa spotkan), a pierwiastek daje odczuwalna, ale lagodna zmiane.
+     Sufit 1,6 zeby przelowiona reszta swiata nie zalala kadru jednym
+     gatunkiem, ktory akurat sie odbudowal.
+     ============================================================ */
+  /* ============================================================
+     RZADKOSC LICZONA Z POPULACJI (IX 2026, polecenie Andrzeja).
+
+     BYLO: waga gatunku brala sie z `udzial` w rejestrze, czyli ze stalej
+     wpisanej przy gatunku, a populacja dokladala sie osobno przez
+     `mnoznikLosowania` (pierwiastek z n/popStartowa, przyciety do 1,6).
+     Rejestr rozpinal sie od ploci do jesiotra w stosunku okolo 666 000:1.
+
+     JEST: waga TO populacja. Gatunek, ktorego plywa 4000 sztuk, wypada
+     tyle razy czesciej od gatunku o 12 sztukach, ile wynosi stosunek
+     tych liczb. Rejestr dalej rzadzi, ale posrednio: to on ustalil
+     populacje startowe, wiec ploc startuje z tysiacami, a jesiotr
+     z dwunastoma. Roznica jest taka, ze od teraz liczba w jeziorze
+     jest JEDYNYM zrodlem rzadkosci -- przelowienie widac od razu
+     w tym, co bierze, a odbudowa tak samo.
+
+     ALFA steruje ostroscia. 1,0 to czysta proporcja. Powyzej 1 rzadkie
+     gatunki robia sie jeszcze rzadsze, ponizej 1 roznice sie splaszczaja.
+     ============================================================ */
+  CFG.ALFA_RZADKOSCI = 1.0;
+
+  function wagaZPopulacji(gk) {
+    const r = rekord(gk); if (!r) return 0;
+    if (r.n <= 0 || r.wymarly) return 0;     /* wymarly znika z puli, bez sciezki powrotu */
+    return Math.pow(r.n, CFG.ALFA_RZADKOSCI);
+  }
+
+  function mnoznikLosowania(gk) {
+    const r = rekord(gk); if (!r) return 1;
+    if (r.n <= 0) return 0;
+    const baza = popStartowa(gk) || 1;
+    return Math.max(0.05, Math.min(1.6, Math.sqrt(r.n / baza)));
+  }
+
+  /* Plec pojedynczej sztuki -- losowana z FAKTYCZNEGO skladu populacji,
+     wiec gdy zostana same samice, kazda zlowiona sztuka bedzie samica. */
+  function losujPlec(gk) {
+    const r = rekord(gk); if (!r || r.n <= 0) return Math.random() < 0.5 ? 'm' : 'f';
+    return (Math.random() * (r.m + r.f) < r.m) ? 'm' : 'f';
+  }
+
+  /* Czy gatunek moze sie jeszcze rozmnazac. Specyfikacja: gatunek moze byc
+     funkcjonalnie martwy ZANIM dojdzie do zera, i nie wolno tego
+     naprawiac po cichu. */
+  function moznaRozmnazac(gk) {
+    const r = rekord(gk);
+    return !!(r && !r.wymarly && r.m > 0 && r.f > 0);
+  }
+
+  /* Procent jeziora i wynikajaca z niego srednia liczba lawic do
+     zobaczenia co najmniej jednej sztuki. Dla sredniej lawicy przyjmujemy
+     12 ryb, zgodnie z rzeczywistym kadrem. */
+  function udzialPopulacji(gk) {
+    const suma = sumaPopulacji();
+    if (!(suma > 0)) return 0;
+    return Math.max(0, populacja(gk)) / suma;
+  }
+  function coIleLawic(gk, rybNaLawice) {
+    const p = udzialPopulacji(gk);
+    if (!(p > 0)) return Infinity;
+    const n = Math.max(1, +(rybNaLawice || 12));
+    const q = 1 - Math.pow(1 - Math.min(1, p), n);
+    return q > 0 ? 1 / q : Infinity;
+  }
+
+  function podsumowanie() {
+    const E = stan(); if (!E) return [];
+    const out = [];
+    for (const gk in E.gat) {
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      out.push({ gat: gk, n: r.n, m: r.m, f: r.f, max: r.max, min: r.min,
+                 indyw: r.indyw, wymarly: r.wymarly,
+                 rozmnazalny: r.m > 0 && r.f > 0 && !r.wymarly });
+    }
+    return out.sort((a, b) => b.n - a.n);
+  }
+
+  function kronika(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika.slice(-(ile || 20)).reverse();
+  }
+
+  /* KRONIKA PUBLICZNA. Pelna kronika to dziennik diagnostyczny -- leca
+     w nia gody przerwane, zjedzenia przez drapieznika i kazde drgniecie
+     populacji. Do feedu widocznego dla wszystkich ida DWA typy zdarzen
+     i nic wiecej, dokladnie tak, jak brzmi specyfikacja:
+       - kto zlowil ryba gatunku ponizej dziesieciu sztuk,
+       - kto dopuscil tarlo i z jakim wynikiem.
+     Wpisy bez nicku (sprzed zalogowania) zostaja odfiltrowane, bo feed
+     bez autora nie niesie tej informacji, o ktora chodzi. */
+  /* Feed widzi DWA typy: kto zlowil rybe gatunku ponizej dziesieciu sztuk
+     i ile ryb dolaczylo do populacji dzieki czyjemus tarlu. Samo zlozenie
+     ikry (`tarlo-wlasne`) zostaje w prywatnym dzienniku. */
+  CFG.TYPY_PUBLICZNE = ['rzadka-zlowiona', 'narybek'];
+
+  function kronikaPubliczna(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika
+      .filter(w => CFG.TYPY_PUBLICZNE.indexOf(w.typ) >= 0 && w.nick)
+      .slice(-(ile || 20)).reverse();
+  }
+
+  /* ============================================================
+     TRYB INDYWIDUALNY (faza 11). Ponizej PROG_INDYWIDUALNY kazda
+     pozostala ryba przestaje byc statystyka i staje sie TRWALYM BYTEM
+     z wlasnym numerem, plcia, data urodzin i cechami.
+
+     PO CO: dopoki populacja to sama liczba, spadek z 12 do 11 nic nie
+     znaczy. Gdy sa to konkretne sztuki, zabranie ostatniej samicy jest
+     wydarzeniem -- i to jest cala dramaturgia, o ktora chodzi.
+
+     RYBA, KTORA ZNIKA Z EKRANU, NIE PRZESTAJE ISTNIEC. To jest
+     najwazniejszy niezmiennik tej fazy: `zwolnij` tylko odznacza, ze
+     osobnik nie jest akurat pokazywany. Z populacji usuwa go wylacznie
+     `usunOsobnika`, wolane przy zatrzymaniu przez gracza albo zjedzeniu
+     przez drapieznika.
+
+     ROZMIAR ZAPISU: rekordy powstaja tylko ponizej stu sztuk na gatunek,
+     wiec nawet przy kilkunastu gatunkach w trybie indywidualnym to setki,
+     nie setki tysiecy wpisow. Powyzej progu nie ma ich wcale -- tego
+     wprost wymaga specyfikacja (zadnych rekordow per ryba przy duzych
+     populacjach).
+     ============================================================ */
+  function listaOsobnikow(gk) {
+    const E = stan(); if (!E) return [];
+    if (!E.osob) E.osob = {};
+    if (!E.osob[gk]) E.osob[gk] = [];
+    return E.osob[gk];
+  }
+
+  /* Cechy dziedziczne w zalazku: na razie losowane, ale pole `gen` jest
+     juz na miejscu, zeby faza genetyki miala gdzie usiasc bez migracji
+     zapisu. Wartosci 0..1, srodek to przecietny osobnik. */
+  function losujGeny() {
+    const r = () => Math.round((0.35 + Math.random() * 0.3) * 100) / 100;
+    return { rozmiar: r(), wzrost: r(), plochliwosc: r(), plodnosc: r() };
+  }
+
+  function nowyOsobnik(gk, plec, nr) {
+    return {
+      id: gk.toUpperCase().slice(0, 6) + '-' + String(nr).padStart(4, '0'),
+      plec: plec,
+      ur: Date.now(),
+      gen: genZPopulacji(gk),
+      naEkranie: false
+    };
+  }
+
+  /* Wolane przy przejsciu ponizej progu. Tworzy tyle rekordow, ile
+     faktycznie zostalo sztuk, z zachowaniem proporcji plci -- populacja
+     nie zmienia sie ani o jeden, zmienia sie tylko sposob jej opisu. */
+  function materializuj(gk) {
+    const r = rekord(gk); if (!r) return;
+    const lista = listaOsobnikow(gk);
+    if (lista.length >= r.n) return;
+    let nr = lista.length;
+    let brakM = Math.max(0, r.m - lista.filter(o => o.plec === 'm').length);
+    let brakF = Math.max(0, r.f - lista.filter(o => o.plec === 'f').length);
+    while (lista.length < r.n && (brakM > 0 || brakF > 0)) {
+      const plec = (brakM >= brakF) ? 'm' : 'f';
+      if (plec === 'm') brakM--; else brakF--;
+      lista.push(nowyOsobnik(gk, plec, ++nr));
+    }
+    zapisz('indyw', gk, 'kazda sztuka ma teraz wlasny numer', lista.length);
+  }
+
+  /* Osobnik do pokazania na ekranie. Zwraca TEGO SAMEGO, ktory juz
+     plywa, dopoki go nie zwolnimy -- dzieki temu ta sama ryba moze
+     wracac miedzy lawicami, zamiast byc losowana od nowa. */
+  function wezOsobnika(gk) {
+    const r = rekord(gk);
+    if (!r || !r.indyw || r.n <= 0) return null;
+    materializuj(gk);
+    const lista = listaOsobnikow(gk);
+    const wolni = lista.filter(o => !o.naEkranie);
+    if (!wolni.length) return null;
+    const o = wolni[Math.floor(Math.random() * wolni.leng
+
+--- hit 2 @ 6264712 ---
+
+ cechach v */
+      const nowa = (sr[c] * (r.n + 1) - v) / Math.max(1, r.n);
+      sr[c] = Math.round(Math.max(0.02, Math.min(0.98, nowa)) * 1000) / 1000;
     }
   }
-  dodajTrzciny(-1, 24);
-  dodajTrzci
 
---- hit 3 @ 2031170 ---
 
-* 0.62 + w2(t, P.e, 5.6) * 0.38) * 1.3;
-  g.drawImage(wbuf, IN, REFL_END - SURFACE, W - IN * 2, H - REFL_END,
-    deepDx, REFL_END, W, H - REFL_END);
-  g.imageSmoothingEnabled = false;
-}
+  /* TYLKO Smok Zycia moze przejsc przez te drzwi. Zwykle tarlo nadal nie
+     wskrzesza wymarlych. Kazdy wymarly gatunek wraca jako 1 samiec + 1 samica. */
+  function odrodzWymarle() {
+    if (!maPrawoDoSwiata()) return [];
+    const E = stan(), out = [];
+    if (!E || !E.gat) return out;
+    for (const gk in E.gat) {
+      if (GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      if (!r || (!r.wymarly && r.n > 0)) continue;
+      r.n=2; r.m=1; r.f=1; r.wymarly=false; r.kiedyWymarl=0;
+      r.max=Math.max(r.max||0,2); r.min=Math.min(r.min||0,0); r.indyw=true;
+      if (E.osob) E.osob[gk]=[];
+      try { materializuj(gk); } catch(e) {}
+      out.push(gk);
+      zapisz('odrodzenie',gk,'Smok Życia przywrócił gatunek: 1 samiec + 1 samica',2);
+    }
+    window.__wagiTab=null;
+    if (typeof Zapis!=='undefined') Zapis.zapisz();
+    try { if (Eko.Serwer && Eko.Serwer.odrodzWymarle) Eko.Serwer.odrodzWymarle(); } catch(e) {}
+    return out;
+  }
 
-/* Pas mulu pod kamieniami. Przy wiekszych glazach kazda dziura miedzy nimi
-   pokazywala wode, teraz kamienie sa mniejsze, wiec dziur bylo by wiecej.
-   Ciemne tlo zamyka je raz na zawsze i daje dnu glebie. */
-/* ============================================================
-   DNO Z OBRAZKA.
-
-   Kafel 768x171 rysowany od BED minus 60 do dolu kadru. Gorne 60 pikseli
-   kafla to przejscie w przezroczystosc, wiec obrazek nie przynosi wlasnej
-   wody i wtapia sie w ton, jaka akurat ma scena.
-
-   Trzy warianty na pore doby. Kafel ma wlasne kamienie i wlasna flore.
-   STAGE 15.3: gdy kafel jest gotowy, nie doklejamy juz proceduralnych
-   weed-sprite'ow. Na telefonie wygladaly jak powtarzalne naklejki i psuly
-   spojnosc authored dna. Ruch w toni zapewniaja ryby, czastki i swiatlo.
-
-   Gdy obrazek sie nie wczyta, wszystko wraca do starego rysowania.
-   Zaden gracz nie zobaczy pustego pasa zamiast dna. */
-const dnoImg = {};
-(function () {
-  const S = window.DNO_SRC || {};
-  for (const k in S) { const i = new Image(); i.src = S[k]; dnoImg[k] = i; }
+  return { CFG, stan, rekord, populacja, wymarly, trybIndywidualny,
+           tikGodow, parujeSie, paraGodowa, ikra, zakonczGody,
+           tikKohort, pokolenia, nowaKohorta, losujScenariusz,
+           genSrednia, genZPopulacji, zmieszajGeny, przesunSrednia, odejmijZeSredniej,
+           materializuj, wezOsobnika, zwolnij, usunOsobnika, osobniki,
+           zmien, zatrzymano, wypuszczono, drapieznikZjadl, odrodzWymarle,
+           mnoznikLosowania, losujPlec, moznaRozmnazac,
+           karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
+           szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
+           tarloPary, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
+           sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
+           meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
+           podsumowanie, kronika, zapisz, popStartowa };
 })();
-function dnoTeraz() {
-  let godz = 12;
-  try {
-    godz = (window.PORA && PORA.teraz) ? PORA.teraz().godzina : new Date().getHours();
-  } catch (e) { godz = new Date().getHours(); }
-  if (godz >= 8 && godz < 18) return dnoImg.dzien;
-  if (godz >= 22 || godz < 4) return dnoImg.noc;
-  return dnoImg.zmierzch;
-}
-function dnoGotowe(im) { return !!(im && im.complete && im.naturalWidth); }
+window.Eko = Eko;
 
-let mulGrad = null;
 /* ============================================================
-   VISUAL AUDIT — STAGE 11 / GLEBIA SCENY
-
-   Do tej pory cale dno bylo rysowane PRZED rybami. Nawet najblizszy kamien
-   i najnizszy wodorost nie mogly zaslonic ryby, wiec oko czytalo:
-     DNO -> RYBY
-   zamiast:
-     DNO DALEKIE -> RYBY W TONI -> DNO BLISKIE
-
-   Nie dokładamy nowych assetow. Uzywamy tych samych kamieni/wodorostow,
-   tylko najblizszy rzad trafia PO rybach.
-
-   `bedForeground()` jest celowo konserwatywne:
-   - dolny rzad roslin (yOff >= 18),
-   - dopiero bardzo niski rzad kamieni/muszelek (yOff >= 64).
-   Srodkowy pas dna zostaje za rybami, wiec gameplay nadal jest czytelny.
+   ZEGAR CYKLU POKOLEN. Co 4 sekundy, a nie co klatke: etapy trwaja
+   minuty, wiec liczenie ich sześćdziesiąt razy na sekunde byloby czysta
+   strata mocy na telefonie (patrz wpisy o wydajnosci wyzej).
+   Pierwszy tik od razu po wczytaniu obsluguje CZAS OFFLINE: `tikKohort`
+   przerabia w petli tyle etapow, ile faktycznie minelo od ostatniej
+   sesji, wiec pokolenie zalozone wczoraj dochodzi do konca, zamiast
+   czekac na gracza. Bezpiecznik na 12 etapow w petli chroni przed
+   absurdalnym skokiem zegara urzadzenia.
    ============================================================ */
-function bedForeground(b) {
-  if (!b) return false;
-  if (b.kind === 'weed') return b.yOff >= 18;
-  return b.yOff >= 64;
-}
-
-function drawBedItem(t, b, zObrazka) {
-  /* STAGE 15.3 — authored DNO jest kompletnym obrazem dna.
-     Doklejane na nie proceduralne weed1..4 byly z innego jezyka graficznego:
-     jaśniejsze, bardziej kontrastowe i powtarzalne. Na telefonie czytaly sie
-     jak naklejki ustawione w rzedzie. Gdy kafel DNO jest gotowy, nie dublujemy
-     go zadnymi starymi sprite'ami. Fallback bez DNO zachowuje poprzednie dno. */
-  if (zObrazka) return;
-  const yy = BED + b.yOff;
-
-  if (b.kind === 'weed') {
-    const k = (Math.sin(t / b.per * TAU + b.ph) * 0.5 + 0.5) * (WEED_FRAMES - 1);
-    const fr = weedFrames[b.name] && weedFrames[b.name][Math.round(k)];
-    if (!fr) return;
-    g.drawImage(fr, Math.round(b.x - WEED_PAD * b.s), Math.round(yy),
-      Math.round(b.w + WEED_PAD * 2 * b.s), Math.round(b.h));
-  } else {
-    spr(b.name, b.x, yy, b.w, b.h);
-  }
-}
-
-function drawBed(t) {
-  const dno = dnoTeraz();
-  const zObrazka = dnoGotowe(dno);
-
-  if (zObrazka) {
-    const gora = BED - 60;
-    g.drawImage(dno, 0, gora, W, H - gora);
-  }
-
-  if (!zObrazka && !mulGrad) {
-    mulGrad = g.createLinearGradient(0, BED - 18, 0, H);
-    mulGrad.addColorStop(0.00, 'rgba(24, 16, 40, 0)');
-    mulGrad.addColorStop(0.22, 'rgba(26, 18, 42, 0.82)');
-    mulGrad.addColorStop(1.00, 'rgba(18, 12, 32, 1)');
-  }
-
-  if (!zObrazka) {
-    g.fillStyle = mulGrad;
-    g.fillRect(0, BED - 18, W, H - BED + 18);
-  }
-
-  /* TYLKO tyl i srodek dna. */
-  for (const b of bed) {
-    if (bedForeground(b)) continue;
-    drawBedItem(t, b, zObrazka);
-  }
-}
-
-/* Najblizszy rzad dna — rysowany PO rybach.
-   Clip pilnuje, zeby pierwszoplanowe obiekty nie weszly zbyt wysoko w ton. */
-function drawBedForeground(t) {
-  const dno = dnoTeraz();
-  const zObrazka = dnoGotowe(dno);
-
-  g.save();
-  g.beginPath();
-  g.rect(0, BED - 22, W, H - BED + 22);
-  g.clip();
-
-  /* Lekki cien u podstawy pierwszego planu: nie nowa winieta, tylko kontakt
-     najblizszych obiektow z dolna krawedzia kadru. */
-  const shade = g.createLinearGradient(0, BED - 18, 0, H);
-  shade.addColorStop(0, 'rgba(12,16,28,0)');
-  shade.addColorStop(1, 'rgba(8,10,20,.13)');
-  g.fillStyle = shade;
-  g.fillRect(0, BED - 18, W, H - BED + 18);
-
-  for (const b of bed) {
-    if (!bedForeground(b)) continue;
-    drawBedItem(t, b, zObrazka);
-  }
-
-  g.restore();
-}
-
-/* Diagnostyka: trzy realne plany sceny, bez wpływu na gameplay. */
-function drawDepthLab() {
-  g.save();
-  g.font='9px monospace';
-  g.textAlign='left';
-  g.lineWidth=1;
-
-  const fishTop=SURFACE+24;
-  const foreTop=BED-22;
-
-  g.fillStyle='rgba(80,155,210,.055)';
-  g.fillRect(0,SURFACE,W,Math.max(0,fishTop-SURFACE));
-  g.fillStyle='rgba(110,210,160,.045)';
-  g.fillRect(0,fishTop,W,Math.max(0,foreTop-fishTop));
-  g.fillStyle='rgba(255,190,100,.060)';
-  g.fillRect(0,foreTop,W,H-foreTop);
-
-  g.strokeStyle='rgba(255,220,130,.55)';
-  g.setLineDash([5,5]);
-  g.beginPath(); g.moveTo(0,foreTop); g.lineTo(W,foreTop); g.stroke();
-  g.setLineDash([]);
-
-  g.fillStyle='rgba(210,235,255,.88)';
-  g.fillText('BACK / WATER',8,SURFACE+14);
-  g.fillStyle='rgba(180,245,205,.88)';
-  g.fillText('MID / FISH',8,fishTop+14);
-  g.fillStyle='rgba(255,218,150,.92)';
-  g.fillText('FRONT / BED OCCLUSION',8,foreTop+14);
-  g.restore();
-}
-window.drawBedForeground=drawBedForeground;
-
-/* ============================================================
-   STAGE 11.1 / 15.3 — GLEBIA SCENY PO CLEANUPIE
-
-   Stage 11.1 wprowadzil BACK / MID / FRONT. Wczesna wersja robila to przez
-   dodatkowe weed-sprite'y na dnie i przy bokach. Na ekranie telefonu te
-   elementy wygladaly jak wycinanki i dublowaly flore gotowego kafla DNO.
-
-   Stage 15.3 zachowuje architekture DepthFX i podzial planow, ale usuwa
-   legacy sprite 
-
---- hit 4 @ 5378027 ---
-
-XM9YWgc+e15+S8zPj04FsE/86lm81+QqtMtHx6gY8m3tOTjLuOmaCHUxIcdb+lCQK9CW4n6KnZtsV8y0QPw7Fl3neLqO/7IDdBAl2cgD0AtQitvM7xuGaZG0LU3UNZvTGgWD6Wp2ocVirjjs0CffkWWl+nVbULbluJhR+yAo2gfgmrTre/L34qAOAhJ+GLklGJzsbLj7FD56IliQH/rjL3I1aJ0gFjuJ3cUYB+dAMrkpKqJUMs71d/BYsJtJ7MIshbogXJ+7cf0CK7Yn2DWoZZI6MKibGtAHAtpd4GEHvd7MMxUcWeayhGLHMhajp8Pckivhi3qQqNdLsd5SXAONJ//0oXplXruxNLIq+7izUp4zeJ6cK875MuEwoRc7Lz9MGFHoqBRBu/6PmJuxItdCl6qpn1zuVpQkGvdWPoUV+392SqmXBFnRf45/8Pg/oI8FFJ+rmxYAAAAASUVORK5CYII=',
-    meta: { w: 96, h: 72 },
-    udzial: 0,
-    bezEko: true,
-    legendarny: true,
-    falaZwoj: 3.2
-  });
-  /* Dlugie stworzenie ma pracowac CALYM cialem: kilka przesuwajacych sie
-     zgiec zamiast pojedynczego machniecia ogonem. */
-  GATUNKI.smok_zycia.fala = Math.max(5.4, (baza.fala || 3) * 1.35);
-  GATUNKI.smok_zycia.ogon = Math.max(6.8, (baza.ogon || 4) * 1.35);
-  GATUNKI.smok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
-  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
-  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
+(function zegarPokolen() {
+  const tik = () => { try { Eko.tikKohort(); } catch (e) {} };
+  tik();
+  setInterval(tik, 4000);
 })();
 
-/* Wczytanie atlasow. */
-let gotowe = 0, ileGatunkow = Object.keys(GATUNKI).length;
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  G2.img = new Image();
-  /* Licznik rusza tak samo po bledzie. Bez tego jeden brakujacy PNG z 61
-     zostawia FishAtlas.ready na false na zawsze i lawica nie rysuje sie
-     wcale, bez sladu w konsoli. Zepsuty gatunek dostaje flage i wypada
-     z losowania, reszta plywa dalej. */
-  G2.img.onload = () => { G2.kontur = zKonturem(G2.img); gotowe++; };
-  G2.img.onerror = () => { G2.zepsuty = true; gotowe++; console.warn('QRyby: nie wczytal sie sprite gatunku ' + k); };
-  G2.img.src = G2.src;
-}
-
-/* Druga tekstura, dla gatunkow ktore ja maja (na razie: rozdymka). Zupelnie
-   osobny obrazek, osobny licznik: jesli sie nie wczyta, gatunek pozostaje
-   grywalny w swoim stanie normalnym i po prostu nigdy nie pokaze drugiego --
-   to NIE jest powod, zeby blokowac reszte lawicy tak jak robi to G2.zepsuty. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.srcNadety) continue;
-  G2.imgNadety = new Image();
-  G2.imgNadety.onload = () => { G2.konturNadety = zKonturem(G2.imgNadety); };
-  G2.imgNadety.onerror = () => { console.warn('QRyby: nie wczytal sie drugi sprite gatunku ' + k); };
-  G2.imgNadety.src = G2.srcNadety;
-}
-
-/* Pelny zestaw klatek, dla gatunkow ktore go maja (na razie: ksiaznik).
-   Kazda klatka to WLASNY Image i WLASNY kontur: brak jednej nie blokuje
-   reszty zestawu ani gatunku w ogole, tak samo jak przy srcNadety. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.klatkiSrc) continue;
-  G2.klatkiImg = {}; G2.klatkiKontur = {};
-  for (const nazwa in G2.klatkiSrc) {
-    const im = new Image();
-    im.onload = (function (n2) { return function () { G2.klatkiKontur[n2] = zKonturem(im); }; })(nazwa);
-    im.onerror = (function (n2) { return function () {
-      console.warn('QRyby: nie wczytala sie klatka ' + n2 + ' gatunku ' + k);
-    }; })(nazwa);
-    im.src = G2.klatkiSrc[nazwa];
-    G2.klatkiImg[nazwa] = im;
-  }
-}
-
-/* Zgodnosc wstecz: reszta kodu pyta o FishAtlas dla konkretnej ryby. */
-const FishAtlas = {
-  get ready() { return gotowe >= ileGatunkow; },
-  get img() { return GATUNKI.ploc.img; },
-  get meta() { return GATUNKI.ploc.meta; }
-};
-/* Atlas i wymiary danej ryby. */
-function gat(f) { return GATUNKI[(f && f.gat) || 'ploc']; }
-window.gat = gat;
-
-/* Paszcza zmierzona na sprite: czubek pyska lezy +0.492 szerokosci
-   i +0.024 wysokosci od srodka klatki. To jest punkt chwytu. */
-const MOUTH = { fx: 0.492, fy: 0.024, r: 13 };
-/* Promien chwytu proporcjonalny do dlugosci ryby, 14% szerokosci sprite a,
-   z podloga 5 px. Przy 11% i podlodze 4 px ponad polowa atakow chybiala
-   i czas do brania rosl z 8.7 na 13 sekund. Teraz chybia okolo 15 procent,
-   czyli tyle, zeby nieudane podejscia dalej sie zdarzaly. */
-function mouthR(f) { return Math.max(5, 0.14 * gat(f).meta.w * f.s); }
-window.mouthR = mouthR;
-
-/* Przelicznik dlugosci: skala osobnika na centymetry prawdziwej ploci.
-   s / 1.875 to skala anatomiczna, razy 132 px sprite a, razy 1.423 cm na piksel.
-   Przy zmianie przesady trzeba ruszyc ten wspolczynnik razem ze skala,
-   inaczej karta zaczyna klamac. */
-function fishCm(f) { return Math.round(f.cm !== undefined ? f.cm : f.s * 100.2); }
-window.fishCm = fishCm;
-
-/* Swiatowa pozycja paszczy, z uwzglednieniem kierunku, skali i obrotu. */
-/* Kierunek: normalnie z predkosci, ale ryba na haczyku ma go
-   zablokowany w f.face, zeby nie przerzucala sie przy kazdym szarpnieciu. */
-function faceOf(f) { return f.face !== undefined ? f.face : (f.vx < 0 ? -1 : 1); }
-
-/* Ustawia rybe przodem do celu, ale dopiero gdy cel jest wyraznie z boku.
-   Histereza 26 px nie pozwala jej migac, gdy przechodzi przez pion celu. */
-function faceTowards(f, tx, hyst) {
-  const d = tx - f.x;
-  const h = hyst === undefined ? 26 : hyst;
-  if (Math.abs(d) > h) f.face = d > 0 ? 1 : -1;
-  else if (f.face === undefined) f.face = d > 0 ? 1 : -1;
-  return f.face;
-}
-window.faceTowards = faceTowards;
-
-/* Poziome przesuniecie paszczy od srodka ciala, w pikselach swiata. */
-function mouthDX(f) { return gat(f).mouth.fx * gat(f).meta.w * f.s; }
-window.mouthDX = mouthDX;
-window.faceOf = faceOf;
-
-/* Kolejnosc transformacji w drawFish: translate -> scale(dir,1) -> rotate(theta).
-   Lustro dziala PRZED obrotem, wiec ten sam theta podnosi glowe w obie strony.
-   Wczesniej odwracalem theta przy dir<0 i ryba plynaca w lewo wisiala
-   glowa w dol, ogonem do gory. */
-function mouthOf(f, angle) {
-  const G2 = gat(f), M = G2.meta, MO = G2.mouth;
-  const dir = faceOf(f);
-  const ox = MO.fx * M.w * f.s, oy = MO.fy * M.h * (f.sy !== undefined ? f.sy : f.s);
-  const a = angle || 0;
-  const c = Math.cos(a), sn = Math.sin(a);
-  return [f.x + dir * (ox * c - oy * sn), f.y + (ox * sn + oy * c)];
-}
-window.mouthOf = mouthOf;
-window.MOUTH = MOUTH;
 
 /* ============================================================
-   POPULACJA
-   Ryby naprawde wplywaja i wyplywaja z kadru. Kazda przyplywajaca
-   losuje rozmiar od nowa, wiec gracz polujacy na duza sztuke ma po co czekac.
+   ZAKLADKA EKOSYSTEM (faza 12).
+   Filozofia z sekcji XXXII: gracz ma poczuc, ze swiat zyje, a nie
+   obslugiwac arkusz rybacki. Dlatego na wierzchu sa tylko trzy rzeczy --
+   ile ryb, w ktora strone idzie i czy grozi im wymarcie -- a liczby
+   szczegolowe (plec, ikra, pokolenia) pojawiaja sie dopiero tam, gdzie
+   cos sie faktycznie dzieje.
+   Panel rysuje istniejaca funkcja `pokazPanel` z `18`, wiec styl,
+   animacja i zamykanie sa te same co w atlasie. Zadnego drugiego panelu.
    ============================================================ */
-const POP = {
-  m
+(function zakladkaEkosystemu() {
+  const btn = document.getElementById('ekosystem');
+  if (!btn) return;
 
-### G2.src
-
---- hit 1 @ 5378504 ---
-
-  meta: { w: 96, h: 72 },
-    udzial: 0,
-    bezEko: true,
-    legendarny: true,
-    falaZwoj: 3.2
-  });
-  /* Dlugie stworzenie ma pracowac CALYM cialem: kilka przesuwajacych sie
-     zgiec zamiast pojedynczego machniecia ogonem. */
-  GATUNKI.smok_zycia.fala = Math.max(5.4, (baza.fala || 3) * 1.35);
-  GATUNKI.smok_zycia.ogon = Math.max(6.8, (baza.ogon || 4) * 1.35);
-  GATUNKI.smok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
-  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
-  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
-})();
-
-/* Wczytanie atlasow. */
-let gotowe = 0, ileGatunkow = Object.keys(GATUNKI).length;
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  G2.img = new Image();
-  /* Licznik rusza tak samo po bledzie. Bez tego jeden brakujacy PNG z 61
-     zostawia FishAtlas.ready na false na zawsze i lawica nie rysuje sie
-     wcale, bez sladu w konsoli. Zepsuty gatunek dostaje flage i wypada
-     z losowania, reszta plywa dalej. */
-  G2.img.onload = () => { G2.kontur = zKonturem(G2.img); gotowe++; };
-  G2.img.onerror = () => { G2.zepsuty = true; gotowe++; console.warn('QRyby: nie wczytal sie sprite gatunku ' + k); };
-  G2.img.src = G2.src;
-}
-
-/* Druga tekstura, dla gatunkow ktore ja maja (na razie: rozdymka). Zupelnie
-   osobny obrazek, osobny licznik: jesli sie nie wczyta, gatunek pozostaje
-   grywalny w swoim stanie normalnym i po prostu nigdy nie pokaze drugiego --
-   to NIE jest powod, zeby blokowac reszte lawicy tak jak robi to G2.zepsuty. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.srcNadety) continue;
-  G2.imgNadety = new Image();
-  G2.imgNadety.onload = () => { G2.konturNadety = zKonturem(G2.imgNadety); };
-  G2.imgNadety.onerror = () => { console.warn('QRyby: nie wczytal sie drugi sprite gatunku ' + k); };
-  G2.imgNadety.src = G2.srcNadety;
-}
-
-/* Pelny zestaw klatek, dla gatunkow ktore go maja (na razie: ksiaznik).
-   Kazda klatka to WLASNY Image i WLASNY kontur: brak jednej nie blokuje
-   reszty zestawu ani gatunku w ogole, tak samo jak przy srcNadety. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.klatkiSrc) continue;
-  G2.klatkiImg = {}; G2.klatkiKontur = {};
-  for (const nazwa in G2.klatkiSrc) {
-    const im = new Image();
-    im.onload = (function (n2) { return function () { G2.klatkiKontur[n2] = zKonturem(im); }; })(nazwa);
-    im.onerror = (function (n2) { return function () {
-      console.warn('QRyby: nie wczytala sie klatka ' + n2 + ' gatunku ' + k);
-    }; })(nazwa);
-    im.src = G2.klatkiSrc[nazwa];
-    G2.klatkiImg[nazwa] = im;
+  const lb = n => (n || 0).toLocaleString('pl-PL');
+  function nazwa(gk) {
+    try { return (GATUNKI[gk] && GATUNKI[gk].nazwa) || gk; } catch (e) { return gk; }
   }
-}
-
-/* Zgodnosc wstecz: reszta kodu pyta o FishAtlas dla konkretnej ryby. */
-const FishAtlas = {
-  get ready() { return gotowe >= ileGatunkow; },
-  get img() { return GATUNKI.ploc.img; },
-  get meta() { return GATUNKI.ploc.meta; }
-};
-/* Atlas i wymiary danej ryby. */
-function gat(f) { return GATUNKI[(f && f.gat) || 'ploc']; }
-window.gat = gat;
-
-/* Paszcza zmierzona na sprite: czubek pyska lezy +0.492 szerokosci
-   i +0.024 wysokosci od srodka klatki. To jest punkt chwytu. */
-const MOUTH = { fx: 0.492, fy: 0.024, r: 13 };
-/* Promien chwytu proporcjonalny do dlugosci ryby, 14% szerokosci sprite a,
-   z podloga 5 px. Przy 11% i podlodze 4 px ponad polowa atakow chybiala
-   i czas do brania rosl z 8.7 na 13 sekund. Teraz chybia okolo 15 procent,
-   czyli tyle, zeby nieudane podejscia dalej sie zdarzaly. */
-function mouthR(f) { return Math.max(5, 0.14 * gat(f).meta.w * f.s); }
-window.mouthR = mouthR;
-
-/* Przelicznik dlugosci: skala osobnika na centymetry prawdziwej ploci.
-   s / 1.875 to skala anatomiczna, razy 132 px sprite a, razy 1.423 cm na piksel.
-   Przy zmianie przesady trzeba ruszyc ten wspolczynnik razem ze skala,
-   inaczej karta zaczyna klamac. */
-function fishCm(f) { return Math.round(f.cm !== undefined ? f.cm : f.s * 100.2); }
-window.fishCm = fishCm;
-
-/* Swiatowa pozycja paszczy, z uwzglednieniem kierunku, skali i obrotu. */
-/* Kierunek: normalnie z predkosci, ale ryba na haczyku ma go
-   zablokowany w f.face, zeby nie przerzucala sie przy kazdym szarpnieciu. */
-function faceOf(f) { return f.face !== undefined ? f.face : (f.vx < 0 ? -1 : 1); }
-
-/* Ustawia rybe przodem do celu, ale dopiero gdy cel jest wyraznie z boku.
-   Histereza 26 px nie pozwala jej migac, gdy przechodzi przez pion celu. */
-function faceTowards(f, tx, hyst) {
-  const d = tx - f.x;
-  const h = hyst === undefined ? 26 : hyst;
-  if (Math.abs(d) > h) f.face = d > 0 ? 1 : -1;
-  else if (f.face === undefined) f.face = d > 0 ? 1 : -1;
-  return f.face;
-}
-window.faceTowards = faceTowards;
-
-/* Poziome przesuniecie paszczy od srodka ciala, w pikselach swiata. */
-function mouthDX(f) { return gat(f).mouth.fx * gat(f).meta.w * f.s; }
-window.mouthDX = mouthDX;
-window.faceOf = faceOf;
-
-/* Kolejnosc transformacji w drawFish: translate -> scale(dir,1) -> rotate(theta).
-   Lustro dziala PRZED obrotem, wiec ten sam theta podnosi glowe w obie strony.
-   Wczesniej odwracalem theta przy dir<0 i ryba plynaca w lewo wisiala
-   glowa w dol, ogonem do gory. */
-function mouthOf(f, angle) {
-  const G2 = gat(f), M = G2.meta, MO = G2.mouth;
-  const dir = faceOf(f);
-  const ox = MO.fx * M.w * f.s, oy = MO.fy * M.h * (f.sy !== undefined ? f.sy : f.s);
-  const a = angle || 0;
-  const c = Math.cos(a), sn = Math.sin(a);
-  return [f.x + dir * (ox * c - oy * sn), f.y + (ox * sn + oy * c)];
-}
-window.mouthOf = mouthOf;
-window.MOUTH = MOUTH;
-
-/* ============================================================
-   POPULACJA
-   Ryby naprawde wplywaja i wyplywaja z kadru. Kazda przyplywajaca
-   losuje rozmiar od nowa, wiec gracz polujacy na duza sztuke ma po co czekac.
-   ============================================================ */
-const POP = {
-  min: 7, max: 25, cel: 10,        /* widelki 7-25; cel liczy ryby czynne,
-                                      a odplywajace jeszcze widac, wiec lacznie
-                                      w kadrze wychodzi okolo 12.
-
-                                      Cel zszedl z 12 na 10 razem z podniesieniem
-                                      skali sylwetek: dwanascie ryb wiekszych
-                                      o cwierc zajmowalo prawie dwa razy tyle
-                    
-
---- hit 2 @ 5378885 ---
-
-ok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
-  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
-  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
-})();
-
-/* Wczytanie atlasow. */
-let gotowe = 0, ileGatunkow = Object.keys(GATUNKI).length;
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  G2.img = new Image();
-  /* Licznik rusza tak samo po bledzie. Bez tego jeden brakujacy PNG z 61
-     zostawia FishAtlas.ready na false na zawsze i lawica nie rysuje sie
-     wcale, bez sladu w konsoli. Zepsuty gatunek dostaje flage i wypada
-     z losowania, reszta plywa dalej. */
-  G2.img.onload = () => { G2.kontur = zKonturem(G2.img); gotowe++; };
-  G2.img.onerror = () => { G2.zepsuty = true; gotowe++; console.warn('QRyby: nie wczytal sie sprite gatunku ' + k); };
-  G2.img.src = G2.src;
-}
-
-/* Druga tekstura, dla gatunkow ktore ja maja (na razie: rozdymka). Zupelnie
-   osobny obrazek, osobny licznik: jesli sie nie wczyta, gatunek pozostaje
-   grywalny w swoim stanie normalnym i po prostu nigdy nie pokaze drugiego --
-   to NIE jest powod, zeby blokowac reszte lawicy tak jak robi to G2.zepsuty. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.srcNadety) continue;
-  G2.imgNadety = new Image();
-  G2.imgNadety.onload = () => { G2.konturNadety = zKonturem(G2.imgNadety); };
-  G2.imgNadety.onerror = () => { console.warn('QRyby: nie wczytal sie drugi sprite gatunku ' + k); };
-  G2.imgNadety.src = G2.srcNadety;
-}
-
-/* Pelny zestaw klatek, dla gatunkow ktore go maja (na razie: ksiaznik).
-   Kazda klatka to WLASNY Image i WLASNY kontur: brak jednej nie blokuje
-   reszty zestawu ani gatunku w ogole, tak samo jak przy srcNadety. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.klatkiSrc) continue;
-  G2.klatkiImg = {}; G2.klatkiKontur = {};
-  for (const nazwa in G2.klatkiSrc) {
-    const im = new Image();
-    im.onload = (function (n2) { return function () { G2.klatkiKontur[n2] = zKonturem(im); }; })(nazwa);
-    im.onerror = (function (n2) { return function () {
-      console.warn('QRyby: nie wczytala sie klatka ' + n2 + ' gatunku ' + k);
-    }; })(nazwa);
-    im.src = G2.klatkiSrc[nazwa];
-    G2.klatkiImg[nazwa] = im;
+  function czestoscTxt(gk) {
+    let p = 0, co = Infinity;
+    try { p = Eko.udzialPopulacji(gk); co = Eko.coIleLawic(gk, 12); } catch (e) {}
+    const proc = p * 100;
+    const pct = proc >= 1 ? proc.toFixed(2)
+              : proc >= 0.01 ? proc.toFixed(3)
+              : proc >= 0.0001 ? proc.toFixed(4)
+              : proc > 0 ? proc.toFixed(6) : '0';
+    let law;
+    if (!isFinite(co)) law = 'nie występuje';
+    else if (co <= 1.15) law = 'praktycznie każda ławica';
+    else if (co < 10) law = 'średnio co ' + co.toFixed(1).replace('.', ',') + ' ławicy';
+    else law = 'średnio co ' + Math.round(co).toLocaleString('pl-PL') + ' ławic';
+    return pct.replace('.', ',') + '% jeziora · ' + law;
   }
-}
-
-/* Zgodnosc wstecz: reszta kodu pyta o FishAtlas dla konkretnej ryby. */
-const FishAtlas = {
-  get ready() { return gotowe >= ileGatunkow; },
-  get img() { return GATUNKI.ploc.img; },
-  get meta() { return GATUNKI.ploc.meta; }
-};
-/* Atlas i wymiary danej ryby. */
-function gat(f) { return GATUNKI[(f && f.gat) || 'ploc']; }
-window.gat = gat;
-
-/* Paszcza zmierzona na sprite: czubek pyska lezy +0.492 szerokosci
-   i +0.024 wysokosci od srodka klatki. To jest punkt chwytu. */
-const MOUTH = { fx: 0.492, fy: 0.024, r: 13 };
-/* Promien chwytu proporcjonalny do dlugosci ryby, 14% szerokosci sprite a,
-   z podloga 5 px. Przy 11% i podlodze 4 px ponad polowa atakow chybiala
-   i czas do brania rosl z 8.7 na 13 sekund. Teraz chybia okolo 15 procent,
-   czyli tyle, zeby nieudane podejscia dalej sie zdarzaly. */
-function mouthR(f) { return Math.max(5, 0.14 * gat(f).meta.w * f.s); }
-window.mouthR = mouthR;
-
-/* Przelicznik dlugosci: skala osobnika na centymetry prawdziwej ploci.
-   s / 1.875 to skala anatomiczna, razy 132 px sprite a, razy 1.423 cm na piksel.
-   Przy zmianie przesady trzeba ruszyc ten wspolczynnik razem ze skala,
-   inaczej karta zaczyna klamac. */
-function fishCm(f) { return Math.round(f.cm !== undefined ? f.cm : f.s * 100.2); }
-window.fishCm = fishCm;
-
-/* Swiatowa pozycja paszczy, z uwzglednieniem kierunku, skali i obrotu. */
-/* Kierunek: normalnie z predkosci, ale ryba na haczyku ma go
-   zablokowany w f.face, zeby nie przerzucala sie przy kazdym szarpnieciu. */
-function faceOf(f) { return f.face !== undefined ? f.face : (f.vx < 0 ? -1 : 1); }
-
-/* Ustawia rybe przodem do celu, ale dopiero gdy cel jest wyraznie z boku.
-   Histereza 26 px nie pozwala jej migac, gdy przechodzi przez pion celu. */
-function faceTowards(f, tx, hyst) {
-  const d = tx - f.x;
-  const h = hyst === undefined ? 26 : hyst;
-  if (Math.abs(d) > h) f.face = d > 0 ? 1 : -1;
-  else if (f.face === undefined) f.face = d > 0 ? 1 : -1;
-  return f.face;
-}
-window.faceTowards = faceTowards;
-
-/* Poziome przesuniecie paszczy od srodka ciala, w pikselach swiata. */
-function mouthDX(f) { return gat(f).mouth.fx * gat(f).meta.w * f.s; }
-window.mouthDX = mouthDX;
-window.faceOf = faceOf;
-
-/* Kolejnosc transformacji w drawFish: translate -> scale(dir,1) -> rotate(theta).
-   Lustro dziala PRZED obrotem, wiec ten sam theta podnosi glowe w obie strony.
-   Wczesniej odwracalem theta przy dir<0 i ryba plynaca w lewo wisiala
-   glowa w dol, ogonem do gory. */
-function mouthOf(f, angle) {
-  const G2 = gat(f), M = G2.meta, MO = G2.mouth;
-  const dir = faceOf(f);
-  const ox = MO.fx * M.w * f.s, oy = MO.fy * M.h * (f.sy !== undefined ? f.sy : f.s);
-  const a = angle || 0;
-  const c = Math.cos(a), sn = Math.sin(a);
-  return [f.x + dir * (ox * c - oy * sn), f.y + (ox * sn + oy * c)];
-}
-window.mouthOf = mouthOf;
-window.MOUTH = MOUTH;
-
-/* ============================================================
-   POPULACJA
-   Ryby naprawde wplywaja i wyplywaja z kadru. Kazda przyplywajaca
-   losuje rozmiar od nowa, wiec gracz polujacy na duza sztuke ma po co czekac.
-   ============================================================ */
-const POP = {
-  min: 7, max: 25, cel: 10,        /* widelki 7-25; cel liczy ryby czynne,
-                                      a odplywajace jeszcze widac, wiec lacznie
-                                      w kadrze wychodzi okolo 12.
-
-                                      Cel zszedl z 12 na 10 razem z podniesieniem
-                                      skali sylwetek: dwanascie ryb wiekszych
-                                      o cwierc zajmowalo prawie dwa razy tyle
-                                      miejsca co przedtem.
-
-                                      Podloga zeszla z 10 na 7, i to nie jest
-                                      kosmetyka. Przy celu 10 i podlodze 10
-                                      ryba nie mogla odplynac po swoim pobycie,
-                                      bo warunek wymaga school.length > POP.min,
-                          
-
---- hit 3 @ 5379140 ---
-
-t.keys(GATUNKI).length;
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  G2.img = new Image();
-  /* Licznik rusza tak samo po bledzie. Bez tego jeden brakujacy PNG z 61
-     zostawia FishAtlas.ready na false na zawsze i lawica nie rysuje sie
-     wcale, bez sladu w konsoli. Zepsuty gatunek dostaje flage i wypada
-     z losowania, reszta plywa dalej. */
-  G2.img.onload = () => { G2.kontur = zKonturem(G2.img); gotowe++; };
-  G2.img.onerror = () => { G2.zepsuty = true; gotowe++; console.warn('QRyby: nie wczytal sie sprite gatunku ' + k); };
-  G2.img.src = G2.src;
-}
-
-/* Druga tekstura, dla gatunkow ktore ja maja (na razie: rozdymka). Zupelnie
-   osobny obrazek, osobny licznik: jesli sie nie wczyta, gatunek pozostaje
-   grywalny w swoim stanie normalnym i po prostu nigdy nie pokaze drugiego --
-   to NIE jest powod, zeby blokowac reszte lawicy tak jak robi to G2.zepsuty. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.srcNadety) continue;
-  G2.imgNadety = new Image();
-  G2.imgNadety.onload = () => { G2.konturNadety = zKonturem(G2.imgNadety); };
-  G2.imgNadety.onerror = () => { console.warn('QRyby: nie wczytal sie drugi sprite gatunku ' + k); };
-  G2.imgNadety.src = G2.srcNadety;
-}
-
-/* Pelny zestaw klatek, dla gatunkow ktore go maja (na razie: ksiaznik).
-   Kazda klatka to WLASNY Image i WLASNY kontur: brak jednej nie blokuje
-   reszty zestawu ani gatunku w ogole, tak samo jak przy srcNadety. */
-for (const k in GATUNKI) {
-  const G2 = GATUNKI[k];
-  if (!G2.klatkiSrc) continue;
-  G2.klatkiImg = {}; G2.klatkiKontur = {};
-  for (const nazwa in G2.klatkiSrc) {
-    const im = new Image();
-    im.onload = (function (n2) { return function () { G2.klatkiKontur[n2] = zKonturem(im); }; })(nazwa);
-    im.onerror = (function (n2) { return function () {
-      console.warn('QRyby: nie wczytala sie klatka ' + n2 + ' gatunku ' + k);
-    }; })(nazwa);
-    im.src = G2.klatkiSrc[nazwa];
-    G2.klatkiImg[nazwa] = im;
+  /* Stan gatunku jednym slowem. To jest ta warstwa, ktora gracz czyta
+     najpierw -- liczba mowi ile, a to mowi CO Z TYM ZROBIC. */
+  /* ============================================================
+     STATUS LICZONY WZGLEDEM WLASNEJ POPULACJI, nie wzgledem stalego progu.
+     Pierwsza wersja uznawala za zagrozony kazdy gatunek ponizej stu sztuk
+     -- a to jest prog TRYBU INDYWIDUALNEGO, czyli decyzja techniczna
+     o tym, jak liczyc ryby, nie o tym, czy gatunek ginie. Zmierzone:
+     64 z 81 gatunkow ladowalo w "wymagaja uwagi", i WSZYSTKIE 64 mialy
+     populacje ROWNA startowej. Jesiotr zawsze byl rzadki -- to nie znaczy,
+     ze wlasnie wymiera. Slowo "zagrozony" przy 64 pozycjach przestaje
+     cokolwiek znaczyc.
+     Teraz liczy sie SPADEK wzgledem historycznego maksimum. Gatunek,
+     ktory ma tyle, ile mial zawsze, jest stabilny -- niezaleznie od tego,
+     czy to 12 sztuk czy 4000. Alarm wlacza sie dopiero wtedy, gdy
+     populacja realnie sie kurczy.
+     ============================================================ */
+  function status(r) {
+    if (r.wymarly) return { txt: 'WYMARŁ', kl: 'zly' };
+    if (!r.rozmnazalny) return { txt: 'BEZ PARY', kl: 'zly' };
+    const baza = Math.max(1, r.max || r.n);
+    const udzial = r.n / baza;
+    if (udzial <= 0.15) return { txt: 'NA SKRAJU', kl: 'zly' };
+    if (udzial <= 0.45) return { txt: 'W ODWROCIE', kl: 'uwaga' };
+    if (r.n <= 3) return { txt: 'NA SKRAJU', kl: 'zly' };
+    if (udzial >= 0.95) return { txt: 'NIETKNIĘTY', kl: 'dobry' };
+    return { txt: 'STABILNY', kl: '' };
   }
-}
+  /* Do gornej sekcji trafia tylko to, co NAPRAWDE wymaga uwagi. */
+  function pilny(x) {
+    const st = status(x);
+    return st.kl === 'zly' || st.kl === 'uwaga';
+  }
 
-/* Zgodnosc wstecz: reszta kodu pyta o FishAtlas dla konkretnej ryby. */
-const FishAtlas = {
-  get ready() { return gotowe >= ileGatunkow; },
-  get img() { return GATUNKI.ploc.img; },
-  get meta() { return GATUNKI.ploc.meta; }
-};
-/* Atlas i wymiary danej ryby. */
-function gat(f) { return GATUNKI[(f && f.gat) || 'ploc']; }
-window.gat = gat;
+  function czasKroniki(kiedy) {
+    const d = new Date(kiedy);
+    if (isNaN(d)) return '--';
+    const teraz = new Date();
+    const dzien = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const dzis = new Date(teraz.getFullYear(), teraz.getMonth(), teraz.getDate()).getTime();
+    const rozn = Math.round((dzis - dzien) / 86400000);
+    const godz = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    if (rozn === 0) return 'DZISIAJ · ' + godz;
+    if (rozn === 1) return 'WCZORAJ · ' + godz;
+    return String(d.getDate()).padStart(2, '0') + '.' +
+           String(d.getMonth() + 1).padStart(2, '0') + ' · ' + godz;
+  }
 
-/* Paszcza zmierzona na sprite: czubek pyska lezy +0.492 szerokosci
-   i +0.024 wysokosci od srodka klatki. To jest punkt chwytu. */
-const MOUTH = { fx: 0.492, fy: 0.024, r: 13 };
-/* Promien chwytu proporcjonalny do dlugosci ryby, 14% szerokosci sprite a,
-   z podloga 5 px. Przy 11% i podlodze 4 px ponad polowa atakow chybiala
-   i czas do brania rosl z 8.7 na 13 sekund. Teraz chybia okolo 15 procent,
-   czyli tyle, zeby nieudane podejscia dalej sie zdarzaly. */
-function mouthR(f) { return Math.max(5, 0.14 * gat(f).meta.w * f.s); }
-window.mouthR = mouthR;
-
-/* Przelicznik dlugosci: skala osobnika na centymetry prawdziwej ploci.
-   s / 1.875 to skala anatomiczna, razy 132 px sprite a, razy 1.423 cm na piksel.
-   Przy zmianie przesady trzeba ruszyc ten wspolczynnik razem ze skala,
-   inaczej karta zaczyna klamac. */
-function fishCm(f) { return Math.round(f.cm !== undefined ? f.cm : f.s * 100.2); }
-window.fishCm = fishCm;
-
-/* Swiatowa pozycja paszczy, z uwzglednieniem kierunku, skali i obrotu. */
-/* Kierunek: normalnie z predkosci, ale ryba na haczyku ma go
-   zablokowany w f.face, zeby nie przerzucala sie przy kazdym szarpnieciu. */
-function faceOf(f) { return f.face !== undefined ? f.face : (f.vx < 0 ? -1 : 1); }
-
-/* Ustawia rybe przodem do celu, ale dopiero gdy cel jest wyraznie z boku.
-   Histereza 26 px nie pozwala jej migac, gdy przechodzi przez pion celu. */
-function faceTowards(f, tx, hyst) {
-  const d = tx - f.x;
-  const h = hyst === undefined ? 26 : hyst;
-  if (Math.abs(d) > h) f.face = d > 0 ? 1 : -1;
-  else if (f.face === undefined) f.face = d > 0 ? 1 : -1;
-  return f.face;
-}
-window.faceTowards = faceTowards;
-
-/* Poziome przesuniecie paszczy od srodka ciala, w pikselach swiata. */
-function mouthDX(f) { return gat(f).mouth.fx * gat(f).meta.w * f.s; }
-window.mouthDX = mouthDX;
-window.faceOf = faceOf;
-
-/* Kolejnosc transformacji w drawFish: translate -> scale(dir,1) -> rotate(theta).
-   Lustro dziala PRZED obrotem, wiec ten sam theta podnosi glowe w obie strony.
-   Wczesniej odwracalem theta przy dir<0 i ryba plynaca w lewo wisiala
-   glowa w dol, ogonem do gory. */
-function mouthOf(f, angle) {
-  const G2 = gat(f), M = G2.meta, MO = G2.mouth;
-  const dir = faceOf(f);
-  const ox = MO.fx * M.w * f.s, oy = MO.fy * M.h * (f.sy !== undefined ? f.sy : f.s);
-  const a = angle || 0;
-  const c = Math.cos(a), sn = Math.sin(a);
-  return [f.x + dir * (ox * c - oy * sn), f.y + (ox * sn + oy * c)];
-}
-window.mouthOf = mouthOf;
-window.MOUTH = MOUTH;
-
-/* ============================================================
-   POPULACJA
-   Ryby naprawde wplywaja i wyplywaja z kadru. Kazda przyplywajaca
-   losuje rozmiar od nowa, wiec gracz polujacy na duza sztuke ma po co czekac.
-   ============================================================ */
-const POP = {
-  min: 7, max: 25, cel: 10,        /* widelki 7-25; cel liczy ryby czynne,
-                                      a odplywajace jeszcze widac, wiec lacznie
-                                      w kadrze wychodzi okolo 12.
-
-                                      Cel zszedl z 12 na 10 razem z podniesieniem
-                                      skali sylwetek: dwanascie ryb wiekszych
-                                      o cwierc zajmowalo prawie dwa razy tyle
-                                      miejsca co przedtem.
-
-                                      Podloga zeszla z 10 na 7, i to nie jest
-                                      kosmetyka. Przy celu 10 i podlodze 10
-                                      ryba nie mogla odplynac po swoim pobycie,
-                                      bo warunek wymaga school.length > POP.min,
-                                      a drapieznik nie mogl nikogo zjesc, bo
-                                      tam warunek jest jeszcze o jeden wyzszy.
-                                      Populacja stanelaby w miejscu, a polowania
-                                      wylacz
-
---- hit 4 @ 5508411 ---
-
-snej, rozjezdzajacej sie logiki pary. */
-    let paryWiadra = new Set();
+  function kronikaSwiataHTML() {
+    const kid = 'ekoKronika' + 'Swiata';
+    if (window.Progression && !Progression.dostep('chronicle')) {
+      return '<div id="' + kid + '"><div class="eko-grupa">KRONIKA ŁOWISKA</div>'
+        + '<div class="prog-lock-line">POZIOM 50 · pełne archiwum wspólnego jeziora</div></div>';
+    }
+    let wsp = [];
     try {
-      if (window.Rozrod && Rozrod.zdolne) paryWiadra = new Set(Rozrod.zdolne());
-    } catch (e) {}
+      if (Eko.Serwer && Eko.Serwer.dostepny()) wsp = Eko.Serwer.kronikaWspolna() || [];
+    } catch (e) { wsp = []; }
 
-    for (let i = 0; i < lista.length; i++) {
-      const r = lista[i], G2 = GATUNKI[r.gat];
-      if (!G2) continue;
-      /* Minimum jedna qryba: drobnica typu jazgarz wazy 40 g, wiec sama
-         cena razy masa wychodzila ponizej polowy i zaokraglala sie do zera.
-         Ryba warta zero to blad w oczach gracza, nie oszczednosc. */
-      const cena = (o && o.typ === 'qryby') ? (o.pozycje[i] || 0) : Math.max(1, Math.round(wartoscRyby(r)));
-      const kg = Math.max(0.001, (r.waga || 0) / 1000);
-      const sred = sredniaRynkowa(r.gat) * kg;
-      const roz = cena - sred;
-      const proc = sred > 0 ? Math.round(roz / sred * 100) : 0;
-      const pl = (r.plec === 'm' || r.plec === 'f') ? r.plec : '';
-      const plUI = pl ? (' <span class="pl ' + pl + '" title="' + (pl === 'm' ? 'samiec' : 'samica') + '">' + (pl === 'm' ? '♂' : '♀') + '</span>') : '';
-      const paraKlasa = paryWiadra.has(r.gat) ? ' para-wiadra' : '';
-      h += '<div class="wr' + (ocz ? ' cel' : '') + paraKlasa + '"><img src="' + (G2.src || '') + '" alt="">';
-      h += '<div><div class="nz">' + G2.nazwa + plUI +
-           (CHRONIONE.indexOf(r.gat) >= 0 ? ' <span class="chr">CHRONIONA</span>' : '') + '</div>' +
-           '<div class="mt">' + (r.pkt || 0) + ' pkt \u00B7 ' +
-           (r.cm / 100).toFixed(2).replace('.', ',') + ' m \u00B7 ' +
-           kg.toFixed(2).replace('.', ',') + ' kg</div></div>';
-      h += '<div class="cn">' + qrybG(cena);
-      if (o && o.typ === 'qryby') h += '<i class="dt ' + (roz >= 0 ? 'w' : 'n') + '">' +
-                  (roz >= 0 ? '+' : '\u2212') + qrybG(Math.abs(roz)) +
-                  ' (' + (proc >= 0 ? '+' : '\u2212') + Math.abs(proc) + '%)</i>';
-      h += '</div>';
-      /* Dwa rozne przyciski w tym samym slocie: normalnie male "wypusc",
-         w trybie wymiany szersze "WYMIEN", bo caly wiersz jest wtedy celem
-         i musi to mowic wprost, nie samym krzyzykiem. */
-      h += ocz
-        ? '<button class="wym" data-i="' + i + '">WYMIEŃ</button>'
-        : '<button class="wyp" data-i="' + i + '" title="wypuść">\u2715</button>';
-      h += rozrodHTML(r.gat, pierwszyZGat[r.gat] === i);
-      h += '</div>';
+    let h = '<div id="' + kid + '"><div class="eko-grupa">KRONIKA ŁOWISKA</div>';
+    if (!wsp.length) {
+      return h + '<div class="eko-kron eko-kron-swiat"><div class="eko-pusto">Pobieram historię wspólnego jeziora…</div></div></div>';
     }
 
-    if (lista.length) h += '<div class="zegar" id="wiadZegar">' + trescZegara() + '</div>';
-    return h;
+    h += '<div class="eko-kron eko-kron-swiat">';
+    for (const k of wsp) {
+      const nick = String(k.nick || '').replace(/[<>&]/g, '');
+      const ryba = nazwa(k.gat);
+      const kiedy = czasKroniki(k.kiedy);
+      if (k.typ === 'narybek') {
+        h += '<div class="eko-k swiat narybek"><span class="eko-czas">' + kiedy + '</span>'
+          + '<span class="eko-evt">🐟 <strong>' + ryba + '</strong> · <i>+' + lb(k.n) +
+            '</i> młodych dzięki ' + (nick || 'graczowi') + '</span></div>';
+      } else if (k.typ === 'rzadka-zlowiona') {
+        h += '<div class="eko-k swiat odlow"><span class="eko-czas">' + kiedy + '</span>'
+          + '<span class="eko-evt">🎣 ' + (nick || 'gracz') + ' zabr
+
+### function podsumowanie
+
+--- hit 1 @ 6222157 ---
+
+ robia sie jeszcze rzadsze, ponizej 1 roznice sie splaszczaja.
+     ============================================================ */
+  CFG.ALFA_RZADKOSCI = 1.0;
+
+  function wagaZPopulacji(gk) {
+    const r = rekord(gk); if (!r) return 0;
+    if (r.n <= 0 || r.wymarly) return 0;     /* wymarly znika z puli, bez sciezki powrotu */
+    return Math.pow(r.n, CFG.ALFA_RZADKOSCI);
   }
 
-  /* Tresc zegara osobno, bo rysuje sie DWA razy: raz przy budowie panelu
-     i potem co pol sekundy z tykniecia zywego licznika ponizej. */
-  function trescZegara() {
-    const t = Gielda.doNastepnego();
-    if (t === null) return 'HANDLARZ CZEKA NA TWOJĄ DECYZJĘ<br><b>zegar stoi</b>';
-    return 'NASTĘPNY HANDLARZ ZA<br><b>' +
-           Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0') + '</b>';
+  function mnoznikLosowania(gk) {
+    const r = rekord(gk); if (!r) return 1;
+    if (r.n <= 0) return 0;
+    const baza = popStartowa(gk) || 1;
+    return Math.max(0.05, Math.min(1.6, Math.sqrt(r.n / baza)));
+  }
+
+  /* Plec pojedynczej sztuki -- losowana z FAKTYCZNEGO skladu populacji,
+     wiec gdy zostana same samice, kazda zlowiona sztuka bedzie samica. */
+  function losujPlec(gk) {
+    const r = rekord(gk); if (!r || r.n <= 0) return Math.random() < 0.5 ? 'm' : 'f';
+    return (Math.random() * (r.m + r.f) < r.m) ? 'm' : 'f';
+  }
+
+  /* Czy gatunek moze sie jeszcze rozmnazac. Specyfikacja: gatunek moze byc
+     funkcjonalnie martwy ZANIM dojdzie do zera, i nie wolno tego
+     naprawiac po cichu. */
+  function moznaRozmnazac(gk) {
+    const r = rekord(gk);
+    return !!(r && !r.wymarly && r.m > 0 && r.f > 0);
+  }
+
+  /* Procent jeziora i wynikajaca z niego srednia liczba lawic do
+     zobaczenia co najmniej jednej sztuki. Dla sredniej lawicy przyjmujemy
+     12 ryb, zgodnie z rzeczywistym kadrem. */
+  function udzialPopulacji(gk) {
+    const suma = sumaPopulacji();
+    if (!(suma > 0)) return 0;
+    return Math.max(0, populacja(gk)) / suma;
+  }
+  function coIleLawic(gk, rybNaLawice) {
+    const p = udzialPopulacji(gk);
+    if (!(p > 0)) return Infinity;
+    const n = Math.max(1, +(rybNaLawice || 12));
+    const q = 1 - Math.pow(1 - Math.min(1, p), n);
+    return q > 0 ? 1 / q : Infinity;
+  }
+
+  function podsumowanie() {
+    const E = stan(); if (!E) return [];
+    const out = [];
+    for (const gk in E.gat) {
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
+      const r = E.gat[gk];
+      out.push({ gat: gk, n: r.n, m: r.m, f: r.f, max: r.max, min: r.min,
+                 indyw: r.indyw, wymarly: r.wymarly,
+                 rozmnazalny: r.m > 0 && r.f > 0 && !r.wymarly });
+    }
+    return out.sort((a, b) => b.n - a.n);
+  }
+
+  function kronika(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika.slice(-(ile || 20)).reverse();
+  }
+
+  /* KRONIKA PUBLICZNA. Pelna kronika to dziennik diagnostyczny -- leca
+     w nia gody przerwane, zjedzenia przez drapieznika i kazde drgniecie
+     populacji. Do feedu widocznego dla wszystkich ida DWA typy zdarzen
+     i nic wiecej, dokladnie tak, jak brzmi specyfikacja:
+       - kto zlowil ryba gatunku ponizej dziesieciu sztuk,
+       - kto dopuscil tarlo i z jakim wynikiem.
+     Wpisy bez nicku (sprzed zalogowania) zostaja odfiltrowane, bo feed
+     bez autora nie niesie tej informacji, o ktora chodzi. */
+  /* Feed widzi DWA typy: kto zlowil rybe gatunku ponizej dziesieciu sztuk
+     i ile ryb dolaczylo do populacji dzieki czyjemus tarlu. Samo zlozenie
+     ikry (`tarlo-wlasne`) zostaje w prywatnym dzienniku. */
+  CFG.TYPY_PUBLICZNE = ['rzadka-zlowiona', 'narybek'];
+
+  function kronikaPubliczna(ile) {
+    const E = stan(); if (!E) return [];
+    return E.kronika
+      .filter(w => CFG.TYPY_PUBLICZNE.indexOf(w.typ) >= 0 && w.nick)
+      .slice(-(ile || 20)).reverse();
   }
 
   /* ============================================================
-     ZEGAR MA LECIEC NA ZYWO.
-     Panel rysuje sie raz, wiec liczba zamarzala na tej, ktora byla
-     w chwili otwarcia -- gracz patrzyl na martwy licznik. Teraz osobne
-     tykniecie odswieza SAM napis zegara, a caly panel przerysowuje
-     dopiero, gdy zmieni sie to, co naprawde wymaga przerysowania:
-     przyjscie albo odejscie handlarza. Uchwyt kasuje sie sam, gdy
-     panel zniknie albo pokaze co innego -- inaczej zostawalby w tle
-     i tykal do konca sesji.
+     TRYB INDYWIDUALNY (faza 11). Ponizej PROG_INDYWIDUALNY kazda
+     pozostala ryba przestaje byc statystyka i staje sie TRWALYM BYTEM
+     z wlasnym numerem, plcia, data urodzin i cechami.
+
+     PO CO: dopoki populacja to sama liczba, spadek z 12 do 11 nic nie
+     znaczy. Gdy sa to konkretne sztuki, zabranie ostatniej samicy jest
+     wydarzeniem -- i to jest cala dramaturgia, o ktora chodzi.
+
+     RYBA, KTORA ZNIKA Z EKRANU, NIE PRZESTAJE ISTNIEC. To jest
+     najwazniejszy niezmiennik tej fazy: `zwolnij` tylko odznacza, ze
+     osobnik nie jest akurat pokazywany. Z populacji usuwa go wylacznie
+     `usunOsobnika`, wolane przy zatrzymaniu przez gracza albo zjedzeniu
+     przez drapieznika.
+
+     ROZMIAR ZAPISU: rekordy powstaja tylko ponizej stu sztuk na gatunek,
+     wiec nawet przy kilkunastu gatunkach w trybie indywidualnym to setki,
+     nie setki tysiecy wpisow. Powyzej progu nie ma ich wcale -- tego
+     wprost wymaga specyfikacja (zadnych rekordow per ryba przy duzych
+     populacjach).
      ============================================================ */
-  let zegarWiad = 0;
-  let portretTimer = null;
-  function podepnijWiaderko() {
-    /* Petla portretu: jedna na caly panel, nie jedna na klatke -- kazde
-       przerysowanie (odswiez, klikniecie) woa podepnijWiaderko od nowa,
-       wiec stary interwal trzeba zdusic, zanim ruszy nowy. Inaczej po
-       kilku odswiezeniach ten sam obrazek migalby kilka petli naraz. */
-    if (portretTimer) { clearInterval(portretTimer); portretTimer = null; }
-    {
-      const H2 = (typeof Gielda !== 'undefined') ? Gielda.handlarz() : null;
-      const ramki = (H2 && window.HANDLARZ_PORTRET && HANDLARZ_PORTRET[H2.id]) || null;
-      if (ramki) {
-        /* Ping-pong (0-1-2-1-0-1-2-1...), ale po OBRÓBCE: kazda klatka ma
-           wspolny obrys i bezpieczne, przyciete tlo. Dzieki temu postac nie
-           skacze miedzy klatkami i nie "wychodzi" na tekst przez pusty kadr. */
-        let f = 0, kierunek = 1;
-        const img0 = document.getElementById('wiadObrazek');
-        if (img0 && window.PortretHandlarza) PortretHandlarza.ustaw(img0, H2.id, 0);
-        portretTimer = setInterval(() => {
-          f += kierunek;
-          if (f >= ramki.length - 1) { f = ramki.length - 1; kierunek = -1; }
-          else if (f <= 0) { f = 0; kierunek = 1; }
-          const img = document.getElementById('wiadObrazek');
-          if (!img) { clearInterval(portretTimer); portretTimer = null; return; }
-          if (window.PortretHandlarza) PortretHandlarza.ustaw(img, H2.id, f);
-          else img.src = ramki[f];
-        }, 450);
-      }
+  function listaOsobnikow(gk) {
+    const E = stan(); if (!E) return [];
+    if (!E.osob) E.osob = {};
+    if (!E.osob[gk]) E.osob[gk] = [];
+    return E.osob[gk];
+  }
+
+  /* Cechy dziedziczne w zalazku: na razie losowane, ale pole `gen` jest
+     juz na miejscu, zeby faza genetyki miala gdzie usiasc bez migracji
+     zapisu. Wartosci 0..1, srodek to przecietny osobnik. */
+  function losujGeny() {
+    const r = () => Math.round((0.35 + Math.random() * 0.3) * 100) / 100;
+    return { rozmiar: r(), wzrost: r(), plochliwosc: r(), plodnosc: r() };
+  }
+
+  function nowyOsobnik(gk, plec, nr) {
+    return {
+      id: gk.toUpperCase().slice(0, 6) + '-' + String(nr).padStart(4, '0'),
+      plec: plec,
+      ur: Date.now(),
+      gen: genZPopulacji(gk),
+      naEkranie: false
+    };
+  }
+
+  /* Wolane przy przejsciu ponizej progu. Tworzy tyle rekordow, ile
+     faktycznie zostalo sztuk, z zachowaniem proporcji plci -- populacja
+     nie zmienia sie ani o jeden, zmienia sie tylko sposob jej opisu. */
+  function materializuj(gk) {
+    const r = rekord(gk); if (!r) return;
+    const lista = listaOsobnikow(gk);
+    if (lista.length >= r.n) return;
+    let nr = lista.length;
+    let brakM = Math.max(0, r.m - lista.filter(o => o.plec === 'm').length);
+    let brakF = Math.max(0, r.f - lista.filter(o => o.plec === 'f').length);
+    while (lista.length < r.n && (brakM > 0 || brakF > 0)) {
+      const plec = (brakM >= brakF) ? 'm' : 'f';
+      if (plec === 'm') brakM--; else brakF--;
+      lista.push(nowyOsobnik(gk, plec, ++nr));
     }
-    const odswiez = () => { pokaz(wiaderkoHTML(), document.getElementById('wiaderko')); podepnijWiaderko(); };
-    if (zegarWiad) { clearInterval(zegarWiad); zegarWiad = 0; }
-    const bylaOferta = !!Gielda.oferta();
-    zegarWiad = setInterval(() => {
-      const z = document.getElementById('wiadZegar');
-      if (!z || !panel.classList.contains('on')) { clearInterval(zegarWiad); zegarWiad = 0; return; }
-      if (!!Gielda.oferta() !== bylaOferta) { odswiez(); return; }
-      const t = trescZegara();
-      if (z.innerHTML !== t) z.innerHTML = t;
-    }, 500);
-    const p = document.getElementById('wPrzyjm'), od = document.getElementById('wOdrzuc');
-    if (p) p.addEventListener('click', e => {
-      e.stopPropagation();
-      const przed = Zapis.dane().monety || 0;
-      const wynik = Gielda.przyjmij();
-      if (!wynik) return;
-      if (navigator.vibrate) { try { navigator.vibrate([16, 40, 16, 40, 30]); } catch (err) {} }
-      /* Handlarz paczek zwraca obiekt, nie liczbe -- ta sama animacja
-         otwierania co w straganie, zeby wygrana z targu nie czula sie
-         gorsza od tej kupionej wprost. Kupon nie otwiera niczego, tylko
-         chowa sie do kieszeni
+    zapisz('indyw', gk, 'kazda sztuka ma teraz wlasny numer', lista.length);
+  }
+
+  /* Osobnik do pokazania na ekranie. Zwraca TEGO SAMEGO, ktory juz
+     plywa, dopoki go nie zwolnimy -- dzieki temu ta sama ryba moze
+     wracac miedzy lawicami, zamiast byc losowana od nowa. */
+  function wezOsobnika(gk) {
+    const r = rekord(gk);
+    if (!r || !r.indyw || r.n <= 0) return null;
+    materializuj(gk);
+    const lista = listaOsobnikow(gk);
+    const wolni = lista.filter(o => !o.naEkranie);
+    if (!wolni.length) return null;
+    const o = wolni[Math.floor(Math.random() * wolni.length)];
+    o.naEkranie = true;
+    return o;
+  }
+
+  /* Ryba wyplynela z kadru. ZOSTAJE w populacji -- to jest cala roznica
+     miedzy trybem indywidualnym a zwyklym losowaniem. */
+  function zwolnij(gk, id) {
+    const lista = listaOsobnikow(gk);
+    for (const o of lista) if (o.id === id) { o.naEkranie = false; return true; }
+    return false;
+  }
+
+  /* Ryba naprawde zniknela ze swiata: zabrana przez gracza albo zjedzona.
+     Dopiero TO zmniejsza populacje. */
+  function usunOsobnika(gk, id) {
+    const lista = listaOsobnikow(gk);
+    const i = lista.findIndex(o => o.id === id);
+    if (i < 0) return false;
+    const o = lista[i];
+    lista.splice(i, 1);
+    odejmijZeSredniej(gk, o.gen);
+    zmien(gk, -1, o.plec);
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    return true;
+  }
+
+  function osobniki(gk) { return listaOsobnikow(gk).slice(); }
+
+  /* ============================================================
+     GODY NA EKRANIE (faza 8). Reprodukcja NIE jest niewidzialnym
+     procentem w tle -- specyfikacja wprost tego zabrania. Zaczyna sie
+     dopiero wtedy, gdy dojrzaly samiec i dojrzala samica tego samego
+     gatunku faktycznie plywaja jednoczesnie w kadrze.
+
+     PRZEBIEG: para zostaje skojarzona, nad nia pojawia sie czerwony
+     dymek, i przez CZAS_GODOW obie ryby musza pozostac w lawicy.
+     Znikniecie ktorejkolwiek -- zlowienie, zjedzenie, wyplyniecie
+     z kadru -- przerywa gody i NIE daje ikry. Dopiero przetrwanie
+     calego okresu tworzy zdarzenie reprodukcji.
+
+     JEDNA PARA NA GATUNEK naraz: bez tego liczna lawica skladalaby
+     dziesiatki par jednoczesnie i ikra sypala
+
+### function wagaGatunku
+
+--- hit 1 @ 1222963 ---
+
+or (let b = 0; b < 4; b++) for (let c = 0; c < 4; c++)
+        s += PORA[e[0]][a] * SEZON[e[1]][b] * POGODA[e[2]][c] * PORY_W[a] * SEZ_W[b] * POG_W[c];
+      if (Math.abs(s - 1) > naj) { naj = Math.abs(s - 1); kto = slug; }
+    }
+    return { ok: naj < 1e-9, odchylenie: naj, gatunek: kto };
+  }
+
+  return { PORY, SEZONY, POGODY, EKO, KOREKTA, czysty, mnoznik, podpowiedz,
+           samotest, poraZGodziny, sezonZMiesiaca };
+})();
+window.OKNA = OKNA;
+
+/* ============================================================
+   CZYSTA RZADKOSC = UDZIAL W POPULACJI (IX 2026).
+
+   Jedna zasada dla NATURALNEJ lawicy:
+       P(gatunek w pojedynczym slocie) = n_gatunku / suma_n
+
+   `wagaGatunku` zwraca DOKLADNIE liczbe zywych sztuk. Nie mnozymy jej
+   przez stary rejestr, SKALA, pasmo, X-Score ani miekkie korekty EKO.
+   Twarde warunki typu "tylko noc / deszcz / pelnia" sa sprawdzane osobno
+   w `losujGatunek`: decyduja CZY gatunek jest teraz dostepny, ale gdy jest
+   dostepny, jego waga pozostaje rowna populacji.
+
+   Pierwsza lawica powstaje zanim modul Eko zostanie zdefiniowany. Zapis
+   istnieje juz wtedy, wiec czytamy ostatni snapshot D.eko.gat. Dopiero gdy
+   nie ma ZADNYCH danych populacji, awaryjnie wracamy do starego `udzial`.
+   ============================================================ */
+function liczbaPopulacjiSpawn(slug) {
+  try {
+    if (window.Eko && Eko.rekord) {
+      const r = Eko.rekord(slug);
+      if (r && Number.isFinite(+r.n)) return Math.max(0, +r.n);
+    }
+  } catch (e) {}
+  try {
+    const Z = window.Zapis;
+    const D = Z && Z.dane ? Z.dane() : null;
+    const r = D && D.eko && D.eko.gat ? D.eko.gat[slug] : null;
+    if (r && Number.isFinite(+r.n)) return Math.max(0, +r.n);
+  } catch (e) {}
+  return null;
+}
+window.liczbaPopulacjiSpawn = liczbaPopulacjiSpawn;
+
+function wagaGatunku(slug, gat, S) {
+  const n = liczbaPopulacjiSpawn(slug);
+  let w = (n !== null) ? n : Math.max(0, +(gat && gat.udzial) || 0);
+  if (window.FortuneCookie && FortuneCookie.spawnMultiplier) w *= FortuneCookie.spawnMultiplier(slug);
+  return Math.max(0,w);
+}
+window.wagaGatunku = wagaGatunku;
+
+function losujGatunekZOknami(GATUNKI, S, r) {
+  const T = window.QRYBY_TEST || {};
+  if (T.wymus && GATUNKI[T.wymus] && !GATUNKI[T.wymus].zepsuty) return T.wymus;
+  if (window.Atlas && Atlas.gotowy()) {
+    const k = Atlas.losujNieodkryty(GATUNKI, S);
+    Atlas.zuzyj();
+    if (k) return k;
+  }
+  const mn = T.mnoznik || {};
+  let suma = 0; const pula = [];
+  for (const k in GATUNKI) {
+    if (GATUNKI[k].zepsuty) continue;
+    const w = wagaGatunku(k, GATUNKI[k], S) * (mn[k] || 1);
+    pula.push([k, w]); suma += w;
+  }
+  if (suma <= 0) return 'ploc';
+  let x = (r ? r() : Math.random()) * suma;
+  for (const [k, w] of pula) { x -= w; if (x <= 0) return k; }
+  return pula[pula.length - 1][0];
+}
+window.losujGatunekZOknami = losujGatunekZOknami;
+
+/* Atlas: ochrona przed pechem. Co KUPON_MIN minut jedna ryba idzie wylacznie
+   z puli nieodkrytych, wazonej rzadkoscia razy aktualny kontekst. Rzadkosc
+   dalej decyduje o kolejnosci odkryc, kupon tylko o tempie. */
+const Atlas = {
+  /* KUPON_MIN bylo 180 minut, czyli trzy godziny nieprzerwanej gry. Sesja
+     trwa dziesiec minut, a kazde przeladowanie strony zeruje licznik od nowa,
+     wiec przez caly czas istnienia tej wersji kupon NIE ODPALIL SIE ANI RAZU.
+     Cala ochrona przed pechem byla martwa. Cztery minuty daja dwa do trzech
+     kuponow na sesje i realnie ciagna ogon rejestru. */
+  /* ============================================================
+     NAPRAWA Q12 (audyt IX 2026). Bylo:
+       odkryte: new Set((typeof Zapis !== 'undefined' && Zapis.odkryte) ? ... : [])
+     Intencja byla dobra ("start z zapisu"), ale ten modul (06) laduje sie
+     PRZED modulem zapisu (19), wiec `typeof Zapis` bylo tu ZAWSZE 'undefined'
+     i zbior zostawal PUSTY NA ZAWSZE -- nic go pozniej nie zasilalo, bo w
+     calym kodzie nie ma ani jednego wywolania Atlas.odkryj(). Trzy miejsca
+     czytaly ten martwy zbior (kupon odkrywcy w 06 i 17, Posazek Krola w 23)
+     i kazde z nich uwazalo CALY atlas za nieodkryty: kupon proponowal
+     w kolko gatunki, ktore gracz juz mial, a Posazek "gwarantowal nieodkryta
+     rybe" nawet przy komplecie kolekcji.
+     Teraz to getter czytajacy Zapis na zywo. Zaden kod nie musi pamietac
+     o aktualizacji zbioru po zlowieniu, bo zrodlem prawdy jest sam zapis
+     (dane.atlas), a nie kopia trzymana obok niego. Cache na 2 s, zeby
+     petla po ~80 gatunkach nie wolala Object.keys przy kazdym sprawdzeniu. */
+  _odkryteCache: null, _odkryteCzas: -1e9,
+  get odkryte() {
+    const t = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (this._odkryteCache && t - this._odkryteCzas < 2000) return this._odkryteCache;
+    let lista = [];
+    try {
+      if (typeof Zapis !== 'undefined' && Zapis.odkryte) lista = Zapis.odkryte() || [];
+    } catch (e) { lista = []; }
+    this._odkryteCache = new Set(lista);
+    this._odkryteCzas = t;
+    return this._odkryteCache;
+  },
+  /* Wolane po zlowieniu nowego gatunku: uniewaznia cache, zeby kolejne
+     sprawdzenie zobaczylo swiezy stan bez czekania na wygasniecie. */
+  odswiezOdkryte() { this._odkryteCzas = -1e9; },
+  /* ============================================================
+     KUPON ODKRYWCY. TO ON ROBIL Z MITYCZNYCH CODZIENNOSC.
+
+     ZNALEZIONE PO ZGLOSZENIU "150 lawic, 4 morswiny, 3 makairy":
+     rejestr mowi, ze ryba pasma 6 wypada raz na 280 tysiecy sztuk, czyli
+     na 1500 obejrzanych rybach oczekiwana wartosc to 0,01. Bylo siedem.
+     Roznica czterech rzedow wielkosci nie bierze sie z wag, tylko stad,
+     ze kupon OMIJA losowanie w calosci i podstawia gatunek nieodkryty.
+
+     Trzy rzeczy skladaly sie na to naraz:
+
+     1. Kupon zapadal co CZTERY minuty. Ten czas obnizono kiedys ze 180 minut,
+        bo licznik zerowal sie przy kazdym przeladowaniu strony i kupon nie
+        odpalal sie nigdy. Lekarstwo bylo gorsze od choroby: przy zwyklym
+        graniu wypada teraz kilkanascie kuponow na godzine.
+
+     2. Kupon nie zaznacza niczego. Gatunek wypada z jego puli dopiero
+        po ZLOWIENIU. Kto zobaczyl morswina i go nie wyciagnal, temu kupon
+        podstawia morswina znowu za cztery minuty, i znowu, bez konca.
+
+     3. Pula nieodkrytych u dobrego gracza sklada sie juz prawie wylacznie
+        z pasm 5, 6 i 7, bo reszte ma w ksiedze. Kupon miał ciagnac ogon
+        polskiego rejestru, a stal sie kranem z mitycznymi.
+
+     LEKARSTWO. Licznik przezywa przeladowanie, bo siedzi w Magazynie, wiec
+     odstep moze wrocic do sensownej wartosci. Kupon dostaje tez zakres:
+     ciagnie ogon POLSKIEGO rejestru, czyli pasma 1 do 4 w pelni, pasmo 5
+     ze zdlawiona waga, a pasm 6 i 7 nie dotyka wcale. Mityczne maja padac
+     z losowania, nie z litosci.
+     ============================================================ */
+  KUPON_MIN: 25,
+  K_CZAS: 'atlas.doKuponu',
+  doKuponu: (function () {
+    try { const t = Magazyn.czytaj('atlas.doKuponu'); if (t !== null) return Math.max(0, +t) || 0; }
+    catch (e) {}
+    return 25 * 60;
+  })(),
+  tik(dt) {
+    this.doKuponu -= dt;
+    /* Zapis co pelna sekunde, nie co klatke: szescdziesiat zapisow na sekunde
+       do magazynu kosztowaloby wiecej niz cala reszta petli. */
+    this._odKiedy = (this._odKiedy || 0) + dt;
+    if (this._odKiedy >= 1) {
+      this._odKiedy = 0;
+      try { Magazyn.pisz(this.K_CZAS, String(Math.max(0, Math.round(this.doKuponu)))); } catch (e) {}
+    }
+  },
+  gotowy() { return this.doKuponu <= 0; },
+  zuzyj() {
+    this.doKuponu = this.KUPON_MIN * 60;
+    try { Magazyn.pisz(this.K_CZAS, String(this.doKuponu)); } catch (e) {}
+  },
+  /* Ile kupon wazy dany gatunek. Zero znaczy: nie podstawiaj go nigdy. */
+  wagaKuponu(k) {
+    const p = (window.KLASA && KLASA[k]) || 1;
+    if (p >= 6) return 0;      /* mityczne wylacznie z losowania */
+    if (p === 5) return 0.15;  /* ogon rejestru, ale bez rozdawnictwa */
+    return 1;
+  },
+  losujNieodkryty(GATUNKI, S) {
+    let suma = 0; const pula = [];
+    for (const k in GATUNKI) {
+      if (this.odkryte.has(k) || GATUNKI[k].zepsuty) continue;
+      const skala = this.wagaKuponu(k);
+      if (!skala) continue;
+      const w = wagaGatunku(k, GATUNKI[k], S) * skala;
+      if (!(w > 0)) continue;
+      pula.push([k, w]); sum
+
+### Eko.mnoznikLosowania
+
+--- hit 1 @ 5395119 ---
+
+da, opad: st.opad }
+                : { godzina: 12, sezon: 'lato', pogoda: 'pogodnie', opad: null };
+    /* Pora dnia jako indeks 0-3 (swit/dzien/zmierzch/noc), do bramy czasowej
+       ponizej. Liczona raz tutaj, razem z reszta kontekstu odswieżanego co
+       400 ms -- zmiana pory w trakcie gry i tak nie jest szybsza niz to. */
+    const pora = (window.OKNA && OKNA.poraZGodziny) ? OKNA.poraZGodziny(S.godzina) : 1;
+    /* Faza ksiezyca, liczona raz na odswiezenie tabeli tak jak reszta
+       kontekstu. PORA.ksiezyc() sam czyta zegar gry, nie potrzebuje S. */
+    const ksiezycTeraz = (window.PORA && PORA.ksiezyc) ? PORA.ksiezyc().nazwa : null;
+    /* Kazdy modul osobno i w klatce ochronnej. Gdyby ktorykolwiek rzucil
+       wyjatek albo jeszcze sie nie wczytal, waga spada do samego udzialu
+       z rejestru, zamiast wywalac cala funkcje. */
+    const bezp = (f, dom) => { try { const v = f(); return (isFinite(v) && v > 0) ? v : dom; } catch (e) { return dom; } };
+    /* ============================================================
+       EKOSYSTEM MA WLASNA KLATKE OCHRONNA, i to nie jest powielenie
+       `bezp` bez powodu. `bezp` odrzuca kazda wartosc <= 0 i podmienia
+       ja na domyslna -- slusznie, bo chroni przed modulem, ktory zwrocil
+       smieci. Ale dla ekosystemu ZERO JEST POPRAWNYM WYNIKIEM i znaczy
+       "gatunek wymarl, nie ma prawa wypasc". Przepuszczone przez `bezp`
+       zamienialo sie w 1 i wymarly gatunek dalej sie pojawial.
+       Znalezione testem: 40 000 losowan po wymarciu sumа i sum nadal
+       wypadal. Tutaj zero przechodzi, a odrzucane sa tylko wartosci
+       ujemne i nieliczbowe.
+       ============================================================ */
+    const ekoMn = (k) => {
+      try {
+        if (!window.Eko) return 1;
+        const v = Eko.mnoznikLosowania(k);
+        return (isFinite(v) && v >= 0) ? v : 1;
+      } catch (e) { return 1; }
+    };
+    const waga = (k) => bezp(() => (window.wagaGatunku ? wagaGatunku(k, GATUNKI[k], S) : GATUNKI[k].udzial), GATUNKI[k].udzial)
+      * (mn[k] || 1)
+      /* ============================================================
+         WYROWNYWACZE STAREGO SYSTEMU WYLACZONE Z WAGI (IX 2026).
+         `Pierwszenstwo.wyrownaj` i `Tiery.mnoznik` powstaly po to, zeby
+         nadrobic to, czego rejestr nie umial: pasma 3-7 byly w nim
+         astronomicznie rzadkie, wiec trzeba je bylo podciagac recznie.
+         Zmierzone wartosci, jakie dokladaly do wagi:
+
+           pasmo | Pierwszenstwo | Tiery | iloczyn
+             2   |         0,451 |  2,94 |   1,33
+             4   |         0,144 |  4,28 |   0,62
+             5   |         0,264 | 56,00 |  14,78
+             7   |         1,000 | 92,00 |  92,00
+
+         Odkad rzadkosc JEST populacja, kazdy z nich liczy to samo drugi
+         raz i rozjezdza tabele POP_PASMA -- pasmo 7 wychodzilo 92 razy
+         czestsze, niz mowi tabela. Zostaja w kodzie, bo `Pierwszenstwo`
+         decyduje takze o tym, ktora ryba bierze przy haczyku, a `Tiery`
+         o wagach pasm w innych miejscach. Z SAMEJ WAGI LOSOWANIA
+         wychodza -- jedynym zrodlem rzadkosci ma byc liczba w jeziorze.
+         ============================================================ */
+      * 1
+      /* ============================================================
+         EKOSYSTEM (IX 2026): POPULACJA STERUJE SPOTKANIAMI.
+         To jest kierunek wprost z zalozen: populacja ma napedzac spawny,
+         a nie spawny tworzyc populacje. Gatunek wymarly dostaje mnoznik 0,
+         wiec ZNIKA z puli i nie ma zadnej sciezki, ktora moglaby go
+         przywrocic przypadkiem. Reszta skaluje sie lagodnie z tym, ile
+         sztuk faktycznie zostalo.
+         W tej samej klatce ochronnej co pozostale moduly: gdyby ekosystem
+         jeszcze sie nie wczytal, waga spada do 1 i gra dziala jak przedtem.
+         ============================================================ */
+      /* `ekoMn` USUNIETY Z TEGO LANCUCHA (IX 2026). Populacja wchodzi
+         teraz do wagi raz, w `wagaGatunku`. Zostawiony tutaj mnoznik
+         liczylby ja DRUGI raz i podnosil do kwadratu: gatunek o polowie
+         populacji wypadalby cztery razy rzadziej zamiast dwa. */
+      * 1;
+    const klucze = [], kum = [], wag = {};
+    let sm = 0;
+    for (const k in GATUNKI) {
+      if (GATUNKI[k].zepsuty) continue;
+      const w = waga(k); wag[k] = w;
+      /* Pula zamknieta przez zanete wypada z tabeli, wiec nie ma czego
+         odrzucac: kotlety zostawiaja w wodzie same drapiezniki. */
+      if (tylko && tylko.indexOf(k) < 0) continue;
+      /* ============================================================
+         BRAMA CZASOWA. Ksiaznik i kazdy przyszly gatunek z OKNO_GODZIN
+         w ogole NIE WCHODZI do puli losowania poza swoimi porami -- to
+         TWARDE zero, nie zwykle wazenie EKO, ktore najwyzej zmniejsza
+         szanse. Poza switem i zmierzchem ksiaznik ma wypadac z gry
+         dokladnie tak samo, jakby GATUNKI go nie mialo. */
+      const oknoG = OKNO_GODZIN[k];
+      if (oknoG && oknoG.indexOf(pora) < 0) continue;
+      /* Brama opadu: ta sama zasada co brama godzin wyzej, tylko po
+         pogodzie zamiast po porze dnia. */
+      const oknoP = OKNO_OPADU[k];
+      if (oknoP && oknoP.indexOf(S.opad) < 0) continue;
+      /* Brama ksiezyca: ta sama zasada, po fazie zamiast po godzinie
+         czy opadzie. */
+      const oknoK = OKNO_KSIEZYCA[k];
+      if (oknoK && oknoK.indexOf(ksiezycTeraz) < 0) continue;
+      /* Brama zegarowa: ta sama zasada, tylko co do minuty zamiast na
+         cala pore dnia. Godzina idzie wprost z S.godzina (ulamkowa). */
+      const oknoZ = OKNO_ZEGARA[k];
+      if (oknoZ && !wOknieZegara(oknoZ, S.godzina)) continue;
+      /* Brama przeszla. W aktywnym oknie gatunek ma DOKLADNIE wage
+         rowna swojej populacji. Nie ma kompensacji ani ukrytego boosta. */
+      sm += w; klucze.push(k); kum.push(sm);
+    }
+    TW = window.__wagiTab = { t: teraz, tylko: tylko, mn: T.mnoznik,
+                              klucze: klucze, kum: kum, suma: sm, wag: wag };
+  }
+  /* ============================================================
+     AUTOMATYCZNY KUPON ODKRYWCY WYLACZONY DLA NATURALNEJ LAWICY.
+     Niewidzialny pity-system podstawial nieodkryty gatunek niezaleznie od
+     jego udzialu w jeziorze, wiec obserwowana rzadkosc przestawala byc
+     procentem populacji. Jawne mechaniki gracza (zaneta/seria) zostaja.
+     ============================================================ */
+  if (!(TW.suma > 0) || !TW.klucze.length) return 'ploc';
+  const x = (r ? r() : Math.random()) * TW.suma;
+  let lo = 0, hi = TW.kum.length - 1;
+  while (lo < hi) { const sr = (lo + hi) >> 1; if (TW.kum[sr] < x) lo = sr + 1; else hi = sr; }
+  return TW.klucze[lo];
+}
+window.losujGatunek = losujGatunek;
+
+/* Rozklad normalny metoda Boxa-Mullera. */
+function gauss(r) {
+  let u = 0, v = 0;
+  while (u === 0) u = r();
+  while (v === 0) v = r();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+/* ============================================================
+   SUFIT WIELKOSCI ZDJETY.
+
+   Bylo: dlugosc obcinana na cmMax (rekord razy 1,25), waga na wagaMax.
+   Kazda ryba, ktora wylosowala sie wyzej, ladowala dokladnie na suficie,
+   a X-Score i tak stal, bo nL byl przyciety do jedynki. Powyzej rekordu
+   robila sie martwa strefa: kazda ploc od 66 cm w gore pokazywala te same
+   31 punktow, niezaleznie od tego, czy miala 67 czy 200 cm.
+
+   Jest: ogon rozkladu otwarty. Zostaje sama podloga cmMin, zeby nie
+   wychodzily ryby o zerowej dlugosci. cmMax i wagaMax nie znikaja, tylko
+   zmieniaja role: z klamry robi sie JEDNOSTKA SKALI w X-Score. Ryba wyzsza
+   od dawnego sufitu ma nL powyzej jedynki, wiec mnoznik okazu przekracza
+   dziesiec i liczba na medalionie dalej rosnie.
+
+   Rozklad zostaje log-normalny, wiec potwora nie da sie dostac tanio.
+   Zmierzone: 0,013% zlowien przekracza dawny sufit dlugosci. Ploc metrowa
+   to jedna na 5,5 miliona kart. Ale sufitu juz nie ma i to jest cala
+   roznica: zawsze moze wplynac cos wiekszego.
+
+   Chcesz wiecej potworow, ruszasz REKORD_OGON przy tablicy gatunkow.
+   To on steruje szerokoscia ogona.
+   ============================================================ */
+/* ============================================================
+   POTWORY.
+
+   Sam otwart
