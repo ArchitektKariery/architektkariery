@@ -1,0 +1,19 @@
+name: QRyby performance extra
+on:
+  push:
+    branches: [main]
+    paths: ['tools/qryby_performance_extra.py']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/qryby_performance_extra.py
+      - run: |
+          git config user.name "qryby-perf-audit"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/qryby-performance-extra.txt
+          git commit -m "Inspect extra QRyby performance paths [skip ci]"
+          git push origin HEAD:main
