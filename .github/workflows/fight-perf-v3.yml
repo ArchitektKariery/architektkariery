@@ -1,0 +1,38 @@
+name: Fight performance v3
+on:
+  push:
+    branches: [main]
+    paths: ['tools/fight_perf_v3.py']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/fight_perf_v3.py
+      - name: Validate
+        run: |
+          git diff --check
+          grep -F "2026-09-26-fight-perf-v3" qryby.html
+          grep -F "const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2" qryby.html
+          grep -F "_fightSchoolUpdateAcc" qryby.html
+          grep -F "targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" qryby.html
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('qryby.html').read_text(encoding='utf-8')
+          assert s.count("_kolejnoscRysowania.sort((a, b) => a.y - b.y)") >= 2
+          assert "fight-perf-v3" in s
+          assert s.rstrip().endswith("</html>")
+          print("fight perf v3 validation OK")
+          PY
+      - name: Commit
+        run: |
+          if git diff --quiet -- qryby.html; then exit 0; fi
+          git config user.name "qryby-fight-perf"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: optimize water and school during fight [skip ci]"
+          git push origin HEAD:main
