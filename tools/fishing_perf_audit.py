@@ -35,3 +35,5 @@ def extract(src,label):
 Path("docs/fishing-perf-audit-current.txt").write_text(extract(CUR,"CURRENT"),encoding="utf-8")
 Path("docs/fishing-perf-audit-pre-lucjan.txt").write_text(extract(OLD,"PRE_LUCJAN"),encoding="utf-8")
 print("audit written")
+
+# trigger
