@@ -11,3 +11,5 @@ elif old in s:
     print("cache buster applied")
 else:
     raise SystemExit("Lucjan live script tag not found")
+
+# trigger-cache-buster
