@@ -117,3 +117,5 @@ if not s.rstrip().endswith("</html>"):
 
 PATH.write_text(s,encoding="utf-8")
 print("Applied Lucjan Stage 7 game integration.")
+
+# run-stage7
