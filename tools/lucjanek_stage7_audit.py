@@ -37,3 +37,5 @@ for p in patterns:
 
 Path("docs/lucjanek-stage7-audit.txt").write_text("\n".join(out), encoding="utf-8")
 print("wrote Stage 7 audit")
+
+# trigger
