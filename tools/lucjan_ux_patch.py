@@ -37,3 +37,5 @@ for old,new in repls:
 
 p.write_text(s,encoding="utf-8")
 print("Lucjan UX base HTML + live4 cache buster applied.")
+
+# trigger-ux-polish
