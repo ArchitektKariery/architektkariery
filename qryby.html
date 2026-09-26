@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-26-lucjanek-stage4-v1';
+window.QRYBY_BUILD = '2026-09-26-lucjanek-stage7-v1';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -4079,6 +4079,7 @@ window.liczbaPopulacjiSpawn = liczbaPopulacjiSpawn;
 
 function wagaGatunku(slug, gat, S) {
   const n = liczbaPopulacjiSpawn(slug);
+  if (gat && gat.odnowa && n === null) return 0;
   let w = (n !== null) ? n : Math.max(0, +(gat && gat.udzial) || 0);
   if (window.FortuneCookie && FortuneCookie.spawnMultiplier) w *= FortuneCookie.spawnMultiplier(slug);
   return Math.max(0,w);
@@ -9922,6 +9923,35 @@ const UDZIAL_DOCELOWY = {
   GATUNKI.smok_zycia.wykl = Math.min(1.05, baza.wykl || 1);
   if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
   if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
+})();
+
+/* ============================================================
+   LUCJAN CZERWONY — community restoration Stage 7.
+   Gatunek istnieje w katalogu gry od startu, ale jego populacja startowa
+   wynosi ZERO. Nie moze wypasc w naturalnej lawicy, dopoki wspolnotowa
+   odnowa nie doprowadzi pierwszego pokolenia do EKO.
+   ============================================================ */
+(function dodajLucjanaCzerwonego(){
+  if (GATUNKI.lucjan_czerwony) return;
+  GATUNKI.lucjan_czerwony = {
+    nazwa: 'LUCJAN CZERWONY',
+    udzial: 0.00020,
+    src: 'assets/lucjanek/lucjanek-128.png',
+    meta: { w: 128, h: 128 },
+    mouth: { fx: 0.44, fy: 0.00 },
+    fala: 3.6, ogon: 5.6, wykl: 2.0,
+    mu: 4.0280, sigma: 0.1436,
+    cmMin: 32, cmMax: 107.5, rekordDl: 95,
+    kMu: -4.20, kSigma: 0.22, kKlamp: 0.528,
+    rekordWaga: 14000, wagaMax: 17500,
+    glebia: [0.42, 0.74],
+    sila: 3.4, pukanie: 1, kruchyPysk: 0,
+    wibracja: [50, 34, 50, 34, 94],
+    drapieznik: true,
+    odnowa: true
+  };
+  if (typeof KLASA !== 'undefined') KLASA.lucjan_czerwony = 4;
+  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.lucjan_czerwony = 4;
 })();
 
 /* Wczytanie atlasow. */
@@ -26829,6 +26859,7 @@ const Eko = (() => {
     const G2 = (typeof GATUNKI !== 'undefined') ? GATUNKI[gk] : null;
     if (!G2) return CFG.POP_MIN_START;
     if (G2.bezEko) return 0;
+    if (G2.odnowa) return 0;
     return CFG.POP_PASMA[pasmoGat(gk)] || CFG.POP_MIN_START;
   }
 
@@ -28222,8 +28253,13 @@ window.Eko = Eko;
   }
 
   function html() {
-    const lista = Eko.podsumowanie();
-    const pok = Eko.pokolenia();
+    const lista = Eko.podsumowanie().filter(x =>
+      !(GATUNKI[x.gat] && GATUNKI[x.gat].odnowa && x.n <= 0)
+    );
+    const pok = Eko.pokolenia().concat(
+      (window.QRYBY_COMMUNITY_EKO && QRYBY_COMMUNITY_EKO.pokolenia)
+        ? QRYBY_COMMUNITY_EKO.pokolenia() : []
+    );
     const kron = Eko.kronika(14);
     let h = '<h2>EKOSYSTEM</h2><div class="pod">Ten świat ma własną historię. '
           + 'Każda zabrana ryba ubywa z populacji, każda wypuszczona zostaje.</div>';
