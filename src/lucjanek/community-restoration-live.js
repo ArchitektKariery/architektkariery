@@ -217,7 +217,7 @@
     const pct = Math.max(0, Math.min(100, Math.round((raised / target) * 100)));
 
     card.dataset.tier = String(tierFor(pct));
-    card.dataset.state = event.state || 'funding';
+    card.dataset.state = event.state === 'completed' ? 'sold' : (event.state || 'funding');
     card.style.setProperty('--odn-progress', pct + '%');
 
     const nums = card.querySelectorAll('.odn-numbers span');
