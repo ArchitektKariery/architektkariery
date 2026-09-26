@@ -1,0 +1,1198 @@
+
+## update
+function update(dt, t) {
+  for (const c of clouds) {
+    c.x += c.v * dt;
+    c.bob += dt * c.bf * TAU;
+    if (c.x > W + 4) c.x = -c.w - rnd(0, 120);
+  }
+  for (const r of refls) {
+    r.x += r.v * dt;
+    if (r.x > W + 4) r.x = -r.w - rnd(0, 120);
+  }
+  for (const gu of gusts) {
+    gu.y += gu.v * dt;
+    if (gu.y > 1.45) { gu.y = -0.45; gu.str = rnd(0.45, 1.0); gu.wide = rnd(0.26, 0.6); gu.v = rnd(0.008, 0.026); }
+  }
+  for (const m of motes) {
+    m.x += m.v * dt; m.bob += dt * m.bf * TAU;
+    if (m.x > W + 8) { m.x = -8; m.y = rnd(40, SURFACE - 120); }
+  }
+  for (const b of bubbles) {
+    b.y -= b.v * dt; b.bob += dt * b.bf * TAU;
+    if (b.y < SURFACE + 40) { b.y = rnd(BED, H); b.x = rnd(0.04, 0.96) * W; }
+  }
+}
+
+## drawParticles
+function drawParticles() {
+  for (const m of motes) {
+    g.globalAlpha = m.a * (0.55 + 0.45 * Math.sin(m.bob));
+    g.fillStyle = '#FFE6F2';
+    g.fillRect(Math.round(m.x), Math.round(m.y + Math.sin(m.bob) * 4), m.r, m.r);
+  }
+  for (const b of bubbles) {
+    g.globalAlpha = b.a;
+    g.fillStyle = '#DCC8F4';
+    g.fillRect(Math.round(b.x + Math.sin(b.bob) * 5), Math.round(b.y), b.r, b.r);
+  }
+  g.globalAlpha = 1;
+}
+
+## drawGuides
+function drawGuides(t) {
+  if (!Scene.guides) return;
+  g.save();
+  g.lineWidth = 2;
+  const line = (y, col, label) => {
+    g.strokeStyle = col; g.setLineDash([10, 8]);
+    g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = col;
+    g.fillRect(8, y - 16, label.length * 8 + 10, 15);
+    g.fillStyle = '#0B0714';
+    g.font = 'bold 11px monospace';
+    g.fillText(label, 13, y - 4);
+  };
+  line(SURFACE, '#F0D77A', 'SURFACE 690');
+  line(REFL_END, '#8FD0F0', 'REFL_END 1060');
+  line(BED, '#8FE07A', 'BED 1180');
+  g.strokeStyle = 'rgba(240,215,122,.5)'; g.setLineDash([6, 10]);
+  g.beginPath(); g.moveTo(W * 0.6, SURFACE); g.lineTo(W * 0.6, BED); g.stroke();
+  g.setLineDash([]);
+  g.fillStyle = 'rgba(240,215,122,.85)';
+  g.font = 'bold 11px monospace';
+  g.fillText('kolumna haczyka', W * 0.6 + 8, SURFACE + 40);
+  g.restore();
+}
+
+## updateSchool
+function updateSchool(dt) {
+  for (const f of school) {
+    /* Nadecie na 'strike'/'hooked' musi zadzialac PRZED wczesnymi 'continue'
+       ponizej, bo zachowanie() (inny blok skryptu) w ogole nie widzi ryby
+       w tych trybach -- zachWolno wymaga mood 'idle'. Funkcja siedzi
+       w pozniejszym bloku, wiec pytanie o istnienie jak wszedzie indziej. */
+    if (typeof nadymanieMood === 'function') nadymanieMood(f, dt);
+    if (typeof pyskTick === 'function') pyskTick(f, dt);
+    if (f.karencja > 0) f.karencja -= dt;
+    if (f.plochT > 0) { f.plochT -= dt; if (f.plochT <= 0) f.ploch = 0; }
+    if (f.caught) { f.phase += dt * (7 + Math.abs(f.thrash || 0) * 6); continue; }
+    if (f.mood === 'inspect' || f.mood === 'strike') { f.phase += dt * (3 + Math.abs(f.vx) * 0.2); continue; }
+    if (f.mood === 'odplywa') {
+      /* Szarza rozpedza sie trzy razy szybciej niz zwykla ucieczka. */
+      f.vx += (f.vTarget - f.vx) * Math.min(1, dt * (f.szarza ? 5.0 : 1.6));
+      f.x += f.vx * dt;
+      if (Math.abs(f.vx) > 5) f.face = f.vx > 0 ? 1 : -1;
+      f.bob += dt * f.bobF * 6.2832;
+      f.y += ((f.home + Math.sin(f.bob) * f.bobA) - f.y) * Math.min(1, dt * 2.2);
+      f.phase += dt * (2.2 + Math.abs(f.vx) * 0.16) * 6.2832 / 16;
+      f.margines = gat(f).meta.w * f.s + 60;
+      if (f.szarza && typeof sladSzarzy === 'function') sladSzarzy(f, dt);
+      continue;
+    }
+    /* PYSK IDZIE ZA RUCHEM W PIONIE.
+       Mierzymy, jak szybko ryba schodzi albo wychodzi, i z tego liczymy
+       nachylenie sylwetki. Wygladzanie jest po to, zeby ryba nie drgala
+       przy kazdej zmianie celu glebokosci. */
+    const yPoprz = (f.yPoprz !== undefined) ? f.yPoprz : f.y;
+    const vyChwila = (f.y - yPoprz) / Math.max(dt, 0.001);
+    /* Wygladzanie bylo za szybkie: przy kazdej zmianie celu glebokosci
+       kat skakal w ulamku sekundy i ryba wygladala, jakby sie zacinala.
+       Teraz dochodzi do nowego kata przez okolo sekunde. */
+    f.vyGladka = (f.vyGladka || 0) + (vyChwila - (f.vyGladka || 0)) * Math.min(1, dt * 1.4);
+    f.yPoprz = f.y;
+    /* Zachowanie gatunkowe. Ustawia vTarget, home i turn, a reszta petli
+       dziala tak samo jak dla ryby bez zachowania. */
+    if (typeof zachowanie === 'function') zachowanie(f, dt);
+    /* Zawracanie przy krawedzi. Ryba, ktora nie zamierza odplynac,
+       trzyma sie kadru: przy brzegu zmienia kierunek do srodka.
+       Bez tego przy wiekszej lawicy kilka sztuk dryfowalo poza ekran
+       i widoczna liczba spadala z pietnastu do jedenastu. */
+    const marg = 70;
+    if (f.x < marg && f.vx < 0) {
+      f.vTarget = Math.abs(f.base); f.hover = 0; f.turn = Math.min(f.turn, 1.5);
+    } else if (f.x > Scene.W - marg && f.vx > 0) {
+      f.vTarget = -Math.abs(f.base); f.hover = 0; f.turn = Math.min(f.turn, 1.5);
+    }
+    const RP = RuchRyby.dla(f);
+    f.turn -= dt;
+    if (f.hover > 0) {
+      f.hover -= dt;
+      /* Zawis jest prawie nieruchomy. Profil dryf/konik ma dluzsze zawisy,
+         drobnica krotsze; nadal nie zmieniamy polozenia "teleportem". */
+      f.vTarget = Math.sin(f.bob * 0.7) * 3;
+    } else if (f.turn <= 0) {
+      f.turn = RP.turnMin + Math.random() * (RP.turnMax - RP.turnMin);
+      const los = Math.random();
+      if (los < RP.hoverP) {
+        f.hover = RP.hoverMin + Math.random() * (RP.hoverMax - RP.hoverMin);
+      } else if (los < RP.hoverP + RP.flipP) {
+        f.vTarget = -Math.sign(f.vx || 1) * f.base
+          * (RP.speedMin + Math.random() * (RP.speedMax - RP.speedMin));
+      } else {
+        f.vTarget = Math.sign(f.vx || 1) * f.base
+          * (RP.speedMin + Math.random() * (RP.speedMax - RP.speedMin));
+      }
+    }
+    /* ZRYW I SZYBOWANIE.
+       Ryba nie plynie ze stala predkoscia. Uderza ogonem, przyspiesza, potem
+       szybuje i zwalnia. Kazda ma wlasny rytm (f.rytm) i wlasna faze, wiec
+       lawica nie pulsuje jednym taktem. Amplituda 0,42 znaczy, ze predkosc
+       chodzi miedzy 58 a 142 procent bazowej. */
+    /* ============================================================
+       ASMR: UDERZENIE -> CIAG -> SZYBOWANIE.
+
+       Stary model mial jeden mocny rytm dla wszystkich ryb:
+       +/-42% predkosci i identyczna prace ogona. Wizualnie byl "zywy",
+       ale spokojny leszcz, minog, zolw i ukleja oddychaly tym samym
+       metronomem.
+
+       Teraz profil zmienia AMPLITUDE, nie srednia predkosc. `ciagBase`
+       jest wyliczony tak, by srednia iloczynu zryw*ciag zostala na
+       dawnym poziomie ~0,983. To jest kluczowe: poprawiamy FEEL,
+       nie czestosc bran. */
+    f.tempo = (f.tempo || 0) + dt * RP.rytm;
+    const sinT = Math.sin(f.tempo);
+    const dodatni = Math.max(0, sinT);
+
+    let burst = RP.burst, thrust = RP.thrust, ease = RP.ease;
+    /* Drapieżnik w realnej pogoni przestaje byc "ASMR spokojny":
+       ogon budzi sie dopiero wtedy, kiedy faktycznie goni ofiare. */
+    const wPogoni = !!f.ofiara;
+    if (wPogoni && RP.chaseBurst != null) {
+      burst = RP.chaseBurst;
+      thrust = RP.chaseThrust;
+      ease = RP.chaseEase;
+    }
+
+    const napedZryw = 1 + burst * sinT;
+    f.machnij = RP.tailBase + RP.tailGain * dodatni;
+
+    /* E[sin]=0, E[max(0,sin)]=1/pi,
+       E[sin*max(0,sin)]=1/4. Dobieramy baze ciagu tak, by srednia
+       byla taka jak przed audytem. */
+    const ciagBase = RP.napedMean - thrust / Math.PI - burst * thrust * 0.25;
+    const ciag = ciagBase + thrust * dodatni;
+
+    f.vx += (f.vTarget * napedZryw * ciag - f.vx) * Math.min(1, dt * ease);
+    f.x += f.vx * dt;
+    /* PYSK ZAWSZE W STRONE RUCHU.
+       f.face byl ustawiany raz, przy wplywaniu do kadru, i nigdy pozniej.
+       Ryba, ktora zawrocila, dalej miala sprite odwrocony w stara strone,
+       wiec plynela tylem: ogon z przodu, pysk z tylu. Widac to bylo przy
+       kazdym nawrocie, a nawrot wypada srednio co piec sekund.
+       Martwa strefa 5 px na sekunde, zeby ryba wiszaca w miejscu nie migala
+       sprite'em w tempie fali. */
+    /* OBROT. Kierunek nie przeskakuje, tylko przechodzi przez zero.
+       f.obrot idzie od 1 przez 0 do 1, a znak sprite'a zmienia sie dokladnie
+       w polowie, gdy sylwetka jest najwezsza. */
+    if (f.obrot === undefined) f.obrot = 1;
+    const chce = f.vx > 0 ? 1 : -1;
+    if (Math.abs(f.vx) > 5 && chce !== (f.face || 1) && f.obrotDo === undefined) f.obrotDo = chce;
+    if (f.obrotDo !== undefined) {
+      f.obrot -= dt / OBROT_CZAS * 2;
+      if (f.obrot <= 0) { f.face = f.obrotDo; f.obrotDo = undefined; f.obrot = 0; }
+    } else if (f.obrot < 1) {
+      f.obrot = Math.min(1, f.obrot + dt / OBROT_CZAS * 2);
+    }
+    f.bob += dt * f.bobF * 6.2832;
+    /* PRZYNETA CIAGNIE W PIONIE.
+       Ryba mijajaca haczyk w poziomie podchodzi ku jego glebokosci. Sila
+       spada gaussowsko z odlegloscia pozioma, wiec daleka drobnica zostaje
+       na swoim pietrze, a ta przy haczyku podplywa.
+
+       To rozstrzyga spor, ktorego inaczej rozstrzygnac sie nie da. Wybor
+       ryby z odleglosci 2D wyglada naturalnie, ale gatunki siedza w pasach
+       glebokosci, wiec pion dziala jak ukryta bramka na gatunek. Wybor
+       z samej odleglosci poziomej tej wady nie ma, ale wtedy bierze ryba
+       z zupelnie innego pietra: zmierzone 112 px mediany w pionie przy
+       slupie 490 px i 12 procent bran dalej niz 200 px.
+
+       Skoro ryba PODCHODZI do przynety, oba warunki spelniaja sie naraz.
+       Zmierzone po zmianie, przy haczyku na 15, 50 i 85 procentach slupa:
+       mediana odleglosci pionowej 5 do 9 px zamiast 112, a udzialy plaskie:
+       ploc 35.4 do 36.0 przy rejestrze 34.5, ukleja 11.6 do 13.5 przy 12.8,
+       sielawa 3.04 do 3.58 przy 3.45. */
+    let celY = f.home;
+    /* window.G, a nie samo G. Wedka siedzi w bloku skryptu, ktory parsuje sie
+       PO tym, i przy pliku wazacym megabajt przegladarka na telefonie zdaza
+       odpalic pierwsza klatke miedzy blokami. Samo G jest wtedy w martwej
+       strefie const i rzuca ReferenceError, ktory zabija cala petle lawicy.
+       Odwolanie przez window daje undefined zamiast wyjatku, wiec pierwsze
+       klatki po prostu nie maja jeszcze haczyka i to jest w porzadku. */
+    const H = window.G;
+    /* Ploch wylacza ciekawosc. Sama karencja blokowala tylko WYBOR ryby do
+       przynety, a przyciaganie na glebokosc haczyka dzialalo dalej, wiec
+       sploszona lawica odplywala na sekunde i zaraz plynela z powrotem pod
+       haczyk. Z boku wygladalo to tak, jakby ploch nic nie dal. */
+    if (H && (H.phase === 'hang' || H.phase === 'fight')
+        && f.mood !== 'odplywa' && !(f.plochT > 0)) {
+      const sila = Math.exp(-Math.pow(Math.abs(f.x - H.hookX) / PRZYNETA_CIEKAWOSC, 2));
+      if (sila > 0.05) celY = f.home + (H.hookY - f.home) * sila;
+    }
+    const zryw = PRZYNETA_PODEJSCIE * dt;
+    const cel = celY - f.home;
+    f.podejscie = (f.podejscie || 0) + Math.max(-zryw, Math.min(zryw, cel - (f.podejscie || 0)));
+    f.y += ((f.home + f.podejscie + Math.sin(f.bob) * f.bobA) - f.y) * Math.min(1, dt * 2.2);
+    /* Ogon nie jest juz wspolnym metronomem calego jeziora.
+       Drobnica pracuje czesciej, olbrzym i zolw niemal tylko szybuja. */
+    f.phase += dt * (RP.phaseBase + Math.abs(f.vx) * RP.phaseV);
+    /* Poza kadrem ryba znika naprawde, a nie przeskakuje na druga strone. */
+    f.margines = gat(f).meta.w * f.s + 60;
+  }
+  _czasSceny = (_czasSceny || 0) + dt;
+  zarzadzajPopulacja(dt);
+  if (typeof aktualizujSlady === 'function') aktualizujSlady(dt);
+
+  /* rozsuwanie, zeby sprite y nie wchodzily na siebie
+     ZOPTYMALIZOWANE (IX 2026, "czy telefony da sie mniej grzac"). Ta petla
+     jest O(n^2) -- przy pelnej lawicy (POP.max=25) to 300 par sprawdzanych
+     KAZDEJ klatki. Zmierzone na zywym silniku: to SAMO ~53% calego kosztu
+     updateSchool (0,20 z 0,38 ms), mimo ze robi tylko kosmetyczne odsuwanie
+     nakladajacych sie sprite'ow -- efekt zbyt drobny, zeby uzasadnial polowe
+     budzetu klatki.
+     Throttling zamiast przepisywania na inny algorytm: sila odpychania i tak
+     jest liniowa w dt (`oy * dt * 1.5`), wiec zrobienie jej raz na 3 klatki
+     z dt*3 daje niemal identyczny skumulowany efekt w czasie -- rozsuwanie
+     jest powolna, kosmetyczna korekta, nie fizyka wymagajaca kazdej klatki.
+     Efekt: ta sama laczna "sila" rozsuwania, 1/3 wywolan O(n^2) na sekunde. */
+  /* GODY: sprawdzane co klatke, bo przerwanie musi byc natychmiastowe --
+     ryba zlowiona w 29. sekundzie ma unicestwic tarlo, a nie zdazyc je
+     domknac przez opoznienie. Sam koszt jest maly: petla po lawicy
+     dziala tylko dla gatunkow, ktore nie paruja i moga sie rozmnazac. */
+  if (window.Eko && Eko.tikGodow) { try { Eko.tikGodow(school); } catch (e) {} }
+
+  _rozsuwCzesc = (_rozsuwCzesc || 0) + 1;
+  if (_rozsuwCzesc % 3 === 0) {
+    const dt3 = dt * 3;
+    for (let i = 0; i < school.length; i++) for (let j = i + 1; j < school.length; j++) {
+      const a = school[i], b = school[j];
+      const ox = (72 * a.s + 72 * b.s) - Math.abs(a.x - b.x);
+      const oy = (34 * (a.sy || a.s) + 34 * (b.sy || b.s)) - Math.abs(a.y - b.y);
+      if (ox > 0 && oy > 0) {
+        const s = a.y <= b.y ? -1 : 1;
+        a.home += s * oy * dt3 * 1.5; b.home -= s * oy * dt3 * 1.5;
+        /* Przyciecie do pietra gatunku, a nie do calego slupa wody. Bez tego
+           ukleje po kilkunastu sekundach ladowaly przy dnie, a okonie przy tafli. */
+        a.home = Math.max(a.gMin !== undefined ? a.gMin : Scene.SURFACE + 70,
+                  Math.min(a.gMax !== undefined ? a.gMax : Scene.BED - 40, a.home));
+        b.home = Math.max(b.gMin !== undefined ? b.gMin : Scene.SURFACE + 70,
+                  Math.min(b.gMax !== undefined ? b.gMax : Scene.BED - 40, b.home));
+      }
+    }
+  }
+}
+
+## stepFloatSettle
+function stepFloatSettle(dt) {
+  if (!G.castStage || G.castStage === 'zamach' || G.castStage === 'wyrzut' || G.castStage === 'lot') return;
+  G.castBend = Math.max(0, (G.castBend || 0) - dt * 40);
+  G.floatBobV += (-G.floatBob * 62 - G.floatBobV * 5.2) * dt;
+  G.floatBob += G.floatBobV * dt;
+  for (const r of G.rings) { r.r += dt * 34; r.a -= dt * 0.55; }
+  G.rings = G.rings.filter(r => r.a > 0);
+  if (Math.abs(G.floatBob) < 0.15 && Math.abs(G.floatBobV) < 0.6 && !G.rings.length) G.castStage = '';
+}
+
+## update
+function update(){
+    if(!WL||!btn)return;
+    const karta=!!(window.Card&&Card.open&&Card.data&&Card.t>=.82&&!Card.ciagniemy&&!Card.decyzja);
+    let onboarding=false;try{onboarding=!!(window.Onboarding&&Onboarding.aktywny&&Onboarding.aktywny());}catch(e){}
+    const progOK=!window.Progression||Progression.dostep('share');
+    document.body.classList.toggle('share-catch-ready',karta&&!onboarding&&!busy&&progOK);
+  }
+
+## const Hap =
+s, Scene.W / 2, hintY, '#F4E6C2', kk);
+  g.restore();
+}
+}
+</script>
+<script>
+/* ============================================================
+   HAPTYKA WALKI
+   navigator.vibrate nie ma regulacji sily, przyjmuje tylko czasy.
+   Sile buduje wiec dlugosc impulsu i gestosc rytmu:
+   przy spokojnym zwijaniu rzadkie, 5 ms tykniecia jak kolowrotek,
+   przy granicy zerwania niemal ciagly warkot.
+
+   Do tego dochodzi dzwiek, bo iOS nie udostepnia wibracji w Safari
+   i bez niego gracz na iPhonie nie mialby zadnej informacji zwrotnej.
+   ============================================================ */
+
+/* Diagnostyka wibracji. Na telefonie nie ma jak otworzyc konsoli, wiec
+   panel wlacza sie doklejeniem ?hap do adresu.
+
+   navigator.vibrate wymaga trzech rzeczy naraz i kazda z nich potrafi
+   milczaco zabic haptyke:
+     1. bezpiecznego kontekstu (https, localhost albo file), bo po zwyklym
+        http metoda albo nie istnieje, albo zwraca false;
+     2. aktywacji uzytkownika, czyli wczesniejszego dotkniecia strony,
+        bo bez niej przegladarka ignoruje wywolanie bez slowa;
+     3. zgody systemu, a Android wylacza wibracje w trybie wyciszenia,
+        przy zerowej siLe wibracji i w trybie oszczedzania energii.
+   Do tego iOS Safari nie ma tego API wcale, a czesc przegladarek
+   nastawionych na prywatnosc blokuje je jako slad do odciskania palca. */
+const HapDiag = {
+  proby: 0, przyjete: 0, odrzucone: 0, ostatniWzor: null, ostatniZwrot: null,
+  odblokowane: false, odblokowanyZwrot: null,
+  raport() {
+    const n = navigator;
+    return [
+      'protokol       ' + location.protocol,
+      'bezpieczny     ' + (window.isSecureContext ? 'tak' : 'NIE'),
+      'navigator.vibrate ' + (typeof n.vibrate),
+      'aktywacja      ' + (n.userActivation ? (n.userActivation.hasBeenActive ? 'byla' : 'BRAK') : 'nieznana'),
+      'Hap.on         ' + (Hap.on ? 'tak' : 'NIE'),
+      'proba odblok.  ' + (this.odblokowane ? String(this.odblokowanyZwrot) : 'jeszcze nie'),
+      'wywolan        ' + this.proby + '  przyjete ' + this.przyjete + '  odrzucone ' + this.odrzucone,
+      'ostatni wzor   ' + JSON.stringify(this.ostatniWzor),
+      'ostatni zwrot  ' + String(this.ostatniZwrot)
+    ];
+  }
+};
+window.HapDiag = HapDiag;
+const MIX_PANEL = /[?&]mix\b/.test(location.search);
+/* Twarde przeladowanie co minute, gdyby cykl lawicy nie wystarczyl. */
+if (/[?&]reload\b/.test(location.search)) setTimeout(() => location.reload(), 60000);
+const HAP_PANEL = /[?&]hap\b/.test(location.search);
+
+const Hap = {
+  /* Sama obecnosc metody nie wystarczy: po http istnieje, a nie dziala. */
+  on: typeof navigator.vibrate === 'function' && window.isSecureContext !== false,
+  nextAt: 0,
+  lastZone: -1,
+  lastTen: 0,
+  clickAt: 0,
+
+  /* Progi ostrzegawcze. Przekroczenie w gore odpala osobny sygnal,
+     zeby gracz wiedzial, ze wlasnie wszedl w gorszy zakres. */
+  zones: [
+    { at: 0.00, name: 'spokoj' },
+    { at: 0.42, name: 'praca' },
+    { at: 0.64, name: 'uwaga' },
+    { at: 0.82, name: 'granica' },
+    { at: 0.94, name: 'pekanie' }
+  ],
+
+  zoneOf(t) {
+    let z = 0;
+    for (let i = 0; i < this.zones.length; i++) if (t >= this.zones[i].at) z = i;
+    return z;
+  },
+
+  buzz(p) {
+    if (!this.on) return false;
+    let r = false;
+    try { r = navigator.vibrate(p); } catch (e) { r = false; }
+    HapDiag.proby++; HapDiag.ostatniWzor = p; HapDiag.ostatniZwrot = r;
+    if (r) HapDiag.przyjete++; else HapDiag.odrzucone++;
+    return r;
+  },
+
+  /* Sygnal przekroczenia progu: im wyzszy zakres, tym bardziej natarczywy. */
+  crossing(z) {
+    if (z === 2) this.buzz([16, 44, 16]);
+    else if (z === 3) this.buzz([26, 32, 26, 32, 26]);
+    else if (z === 4) this.buzz([44, 24, 44, 24, 60]);
+    else if (z === 1) this.buzz(12);
+    beepHap(z);
+  },
+
+  /* Sygnal powrotu do bezpiecznego zakresu. */
+  relief() { this.buzz(10); beepHap(-1); },
+
+  update(dt, now) {
+    const walka = (typeof G !== 'undefined') && G.phase === 'fight';
+    if (!walka) { this.lastZone = -1; this.lastTen = 0; return; }
+
+    const ten = Math.max(0, Math.min(1, G.tension));
+    const z = this.zoneOf(ten);
+
+    /* przekroczenie progu w gore albo powrot w dol */
+    if (this.lastZone >= 0 && z > this.lastZone) this.crossing(z);
+    else if (this.lastZone >= 2 && z < this.lastZone && z <= 1) this.relief();
+    this.lastZone = z;
+    this.lastTen = ten;
+
+    if (now < this.nextAt) return;
+
+    if (G.holding) {
+      /* Zwijanie: rytm gestnieje i impuls sie wydluza razem z naprezeniem.
+         Krzywa jest wykladnicza, wiec dol jest naprawde delikatny,
+         a gora naprawde alarmujaca. */
+      const k = Math.pow(ten, 1.5);
+      const okres = 200 - 158 * k;          /* 200 ms w spokoju, 42 ms przy granicy */
+      const dlug = Math.round(4 + 30 * Math.pow(ten, 1.7));
+      /* Okon puka twardo i krotko, wiec jego rytm jest gestszy od ploci. */
+      const gk = (typeof G !== "undefined" && G.hooked && G.hooked.gat) || "ploc";
+      const puk = (typeof GATUNKI !== "undefined" && GATUNKI[gk]) ? GATUNKI[gk].pukanie : 0;
+      if (puk > 0 && ten > 0.35 && ten <= 0.94) {
+        this.buzz([Math.round(dlug * 0.8), 22, Math.round(dlug * 0.8)]);
+        this.nextAt = now + okres * 0.7;
+        clickSound(ten, true);
+        return;
+      }
+      if (ten > 0.94) {
+        /* Tuz przed zerwaniem rytm nie ma juz sensu: idzie ciagly warkot,
+           odswiezany zanim poprzedni impuls zdazy wygasnac. */
+        this.buzz(150);
+        this.nextAt = now + 110;
+      } else if (ten > 0.82) {
+        /* w strefie granicznej podwojne uderzenie, czyta sie jak alarm */
+        this.buzz([dlug, 18, Math.round(dlug * 0.7)]);
+        this.nextAt = now + okres;
+      } else {
+        this.buzz(dlug);
+        this.nextAt = now + okres;
+      }
+      clickSound(ten, true);
+    } else {
+      /* Puszczone: zylka jest luzna i haczyk sie obluzowuje.
+         Rytm przyspiesza w miare ubywania zaczepu, wiec palec czuje,
+         ze czas dziala na niekorzysc. */
+      const g = (typeof G !== 'undefined' && G.grip !== undefined) ? G.grip : 1;
+      const pilnosc = 1 - Math.max(0, Math.min(1, g));
+      const okres = 300 - 200 * pilnosc;
+      this.buzz(Math.round(6 + 14 * pilnosc));
+      this.nextAt = now + okres;
+      clickSound(0.15 + pilnosc * 0.5, false);
+    }
+  }
+};
+window.Hap = Hap;
+
+/* ---------- Dzwiek: klik kolowrotka i sygnaly progow ---------- */
+let AC = null, master = null;
+let _ostatniKlik = 0;   /* podloga czasowa dla clickSound, patrz komentarz tamze */
+function audioOn() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  AC = new C();
+  master = AC.createGain();
+  /* Start od ciszy i lagodne dojscie do poziomu -- inaczej pierwszy
+     dotyk ekranu wali w uszy pelnym tlem od zera. Gdy dzwiek jest
+     wylaczony w ustawieniach, zostajemy na ciszy: kontekst istnieje
+     (wiec przelacznik zadziala od razu, bez czekania na kolejny
+     dotyk), ale nic nie slychac. */
+  const wl = (typeof dzwiekWl === 'function') ? dzwiekWl() : true;
+  master.gain.setValueAtTime(0.0001, AC.currentTime);
+  if (wl) master.gain.linearRampToValueAtTime(0.30, AC.currentTime + 1.2);
+  master.connect(AC.destination);
+  window.__AC = AC; window.__MASTER = master;
+  if (wl && typeof ambientStart === 'function') ambientStart();
+}
+window.audioOn = audioOn;
+
+function clickSound(ten, zwijanie) {
+  if (!AC) return;
+  /* NAPRAWA "zylka sie przycina przy wciaganiu" (IX 2026, zgloszenie
+     Andrzeja). Przy wysokim naprezeniu okres rytmu schodzi do 42 ms
+     (patrz Hap.update wyzej), wiec ta funkcja tworzyla DWA nowe wezly
+     Web Audio (oscylator + wzmocnienie) ~24 razy na sekunde, kazdy do
+     posprzatania przez GC po wygasnieciu. Razem z navigator.vibrate()
+     w tym samym rytmie wypada to dokladnie w chwili, gdy gracz trzyma
+     palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej.
+     Podloga 70 ms na sam DZWIEK: ucho i tak nie rozroznia klikniec
+     gestszych niz ~14/s (zlewaja sie w warkot), a scinamy blisko polowe
+     alokacji w najgorszym momencie. Rytm HAPTYKI zostaje nietkniety --
+     palec czuje pelna gestosc, tak jak byl zaprojektowany. */
+  const teraz = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (teraz - _ostatniKlik < 70) return;
+  _ostatniKlik = teraz;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = zwijanie ? 'square' : 'triangle';
+  /* im blizej zerwania, tym wyzszy i ostrzejszy klik */
+  o.frequency.setValueAtTime(zwijanie ? 420 + ten * 900 : 180 + ten * 220, t);
+  const v = zwijanie ? 0.02 + ten * 0.09 : 0.02 + ten * 0.04;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(v, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (zwijanie ? 0.035 : 0.06));
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.09);
+}
+
+function beepHap(z) {
+  if (!AC) return;
+  const t = AC.currentTime;
+  const seq = z === -1 ? [[520, 0.10]]
+    : z === 2 ? [[700, 0.07], [880, 0.09]]
+    : z === 3 ? [[900, 0.06], [1150, 0.06], [900, 0.08]]
+    : z === 4 ? [[1250, 0.05], [1250, 0.05], [1250, 0.05], [1400, 0.12]]
+    : [[600, 0.05]];
+  seq.forEach((s, i) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(s[0], t + i * 0.09);
+    g.gain.setValueAtTime(0.0001, t + i * 0.09);
+    g.gain.exponentialRampToValueAtTime(0.07, t + i * 0.09 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + s[1]);
+    o.connect(g); g.connect(master);
+    o.start(t + i * 0.09); o.stop(t + i * 0.09 + s[1] + 0.02);
+  });
+}
+
+/* ---------- Petla haptyki ---------- */
+(function hapLoop() {
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    Hap.update(dt, now);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ============================================================
+   PEJZAZ DZWIEKOWY (IX 2026, zyczenie: "wyliftuj gre wizualnie,
+   animacje, ux, asmr... niech bedzie zew jakosci firmy gamedev").
+
+   STAN ZASTANY: gra o jeziorze byla CALKOWICIE CICHA poza dwoma
+   sygnalami z fali prostokatnej (klik kolowrotka i pik progu).
+   Fala prostokatna to najostrzejszy mozliwy przebieg -- brzmi jak
+   budzik z lat osiemdziesiatych, czyli dokladne przeciwienstwo tego,
+   o co chodzi w ASMR. Zadne studio nie wypuscilo by gry wedkarskiej
+   bez wody w tle.
+
+   DECYZJA: wszystko SYNTEZOWANE przez WebAudio, zero plikow audio.
+   Cala gra to jeden plik HTML z grafika w base64 -- doklejenie
+   nagran wody i ptakow dorzucilo by megabajty i zlamalo te
+   architekture. Szum generowany proceduralnie kosztuje zero bajtow
+   i nigdy sie nie zapetla slyszalnie, bo bufor jest dlugi i modulowany.
+
+   TRZY WARSTWY, kazda z innym zadaniem:
+     1. WODA -- ciagly podklad. Brazowy szum (nie bialy: bialy syczy,
+        brazowy szumi jak woda) przez filtr dolnoprzepustowy, ktorego
+        czestotliwosc i glosnosc powoli faluja dwoma niewspolmiernymi
+        okresami. Niewspolmiernymi celowo: przy okresach 1:2 ucho
+        wychwytuje rytm i robi sie usypiajaca pralka zamiast jeziora.
+     2. PORA DNIA -- warstwa zycia, podpieta pod istniejacy system
+        PORA (0=swit, 1=dzien, 2=zmierzch, 3=noc). Switem i o zmierzchu
+        rzadkie ptaki, w nocy swierszcze, w dzien niemal cisza (w
+        poludnie nad woda faktycznie jest najciszej). To jest ta
+        rzecz, ktora robi "studio" zamiast "efekt dzwiekowy": dzwiek
+        WIE, co sie dzieje w grze, zamiast grac w kolko to samo.
+     3. ZDARZENIA -- plusk zarzutu, klik kolowrotka, dzwonki progow.
+
+   WSZYSTKO wchodzi lagodnie (ramp 2 s), zeby wlaczenie dzwieku nie
+   bylo skokiem, i schodzi tak samo przy wylaczeniu. */
+
+let _amb = null;                 /* wezly warstwy ciaglej */
+let _ambStart = 0;
+
+/* Bufor szumu brazowego. Generowany RAZ, potem zapetlany -- 8 sekund
+   przy 44,1 kHz to ~350 tys. probek, ktore w pamieci zajmuja tyle co
+   nic, a przy naszej modulacji ucho nie slyszy szwu petli. */
+function _bufSzumu(AC2, sekund) {
+  const n = Math.floor(AC2.sampleRate * sekund);
+  const buf = AC2.createBuffer(1, n, AC2.sampleRate);
+  const d = buf.getChannelData(0);
+  /* Brazowy szum: calka z bialego, czyli kazda probka to poprzednia
+     plus mala losowa zmiana. Daje -6 dB/oktawe, czyli duzo basu i malo
+     gory -- brzmi jak woda i wiatr, nie jak syk telewizor
+
+## window.Hap
+ boxY, szer + padX * 2, boxH);
+  g.strokeStyle = 'rgba(244,230,194,.24)';
+  g.lineWidth = Math.max(1, Math.round(kk * .28));
+  g.strokeRect(boxX, boxY, szer + padX * 2, boxH);
+  ctextC(g, napis, Scene.W / 2, hintY + Math.max(1, Math.round(kk * .30)), 'rgba(4,3,9,.98)', kk);
+  ctextC(g, napis, Scene.W / 2, hintY, '#F4E6C2', kk);
+  g.restore();
+}
+}
+</script>
+<script>
+/* ============================================================
+   HAPTYKA WALKI
+   navigator.vibrate nie ma regulacji sily, przyjmuje tylko czasy.
+   Sile buduje wiec dlugosc impulsu i gestosc rytmu:
+   przy spokojnym zwijaniu rzadkie, 5 ms tykniecia jak kolowrotek,
+   przy granicy zerwania niemal ciagly warkot.
+
+   Do tego dochodzi dzwiek, bo iOS nie udostepnia wibracji w Safari
+   i bez niego gracz na iPhonie nie mialby zadnej informacji zwrotnej.
+   ============================================================ */
+
+/* Diagnostyka wibracji. Na telefonie nie ma jak otworzyc konsoli, wiec
+   panel wlacza sie doklejeniem ?hap do adresu.
+
+   navigator.vibrate wymaga trzech rzeczy naraz i kazda z nich potrafi
+   milczaco zabic haptyke:
+     1. bezpiecznego kontekstu (https, localhost albo file), bo po zwyklym
+        http metoda albo nie istnieje, albo zwraca false;
+     2. aktywacji uzytkownika, czyli wczesniejszego dotkniecia strony,
+        bo bez niej przegladarka ignoruje wywolanie bez slowa;
+     3. zgody systemu, a Android wylacza wibracje w trybie wyciszenia,
+        przy zerowej siLe wibracji i w trybie oszczedzania energii.
+   Do tego iOS Safari nie ma tego API wcale, a czesc przegladarek
+   nastawionych na prywatnosc blokuje je jako slad do odciskania palca. */
+const HapDiag = {
+  proby: 0, przyjete: 0, odrzucone: 0, ostatniWzor: null, ostatniZwrot: null,
+  odblokowane: false, odblokowanyZwrot: null,
+  raport() {
+    const n = navigator;
+    return [
+      'protokol       ' + location.protocol,
+      'bezpieczny     ' + (window.isSecureContext ? 'tak' : 'NIE'),
+      'navigator.vibrate ' + (typeof n.vibrate),
+      'aktywacja      ' + (n.userActivation ? (n.userActivation.hasBeenActive ? 'byla' : 'BRAK') : 'nieznana'),
+      'Hap.on         ' + (Hap.on ? 'tak' : 'NIE'),
+      'proba odblok.  ' + (this.odblokowane ? String(this.odblokowanyZwrot) : 'jeszcze nie'),
+      'wywolan        ' + this.proby + '  przyjete ' + this.przyjete + '  odrzucone ' + this.odrzucone,
+      'ostatni wzor   ' + JSON.stringify(this.ostatniWzor),
+      'ostatni zwrot  ' + String(this.ostatniZwrot)
+    ];
+  }
+};
+window.HapDiag = HapDiag;
+const MIX_PANEL = /[?&]mix\b/.test(location.search);
+/* Twarde przeladowanie co minute, gdyby cykl lawicy nie wystarczyl. */
+if (/[?&]reload\b/.test(location.search)) setTimeout(() => location.reload(), 60000);
+const HAP_PANEL = /[?&]hap\b/.test(location.search);
+
+const Hap = {
+  /* Sama obecnosc metody nie wystarczy: po http istnieje, a nie dziala. */
+  on: typeof navigator.vibrate === 'function' && window.isSecureContext !== false,
+  nextAt: 0,
+  lastZone: -1,
+  lastTen: 0,
+  clickAt: 0,
+
+  /* Progi ostrzegawcze. Przekroczenie w gore odpala osobny sygnal,
+     zeby gracz wiedzial, ze wlasnie wszedl w gorszy zakres. */
+  zones: [
+    { at: 0.00, name: 'spokoj' },
+    { at: 0.42, name: 'praca' },
+    { at: 0.64, name: 'uwaga' },
+    { at: 0.82, name: 'granica' },
+    { at: 0.94, name: 'pekanie' }
+  ],
+
+  zoneOf(t) {
+    let z = 0;
+    for (let i = 0; i < this.zones.length; i++) if (t >= this.zones[i].at) z = i;
+    return z;
+  },
+
+  buzz(p) {
+    if (!this.on) return false;
+    let r = false;
+    try { r = navigator.vibrate(p); } catch (e) { r = false; }
+    HapDiag.proby++; HapDiag.ostatniWzor = p; HapDiag.ostatniZwrot = r;
+    if (r) HapDiag.przyjete++; else HapDiag.odrzucone++;
+    return r;
+  },
+
+  /* Sygnal przekroczenia progu: im wyzszy zakres, tym bardziej natarczywy. */
+  crossing(z) {
+    if (z === 2) this.buzz([16, 44, 16]);
+    else if (z === 3) this.buzz([26, 32, 26, 32, 26]);
+    else if (z === 4) this.buzz([44, 24, 44, 24, 60]);
+    else if (z === 1) this.buzz(12);
+    beepHap(z);
+  },
+
+  /* Sygnal powrotu do bezpiecznego zakresu. */
+  relief() { this.buzz(10); beepHap(-1); },
+
+  update(dt, now) {
+    const walka = (typeof G !== 'undefined') && G.phase === 'fight';
+    if (!walka) { this.lastZone = -1; this.lastTen = 0; return; }
+
+    const ten = Math.max(0, Math.min(1, G.tension));
+    const z = this.zoneOf(ten);
+
+    /* przekroczenie progu w gore albo powrot w dol */
+    if (this.lastZone >= 0 && z > this.lastZone) this.crossing(z);
+    else if (this.lastZone >= 2 && z < this.lastZone && z <= 1) this.relief();
+    this.lastZone = z;
+    this.lastTen = ten;
+
+    if (now < this.nextAt) return;
+
+    if (G.holding) {
+      /* Zwijanie: rytm gestnieje i impuls sie wydluza razem z naprezeniem.
+         Krzywa jest wykladnicza, wiec dol jest naprawde delikatny,
+         a gora naprawde alarmujaca. */
+      const k = Math.pow(ten, 1.5);
+      const okres = 200 - 158 * k;          /* 200 ms w spokoju, 42 ms przy granicy */
+      const dlug = Math.round(4 + 30 * Math.pow(ten, 1.7));
+      /* Okon puka twardo i krotko, wiec jego rytm jest gestszy od ploci. */
+      const gk = (typeof G !== "undefined" && G.hooked && G.hooked.gat) || "ploc";
+      const puk = (typeof GATUNKI !== "undefined" && GATUNKI[gk]) ? GATUNKI[gk].pukanie : 0;
+      if (puk > 0 && ten > 0.35 && ten <= 0.94) {
+        this.buzz([Math.round(dlug * 0.8), 22, Math.round(dlug * 0.8)]);
+        this.nextAt = now + okres * 0.7;
+        clickSound(ten, true);
+        return;
+      }
+      if (ten > 0.94) {
+        /* Tuz przed zerwaniem rytm nie ma juz sensu: idzie ciagly warkot,
+           odswiezany zanim poprzedni impuls zdazy wygasnac. */
+        this.buzz(150);
+        this.nextAt = now + 110;
+      } else if (ten > 0.82) {
+        /* w strefie granicznej podwojne uderzenie, czyta sie jak alarm */
+        this.buzz([dlug, 18, Math.round(dlug * 0.7)]);
+        this.nextAt = now + okres;
+      } else {
+        this.buzz(dlug);
+        this.nextAt = now + okres;
+      }
+      clickSound(ten, true);
+    } else {
+      /* Puszczone: zylka jest luzna i haczyk sie obluzowuje.
+         Rytm przyspiesza w miare ubywania zaczepu, wiec palec czuje,
+         ze czas dziala na niekorzysc. */
+      const g = (typeof G !== 'undefined' && G.grip !== undefined) ? G.grip : 1;
+      const pilnosc = 1 - Math.max(0, Math.min(1, g));
+      const okres = 300 - 200 * pilnosc;
+      this.buzz(Math.round(6 + 14 * pilnosc));
+      this.nextAt = now + okres;
+      clickSound(0.15 + pilnosc * 0.5, false);
+    }
+  }
+};
+window.Hap = Hap;
+
+/* ---------- Dzwiek: klik kolowrotka i sygnaly progow ---------- */
+let AC = null, master = null;
+let _ostatniKlik = 0;   /* podloga czasowa dla clickSound, patrz komentarz tamze */
+function audioOn() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  AC = new C();
+  master = AC.createGain();
+  /* Start od ciszy i lagodne dojscie do poziomu -- inaczej pierwszy
+     dotyk ekranu wali w uszy pelnym tlem od zera. Gdy dzwiek jest
+     wylaczony w ustawieniach, zostajemy na ciszy: kontekst istnieje
+     (wiec przelacznik zadziala od razu, bez czekania na kolejny
+     dotyk), ale nic nie slychac. */
+  const wl = (typeof dzwiekWl === 'function') ? dzwiekWl() : true;
+  master.gain.setValueAtTime(0.0001, AC.currentTime);
+  if (wl) master.gain.linearRampToValueAtTime(0.30, AC.currentTime + 1.2);
+  master.connect(AC.destination);
+  window.__AC = AC; window.__MASTER = master;
+  if (wl && typeof ambientStart === 'function') ambientStart();
+}
+window.audioOn = audioOn;
+
+function clickSound(ten, zwijanie) {
+  if (!AC) return;
+  /* NAPRAWA "zylka sie przycina przy wciaganiu" (IX 2026, zgloszenie
+     Andrzeja). Przy wysokim naprezeniu okres rytmu schodzi do 42 ms
+     (patrz Hap.update wyzej), wiec ta funkcja tworzyla DWA nowe wezly
+     Web Audio (oscylator + wzmocnienie) ~24 razy na sekunde, kazdy do
+     posprzatania przez GC po wygasnieciu. Razem z navigator.vibrate()
+     w tym samym rytmie wypada to dokladnie w chwili, gdy gracz trzyma
+     palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej.
+     Podloga 70 ms na sam DZWIEK: ucho i tak nie rozroznia klikniec
+     gestszych niz ~14/s (zlewaja sie w warkot), a scinamy blisko polowe
+     alokacji w najgorszym momencie. Rytm HAPTYKI zostaje nietkniety --
+     palec czuje pelna gestosc, tak jak byl zaprojektowany. */
+  const teraz = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (teraz - _ostatniKlik < 70) return;
+  _ostatniKlik = teraz;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = zwijanie ? 'square' : 'triangle';
+  /* im blizej zerwania, tym wyzszy i ostrzejszy klik */
+  o.frequency.setValueAtTime(zwijanie ? 420 + ten * 900 : 180 + ten * 220, t);
+  const v = zwijanie ? 0.02 + ten * 0.09 : 0.02 + ten * 0.04;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(v, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (zwijanie ? 0.035 : 0.06));
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.09);
+}
+
+function beepHap(z) {
+  if (!AC) return;
+  const t = AC.currentTime;
+  const seq = z === -1 ? [[520, 0.10]]
+    : z === 2 ? [[700, 0.07], [880, 0.09]]
+    : z === 3 ? [[900, 0.06], [1150, 0.06], [900, 0.08]]
+    : z === 4 ? [[1250, 0.05], [1250, 0.05], [1250, 0.05], [1400, 0.12]]
+    : [[600, 0.05]];
+  seq.forEach((s, i) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(s[0], t + i * 0.09);
+    g.gain.setValueAtTime(0.0001, t + i * 0.09);
+    g.gain.exponentialRampToValueAtTime(0.07, t + i * 0.09 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + s[1]);
+    o.connect(g); g.connect(master);
+    o.start(t + i * 0.09); o.stop(t + i * 0.09 + s[1] + 0.02);
+  });
+}
+
+/* ---------- Petla haptyki ---------- */
+(function hapLoop() {
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    Hap.update(dt, now);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ============================================================
+   PEJZAZ DZWIEKOWY (IX 2026, zyczenie: "wyliftuj gre wizualnie,
+   animacje, ux, asmr... niech bedzie zew jakosci firmy gamedev").
+
+   STAN ZASTANY: gra o jeziorze byla CALKOWICIE CICHA poza dwoma
+   sygnalami z fali prostokatnej (klik kolowrotka i pik progu).
+   Fala prostokatna to najostrzejszy mozliwy przebieg -- brzmi jak
+   budzik z lat osiemdziesiatych, czyli dokladne przeciwienstwo tego,
+   o co chodzi w ASMR. Zadne studio nie wypuscilo by gry wedkarskiej
+   bez wody w tle.
+
+   DECYZJA: wszystko SYNTEZOWANE przez WebAudio, zero plikow audio.
+   Cala gra to jeden plik HTML z grafika w base64 -- doklejenie
+   nagran wody i ptakow dorzucilo by megabajty i zlamalo te
+   architekture. Szum generowany proceduralnie kosztuje zero bajtow
+   i nigdy sie nie zapetla slyszalnie, bo bufor jest dlugi i modulowany.
+
+   TRZY WARSTWY, kazda z innym zadaniem:
+     1. WODA -- ciagly podklad. Brazowy szum (nie bialy: bialy syczy,
+        brazowy szumi jak woda) przez filtr dolnoprzepustowy, ktorego
+        czestotliwosc i glosnosc powoli faluja dwoma niewspolmiernymi
+        okresami. Niewspolmiernymi celowo: przy okresach 1:2 ucho
+        wychwytuje rytm i robi sie usypiajaca pralka zamiast jeziora.
+     2. PORA DNIA -- warstwa zycia, podpieta pod istniejacy system
+        PORA (0=swit, 1=dzien, 2=zmierzch, 3=noc). Switem i o zmierzchu
+        rzadkie ptaki, w nocy swierszcze, w dzien niemal cisza (w
+        poludnie nad woda faktycznie jest najciszej). To jest ta
+        rzecz, ktora robi "studio" zamiast "efekt dzwiekowy": dzwiek
+        WIE, co sie dzieje w grze, zamiast grac w kolko to samo.
+     3. ZDARZENIA -- plusk zarzutu, klik kolowrotka, dzwonki progow.
+
+   WSZYSTKO wchodzi lagodnie (ramp 2 s), zeby wlaczenie dzwieku nie
+   bylo skokiem, i schodzi tak samo przy wylaczeniu. */
+
+let _amb = null;                 /* wezly warstwy ciaglej */
+let _ambStart = 0;
+
+/* Bufor szumu brazowego. Generowany RAZ, potem zapetlany -- 8 sekund
+   przy 44,1 kHz to ~350 tys. probek, ktore w pamieci zajmuja tyle co
+   nic, a przy naszej modulacji ucho nie slyszy szwu petli. */
+function _bufSzumu(AC2, sekund) {
+  const n = Math.floor(AC2.sampleRate * sekund
+
+## update(dt, now)
+palca. */
+const HapDiag = {
+  proby: 0, przyjete: 0, odrzucone: 0, ostatniWzor: null, ostatniZwrot: null,
+  odblokowane: false, odblokowanyZwrot: null,
+  raport() {
+    const n = navigator;
+    return [
+      'protokol       ' + location.protocol,
+      'bezpieczny     ' + (window.isSecureContext ? 'tak' : 'NIE'),
+      'navigator.vibrate ' + (typeof n.vibrate),
+      'aktywacja      ' + (n.userActivation ? (n.userActivation.hasBeenActive ? 'byla' : 'BRAK') : 'nieznana'),
+      'Hap.on         ' + (Hap.on ? 'tak' : 'NIE'),
+      'proba odblok.  ' + (this.odblokowane ? String(this.odblokowanyZwrot) : 'jeszcze nie'),
+      'wywolan        ' + this.proby + '  przyjete ' + this.przyjete + '  odrzucone ' + this.odrzucone,
+      'ostatni wzor   ' + JSON.stringify(this.ostatniWzor),
+      'ostatni zwrot  ' + String(this.ostatniZwrot)
+    ];
+  }
+};
+window.HapDiag = HapDiag;
+const MIX_PANEL = /[?&]mix\b/.test(location.search);
+/* Twarde przeladowanie co minute, gdyby cykl lawicy nie wystarczyl. */
+if (/[?&]reload\b/.test(location.search)) setTimeout(() => location.reload(), 60000);
+const HAP_PANEL = /[?&]hap\b/.test(location.search);
+
+const Hap = {
+  /* Sama obecnosc metody nie wystarczy: po http istnieje, a nie dziala. */
+  on: typeof navigator.vibrate === 'function' && window.isSecureContext !== false,
+  nextAt: 0,
+  lastZone: -1,
+  lastTen: 0,
+  clickAt: 0,
+
+  /* Progi ostrzegawcze. Przekroczenie w gore odpala osobny sygnal,
+     zeby gracz wiedzial, ze wlasnie wszedl w gorszy zakres. */
+  zones: [
+    { at: 0.00, name: 'spokoj' },
+    { at: 0.42, name: 'praca' },
+    { at: 0.64, name: 'uwaga' },
+    { at: 0.82, name: 'granica' },
+    { at: 0.94, name: 'pekanie' }
+  ],
+
+  zoneOf(t) {
+    let z = 0;
+    for (let i = 0; i < this.zones.length; i++) if (t >= this.zones[i].at) z = i;
+    return z;
+  },
+
+  buzz(p) {
+    if (!this.on) return false;
+    let r = false;
+    try { r = navigator.vibrate(p); } catch (e) { r = false; }
+    HapDiag.proby++; HapDiag.ostatniWzor = p; HapDiag.ostatniZwrot = r;
+    if (r) HapDiag.przyjete++; else HapDiag.odrzucone++;
+    return r;
+  },
+
+  /* Sygnal przekroczenia progu: im wyzszy zakres, tym bardziej natarczywy. */
+  crossing(z) {
+    if (z === 2) this.buzz([16, 44, 16]);
+    else if (z === 3) this.buzz([26, 32, 26, 32, 26]);
+    else if (z === 4) this.buzz([44, 24, 44, 24, 60]);
+    else if (z === 1) this.buzz(12);
+    beepHap(z);
+  },
+
+  /* Sygnal powrotu do bezpiecznego zakresu. */
+  relief() { this.buzz(10); beepHap(-1); },
+
+  update(dt, now) {
+    const walka = (typeof G !== 'undefined') && G.phase === 'fight';
+    if (!walka) { this.lastZone = -1; this.lastTen = 0; return; }
+
+    const ten = Math.max(0, Math.min(1, G.tension));
+    const z = this.zoneOf(ten);
+
+    /* przekroczenie progu w gore albo powrot w dol */
+    if (this.lastZone >= 0 && z > this.lastZone) this.crossing(z);
+    else if (this.lastZone >= 2 && z < this.lastZone && z <= 1) this.relief();
+    this.lastZone = z;
+    this.lastTen = ten;
+
+    if (now < this.nextAt) return;
+
+    if (G.holding) {
+      /* Zwijanie: rytm gestnieje i impuls sie wydluza razem z naprezeniem.
+         Krzywa jest wykladnicza, wiec dol jest naprawde delikatny,
+         a gora naprawde alarmujaca. */
+      const k = Math.pow(ten, 1.5);
+      const okres = 200 - 158 * k;          /* 200 ms w spokoju, 42 ms przy granicy */
+      const dlug = Math.round(4 + 30 * Math.pow(ten, 1.7));
+      /* Okon puka twardo i krotko, wiec jego rytm jest gestszy od ploci. */
+      const gk = (typeof G !== "undefined" && G.hooked && G.hooked.gat) || "ploc";
+      const puk = (typeof GATUNKI !== "undefined" && GATUNKI[gk]) ? GATUNKI[gk].pukanie : 0;
+      if (puk > 0 && ten > 0.35 && ten <= 0.94) {
+        this.buzz([Math.round(dlug * 0.8), 22, Math.round(dlug * 0.8)]);
+        this.nextAt = now + okres * 0.7;
+        clickSound(ten, true);
+        return;
+      }
+      if (ten > 0.94) {
+        /* Tuz przed zerwaniem rytm nie ma juz sensu: idzie ciagly warkot,
+           odswiezany zanim poprzedni impuls zdazy wygasnac. */
+        this.buzz(150);
+        this.nextAt = now + 110;
+      } else if (ten > 0.82) {
+        /* w strefie granicznej podwojne uderzenie, czyta sie jak alarm */
+        this.buzz([dlug, 18, Math.round(dlug * 0.7)]);
+        this.nextAt = now + okres;
+      } else {
+        this.buzz(dlug);
+        this.nextAt = now + okres;
+      }
+      clickSound(ten, true);
+    } else {
+      /* Puszczone: zylka jest luzna i haczyk sie obluzowuje.
+         Rytm przyspiesza w miare ubywania zaczepu, wiec palec czuje,
+         ze czas dziala na niekorzysc. */
+      const g = (typeof G !== 'undefined' && G.grip !== undefined) ? G.grip : 1;
+      const pilnosc = 1 - Math.max(0, Math.min(1, g));
+      const okres = 300 - 200 * pilnosc;
+      this.buzz(Math.round(6 + 14 * pilnosc));
+      this.nextAt = now + okres;
+      clickSound(0.15 + pilnosc * 0.5, false);
+    }
+  }
+};
+window.Hap = Hap;
+
+/* ---------- Dzwiek: klik kolowrotka i sygnaly progow ---------- */
+let AC = null, master = null;
+let _ostatniKlik = 0;   /* podloga czasowa dla clickSound, patrz komentarz tamze */
+function audioOn() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  AC = new C();
+  master = AC.createGain();
+  /* Start od ciszy i lagodne dojscie do poziomu -- inaczej pierwszy
+     dotyk ekranu wali w uszy pelnym tlem od zera. Gdy dzwiek jest
+     wylaczony w ustawieniach, zostajemy na ciszy: kontekst istnieje
+     (wiec przelacznik zadziala od razu, bez czekania na kolejny
+     dotyk), ale nic nie slychac. */
+  const wl = (typeof dzwiekWl === 'function') ? dzwiekWl() : true;
+  master.gain.setValueAtTime(0.0001, AC.currentTime);
+  if (wl) master.gain.linearRampToValueAtTime(0.30, AC.currentTime + 1.2);
+  master.connect(AC.destination);
+  window.__AC = AC; window.__MASTER = master;
+  if (wl && typeof ambientStart === 'function') ambientStart();
+}
+window.audioOn = audioOn;
+
+function clickSound(ten, zwijanie) {
+  if (!AC) return;
+  /* NAPRAWA "zylka sie przycina przy wciaganiu" (IX 2026, zgloszenie
+     Andrzeja). Przy wysokim naprezeniu okres rytmu schodzi do 42 ms
+     (patrz Hap.update wyzej), wiec ta funkcja tworzyla DWA nowe wezly
+     Web Audio (oscylator + wzmocnienie) ~24 razy na sekunde, kazdy do
+     posprzatania przez GC po wygasnieciu. Razem z navigator.vibrate()
+     w tym samym rytmie wypada to dokladnie w chwili, gdy gracz trzyma
+     palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej.
+     Podloga 70 ms na sam DZWIEK: ucho i tak nie rozroznia klikniec
+     gestszych niz ~14/s (zlewaja sie w warkot), a scinamy blisko polowe
+     alokacji w najgorszym momencie. Rytm HAPTYKI zostaje nietkniety --
+     palec czuje pelna gestosc, tak jak byl zaprojektowany. */
+  const teraz = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (teraz - _ostatniKlik < 70) return;
+  _ostatniKlik = teraz;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = zwijanie ? 'square' : 'triangle';
+  /* im blizej zerwania, tym wyzszy i ostrzejszy klik */
+  o.frequency.setValueAtTime(zwijanie ? 420 + ten * 900 : 180 + ten * 220, t);
+  const v = zwijanie ? 0.02 + ten * 0.09 : 0.02 + ten * 0.04;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(v, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (zwijanie ? 0.035 : 0.06));
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.09);
+}
+
+function beepHap(z) {
+  if (!AC) return;
+  const t = AC.currentTime;
+  const seq = z === -1 ? [[520, 0.10]]
+    : z === 2 ? [[700, 0.07], [880, 0.09]]
+    : z === 3 ? [[900, 0.06], [1150, 0.06], [900, 0.08]]
+    : z === 4 ? [[1250, 0.05], [1250, 0.05], [1250, 0.05], [1400, 0.12]]
+    : [[600, 0.05]];
+  seq.forEach((s, i) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(s[0], t + i * 0.09);
+    g.gain.setValueAtTime(0.0001, t + i * 0.09);
+    g.gain.exponentialRampToValueAtTime(0.07, t + i * 0.09 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + s[1]);
+    o.connect(g); g.connect(master);
+    o.start(t + i * 0.09); o.stop(t + i * 0.09 + s[1] + 0.02);
+  });
+}
+
+/* ---------- Petla haptyki ---------- */
+(function hapLoop() {
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    Hap.update(dt, now);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ============================================================
+   PEJZAZ DZWIEKOWY (IX 2026, zyczenie: "wyliftuj gre wizualnie,
+   animacje, ux, asmr... niech bedzie zew jakosci firmy gamedev").
+
+   STAN ZASTANY: gra o jeziorze byla CALKOWICIE CICHA poza dwoma
+   sygnalami z fali prostokatnej (klik kolowrotka i pik progu).
+   Fala prostokatna to najostrzejszy mozliwy przebieg -- brzmi jak
+   budzik z lat osiemdziesiatych, czyli dokladne przeciwienstwo tego,
+   o co chodzi w ASMR. Zadne studio nie wypuscilo by gry wedkarskiej
+   bez wody w tle.
+
+   DECYZJA: wszystko SYNTEZOWANE przez WebAudio, zero plikow audio.
+   Cala gra to jeden plik HTML z grafika w base64 -- doklejenie
+   nagran wody i ptakow dorzucilo by megabajty i zlamalo te
+   architekture. Szum generowany proceduralnie kosztuje zero bajtow
+   i nigdy sie nie zapetla slyszalnie, bo bufor jest dlugi i modulowany.
+
+   TRZY WARSTWY, kazda z innym zadaniem:
+     1. WODA -- ciagly podklad. Brazowy szum (nie bialy: bialy syczy,
+        brazowy szumi jak woda) przez filtr dolnoprzepustowy, ktorego
+        czestotliwosc i glosnosc powoli faluja dwoma niewspolmiernymi
+        okresami. Niewspolmiernymi celowo: przy okresach 1:2 ucho
+        wychwytuje rytm i robi sie usypiajaca pralka zamiast jeziora.
+     2. PORA DNIA -- warstwa zycia, podpieta pod istniejacy system
+        PORA (0=swit, 1=dzien, 2=zmierzch, 3=noc). Switem i o zmierzchu
+        rzadkie ptaki, w nocy swierszcze, w dzien niemal cisza (w
+        poludnie nad woda faktycznie jest najciszej). To jest ta
+        rzecz, ktora robi "studio" zamiast "efekt dzwiekowy": dzwiek
+        WIE, co sie dzieje w grze, zamiast grac w kolko to samo.
+     3. ZDARZENIA -- plusk zarzutu, klik kolowrotka, dzwonki progow.
+
+   WSZYSTKO wchodzi lagodnie (ramp 2 s), zeby wlaczenie dzwieku nie
+   bylo skokiem, i schodzi tak samo przy wylaczeniu. */
+
+let _amb = null;                 /* wezly warstwy ciaglej */
+let _ambStart = 0;
+
+/* Bufor szumu brazowego. Generowany RAZ, potem zapetlany -- 8 sekund
+   przy 44,1 kHz to ~350 tys. probek, ktore w pamieci zajmuja tyle co
+   nic, a przy naszej modulacji ucho nie slyszy szwu petli. */
+function _bufSzumu(AC2, sekund) {
+  const n = Math.floor(AC2.sampleRate * sekund);
+  const buf = AC2.createBuffer(1, n, AC2.sampleRate);
+  const d = buf.getChannelData(0);
+  /* Brazowy szum: calka z bialego, czyli kazda probka to poprzednia
+     plus mala losowa zmiana. Daje -6 dB/oktawe, czyli duzo basu i malo
+     gory -- brzmi jak woda i wiatr, nie jak syk telewizora. */
+  let ost = 0;
+  for (let i = 0; i < n; i++) {
+    const bialy = Math.random() * 2 - 1;
+    ost = (ost + 0.02 * bialy) / 1.02;
+    d[i] = ost * 3.5;
+  }
+  return buf;
+}
+
+function _lfo(AC2, okres, glebokosc, srodek, cel) {
+  /* Powolna sinusoida sterujaca parametrem. Okres w sekundach. */
+  const o = AC2.createOscillator(), g = AC2.createGain();
+  o.type = 'sine';
+  o.frequency.value = 1 / okres;
+  g.gain.value = glebokosc;
+  o.connect(g); g.connect(cel);
+  cel.value = srodek;
+  o.start();
+  return o;
+}
+
+function ambientStart() {
+  if (!AC || _amb) return;
+  const t = AC.currentTime;
+  const wyj = AC.createGain();
+  wyj.gain.setValueAtTime(0.0001, t);
+  wyj.gain.linearRampToValueAtTime(1, t + 2.0);   /* lagodne wejscie */
+  wyj.connect(master);
+
+  /* --- warstwa 1: woda --- */
+  const zrodlo = AC.createBufferSource();
+  zrodlo.buffer = _bufSzumu(AC, 8);
+  zrodlo.loop = true;
+  const filtr = AC.createBiquadFilter();
+  filtr.type = 'lowpass';
+  filtr.Q.value = 0.7;
+  const gWody = AC.createGain();
+  gWody.gain.value = 0.5;
+  zrodlo.connect(filtr); filtr.connect(gWody); gWody.connect(wyj);
+  /* Okresy 11 s i 7 s -- liczby pierwsze, wiec wzor powtarza sie
+     dopiero co 77 s i ucho nie znajduje rytmu. */
+  const lfoF = _lfo(AC, 11, 220, 420, filtr.frequency);
+  const lfoG = _lfo(AC, 7, 0.16, 0.5, gWody.gain);
+  zrodlo.start(t);
+
+  _
