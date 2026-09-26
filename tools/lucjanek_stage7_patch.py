@@ -119,3 +119,5 @@ PATH.write_text(s,encoding="utf-8")
 print("Applied Lucjan Stage 7 game integration.")
 
 # run-stage7
+
+# validate-stage7
