@@ -11,7 +11,9 @@
   let lastEventId = null;
   let lastCard = null;
   let rewardState = null;
+  let eventState = null;
   let finalizeBusy = false;
+  let lifecycleBusy = false;
 
   const fmt = n => String(Math.max(0, Number(n) || 0))
     .replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
@@ -241,6 +243,21 @@
     ensureContributionControls(card, event);
   }
 
+  async function refreshLifecycle() {
+    if (lifecycleBusy || document.hidden) return;
+    lifecycleBusy = true;
+    try {
+      const events = await callRpc('community_public_event', { p_slug: SLUG });
+      eventState = Array.isArray(events) ? events[0] || null : null;
+      if (eventState) await refreshReward(eventState);
+      else rewardState = null;
+    } catch (err) {
+      console.warn('[QRyby][Odnowa] lifecycle refresh failed', err);
+    } finally {
+      lifecycleBusy = false;
+    }
+  }
+
   async function refresh() {
     const card = document.querySelector('#panelTresc .odn-card');
     if (!card || busy || document.hidden) return;
@@ -248,6 +265,7 @@
     try {
       const events = await callRpc('community_public_event', { p_slug: SLUG });
       const event = Array.isArray(events) ? events[0] : null;
+      eventState = event;
       if (!event) {
         const note = card.querySelector('.odn-stage-note');
         if (note) note.textContent = 'EVENT JESZCZE NIEAKTYWNY · PODGLĄD GOTOWY';
@@ -284,16 +302,19 @@
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refresh();
+    if (!document.hidden) { refreshLifecycle(); refresh(); }
   });
-  window.addEventListener('focus', refresh);
+  window.addEventListener('focus', () => { refreshLifecycle(); refresh(); });
+  setInterval(refreshLifecycle, REFRESH_MS);
   setInterval(refresh, REFRESH_MS);
+  setTimeout(refreshLifecycle, 0);
   setTimeout(refresh, 0);
 
   window.QRYBY_COMMUNITY_EKO = Object.freeze({
     aktywna() { return !!(rewardState && rewardState.state === 'executing'); },
     pokolenia() { return communityGeneration(); },
-    reward() { return rewardState; }
+    reward() { return rewardState; },
+    event() { return eventState; }
   });
 
   window.QRYBY_COMMUNITY_READ = Object.freeze({
