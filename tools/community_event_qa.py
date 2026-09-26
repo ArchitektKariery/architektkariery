@@ -44,7 +44,12 @@ required_migrations = [
 for name in required_migrations:
     require((root / "supabase/migrations" / name).exists(), f"missing migration: {name}")
 
-require("LIVE_FUNDING: OFF" in doc, "QA must not silently launch funding")
+if "STATUS: LIVE" in doc:
+    require("LIVE_FUNDING: ON" in doc, "LIVE status requires LIVE_FUNDING: ON")
+    require("## LIVE START" in doc, "LIVE status requires recorded launch section")
+else:
+    require("LIVE_FUNDING: OFF" in doc, "pre-launch status requires LIVE_FUNDING: OFF")
+
 require("wpłaty przepadają" in doc.lower(), "no-refund product rule missing from docs")
 
 if errors:
@@ -54,4 +59,7 @@ if errors:
     sys.exit(1)
 
 print("COMMUNITY EVENT QA OK")
-print("Lucjan remains launch-gated; no launch is performed by this test.")
+if "STATUS: LIVE" in doc:
+    print("Lucjan LIVE configuration validated.")
+else:
+    print("Lucjan pre-launch configuration validated.")
