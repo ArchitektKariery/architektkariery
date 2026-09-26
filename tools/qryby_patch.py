@@ -1,5 +1,7 @@
 from pathlib import Path
 
+# Stage 4 guarded autopatch trigger.
+
 PATH = Path("qryby.html")
 s = PATH.read_text(encoding="utf-8")
 
