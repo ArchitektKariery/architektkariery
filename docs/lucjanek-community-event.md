@@ -1,6 +1,6 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: STAGE_2_DONE
+STATUS: STAGE_4_BACKEND_READY
 LIVE_FUNDING: OFF
 
 ## Parametry
@@ -12,8 +12,8 @@ LIVE_FUNDING: OFF
 ## Etapy
 - [x] Stage 1 — zakładka ODNOWA i bezpieczny mock UI
 - [x] Stage 2 — pixel-art Lucjanka, inkubator/ikra, animacje 0/25/50/75/100, stan URATOWANE
-- [ ] Stage 3 — Supabase: community_events, community_contributions, rewards + RLS
-- [ ] Stage 4 — odczyt live, timer, historia wpłat
+- [x] Stage 3 — Supabase: community_events, community_contributions, rewards + RLS
+- [~] Stage 4 — backend read API gotowy; frontendowe podłączenie do karty pozostaje
 - [ ] Stage 5 — atomowe wpłaty
 - [ ] Stage 6 — sukces i blokada
 - [ ] Stage 7 — EKO / tarło
