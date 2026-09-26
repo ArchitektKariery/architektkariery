@@ -27,7 +27,7 @@ for marker in [
     "community_public_reward",
     "community_finalize_reward",
     "event.state === 'failed'",
-    "WPŁATY PRZEPADŁY",
+    "Wpłaty nie podlegają zwrotowi.",
 ]:
     require(marker in live, f"live client missing marker: {marker}")
 
