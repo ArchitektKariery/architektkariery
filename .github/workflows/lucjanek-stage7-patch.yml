@@ -24,6 +24,7 @@ jobs:
         run: python3 tools/lucjanek_stage7_patch.py
       - name: Validate
         run: |
+          node --check src/lucjanek/community-restoration-live.js
           git diff --check
           python3 - <<'PY'
           from pathlib import Path
