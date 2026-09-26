@@ -19,3 +19,5 @@ for token in ["const Hap =", "window.Hap", "update(dt, now)"]:
     if i>=0: out.append("\n## "+token+"\n"+s[max(0,i-2500):min(len(s),i+10000)])
 Path("docs/qryby-performance-extra.txt").write_text("\n".join(out),encoding="utf-8")
 print("extra written")
+
+# trigger-extra
