@@ -1,0 +1,41 @@
+name: QRyby server authority v2
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/server_authority_v1.py'
+      - '.github/workflows/server-authority-v2.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/server_authority_v1.py
+      - name: Validate
+        run: |
+          git diff --check
+          grep -F "2026-09-26-server-authority-v1" qryby.html
+          grep -F "DLA ZALOGOWANEGO KONTA SERWER JEST ZRODLEM PRAWDY" qryby.html
+          grep -F "async function zapewnijAutorytetSerwera()" qryby.html
+          grep -F "Pierwszy ruch po starcie/logowaniu jest" qryby.html
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('qryby.html').read_text(encoding='utf-8')
+          assert "DYSK JEST ZRODLEM PRAWDY" not in s
+          assert s.count("async function zapewnijAutorytetSerwera()") == 1
+          assert s.count("window.QRYBY_BUILD = '2026-09-26-server-authority-v1';") == 1
+          assert s.rstrip().endswith("</html>")
+          print("server authority validation OK")
+          PY
+      - name: Commit
+        run: |
+          if git diff --quiet -- qryby.html; then exit 0; fi
+          git config user.name "qryby-server-authority"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: make server authoritative for account saves [skip ci]"
+          git push origin HEAD:main
