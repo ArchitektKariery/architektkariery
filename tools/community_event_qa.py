@@ -51,6 +51,9 @@ else:
     require("LIVE_FUNDING: OFF" in doc, "pre-launch status requires LIVE_FUNDING: OFF")
 
 require("wpłaty przepadają" in doc.lower(), "no-refund product rule missing from docs")
+require("observer.observe(panelRoot" in live, "Lucjan observer must be scoped to panelRoot")
+require("observer.observe(document.documentElement" not in live, "Lucjan observer must not watch the whole document")
+require("setInterval(refresh, REFRESH_MS)" not in live, "Lucjan UI polling must not run globally during gameplay")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")
