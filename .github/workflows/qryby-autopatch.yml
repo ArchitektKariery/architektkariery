@@ -1,0 +1,59 @@
+name: QRyby autopatch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/qryby_patch.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qryby-autopatch
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply guarded patch
+        run: python3 tools/qryby_patch.py
+
+      - name: Validate diff
+        run: |
+          git diff --check
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('qryby.html').read_text(encoding='utf-8')
+          required=[
+            "communityRestoration: true",
+            "function odnowaKafel()",
+            "zak('odnowa', 'ODNOWA')",
+            "dzial === 'odnowa'",
+            "ODNOWA GATUNKOW — etap 1"
+          ]
+          missing=[x for x in required if x not in s]
+          if missing:
+              raise SystemExit("Missing stage-1 markers: "+", ".join(missing))
+          if not s.rstrip().endswith('</html>'):
+              raise SystemExit('qryby.html lost closing </html>')
+          print('Stage 1 validation OK')
+          PY
+
+      - name: Commit patched game
+        run: |
+          if git diff --quiet -- qryby.html; then
+            echo "No qryby.html change needed."
+            exit 0
+          fi
+          git config user.name "qryby-autopatch"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: etap 1 odnowy Lucjanka — podgląd Straganu [skip ci]"
+          git push origin HEAD:main
