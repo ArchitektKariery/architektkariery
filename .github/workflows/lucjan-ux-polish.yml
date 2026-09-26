@@ -1,0 +1,27 @@
+name: Lucjan UX polish
+on:
+  push:
+    branches: [main]
+    paths: ['tools/lucjan_ux_patch.py']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/lucjan_ux_patch.py
+      - run: |
+          node --check src/lucjanek/community-restoration-live.js
+          git diff --check
+          grep -F 'community-restoration-live.js?v=20260926-live4' qryby.html
+          grep -F 'Po osiągnięciu celu ikra Lucjanka zostanie wpuszczona do jeziora.' qryby.html
+      - run: |
+          if git diff --quiet -- qryby.html; then exit 0; fi
+          git config user.name "qryby-ux"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: polish Lucjan player-facing UX [skip ci]"
+          git push origin HEAD:main
