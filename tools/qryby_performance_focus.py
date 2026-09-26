@@ -28,3 +28,5 @@ for t in [7842,21218,22642,25619]:
 
 Path("docs/qryby-performance-focus.txt").write_text("\n".join(out),encoding="utf-8")
 print("focus written")
+
+# trigger-focus
