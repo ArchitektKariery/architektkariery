@@ -1,0 +1,28 @@
+name: QRyby community event QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qryby.html'
+      - 'src/lucjanek/**'
+      - 'supabase/migrations/*community_restoration*'
+      - 'docs/lucjanek-community-event.md'
+      - 'tools/community_event_qa.py'
+      - '.github/workflows/community-event-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Lucjan client syntax
+        run: node --check src/lucjanek/community-restoration-live.js
+      - name: Run community-event regression checks
+        run: python3 tools/community_event_qa.py
+      - name: Check patch cleanliness
+        run: git diff --check
