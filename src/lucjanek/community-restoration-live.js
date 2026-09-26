@@ -10,6 +10,8 @@
   let busy = false;
   let lastEventId = null;
   let lastCard = null;
+  let rewardState = null;
+  let finalizeBusy = false;
 
   const fmt = n => String(Math.max(0, Number(n) || 0))
     .replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
@@ -128,6 +130,87 @@
     }
   }
 
+  const COMMUNITY_STAGES = [
+    { name: 'ikra', ms: 90000, survive: 0.80 },
+    { name: 'ikra zapłodniona', ms: 120000, survive: 0.62 },
+    { name: 'wylęg', ms: 150000, survive: 0.45 },
+    { name: 'narybek', ms: 240000, survive: 0.055 }
+  ];
+
+  function communityGeneration() {
+    const r = rewardState;
+    if (!r || r.state !== 'executing' || !r.payload) return [];
+    const p = r.payload;
+    const started = new Date(p.started_at).getTime();
+    if (!Number.isFinite(started)) return [];
+    const elapsed = Math.max(0, Date.now() - started);
+    const mn = Math.max(0, Number(p.scenario_multiplier) || 1);
+    let n = Math.max(0, Math.trunc(Number(p.eggs) || 0));
+    let used = 0;
+    let idx = 0;
+    for (; idx < COMMUNITY_STAGES.length; idx++) {
+      const st = COMMUNITY_STAGES[idx];
+      if (elapsed < used + st.ms) {
+        return [{
+          gat: 'lucjan_czerwony',
+          etap: st.name,
+          etapNr: idx + 1,
+          etapow: COMMUNITY_STAGES.length,
+          postep: Math.max(0, Math.min(1, (elapsed - used) / st.ms)),
+          n,
+          scen: p.scenario_id || 'zwykle',
+          scenTxt: p.scenario_text || 'zwykły przebieg',
+          zly: mn < 0.9,
+          community: true
+        }];
+      }
+      n = Math.floor(n * Math.min(0.95, st.survive * mn));
+      used += st.ms;
+      if (n <= 0) break;
+    }
+    return [{
+      gat: 'lucjan_czerwony',
+      etap: 'finalizacja',
+      etapNr: COMMUNITY_STAGES.length,
+      etapow: COMMUNITY_STAGES.length,
+      postep: 1,
+      n: Math.max(0, n),
+      scen: p.scenario_id || 'zwykle',
+      scenTxt: p.scenario_text || 'zwykły przebieg',
+      zly: mn < 0.9,
+      community: true
+    }];
+  }
+
+  async function refreshReward(event) {
+    if (!event || (event.state !== 'funded' && event.state !== 'completed')) {
+      rewardState = null;
+      return;
+    }
+    const rows = await callRpc('community_public_reward', { p_slug: SLUG });
+    rewardState = Array.isArray(rows) ? rows[0] || null : null;
+    if (!rewardState || rewardState.state !== 'executing' || !rewardState.payload) return;
+
+    const p = rewardState.payload;
+    const started = new Date(p.started_at).getTime();
+    const total = Number(p.total_duration_ms) || 600000;
+    if (!Number.isFinite(started) || Date.now() < started + total || finalizeBusy) return;
+
+    finalizeBusy = true;
+    try {
+      await callRpc('community_finalize_reward', { p_slug: SLUG });
+      const again = await callRpc('community_public_reward', { p_slug: SLUG });
+      rewardState = Array.isArray(again) ? again[0] || null : rewardState;
+      try {
+        if (window.Eko && Eko.Serwer && Eko.Serwer.pobierz) await Eko.Serwer.pobierz();
+      } catch (e) {}
+    } catch (err) {
+      console.warn('[QRyby][Odnowa] finalizacja tarła nieudana', err);
+    } finally {
+      finalizeBusy = false;
+    }
+  }
+
   function renderLive(card, event, rows) {
     const raised = Number(event.raised_qryb) || 0;
     const target = Math.max(1, Number(event.target_qryb) || 500000000);
@@ -178,6 +261,7 @@
         p_event_id: event.id,
         p_limit: 10
       });
+      await refreshReward(event);
       renderLive(card, event, Array.isArray(rows) ? rows : []);
     } catch (err) {
       console.warn('[QRyby][Odnowa] odczyt live nieudany', err);
@@ -205,6 +289,12 @@
   window.addEventListener('focus', refresh);
   setInterval(refresh, REFRESH_MS);
   setTimeout(refresh, 0);
+
+  window.QRYBY_COMMUNITY_EKO = Object.freeze({
+    aktywna() { return !!(rewardState && rewardState.state === 'executing'); },
+    pokolenia() { return communityGeneration(); },
+    reward() { return rewardState; }
+  });
 
   window.QRYBY_COMMUNITY_READ = Object.freeze({
     refresh,
