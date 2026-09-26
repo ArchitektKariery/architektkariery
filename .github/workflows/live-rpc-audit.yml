@@ -1,0 +1,20 @@
+name: QRyby live RPC audit
+on:
+  push:
+    branches: [main]
+    paths: ['tools/live_rpc_audit.py']
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/live_rpc_audit.py
+      - run: |
+          git config user.name "qryby-rpc-audit"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/live-rpc-audit.txt
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Audit live RPC helper [skip ci]"
+          git push origin HEAD:main
