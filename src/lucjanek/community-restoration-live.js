@@ -380,23 +380,25 @@
     }
   }
 
-  const observer = new MutationObserver(() => {
-    const card = document.querySelector('#panelTresc .odn-card');
-    if (card && card !== lastCard) {
-      lastCard = card;
-      refresh();
-    } else if (!card) {
-      lastCard = null;
-    }
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  const panelRoot = document.querySelector('#panelTresc');
+  if (panelRoot) {
+    const observer = new MutationObserver(() => {
+      const card = panelRoot.querySelector('.odn-card');
+      if (card && card !== lastCard) {
+        lastCard = card;
+        refresh();
+      } else if (!card) {
+        lastCard = null;
+      }
+    });
+    observer.observe(panelRoot, { childList: true, subtree: true });
+  }
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) { refreshLifecycle(); refresh(); }
   });
   window.addEventListener('focus', () => { refreshLifecycle(); refresh(); });
   setInterval(refreshLifecycle, REFRESH_MS);
-  setInterval(refresh, REFRESH_MS);
   setTimeout(refreshLifecycle, 0);
   setTimeout(refresh, 0);
 
