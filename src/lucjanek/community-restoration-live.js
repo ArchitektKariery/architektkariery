@@ -1,6 +1,6 @@
 /* QRyby — Community Restoration Engine
-   Stage 5: live read + atomic contribution controls for Lucjanek.
-   Uses the game's existing rpc() transport.
+   LIVE: public read transport + authenticated atomic contribution controls.
+   Public event state is readable without login; mutations use Chmura.wolajRpc.
    Wallet mutation happens only in the server-side community_contribute() transaction. */
 (() => {
   'use strict';
@@ -18,10 +18,52 @@
   const fmt = n => String(Math.max(0, Number(n) || 0))
     .replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
 
+  const PUBLIC_RPC = new Set([
+    'community_public_event',
+    'community_public_contributions',
+    'community_public_reward'
+  ]);
+
+  function cloudConfig() {
+    const c = (window.Chmura && Chmura.konf) ? Chmura.konf() : window.QRYBY_CHMURA;
+    const key = c && (c.klucz || c.key);
+    if (!c || !c.url || !key) throw new Error('Brak konfiguracji Supabase.');
+    return { url: String(c.url).replace(/\/+$/, ''), key: String(key) };
+  }
+
+  async function publicRpc(name, args) {
+    const c = cloudConfig();
+    const res = await fetch(c.url + '/rest/v1/rpc/' + encodeURIComponent(name), {
+      method: 'POST',
+      headers: {
+        'apikey': c.key,
+        'Authorization': 'Bearer ' + c.key,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(args || {})
+    });
+
+    let body = null;
+    try { body = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      const msg = body && (body.message || body.msg || body.error) || ('Błąd ' + res.status);
+      throw new Error('PUBLIC_RPC_FAILED: ' + msg);
+    }
+    return body;
+  }
+
+  async function authenticatedRpc(name, args) {
+    if (!window.Chmura || !Chmura.wolajRpc)
+      throw new Error('AUTH_TRANSPORT_UNAVAILABLE');
+    if (Chmura.pelnyDostep && !Chmura.pelnyDostep())
+      throw new Error('CONFIRMED_EMAIL_REQUIRED');
+    return Chmura.wolajRpc(name, args || {});
+  }
+
   async function callRpc(name, args) {
-    if (typeof rpc === 'function') return rpc(name, args || {});
-    if (typeof window.rpc === 'function') return window.rpc(name, args || {});
-    throw new Error('QRyby rpc() transport unavailable');
+    return PUBLIC_RPC.has(name)
+      ? publicRpc(name, args)
+      : authenticatedRpc(name, args);
   }
 
   function countdown(end) {
@@ -115,7 +157,7 @@
           const m = String(err && (err.message || err) || '');
           msg.textContent =
             m.includes('INSUFFICIENT_QRYB') ? 'Masz za mało QRYB.' :
-            m.includes('CONFIRMED_EMAIL_REQUIRED') ? 'Najpierw potwierdź adres e-mail.' :
+            (m.includes('CONFIRMED_EMAIL_REQUIRED') || m.includes('Nie jesteś zalogowany')) ? 'Zaloguj się na konto z potwierdzonym e-mailem.' :
             m.includes('EVENT_NOT_OPEN') ? 'Zbiórka nie jest aktywna.' :
             'Nie udało się wykonać wpłaty.';
           btn.disabled = false;
