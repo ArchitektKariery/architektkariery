@@ -1,7 +1,7 @@
 /* QRyby — Community Restoration Engine
-   Stage 4: read-only live state for Lucjanek.
+   Stage 5: live read + atomic contribution controls for Lucjanek.
    Uses the game's existing rpc() transport.
-   No wallet mutation and no contribution writes. */
+   Wallet mutation happens only in the server-side community_contribute() transaction. */
 (() => {
   'use strict';
 
@@ -92,7 +92,7 @@
         input.disabled = true;
         msg.textContent = 'Wpłata...';
         try {
-          const requestId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+          const requestId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
             '00000000-0000-4000-8000-' + Date.now().toString().padStart(12,'0').slice(-12);
           const result = await callRpc('community_contribute', {
             p_slug: SLUG,
