@@ -9,6 +9,7 @@
   const REFRESH_MS = 20000;
   let busy = false;
   let lastEventId = null;
+  let lastCard = null;
 
   const fmt = n => String(Math.max(0, Number(n) || 0))
     .replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
@@ -120,7 +121,13 @@
   }
 
   const observer = new MutationObserver(() => {
-    if (document.querySelector('#panelTresc .odn-card')) refresh();
+    const card = document.querySelector('#panelTresc .odn-card');
+    if (card && card !== lastCard) {
+      lastCard = card;
+      refresh();
+    } else if (!card) {
+      lastCard = null;
+    }
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
