@@ -12,7 +12,11 @@ html = (root / "qryby.html").read_text(encoding="utf-8")
 live = (root / "src/lucjanek/community-restoration-live.js").read_text(encoding="utf-8")
 doc = (root / "docs/lucjanek-community-event.md").read_text(encoding="utf-8")
 
-require(("2026-09-26-lucjanek-stage7-v1" in html) or ("2026-09-26-fight-perf-v1" in html), "missing supported QRyby build id")
+require(any(x in html for x in [
+    "2026-09-26-lucjanek-stage7-v1",
+    "2026-09-26-fight-perf-v1",
+    "2026-09-26-fight-perf-v2",
+]), "missing supported QRyby build id")
 require(html.count("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
 require("KLASA.lucjan_czerwony = 4" in html, "Lucjan must be pasmo 4")
@@ -22,6 +26,8 @@ require("QRYBY_COMMUNITY_EKO.pokolenia()" in html, "community EKO generation bri
 require("PERFORMANCE — HOL RYBY" in html, "hooked-fish cache marker missing")
 require("rybBuf.__holFrame" in html, "hooked-fish render cache missing")
 require("holStride = fpsNow < 45 ? 3 : 2" in html, "adaptive fight render stride missing")
+require("_fightSchoolBuf" in html, "fight school layer cache missing")
+require("g.drawImage(_fightSchoolBuf, 0, 0)" in html, "fight school cache draw missing")
 
 for marker in [
     "community_contribute",
