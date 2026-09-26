@@ -71,3 +71,5 @@ elif new_build not in s:
 
 p.write_text(s,encoding="utf-8")
 print("fight school cache applied")
+
+# trigger-v2
