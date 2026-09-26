@@ -1,6 +1,6 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: STAGE_8_DONE
+STATUS: STAGE_9_READY_FOR_LAUNCH
 LIVE_FUNDING: OFF
 
 ## Parametry
@@ -17,8 +17,8 @@ LIVE_FUNDING: OFF
 - [x] Stage 5 — atomowe wpłaty
 - [x] Stage 6 — sukces, zamknięcie wpłat i kolejka nagrody
 - [x] Stage 7 — Lucjan czerwony / EKO / tarło exactly-once
-- [ ] Stage 8 — porażka i zwroty
-- [ ] Stage 9 — QA
+- [x] Stage 8 — porażka po 7 dniach / bez zwrotów
+- [x] Stage 9 — QA + kontrolowany launch gate
 
 ## Stan po Stage 4
 - frontend Straganu odczytuje stan przez bezpieczne funkcje RPC
@@ -68,3 +68,18 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - testowy fixture został ukryty (is_visible=false)
 - właściwy event Lucjana nadal pozostaje: draft / invisible / 0 QRYB
 - NEXT: STAGE_9_QA_AND_LAUNCH
+
+
+## Stan po Stage 9
+- pełny statyczny QA Lucjana działa w GitHub Actions
+- sprawdzane są: gatunek pasma 4, blokada spawnu przed odnową, most EKO, klient RPC, wszystkie migracje i zasada braku zwrotów
+- prawa RPC zweryfikowane: anon nie może wpłacać ani finalizować nagrody; authenticated może wykonywać tylko właściwe RPC gracza
+- prywatne funkcje wygaszania i startu nie są dostępne dla anon ani authenticated
+- cron wygaszający działa co minutę
+- uruchomienie eventu odbywa się wyłącznie przez private.community_start_event('lucjanek')
+- funkcja startowa wymaga czystego DRAFT, pustej historii wpłat i LOCKED reward
+- start ustawia dokładnie 7 dni według duration_seconds
+- launch gate został przetestowany na ukrytym fixture i zadziałał poprawnie
+- właściwy Lucjan nadal NIE został uruchomiony
+- LIVE_FUNDING: OFF
+- READY_FOR_LAUNCH: YES
