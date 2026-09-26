@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-26-fight-perf-v3';
+window.QRYBY_BUILD = '2026-09-26-server-authority-v1';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -13039,21 +13039,11 @@ window.Ruch = Ruch;
   let oczekujacyZapis = null;
   function opisSpotkania(w) {
     if (!w) return 'Gotowe.';
-    if (w.co === 'wyslano') return 'Zapis wysłany na serwer.';
-    if (w.co === 'pobrano') return 'Ściągnięto zapis z serwera: ' + w.ile + ' złowień.';
-    if (w.co === 'obce') {
-      return 'To konto jest <b>puste</b>, a na telefonie masz <b>' + w.tu + '</b> złowień ' +
-        'z innego konta. Co zrobić?<br><br>' +
-        '<a href="#" onclick="Gracz.zostawTutejszyNaObcym();return false">WYŚLIJ MÓJ ZAPIS TUTAJ</a> &middot; ' +
-        '<a href="#" onclick="Gracz.odZeraNaObcym();return false">ZACZNIJ OD ZERA</a><br>' +
-        'Zanim wybierzesz, skopiuj kod zapasowy niżej.';
-    }
-    oczekujacyZapis = w.zapis;
-    return 'Dwa różne zapisy. Tu masz <b>' + w.tu + '</b> złowień, na serwerze <b>' + w.tam +
-      '</b>. Który zostaje?<br><br>' +
-      '<a href="#" onclick="Gracz.zostawTutejszy();return false">ZOSTAW TEN Z TELEFONU</a> &middot; ' +
-      '<a href="#" onclick="Gracz.wezZdalny();return false">WEŹ TEN Z SERWERA</a><br>' +
-      'Zanim wybierzesz, skopiuj kod zapasowy niżej. Odrzucony zapis da się z niego odtworzyć.';
+    if (w.co === 'wyslano') return 'Zapis zsynchronizowany z serwerem.';
+    if (w.co === 'pobrano') return 'Wczytano zapis z serwera: ' + w.ile + ' złowień.';
+    if (w.co === 'blad') return 'Nie udało się zsynchronizować. Lokalny zapis nie nadpisał serwera.';
+    if (w.co === 'lokalny') return 'Tryb lokalny — brak aktywnego konta serwerowego.';
+    return 'Synchronizacja zakończona. Serwer jest źródłem prawdy.';
   }
   function wart(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
   async function proba(fn, udane) {
@@ -13100,7 +13090,7 @@ window.Ruch = Ruch;
         'Mail dopięty. Sprawdź skrzynkę, jeśli serwer prosi o potwierdzenie.');
     },
     synchronizuj() {
-      panelGracza('Wysyłam...');
+      panelGracza('Synchronizuję z serwerem...');
       proba(async () => await Chmura.pierwszeSpotkanie(), opisSpotkania);
     },
     /* Konflikt: gracz wybiera, ktory dorobek zostaje. Odrzucony NIE ginie,
@@ -15016,10 +15006,10 @@ window.RaptorLove = RaptorLove;
 /* ============================================================
    CHMURA. Konto, logowanie i kopia zapisu na serwerze.
 
-   ZASADA NADRZEDNA: DYSK JEST ZRODLEM PRAWDY, CHMURA KOPIA.
-   Gra dziala w calosci bez sieci i bez konta. Zadne wolanie stad nie stoi
-   na drodze rozgrywce: wszystko leci w tle, z limitem czasu, a bledy
-   ladują w stanie modulu, nie w wyjatku przerywajacym klatke.
+   ZASADA NADRZEDNA: DLA ZALOGOWANEGO KONTA SERWER JEST ZRODLEM PRAWDY.
+   Lokalny zapis jest cachem i pozwala grac bez sieci, ale po odzyskaniu
+   polaczenia nie moze nadpisac stanu serwera, dopoki klient nie pobierze
+   aktualnego zapisu konta. Bez konta gra nadal dziala lokalnie.
 
    Bez SDK. Supabase to zwykle HTTP, wiec cztery adresy i fetch wystarcza.
    Doklejanie biblioteki z CDN zlamaloby najwazniejsza wlasnosc tego pliku:
@@ -15041,6 +15031,9 @@ const Chmura = (() => {
 
   let konf = null, sesja = null, blad = '', timer = 0;
   let wLocie = false, zaleglosc = false, ostatniaKopia = 0;
+  /* Dla zalogowanego konta zapis lokalny nie moze nic wyslac, dopoki
+     nie pobierzemy aktualnego stanu serwera. */
+  let autorytetGotowy = false, autorytetPromise = null;
   const sluchacze = [];
   function powiadom() { for (const f of sluchacze) { try { f(); } catch (e) {} } }
 
@@ -15117,6 +15110,7 @@ const Chmura = (() => {
     return !!(u && u.email && (u.email_confirmed_at || u.confirmed_at));
   }
   function zapiszSesje(s) {
+    const staryUid = (sesja && sesja.uid) || '';
     const u = s && s.user ? s.user : null;
     sesja = s ? {
       token: s.access_token, odswiez: s.refresh_token,
@@ -15128,6 +15122,11 @@ const Chmura = (() => {
          dla już zweryfikowanej sesji; backend i tak sprawdza auth.users. */
       potwierdzony: u ? potwierdzonyZUsera(u) : !!(sesja && sesja.potwierdzony)
     } : null;
+    const nowyUid = (sesja && sesja.uid) || '';
+    if (!sesja || nowyUid != staryUid) {
+      autorytetGotowy = false;
+      autorytetPromise = null;
+    }
     if (sesja) Magazyn.pisz(K_SESJA, JSON.stringify(sesja));
     else Magazyn.skasuj(K_SESJA);
     powiadom();
@@ -15302,12 +15301,52 @@ const Chmura = (() => {
     };
   }
 
+  async function zapewnijAutorytetSerwera() {
+    if (!konf || !sesja) return { co: 'lokalny' };
+    if (autorytetGotowy) return { co: 'gotowy' };
+    if (autorytetPromise) return await autorytetPromise;
+
+    autorytetPromise = (async () => {
+      const zdalny = await pobierz();
+      if (zdalny && zdalny.zapis) {
+        /* SERWER WYGRYWA. Lokalny stan jest tylko cachem. */
+        Zapis.wczytajObiekt(zdalny.zapis);
+        Magazyn.pisz(K_KONTO, sesja.uid);
+        autorytetGotowy = true;
+        ostatniaKopia = Date.now();
+        blad = '';
+        powiadom();
+        return { co: 'pobrano', ile: zdalny.zlowien || 0 };
+      }
+
+      /* Nowe konto bez zapisu: dopiero teraz wolno utworzyc pierwszy
+         serwerowy stan z lokalnego cache. */
+      autorytetGotowy = true;
+      return { co: 'brak' };
+    })();
+
+    try {
+      return await autorytetPromise;
+    } finally {
+      autorytetPromise = null;
+    }
+  }
+
   async function wyslijTeraz() {
     if (!konf || !sesja) return false;
     if (wLocie) { zaleglosc = true; return false; }
     wLocie = true;
     try {
       await pewnyToken();
+
+      /* Pierwszy ruch po starcie/logowaniu jest ZAWSZE serwer -> telefon.
+         Jesli istnieje zdalny zapis, konczymy ten cykl bez uploadu. */
+      const start = await zapewnijAutorytetSerwera();
+      if (start && start.co === 'pobrano') {
+        blad = '';
+        return true;
+      }
+
       await zadanie('/rest/v1/gracze', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
@@ -15336,46 +15375,24 @@ const Chmura = (() => {
     /* Bez identyfikatora zapytanie i tak by sie nie udalo, a blad 400
        nic nikomu nie mowi. Lepiej powiedziec wprost, co jest nie tak. */
     if (!sesja.uid) throw new Error('Sesja bez identyfikatora konta. Wyloguj się i zaloguj ponownie.');
-    const o = await zadanie('/rest/v1/gracze?select=zapis,zlowien,gatunkow,nick&id=eq.' + sesja.uid, {}, true);
+    const o = await zadanie('/rest/v1/gracze?select=zapis,zlowien,gatunkow,nick,zmieniono&id=eq.' + sesja.uid, {}, true);
     return (o && o.length) ? o[0] : null;
   }
 
   /* ============================================================
-     SPOTKANIE DWOCH ZAPISOW.
-     Nigdy nie nadpisujemy niczego po cichu. Jesli na serwerze nie ma nic,
-     albo jest pusty poczatek, leci kopia lokalna. Jesli obie strony maja
-     dorobek, decyzja wraca do gracza razem z liczbami: ile zlowien tu,
-     ile tam. Zaden wariant nie kasuje drugiego bez pytania.
+     SYNCHRONIZACJA KONTA — SERWER JEST ZRODLEM PRAWDY.
+     Po starcie i po logowaniu najpierw pobieramy zapis z serwera.
+     Jezeli istnieje, zawsze trafia on na telefon. Lokalny stan moze
+     utworzyc zapis serwera tylko dla nowego konta bez zadnego wiersza.
      ============================================================ */
   async function pierwszeSpotkanie() {
-    const zdalny = await pobierz();
-    const mojeZl = Zapis.dane().stat.zlowien || 0;
-    /* Rozpoznanie cudzego konta MUSI stac przed wyslaniem. Wczesniej stalo
-       nizej i nie lapalo najczestszego przypadku: konta, ktore nie ma jeszcze
-       ZADNEGO wiersza. Wtedy pierwsza galaz wysylala zapis bez pytania. */
-    const poprzednie = ostatnieKonto();
-    const puste = !zdalny || (zdalny.zlowien || 0) === 0;
-    if (puste && mojeZl > 0 && poprzednie && poprzednie !== sesja.uid) {
-      return { co: 'obce', tu: mojeZl, nick: (zdalny && zdalny.nick) || '' };
+    const stan = await zapewnijAutorytetSerwera();
+    if (stan && stan.co === 'pobrano') return stan;
+    if (stan && (stan.co === 'gotowy' || stan.co === 'brak')) {
+      const ok = await wyslijTeraz();
+      return { co: ok ? 'wyslano' : 'blad' };
     }
-    if (!zdalny) { await wyslijTeraz(); return { co: 'wyslano' }; }
-    /* Ten sam rodowod zapisu, czyli to samo id nadane przy pierwszym
-       uruchomieniu. Wtedy nie ma o co pytac: telefon jest zrodlem prawdy,
-       serwer kopia, wiec leci kopia. Bez tej linii kazde recznie wolane
-       SYNCHRONIZUJ TERAZ zglaszalo konflikt sam ze soba. */
-    if (zdalny.zapis && zdalny.zapis.id && zdalny.zapis.id === Zapis.id()) {
-      await wyslijTeraz(); return { co: 'wyslano' };
-    }
-    /* ============================================================
-       LOGOWANIE NA CUDZE KONTO.
-       Sprawdzenie stoi wyzej, przed pierwszym wyslaniem. Rozpoznajemy je
-       po ostatnim koncie, do ktorego szla kopia: jesli identyfikator sie
-       zmienil, a na telefonie jest dorobek, decyzja wraca do gracza.
-       ============================================================ */
-    const ichZl = zdalny.zlowien || 0;
-    if (ichZl === 0) { await wyslijTeraz(); return { co: 'wyslano' }; }
-    if (mojeZl === 0) { Zapis.wczytajObiekt(zdalny.zapis); return { co: 'pobrano', ile: ichZl }; }
-    return { co: 'konflikt', tu: mojeZl, tam: ichZl, zapis: zdalny.zapis };
+    return { co: 'lokalny' };
   }
   function przyjmijZdalny(zapisZdalny) {
     Zapis.wczytajObiekt(zapisZdalny);
@@ -15487,7 +15504,14 @@ const Chmura = (() => {
   wczytajKonf(); wczytajSesje();
   /* Sesja zapisana przez starszą wersję nie ma wiarygodnej flagi
      potwierdzenia. Sprawdzamy ją z Supabase przy starcie. */
-  if (konf && sesja) setTimeout(() => { sprawdzPotwierdzenie().catch(() => {}); }, 250);
+  if (konf && sesja) {
+    /* Zalogowany klient zaczyna od PULL. Dopiero po nim wolno wysylac save. */
+    setTimeout(() => { zapewnijAutorytetSerwera().catch(e => {
+      blad = e.message || 'Nie udało się pobrać zapisu z serwera.';
+      powiadom();
+    }); }, 120);
+    setTimeout(() => { sprawdzPotwierdzenie().catch(() => {}); }, 250);
+  }
   if (konf) setTimeout(autoRekordy, 6000);
   sluchacze.push(() => { if (konf && sesja) rekordySwiata().catch(() => {}); });
 
