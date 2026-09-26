@@ -9,3 +9,5 @@ if old not in s:
     raise SystemExit("live2 script tag not found")
 p.write_text(s.replace(old,new,1),encoding="utf-8")
 print("live3 cache buster applied")
+
+# trigger-live3
