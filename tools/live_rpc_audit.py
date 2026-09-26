@@ -15,3 +15,5 @@ for p in patterns:
     if hits==0: out.append("\nNOT FOUND\n")
 Path("docs/live-rpc-audit.txt").write_text("\n".join(out),encoding="utf-8")
 print("rpc audit written")
+
+# trigger-live-rpc-audit
