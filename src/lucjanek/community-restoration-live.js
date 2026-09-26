@@ -126,9 +126,13 @@
 
     const open = event && event.state === 'funding';
     wrap.style.display = open ? 'grid' : 'none';
-    if (!open && event && (event.state === 'funded' || event.state === 'completed')) {
+    if (!open && event) {
       const msg = wrap.querySelector('.odn-pay-msg');
-      if (msg) msg.textContent = 'Cel osiągnięty — wpłaty są zamknięte.';
+      if (msg && (event.state === 'funded' || event.state === 'completed')) {
+        msg.textContent = 'Cel osiągnięty — wpłaty są zamknięte.';
+      } else if (msg && event.state === 'failed') {
+        msg.textContent = 'Czas minął — zbiórka zakończona bez powodzenia. Wpłaty nie podlegają zwrotowi.';
+      }
     }
   }
 
@@ -228,15 +232,19 @@
     setMilestones(card, pct);
 
     const chips = card.querySelectorAll('.odn-chip');
-    if (chips[0]) chips[0].innerHTML = '<b>' + countdown(event.ends_at) + '</b>do końca zbiórki';
+    if (chips[0]) chips[0].innerHTML = event.state === 'failed'
+      ? '<b>KONIEC</b>7 dni minęło · cel nieosiągnięty'
+      : '<b>' + countdown(event.ends_at) + '</b>do końca zbiórki';
     if (chips[1]) chips[1].innerHTML = '<b>' + fmt(event.donor_count) +
       ' DARCZYŃCÓW</b>wspólny cel całej społeczności';
 
     const note = card.querySelector('.odn-stage-note');
     if (note) {
-      note.textContent = (event.state === 'funded' || event.state === 'completed')
-        ? 'CEL OSIĄGNIĘTY · IKRA WYPRZEDANA · NAGRODA OCZEKUJE NA EKO'
-        : 'LIVE · POSTĘP I HISTORIA WPŁAT Z SERWERA';
+      note.textContent = event.state === 'failed'
+        ? 'ZBIÓRKA ZAKOŃCZONA · CEL NIEOSIĄGNIĘTY · WPŁATY PRZEPADŁY · BRAK TARŁA'
+        : (event.state === 'funded' || event.state === 'completed')
+          ? 'CEL OSIĄGNIĘTY · IKRA WYPRZEDANA · NAGRODA OCZEKUJE NA EKO'
+          : 'LIVE · POSTĘP I HISTORIA WPŁAT Z SERWERA';
     }
 
     renderHistory(card, rows);
