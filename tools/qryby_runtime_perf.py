@@ -60,3 +60,5 @@ out["hot_gameplay_functions"]=hot
 
 Path("docs/qryby-performance-runtime.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
 print("written")
+
+# trigger-runtime-map
