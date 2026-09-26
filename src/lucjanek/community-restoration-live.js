@@ -134,10 +134,25 @@
           msg.textContent = 'Wpisz poprawną kwotę QRYB.';
           return;
         }
+
+        const local = (window.Zapis && Zapis.dane) ? Zapis.dane() : null;
+        const localBalance = local ? Math.max(0, Math.trunc(Number(local.monety) || 0)) : 0;
+        if (!local || amount > localBalance) {
+          msg.textContent = 'Masz za mało QRYB.';
+          return;
+        }
+
         btn.disabled = true;
         input.disabled = true;
-        msg.textContent = 'Wpłata...';
+        msg.textContent = 'Synchronizuję portfel...';
         try {
+          if (!window.Chmura || !Chmura.wyslijTeraz)
+            throw new Error('WALLET_SYNC_UNAVAILABLE');
+
+          const synced = await Chmura.wyslijTeraz();
+          if (!synced) throw new Error('WALLET_SYNC_FAILED');
+
+          msg.textContent = 'Wpłata...';
           const requestId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
             '00000000-0000-4000-8000-' + Date.now().toString().padStart(12,'0').slice(-12);
           const result = await callRpc('community_contribute', {
@@ -147,11 +162,22 @@
             p_anonymous: false
           });
           const accepted = Number(result && result.accepted_qryb) || 0;
+          const newBalance = Math.max(0, Math.trunc(Number(result && result.balance_qryb)));
+          if (accepted > 0 && window.Zapis && Zapis.dane) {
+            const D = Zapis.dane();
+            D.monety = Number.isFinite(newBalance) ? newBalance : Math.max(0, localBalance - accepted);
+            if (Zapis.zapisz) Zapis.zapisz();
+            if (window.Chmura && Chmura.wyslijTeraz) await Chmura.wyslijTeraz();
+          }
+
           msg.textContent = accepted > 0
-            ? 'Wpłacono ' + fmt(accepted) + ' QRYB. Odświeżam stan...'
+            ? 'Wpłacono ' + fmt(accepted) + ' QRYB. Saldo: ' + fmt(
+                Number.isFinite(newBalance) ? newBalance : Math.max(0, localBalance - accepted)
+              ) + ' QRYB.'
             : 'Wpłata zakończona.';
+          input.value = '';
           await refresh();
-          setTimeout(() => window.location.reload(), 700);
+          setTimeout(() => window.location.reload(), 900);
         } catch (err) {
           console.warn('[QRyby][Odnowa] wpłata nieudana', err);
           const m = String(err && (err.message || err) || '');
@@ -159,6 +185,7 @@
             m.includes('INSUFFICIENT_QRYB') ? 'Masz za mało QRYB.' :
             (m.includes('CONFIRMED_EMAIL_REQUIRED') || m.includes('Nie jesteś zalogowany')) ? 'Zaloguj się na konto z potwierdzonym e-mailem.' :
             m.includes('EVENT_NOT_OPEN') ? 'Zbiórka nie jest aktywna.' :
+            (m.includes('WALLET_SYNC_FAILED') || m.includes('WALLET_SYNC_UNAVAILABLE')) ? 'Nie udało się zsynchronizować portfela. Spróbuj ponownie.' :
             'Nie udało się wykonać wpłaty.';
           btn.disabled = false;
           input.disabled = false;
