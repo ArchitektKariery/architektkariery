@@ -1,0 +1,521 @@
+
+### async function rpc
+
+--- hit 1 @ 6284472 ---
+
+oim zapisie. Teraz
+   liczby ida z jednej tabeli w Supabase, wiec ryba zabrana przez ciebie
+   znika takze innym -- i dopiero to daje zdanie "nasz serwer stracil sumy",
+   o ktore chodzi w sekcji XL specyfikacji.
+
+   TRZY ZASADY, ktore musialy tu wejsc:
+
+   1. ODEJMOWANIE ROBI BAZA, NIE GRA. Gdyby gra czytala populacje,
+      odejmowala jedynke i zapisywala wynik, dwoch graczy zabierajacych
+      ostatniego szczupaka w tej samej chwili odczytaloby jedynke oboje
+      i oboje zapisaloby zero -- populacja spadlaby o jeden zamiast
+      o dwa, albo ponizej zera. Funkcja `eko_zmien` w Postgresie robi
+      to jednym UPDATE pod blokada wiersza, wiec drugi gracz dostaje
+      juz zero i jego polow sie nie liczy. Sekcja XIX wymaga tego wprost.
+
+   2. LOKALNY BUFOR JEST TYLKO PODGLADEM. Gra rysuje z niego lawice
+      i panel, ale nigdy nie traktuje go jak prawdy. Odpowiedz serwera
+      zawsze nadpisuje bufor -- takze wtedy, gdy jest gorsza, niz gracz
+      sie spodziewal (bo ktos inny zdazyl wczesniej).
+
+   3. BRAK SIECI NIE BLOKUJE GRY. Zmiany, ktore nie doszly, ladzie
+      w kolejce w zapisie gracza i sa wysylane po powrocie polaczenia.
+      Kolejka ma sufit, zeby tydzien offline nie zrobil z niej archiwum.
+      To jest ta sama zasada, ktora ma juz reszta gry: dysk dziala
+      zawsze, siec dokłada sie, gdy jest.
+   ============================================================ */
+Eko.Serwer = (function () {
+  const KOLEJKA_MAX = 300;
+  const ODSWIEZ_MS = 25000;
+  let konf = null, ostatniOdczyt = 0, trwa = false;
+
+  function konfiguracja() {
+    if (konf) return konf;
+    const n = window.QRYBY_CHMURA;
+    if (n && n.url && n.klucz) konf = { url: String(n.url).replace(/\/+$/, ''), klucz: n.klucz };
+    return konf;
+  }
+  function dostepny() { return !!konfiguracja(); }
+
+  async function rpc(nazwa, ciało) {
+    /* ============================================================
+       FIX TARLA / WSPOLNEJ POPULACJI (IX 2026).
+
+       BYLO: ten lokalny klient RPC wysylal publiczny anon key rowniez jako
+       Authorization: Bearer. Procedura `eko_zmien` zaczyna sie od
+       `if not ma_mail() then ... return stan bez zmian`, wiec baza nie widziala
+       zalogowanego gracza. Lokalnie narybek byl dodawany optymistycznie, a
+       odpowiedz/poll serwera przywracaly stara liczbe. Objaw: udane tarlo
+       dochodzilo do 4/4, ale populacja nie rosla trwale.
+
+       JEST: wszystkie mutujace RPC ekosystemu ida przez ten sam uwierzytelniony
+       transport co turnieje i konto. `Chmura.wolajRpc` odswieza JWT i wysyla
+       Authorization: Bearer <access_token użytkownika>, wiec `ma_mail()` moze
+       prawidlowo rozpoznac konto z mailem. Publiczny anon key zostaje tylko
+       kluczem API -- tak jak powinno byc w Supabase.
+       ============================================================ */
+    if (!window.Chmura || !Chmura.pelnyDostep || !Chmura.pelnyDostep() || !Chmura.wolajRpc)
+      throw new Error('wymagane konto z mailem');
+    const diag = window.__ekoDiag = {
+      nazwa: nazwa, body: ciało || {}, start: Date.now(), status: 'pending', blad: ''
+    };
+    try {
+      const wynik = await Chmura.wolajRpc(nazwa, ciało || {});
+      diag.status = 'ok';
+      diag.ms = Date.now() - diag.start;
+      diag.odp = Array.isArray(wynik) && wynik[0] ? wynik[0] : wynik;
+      return wynik;
+    } catch (e) {
+      diag.status = 'error';
+      diag.ms = Date.now() - diag.start;
+      diag.blad = String((e && e.message) || e || 'error');
+      throw e;
+    }
+  }
+
+  function kolejka() {
+    const D = (typeof Zapis !== 'undefined') ? Zapis.dane() : null;
+    if (!D) return [];
+    if (!D.ekoKolejka) D.ekoKolejka = [];
+    return D.ekoKolejka;
+  }
+
+  /* Wpisanie odpowiedzi serwera do lokalnego bufora. Serwer wygrywa
+     zawsze -- takze gdy mowi cos gorszego, niz gracz widzial. */
+  function wpiszStan(gat, w) {
+    if (!w) return;
+    const r = Eko.rekord(gat); if (!r) return;
+    r.n = w.n; r.m = w.samcow; r.f = w.samic;
+    r.wymarly = !!w.wymarly;
+    if (r.n > r.max) r.max = r.n;
+    if (r.n < r.min) r.min = r.n;
+    r.indyw = r.n < Eko.CFG.PROG_INDYWIDUALNY;
+    /* Kazda zmiana n zmienia procent populacji. */
+    window.__wagiTab = null;
+  }
+
+  /* Pobranie CALEJ tabeli. Wolane przy starcie i co ODSWIEZ_MS, zeby
+     gracz widzial skutki cudzych polowow bez przeladowania gry. */
+  async function pobierz() {
+    const k = konfiguracja(); if (!k || trwa) return false;
+    trwa = true;
+    try {
+      const o = await fetch(k.url + '/rest/v1/eko_populacja?select=*', {
+        headers: { 'apikey': k.klucz, 'Authorization': 'Bearer ' + k.klucz }
+      });
+      if (!o.ok) return false;
+      const dane = await o.json();
+      if (!Array.isArray(dane) || !dane.length) return false;
+      for (const w of dane) wpiszStan(w.gat, w);
+      ostatniOdczyt = Date.now();
+      if (typeof Zapis !== 'undefined') Zapis.zapisz();
+      return true;
+    } catch (e) { return false; }
+    finally { trwa = false; }
+  }
+
+  /* Jedyna droga zmiany populacji, gdy serwer jest wlaczony.
+     Nie czeka na odpowiedz, zeby nie zamrazac kadru -- bufor lokalny
+     zmienia sie od razu, a odpowiedz serwera go potem prostuje. */
+  function zmien(gat, delta, plec) {
+    if (!dostepny()) return false;
+    const zad = { gat: gat, delta: delta, plec: plec || null, t: Date.now() };
+    rpc('eko_zmien', { p_gat: gat, p_delta: delta, p_plec: plec || null })
+      .then(w => { if (Array.isArray(w) && w[0]) wpiszStan(gat, w[0]); })
+      .catch(() => {
+        const K = kolejka();
+        K.push(zad);
+        if (K.length > KOLEJKA_MAX) K.splice(0, K.length - KOLEJKA_MAX);
+        if (typeof Zapis !== 'undefined') Zapis.zapisz();
+      });
+    return true;
+  }
+
+  /* Doslanie tego, co nie przeszlo. Po kolei, zeby nie zasypac serwera
+     i zeby kolejnosc odejmowania byla zachowana. */
+  async function doslij() {
+    const K = kolejka();
+    while (K.length) {
+      const z = K[0];
+      try {
+        const w = await rpc('eko_zmien', { p_gat: z.gat, p_delta: z.delta, p_plec: z.plec });
+        if (Array.isArray(w) && w[0]) wpiszStan(z.gat, w[0]);
+        K.shift();
+      } catch (e) { return false; }
+    }
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    return true;
+  }
+
+  async function odrodzWymarle() {
+    if (!dostepny()) return [];
+    try {
+      const w = await rpc('eko_odrodz_wymarle', {});
+      if (Array.isArray(w)) {
+        for (const r of w) if (r && r.gat) wpiszStan(r.gat, r);
+        if (typeof Zapis !== 'undefined') Zapis.zapisz();
+        return w;
+      }
+    } catch(e) {}
+    return [];
+  }
+
+  /* Zasiew: wypisuje SQL z biezacymi populacjami, do wklejenia raz
+     w Supabase. Dzieki temu swiat na serwerze startuje z tymi samymi
+     liczbami, ktore gra liczy lokalnie, zamiast z okraglych zmyslen. */
+  function za
+
+### function rpc
+
+--- hit 1 @ 6284478 ---
+
+pisie. Teraz
+   liczby ida z jednej tabeli w Supabase, wiec ryba zabrana przez ciebie
+   znika takze innym -- i dopiero to daje zdanie "nasz serwer stracil sumy",
+   o ktore chodzi w sekcji XL specyfikacji.
+
+   TRZY ZASADY, ktore musialy tu wejsc:
+
+   1. ODEJMOWANIE ROBI BAZA, NIE GRA. Gdyby gra czytala populacje,
+      odejmowala jedynke i zapisywala wynik, dwoch graczy zabierajacych
+      ostatniego szczupaka w tej samej chwili odczytaloby jedynke oboje
+      i oboje zapisaloby zero -- populacja spadlaby o jeden zamiast
+      o dwa, albo ponizej zera. Funkcja `eko_zmien` w Postgresie robi
+      to jednym UPDATE pod blokada wiersza, wiec drugi gracz dostaje
+      juz zero i jego polow sie nie liczy. Sekcja XIX wymaga tego wprost.
+
+   2. LOKALNY BUFOR JEST TYLKO PODGLADEM. Gra rysuje z niego lawice
+      i panel, ale nigdy nie traktuje go jak prawdy. Odpowiedz serwera
+      zawsze nadpisuje bufor -- takze wtedy, gdy jest gorsza, niz gracz
+      sie spodziewal (bo ktos inny zdazyl wczesniej).
+
+   3. BRAK SIECI NIE BLOKUJE GRY. Zmiany, ktore nie doszly, ladzie
+      w kolejce w zapisie gracza i sa wysylane po powrocie polaczenia.
+      Kolejka ma sufit, zeby tydzien offline nie zrobil z niej archiwum.
+      To jest ta sama zasada, ktora ma juz reszta gry: dysk dziala
+      zawsze, siec dokłada sie, gdy jest.
+   ============================================================ */
+Eko.Serwer = (function () {
+  const KOLEJKA_MAX = 300;
+  const ODSWIEZ_MS = 25000;
+  let konf = null, ostatniOdczyt = 0, trwa = false;
+
+  function konfiguracja() {
+    if (konf) return konf;
+    const n = window.QRYBY_CHMURA;
+    if (n && n.url && n.klucz) konf = { url: String(n.url).replace(/\/+$/, ''), klucz: n.klucz };
+    return konf;
+  }
+  function dostepny() { return !!konfiguracja(); }
+
+  async function rpc(nazwa, ciało) {
+    /* ============================================================
+       FIX TARLA / WSPOLNEJ POPULACJI (IX 2026).
+
+       BYLO: ten lokalny klient RPC wysylal publiczny anon key rowniez jako
+       Authorization: Bearer. Procedura `eko_zmien` zaczyna sie od
+       `if not ma_mail() then ... return stan bez zmian`, wiec baza nie widziala
+       zalogowanego gracza. Lokalnie narybek byl dodawany optymistycznie, a
+       odpowiedz/poll serwera przywracaly stara liczbe. Objaw: udane tarlo
+       dochodzilo do 4/4, ale populacja nie rosla trwale.
+
+       JEST: wszystkie mutujace RPC ekosystemu ida przez ten sam uwierzytelniony
+       transport co turnieje i konto. `Chmura.wolajRpc` odswieza JWT i wysyla
+       Authorization: Bearer <access_token użytkownika>, wiec `ma_mail()` moze
+       prawidlowo rozpoznac konto z mailem. Publiczny anon key zostaje tylko
+       kluczem API -- tak jak powinno byc w Supabase.
+       ============================================================ */
+    if (!window.Chmura || !Chmura.pelnyDostep || !Chmura.pelnyDostep() || !Chmura.wolajRpc)
+      throw new Error('wymagane konto z mailem');
+    const diag = window.__ekoDiag = {
+      nazwa: nazwa, body: ciało || {}, start: Date.now(), status: 'pending', blad: ''
+    };
+    try {
+      const wynik = await Chmura.wolajRpc(nazwa, ciało || {});
+      diag.status = 'ok';
+      diag.ms = Date.now() - diag.start;
+      diag.odp = Array.isArray(wynik) && wynik[0] ? wynik[0] : wynik;
+      return wynik;
+    } catch (e) {
+      diag.status = 'error';
+      diag.ms = Date.now() - diag.start;
+      diag.blad = String((e && e.message) || e || 'error');
+      throw e;
+    }
+  }
+
+  function kolejka() {
+    const D = (typeof Zapis !== 'undefined') ? Zapis.dane() : null;
+    if (!D) return [];
+    if (!D.ekoKolejka) D.ekoKolejka = [];
+    return D.ekoKolejka;
+  }
+
+  /* Wpisanie odpowiedzi serwera do lokalnego bufora. Serwer wygrywa
+     zawsze -- takze gdy mowi cos gorszego, niz gracz widzial. */
+  function wpiszStan(gat, w) {
+    if (!w) return;
+    const r = Eko.rekord(gat); if (!r) return;
+    r.n = w.n; r.m = w.samcow; r.f = w.samic;
+    r.wymarly = !!w.wymarly;
+    if (r.n > r.max) r.max = r.n;
+    if (r.n < r.min) r.min = r.n;
+    r.indyw = r.n < Eko.CFG.PROG_INDYWIDUALNY;
+    /* Kazda zmiana n zmienia procent populacji. */
+    window.__wagiTab = null;
+  }
+
+  /* Pobranie CALEJ tabeli. Wolane przy starcie i co ODSWIEZ_MS, zeby
+     gracz widzial skutki cudzych polowow bez przeladowania gry. */
+  async function pobierz() {
+    const k = konfiguracja(); if (!k || trwa) return false;
+    trwa = true;
+    try {
+      const o = await fetch(k.url + '/rest/v1/eko_populacja?select=*', {
+        headers: { 'apikey': k.klucz, 'Authorization': 'Bearer ' + k.klucz }
+      });
+      if (!o.ok) return false;
+      const dane = await o.json();
+      if (!Array.isArray(dane) || !dane.length) return false;
+      for (const w of dane) wpiszStan(w.gat, w);
+      ostatniOdczyt = Date.now();
+      if (typeof Zapis !== 'undefined') Zapis.zapisz();
+      return true;
+    } catch (e) { return false; }
+    finally { trwa = false; }
+  }
+
+  /* Jedyna droga zmiany populacji, gdy serwer jest wlaczony.
+     Nie czeka na odpowiedz, zeby nie zamrazac kadru -- bufor lokalny
+     zmienia sie od razu, a odpowiedz serwera go potem prostuje. */
+  function zmien(gat, delta, plec) {
+    if (!dostepny()) return false;
+    const zad = { gat: gat, delta: delta, plec: plec || null, t: Date.now() };
+    rpc('eko_zmien', { p_gat: gat, p_delta: delta, p_plec: plec || null })
+      .then(w => { if (Array.isArray(w) && w[0]) wpiszStan(gat, w[0]); })
+      .catch(() => {
+        const K = kolejka();
+        K.push(zad);
+        if (K.length > KOLEJKA_MAX) K.splice(0, K.length - KOLEJKA_MAX);
+        if (typeof Zapis !== 'undefined') Zapis.zapisz();
+      });
+    return true;
+  }
+
+  /* Doslanie tego, co nie przeszlo. Po kolei, zeby nie zasypac serwera
+     i zeby kolejnosc odejmowania byla zachowana. */
+  async function doslij() {
+    const K = kolejka();
+    while (K.length) {
+      const z = K[0];
+      try {
+        const w = await rpc('eko_zmien', { p_gat: z.gat, p_delta: z.delta, p_plec: z.plec });
+        if (Array.isArray(w) && w[0]) wpiszStan(z.gat, w[0]);
+        K.shift();
+      } catch (e) { return false; }
+    }
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    return true;
+  }
+
+  async function odrodzWymarle() {
+    if (!dostepny()) return [];
+    try {
+      const w = await rpc('eko_odrodz_wymarle', {});
+      if (Array.isArray(w)) {
+        for (const r of w) if (r && r.gat) wpiszStan(r.gat, r);
+        if (typeof Zapis !== 'undefined') Zapis.zapisz();
+        return w;
+      }
+    } catch(e) {}
+    return [];
+  }
+
+  /* Zasiew: wypisuje SQL z biezacymi populacjami, do wklejenia raz
+     w Supabase. Dzieki temu swiat na serwerze startuje z tymi samymi
+     liczbami, ktore gra liczy lokalnie, zamiast z okraglych zmyslen. */
+  function zasiewSQ
+
+### const rpc =
+
+--- hit 1 @ 6335036 ---
+
+gk];
+      /* Cala reszta nalezy do ekosystemu. Gdy odmowi (karencja gatunku
+         jeszcze trwa albo gatunek nie moze sie rozmnazac), para po prostu
+         zaczyna od nowa -- dokladnie tak, jak w lawicy. */
+      let r = null;
+      try { if (window.Eko && Eko.tarloPary) r = Eko.tarloPary(gk, genZWiaderka(gk, 'm'), genZWiaderka(gk, 'f'), teraz); } catch (e) {}
+      if (r) wynik = r;
+    }
+    if (wynik && typeof Zapis !== 'undefined') Zapis.zapisz();
+    return wynik;
+  }
+
+  /* Cechy rodzica, jesli ryba w wiaderku je ma (tryb indywidualny).
+     Gdy nie ma, `Eko.tarloPary` sam siegnie po srednia gatunku. */
+  function genZWiaderka(gk, plec) {
+    const D = d(); if (!D || !D.wiaderko) return undefined;
+    for (const r of D.wiaderko) if (r && r.gat === gk && r.plec === plec && r.gen) return r.gen;
+    return undefined;
+  }
+
+  return { stan, postep, pary, zdolne, tik, czasPary };
+})();
+window.Rozrod = Rozrod;
+
+
+/* ============================================================
+   ETAP 5/6 — QDIAG.
+   #diag w URL lub QDiag.toggle() z konsoli. Nie zapisuje nic do save.
+   ============================================================ */
+const QDiag = (() => {
+  const el = document.getElementById('qDiag');
+  let timer = 0;
+
+  const safe = (fn, fallback) => {
+    try { const v = fn(); return v === undefined || v === null ? fallback : v; }
+    catch (e) { return fallback; }
+  };
+  const fmt = n => Number(n || 0).toLocaleString('pl-PL');
+
+  function tekst() {
+    const pop = safe(() => Eko.sumaPopulacji(), 0);
+    const poj = safe(() => Eko.CFG.POJEMNOSC_JEZIORA, 0);
+    const zap = poj ? (pop / poj * 100) : 0;
+    const koh = safe(() => Eko.pokolenia().length, 0);
+    const kolej = safe(() => (Zapis.dane().ekoKolejka || []).length, 0);
+    const f = window.__qrFps || {};
+    const rpc = window.__ekoDiag || null;
+    const card = safe(() => !!Card.open, false);
+    const raster = safe(() => !!(window.CardRaster && CardRaster.aktywny()), false);
+    const auth = safe(() => !!(Chmura && Chmura.potwierdzony && Chmura.potwierdzony()), false);
+    const menu = document.body.classList.contains('menu-master-open');
+    const linie = [
+      'QRYBY DIAG',
+      'FPS        ' + (f.fps || '?') + '  min ' + (f.min || '?'),
+      'POPULACJA  ' + fmt(pop) + ' / ' + fmt(poj) + '  (' + zap.toFixed(1) + '%)',
+      'KOHORTY    ' + koh,
+      'EKO QUEUE  ' + kolej,
+      'AUTH MAIL  ' + (auth ? 'OK' : 'NIE'),
+      'KARTA      ' + (card ? 'OPEN' : 'OFF') + '  raster ' + (raster ? 'ON' : 'OFF'),
+      'UI         menu=' + (menu ? 'open' : 'closed') + '  hidden=' + (document.hidden ? 'yes' : 'no'),
+      'RPC        ' + (rpc ? (rpc.nazwa + ' · ' + rpc.status + (rpc.ms != null ? ' · ' + rpc.ms + 'ms' : '')) : 'brak'),
+      rpc && rpc.body ? 'RPC BODY   ' + JSON.stringify(rpc.body).slice(0, 150) : '',
+      rpc && rpc.odp ? 'RPC ODP    ' + JSON.stringify(rpc.odp).slice(0, 150) : '',
+      rpc && rpc.blad ? 'RPC ERR    ' + rpc.blad.slice(0, 150) : ''
+    ];
+    return linie.filter(Boolean).join('\n');
+  }
+
+  function odswiez() {
+    if (!el || !el.classList.contains('on')) return;
+    el.textContent = tekst();
+  }
+  function pokaz(on) {
+    if (!el) return;
+    const wl = on === undefined ? !el.classList.contains('on') : !!on;
+    el.classList.toggle('on', wl);
+    el.setAttribute('aria-hidden', wl ? 'false' : 'true');
+    clearInterval(timer); timer = 0;
+    if (wl) {
+      odswiez();
+      timer = setInterval(odswiez, 1000);
+    }
+  }
+  function zHash() { pokaz(location.hash === '#diag'); }
+  window.addEventListener('hashchange', zHash);
+  if (location.hash === '#diag') setTimeout(zHash, 0);
+  return { toggle: () => pokaz(), pokaz, odswiez };
+})();
+window.QDiag = QDiag;
+
+/* ============================================================
+   DRUGIE ZABEZPIECZENIE PRZED ZOOMEM NA POLACH (IX 2026, po zgloszeniu
+   Andrzeja: "graja na chrome a i tak im przyblizа i potem nie oddala").
+   Chrome na iOS to tez WebKit, wiec dziedziczy cale zachowanie Safari.
+   Samo `font-size: 16px` (patrz arkusz) powinno wystarczyc, ale nie
+   wystarcza wszedzie: przy powiekszonej czcionce systemowej iOS liczy
+   PRZESKALOWANY rozmiar, ktory znow schodzi ponizej progu, i zoomuje mimo
+   wszystko. Gorsze jest to, ze PO zamknieciu klawiatury WebKit nie cofa
+   przyblizenia sam -- gracz zostaje z rozjechanym kadrem.
+   Dlatego `maximum-scale=1` wchodzi TYLKO na czas pisania i znika zaraz
+   po wyjsciu z pola. Przez te kilka sekund powiekszanie szczypaniem jest
+   wylaczone, ale poza nimi dziala normalnie -- inaczej niz przy wpisaniu
+   `maximum-scale=1` na stale, ktore zabiera dostepnosc na zawsze (patrz
+   komentarz przy meta viewport).
+   Przywrocenie jest w setTimeout, bo WebKit ignoruje zmiane viewportu
+   wykonana w tej samej klatce co blur -- bez opoznienia kadr zostaje
+   przyblizony mimo poprawnego atrybutu.
+   ============================================================ */
+(function bezZoomuNaPolach() {
+  const vp = document.getElementById('vp');
+  if (!vp) return;
+  const LUZNY = 'width=device-width,initial-scale=1,viewport-fit=cover';
+  const SZTYWNY = LUZNY + ',maximum-scale=1,user-scalable=no';
+  let wPolu = 0;
+  const jestPolem = el => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  document.addEventListener('focusin', e => {
+    if (!jestPolem(e.target)) return;
+    wPolu++; vp.setAttribute('content', SZTYWNY);
+  }, true);
+  document.addEventListener('focusout', e => {
+    if (!jestPolem(e.target)) return;
+    wPolu = Math.max(0, wPolu - 1);
+    setTimeout(() => { if (!wPolu) vp.setAttribute('content', LUZNY); }, 320);
+  }, true);
+})();
+</script>
+
+<script>
+window.QRybyRhythm={
+  read(){
+    const b=document.body,p=document.getElementById('panel'),m=document.getElementById('menuMaster');
+    return {
+      menu:b.classList.contains('menu-master-open'),
+      panel:!!(p&&p.classList.contains('on')),
+      book:!!(window.Ksiega&&Ksiega.czyOtwarta&&Ksiega.czyOtwarta()),
+      card:!!(window.Card&&Card.open),
+      menuExpanded:m?m.getAttribute('aria-expanded'):null
+    };
+  }
+};
+</script>
+
+
+<style id="stage14-final-immersion">
+body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster{
+  background:transparent !important;border-color:rgba(214,174,86,.025) !important;
+  box-shadow:none !important;backdrop-filter:none !important
+}
+body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster>svg{opacity:.18 !important}
+body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster>span{opacity:0 !important}
+body.ui-idle #masterAlerts{opacity:1 !important}
+
+body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) .quickBtn{
+  color:rgba(243,217,133,.14) !important;background:transparent !important;
+  bo
+
+### let rpc =
+
+NOT FOUND
+
+
+### rpc = async
+
+NOT FOUND
+
+
+### .rpc(
+
+NOT FOUND
+
+
+### window.rpc
+
+NOT FOUND
