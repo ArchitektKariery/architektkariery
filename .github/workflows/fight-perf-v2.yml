@@ -1,0 +1,38 @@
+name: Fight performance v2
+on:
+  push:
+    branches: [main]
+    paths: ['tools/fight_perf_v2.py']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/fight_perf_v2.py
+      - name: Validate
+        run: |
+          git diff --check
+          grep -F "PERFORMANCE — lawica w czasie holu" qryby.html
+          grep -F "_fightSchoolBuf" qryby.html
+          grep -F "2026-09-26-fight-perf-v2" qryby.html
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('qryby.html').read_text(encoding='utf-8')
+          assert "const fight = !!(window.G && G.phase === 'fight' && G.hooked);" in s
+          assert "const stride = fpsNow < 45 ? 3 : 2;" in s
+          assert "g.drawImage(_fightSchoolBuf, 0, 0);" in s
+          assert s.rstrip().endswith('</html>')
+          print('fight perf v2 validation OK')
+          PY
+      - name: Commit
+        run: |
+          if git diff --quiet -- qryby.html; then exit 0; fi
+          git config user.name "qryby-fight-perf"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: cache background school during fight [skip ci]"
+          git push origin HEAD:main
