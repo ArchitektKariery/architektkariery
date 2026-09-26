@@ -1,6 +1,6 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: STAGE_6_DONE
+STATUS: STAGE_7_DONE
 LIVE_FUNDING: OFF
 
 ## Parametry
@@ -16,7 +16,7 @@ LIVE_FUNDING: OFF
 - [x] Stage 4 — odczyt live, timer, liczba darczyńców i historia wpłat
 - [x] Stage 5 — atomowe wpłaty
 - [x] Stage 6 — sukces, zamknięcie wpłat i kolejka nagrody
-- [ ] Stage 7 — EKO / tarło
+- [x] Stage 7 — Lucjan czerwony / EKO / tarło exactly-once
 - [ ] Stage 8 — porażka i zwroty
 - [ ] Stage 9 — QA
 
@@ -38,4 +38,19 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - reward przechodzi z locked do pending
 - test przejścia wykonany w transakcji i wycofany
 - po teście realny Lucjanek nadal ma state=draft, is_visible=false, raised_qryb=0 i reward=locked
+- LIVE_FUNDING pozostaje OFF
+
+
+## Stan po Stage 7
+- właściwy gatunek w grze: lucjan_czerwony, pasmo 4
+- przed odnową populacja startowa Lucjana wynosi 0 i gatunek nie może pojawić się w naturalnej ławicy
+- osiągnięcie celu zamraża po stronie serwera jeden z 10 scenariuszy tarła, liczbę ikry i czas startu
+- tarło jest widoczne w EKO jako standardowy czteroetapowy cykl: ikra → ikra zapłodniona → wylęg → narybek
+- pełny cykl trwa 10 minut i korzysta z tych samych współczynników przeżycia co zwykłe pokolenia EKO
+- końcowa liczba młodych uwzględnia aktualne zapełnienie jeziora
+- finalizacja jest atomowa i idempotentna: ponowne wywołanie nie dodaje drugiej populacji
+- po udanym zakończeniu młode trafiają do eko_populacja i kroniki społeczności
+- po zakończeniu event przechodzi do completed, reward do executed, a ikra pozostaje WYPRZEDANA
+- test pełnego przejścia wykonano w transakcji z rollbackiem; produkcyjny event nie został uruchomiony
+- aktualny stan produkcyjny: draft, niewidoczny, 0 QRYB, reward locked, brak wiersza Lucjana w eko_populacja
 - LIVE_FUNDING pozostaje OFF
