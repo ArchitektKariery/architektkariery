@@ -1,0 +1,2185 @@
+{
+  "raf": [
+    {
+      "line": 7748,
+      "owner": "frame",
+      "owner_line": 7722
+    },
+    {
+      "line": 7757,
+      "owner": "frame",
+      "owner_line": 7722
+    },
+    {
+      "line": 7834,
+      "owner": "frame",
+      "owner_line": 7722
+    },
+    {
+      "line": 7842,
+      "owner": "<global>",
+      "owner_line": 7842
+    },
+    {
+      "line": 10735,
+      "owner": "krok",
+      "owner_line": 10732
+    },
+    {
+      "line": 10800,
+      "owner": "nalej",
+      "owner_line": 10799
+    },
+    {
+      "line": 10844,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10898,
+      "owner": "seria",
+      "owner_line": 10885
+    },
+    {
+      "line": 16758,
+      "owner": "rysuj",
+      "owner_line": 16726
+    },
+    {
+      "line": 21216,
+      "owner": "step",
+      "owner_line": 21212
+    },
+    {
+      "line": 21218,
+      "owner": "loop",
+      "owner_line": 21210
+    },
+    {
+      "line": 22640,
+      "owner": "tick",
+      "owner_line": 22636
+    },
+    {
+      "line": 22642,
+      "owner": "hapLoop",
+      "owner_line": 22634
+    },
+    {
+      "line": 25617,
+      "owner": "tick",
+      "owner_line": 25602
+    },
+    {
+      "line": 25619,
+      "owner": "mechLoop",
+      "owner_line": 25600
+    }
+  ],
+  "interval": [
+    {
+      "line": 5710,
+      "owner": "<global>",
+      "owner_line": 5710
+    },
+    {
+      "line": 11007,
+      "owner": "<global>",
+      "owner_line": 11007
+    },
+    {
+      "line": 12129,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12645,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12659,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12693,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12805,
+      "owner": "przesyp",
+      "owner_line": 12801
+    },
+    {
+      "line": 14983,
+      "owner": "<global>",
+      "owner_line": 14983
+    },
+    {
+      "line": 16111,
+      "owner": "<global>",
+      "owner_line": 16111
+    },
+    {
+      "line": 16821,
+      "owner": "pasekTurniejowy",
+      "owner_line": 16591
+    },
+    {
+      "line": 17202,
+      "owner": "<global>",
+      "owner_line": 17202
+    },
+    {
+      "line": 18320,
+      "owner": "podepnijSzukajke",
+      "owner_line": 18307
+    },
+    {
+      "line": 18329,
+      "owner": "<global>",
+      "owner_line": 18329
+    },
+    {
+      "line": 26697,
+      "owner": "uiZlecen",
+      "owner_line": 26605
+    },
+    {
+      "line": 26736,
+      "owner": "uiZlecen",
+      "owner_line": 26605
+    },
+    {
+      "line": 28183,
+      "owner": "zegarPokolen",
+      "owner_line": 28180
+    },
+    {
+      "line": 28703,
+      "owner": "<global>",
+      "owner_line": 28703
+    },
+    {
+      "line": 29063,
+      "owner": "<global>",
+      "owner_line": 29063
+    },
+    {
+      "line": 29944,
+      "owner": "pokaz",
+      "owner_line": 29936
+    }
+  ],
+  "timeout": [
+    {
+      "line": 10724,
+      "owner": "fala",
+      "owner_line": 10715
+    },
+    {
+      "line": 10765,
+      "owner": "sypnij",
+      "owner_line": 10741
+    },
+    {
+      "line": 10768,
+      "owner": "sypnij",
+      "owner_line": 10741
+    },
+    {
+      "line": 10782,
+      "owner": "powiedz",
+      "owner_line": 10776
+    },
+    {
+      "line": 10850,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10854,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10856,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10858,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10877,
+      "owner": "zaRekord",
+      "owner_line": 10861
+    },
+    {
+      "line": 10902,
+      "owner": "seria",
+      "owner_line": 10885
+    },
+    {
+      "line": 10980,
+      "owner": "schowaj",
+      "owner_line": 10970
+    },
+    {
+      "line": 11019,
+      "owner": "<global>",
+      "owner_line": 11019
+    },
+    {
+      "line": 11350,
+      "owner": "podpMenuMaster",
+      "owner_line": 11323
+    },
+    {
+      "line": 12067,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12144,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12182,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12186,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12208,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12210,
+      "owner": "podepnijSklep",
+      "owner_line": 11980
+    },
+    {
+      "line": 12710,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12717,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12724,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12736,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12749,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12757,
+      "owner": "podepnijWiaderko",
+      "owner_line": 12629
+    },
+    {
+      "line": 12829,
+      "owner": "podepnijZadania",
+      "owner_line": 12811
+    },
+    {
+      "line": 12834,
+      "owner": "podepnijZadania",
+      "owner_line": 12811
+    },
+    {
+      "line": 13934,
+      "owner": "<global>",
+      "owner_line": 13934
+    },
+    {
+      "line": 14480,
+      "owner": "zapisz",
+      "owner_line": 14477
+    },
+    {
+      "line": 14981,
+      "owner": "<global>",
+      "owner_line": 14981
+    },
+    {
+      "line": 14997,
+      "owner": "<global>",
+      "owner_line": 14997
+    },
+    {
+      "line": 15139,
+      "owner": "zadanie",
+      "owner_line": 15136
+    },
+    {
+      "line": 15203,
+      "owner": "odswiezToken",
+      "owner_line": 15190
+    },
+    {
+      "line": 15329,
+      "owner": "zaplanujWyslanie",
+      "owner_line": 15326
+    },
+    {
+      "line": 15482,
+      "owner": "autoRekordy",
+      "owner_line": 15478
+    },
+    {
+      "line": 15488,
+      "owner": "<global>",
+      "owner_line": 15488
+    },
+    {
+      "line": 15489,
+      "owner": "<global>",
+      "owner_line": 15489
+    },
+    {
+      "line": 15747,
+      "owner": "planFlush",
+      "owner_line": 15744
+    },
+    {
+      "line": 15781,
+      "owner": "<global>",
+      "owner_line": 15781
+    },
+    {
+      "line": 15786,
+      "owner": "<global>",
+      "owner_line": 15786
+    },
+    {
+      "line": 15787,
+      "owner": "<global>",
+      "owner_line": 15787
+    },
+    {
+      "line": 15788,
+      "owner": "<global>",
+      "owner_line": 15788
+    },
+    {
+      "line": 15806,
+      "owner": "<global>",
+      "owner_line": 15806
+    },
+    {
+      "line": 15914,
+      "owner": "setStep",
+      "owner_line": 15902
+    },
+    {
+      "line": 15916,
+      "owner": "setStep",
+      "owner_line": 15902
+    },
+    {
+      "line": 16012,
+      "owner": "render",
+      "owner_line": 15956
+    },
+    {
+      "line": 16055,
+      "owner": "render",
+      "owner_line": 15956
+    },
+    {
+      "line": 16058,
+      "owner": "render",
+      "owner_line": 15956
+    },
+    {
+      "line": 16105,
+      "owner": "<global>",
+      "owner_line": 16105
+    },
+    {
+      "line": 16115,
+      "owner": "<global>",
+      "owner_line": 16115
+    },
+    {
+      "line": 16433,
+      "owner": "przestaw",
+      "owner_line": 16429
+    },
+    {
+      "line": 16796,
+      "owner": "pokazBaner",
+      "owner_line": 16782
+    },
+    {
+      "line": 16798,
+      "owner": "pokazBaner",
+      "owner_line": 16782
+    },
+    {
+      "line": 17201,
+      "owner": "<global>",
+      "owner_line": 17201
+    },
+    {
+      "line": 17517,
+      "owner": "zamknij",
+      "owner_line": 17513
+    },
+    {
+      "line": 18797,
+      "owner": "<global>",
+      "owner_line": 18797
+    },
+    {
+      "line": 19662,
+      "owner": "<global>",
+      "owner_line": 19662
+    },
+    {
+      "line": 21715,
+      "owner": "openCard",
+      "owner_line": 21520
+    },
+    {
+      "line": 22453,
+      "owner": "<global>",
+      "owner_line": 22453
+    },
+    {
+      "line": 22750,
+      "owner": "ambientStop",
+      "owner_line": 22742
+    },
+    {
+      "line": 22817,
+      "owner": "_zycieHarmonogram",
+      "owner_line": 22806
+    },
+    {
+      "line": 26656,
+      "owner": "uiZlecen",
+      "owner_line": 26605
+    },
+    {
+      "line": 28466,
+      "owner": "zakladkaEkosystemu",
+      "owner_line": 28197
+    },
+    {
+      "line": 29021,
+      "owner": "fallback",
+      "owner_line": 29018
+    },
+    {
+      "line": 29377,
+      "owner": "<global>",
+      "owner_line": 29377
+    },
+    {
+      "line": 29393,
+      "owner": "<global>",
+      "owner_line": 29393
+    },
+    {
+      "line": 29395,
+      "owner": "<global>",
+      "owner_line": 29395
+    },
+    {
+      "line": 29647,
+      "owner": "<global>",
+      "owner_line": 29647
+    },
+    {
+      "line": 29949,
+      "owner": "<global>",
+      "owner_line": 29949
+    },
+    {
+      "line": 29986,
+      "owner": "bezZoomuNaPolach",
+      "owner_line": 29972
+    }
+  ],
+  "gradient": [
+    {
+      "line": 6181,
+      "owner": "rysujCiala",
+      "owner_line": 6166
+    },
+    {
+      "line": 6347,
+      "owner": "drawTreeline",
+      "owner_line": 6326
+    },
+    {
+      "line": 6478,
+      "owner": "bakeBrzeg",
+      "owner_line": 6433
+    },
+    {
+      "line": 6635,
+      "owner": "horyzont",
+      "owner_line": 6620
+    },
+    {
+      "line": 6645,
+      "owner": "horyzont",
+      "owner_line": 6620
+    },
+    {
+      "line": 6791,
+      "owner": "poWodzie",
+      "owner_line": 6779
+    },
+    {
+      "line": 6807,
+      "owner": "poWodzie",
+      "owner_line": 6779
+    },
+    {
+      "line": 6823,
+      "owner": "poWodzie",
+      "owner_line": 6779
+    },
+    {
+      "line": 6832,
+      "owner": "poWodzie",
+      "owner_line": 6779
+    },
+    {
+      "line": 6854,
+      "owner": "podPowierzchnia",
+      "owner_line": 6843
+    },
+    {
+      "line": 6865,
+      "owner": "podPowierzchnia",
+      "owner_line": 6843
+    },
+    {
+      "line": 6882,
+      "owner": "nadRyba",
+      "owner_line": 6876
+    },
+    {
+      "line": 6894,
+      "owner": "nadRyba",
+      "owner_line": 6876
+    },
+    {
+      "line": 6972,
+      "owner": "tafla",
+      "owner_line": 6957
+    },
+    {
+      "line": 6982,
+      "owner": "tafla",
+      "owner_line": 6957
+    },
+    {
+      "line": 7002,
+      "owner": "tafla",
+      "owner_line": 6957
+    },
+    {
+      "line": 7021,
+      "owner": "wodaPoRybach",
+      "owner_line": 7012
+    },
+    {
+      "line": 7177,
+      "owner": "bakeWater",
+      "owner_line": 7172
+    },
+    {
+      "line": 7218,
+      "owner": "bakeWater",
+      "owner_line": 7172
+    },
+    {
+      "line": 7341,
+      "owner": "drawBed",
+      "owner_line": 7331
+    },
+    {
+      "line": 7372,
+      "owner": "drawBedForeground",
+      "owner_line": 7361
+    },
+    {
+      "line": 7433,
+      "owner": "back",
+      "owner_line": 7430
+    },
+    {
+      "line": 7448,
+      "owner": "front",
+      "owner_line": 7442
+    },
+    {
+      "line": 7455,
+      "owner": "front",
+      "owner_line": 7442
+    },
+    {
+      "line": 7461,
+      "owner": "front",
+      "owner_line": 7442
+    },
+    {
+      "line": 7520,
+      "owner": "drawLightBreath",
+      "owner_line": 7500
+    },
+    {
+      "line": 7572,
+      "owner": "bakeRays",
+      "owner_line": 7559
+    },
+    {
+      "line": 7621,
+      "owner": "drawVignette",
+      "owner_line": 7618
+    },
+    {
+      "line": 17590,
+      "owner": "papier",
+      "owner_line": 17584
+    },
+    {
+      "line": 17597,
+      "owner": "papier",
+      "owner_line": 17584
+    },
+    {
+      "line": 17600,
+      "owner": "papier",
+      "owner_line": 17584
+    },
+    {
+      "line": 17757,
+      "owner": "tresc",
+      "owner_line": 17637
+    },
+    {
+      "line": 18173,
+      "owner": "rysuj",
+      "owner_line": 18120
+    },
+    {
+      "line": 21950,
+      "owner": "drawCard",
+      "owner_line": 21906
+    },
+    {
+      "line": 23298,
+      "owner": "shadow",
+      "owner_line": 23292
+    },
+    {
+      "line": 23335,
+      "owner": "reflectionFog",
+      "owner_line": 23328
+    },
+    {
+      "line": 28943,
+      "owner": "gradientTier",
+      "owner_line": 28933
+    },
+    {
+      "line": 28966,
+      "owner": "canvas",
+      "owner_line": 28960
+    }
+  ],
+  "rect": [
+    {
+      "line": 5559,
+      "owner": "bezpieczny",
+      "owner_line": 5554
+    },
+    {
+      "line": 10716,
+      "owner": "fala",
+      "owner_line": 10715
+    },
+    {
+      "line": 10744,
+      "owner": "sypnij",
+      "owner_line": 10741
+    },
+    {
+      "line": 10745,
+      "owner": "sypnij",
+      "owner_line": 10741
+    },
+    {
+      "line": 10790,
+      "owner": "zPrzycisku",
+      "owner_line": 10787
+    },
+    {
+      "line": 10791,
+      "owner": "zPrzycisku",
+      "owner_line": 10787
+    },
+    {
+      "line": 10828,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10828,
+      "owner": "chmura",
+      "owner_line": 10825
+    },
+    {
+      "line": 10875,
+      "owner": "zaRekord",
+      "owner_line": 10861
+    },
+    {
+      "line": 10890,
+      "owner": "seria",
+      "owner_line": 10885
+    },
+    {
+      "line": 12821,
+      "owner": "podepnijZadania",
+      "owner_line": 12811
+    },
+    {
+      "line": 14035,
+      "owner": "doSceny",
+      "owner_line": 14034
+    },
+    {
+      "line": 14062,
+      "owner": "<global>",
+      "owner_line": 14062
+    },
+    {
+      "line": 14106,
+      "owner": "koniec",
+      "owner_line": 14068
+    },
+    {
+      "line": 25541,
+      "owner": "scenaZX",
+      "owner_line": 25539
+    }
+  ],
+  "sort": [
+    {
+      "line": 5390,
+      "owner": "cele",
+      "owner_line": 5388
+    },
+    {
+      "line": 6000,
+      "owner": "<global>",
+      "owner_line": 6000
+    },
+    {
+      "line": 6079,
+      "owner": "buildBed",
+      "owner_line": 6023
+    },
+    {
+      "line": 13387,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13667,
+      "owner": "<global>",
+      "owner_line": 13667
+    },
+    {
+      "line": 13684,
+      "owner": "<global>",
+      "owner_line": 13684
+    },
+    {
+      "line": 16656,
+      "owner": "wpisy",
+      "owner_line": 16638
+    },
+    {
+      "line": 17470,
+      "owner": "porzadekAtlasu",
+      "owner_line": 17467
+    },
+    {
+      "line": 19331,
+      "owner": "species",
+      "owner_line": 19329
+    },
+    {
+      "line": 21116,
+      "owner": "drawSchool",
+      "owner_line": 21109
+    },
+    {
+      "line": 21282,
+      "owner": "rysujSiec",
+      "owner_line": 21265
+    },
+    {
+      "line": 26483,
+      "owner": "zbudujZlecenie",
+      "owner_line": 26447
+    },
+    {
+      "line": 27274,
+      "owner": "podsumowanie",
+      "owner_line": 27264
+    },
+    {
+      "line": 29226,
+      "owner": "dedupe",
+      "owner_line": 29224
+    },
+    {
+      "line": 29546,
+      "owner": "dedupe",
+      "owner_line": 29544
+    }
+  ],
+  "filter": [
+    {
+      "line": 5623,
+      "owner": "rysuj",
+      "owner_line": 5580
+    },
+    {
+      "line": 11511,
+      "owner": "serverEntitlements",
+      "owner_line": 11509
+    },
+    {
+      "line": 11931,
+      "owner": "sklepHTML",
+      "owner_line": 11844
+    },
+    {
+      "line": 12368,
+      "owner": "usunTloKrawedzia",
+      "owner_line": 12366
+    },
+    {
+      "line": 12862,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 12883,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 12889,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 13260,
+      "owner": "ostrzezenieLigi",
+      "owner_line": 13256
+    },
+    {
+      "line": 13385,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13386,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13647,
+      "owner": "<global>",
+      "owner_line": 13647
+    },
+    {
+      "line": 13681,
+      "owner": "<global>",
+      "owner_line": 13681
+    },
+    {
+      "line": 13682,
+      "owner": "<global>",
+      "owner_line": 13682
+    },
+    {
+      "line": 13683,
+      "owner": "<global>",
+      "owner_line": 13683
+    },
+    {
+      "line": 13822,
+      "owner": "<global>",
+      "owner_line": 13822
+    },
+    {
+      "line": 14403,
+      "owner": "sanujZapis",
+      "owner_line": 14384
+    },
+    {
+      "line": 14423,
+      "owner": "sanujZapis",
+      "owner_line": 14384
+    },
+    {
+      "line": 14447,
+      "owner": "sanujZapis",
+      "owner_line": 14384
+    },
+    {
+      "line": 14540,
+      "owner": "podgladKodu",
+      "owner_line": 14532
+    },
+    {
+      "line": 14663,
+      "owner": "sprawdzKolekcje",
+      "owner_line": 14654
+    },
+    {
+      "line": 16257,
+      "owner": "<global>",
+      "owner_line": 16257
+    },
+    {
+      "line": 16364,
+      "owner": "opusc",
+      "owner_line": 16362
+    },
+    {
+      "line": 16557,
+      "owner": "skonczoneNiewyplacone",
+      "owner_line": 16555
+    },
+    {
+      "line": 16655,
+      "owner": "wpisy",
+      "owner_line": 16638
+    },
+    {
+      "line": 17162,
+      "owner": "poZlowieniu",
+      "owner_line": 17152
+    },
+    {
+      "line": 17342,
+      "owner": "obserwacje",
+      "owner_line": 17307
+    },
+    {
+      "line": 17354,
+      "owner": "poryTekst",
+      "owner_line": 17353
+    },
+    {
+      "line": 17482,
+      "owner": "<global>",
+      "owner_line": 17482
+    },
+    {
+      "line": 18781,
+      "owner": "audit",
+      "owner_line": 18779
+    },
+    {
+      "line": 19327,
+      "owner": "aktywne",
+      "owner_line": 19325
+    },
+    {
+      "line": 19330,
+      "owner": "species",
+      "owner_line": 19329
+    },
+    {
+      "line": 19412,
+      "owner": "consumeShoal",
+      "owner_line": 19407
+    },
+    {
+      "line": 21241,
+      "owner": "siecZarzuc",
+      "owner_line": 21239
+    },
+    {
+      "line": 24347,
+      "owner": "stepFloatSettle",
+      "owner_line": 24341
+    },
+    {
+      "line": 26449,
+      "owner": "zbudujZlecenie",
+      "owner_line": 26447
+    },
+    {
+      "line": 26489,
+      "owner": "zbudujZlecenie",
+      "owner_line": 26447
+    },
+    {
+      "line": 27298,
+      "owner": "kronikaPubliczna",
+      "owner_line": 27295
+    },
+    {
+      "line": 27356,
+      "owner": "materializuj",
+      "owner_line": 27351
+    },
+    {
+      "line": 27357,
+      "owner": "materializuj",
+      "owner_line": 27351
+    },
+    {
+      "line": 27374,
+      "owner": "wezOsobnika",
+      "owner_line": 27369
+    },
+    {
+      "line": 28319,
+      "owner": "html",
+      "owner_line": 28318
+    },
+    {
+      "line": 28333,
+      "owner": "html",
+      "owner_line": 28318
+    },
+    {
+      "line": 28334,
+      "owner": "html",
+      "owner_line": 28318
+    },
+    {
+      "line": 28834,
+      "owner": "surowe",
+      "owner_line": 28786
+    },
+    {
+      "line": 29639,
+      "owner": "telemetryShown",
+      "owner_line": 29634
+    },
+    {
+      "line": 29640,
+      "owner": "telemetryShown",
+      "owner_line": 29634
+    },
+    {
+      "line": 29641,
+      "owner": "telemetryShown",
+      "owner_line": 29634
+    },
+    {
+      "line": 29929,
+      "owner": "tekst",
+      "owner_line": 29903
+    }
+  ],
+  "map": [
+    {
+      "line": 3313,
+      "owner": "<global>",
+      "owner_line": 3313
+    },
+    {
+      "line": 3348,
+      "owner": "paleta",
+      "owner_line": 3333
+    },
+    {
+      "line": 3448,
+      "owner": "teraz",
+      "owner_line": 3425
+    },
+    {
+      "line": 3449,
+      "owner": "teraz",
+      "owner_line": 3425
+    },
+    {
+      "line": 3451,
+      "owner": "teraz",
+      "owner_line": 3425
+    },
+    {
+      "line": 3452,
+      "owner": "teraz",
+      "owner_line": 3425
+    },
+    {
+      "line": 4463,
+      "owner": "poObwodzie",
+      "owner_line": 4462
+    },
+    {
+      "line": 5390,
+      "owner": "cele",
+      "owner_line": 5388
+    },
+    {
+      "line": 5625,
+      "owner": "rysuj",
+      "owner_line": 5580
+    },
+    {
+      "line": 6291,
+      "owner": "chmuraZGlebia",
+      "owner_line": 6266
+    },
+    {
+      "line": 6437,
+      "owner": "bakeBrzeg",
+      "owner_line": 6433
+    },
+    {
+      "line": 11184,
+      "owner": "<global>",
+      "owner_line": 11184
+    },
+    {
+      "line": 11187,
+      "owner": "<global>",
+      "owner_line": 11187
+    },
+    {
+      "line": 11577,
+      "owner": "html",
+      "owner_line": 11554
+    },
+    {
+      "line": 11716,
+      "owner": "odnowaKafel",
+      "owner_line": 11710
+    },
+    {
+      "line": 11800,
+      "owner": "fortuneHTML",
+      "owner_line": 11796
+    },
+    {
+      "line": 11925,
+      "owner": "sklepHTML",
+      "owner_line": 11844
+    },
+    {
+      "line": 11963,
+      "owner": "sklepHTML",
+      "owner_line": 11844
+    },
+    {
+      "line": 11966,
+      "owner": "sklepHTML",
+      "owner_line": 11844
+    },
+    {
+      "line": 11969,
+      "owner": "sklepHTML",
+      "owner_line": 11844
+    },
+    {
+      "line": 12426,
+      "owner": "ensure",
+      "owner_line": 12422
+    },
+    {
+      "line": 12456,
+      "owner": "ensure",
+      "owner_line": 12422
+    },
+    {
+      "line": 12862,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 12883,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 12889,
+      "owner": "panelGracza",
+      "owner_line": 12852
+    },
+    {
+      "line": 13340,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13365,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13389,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13399,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13416,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13433,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13438,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13453,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13468,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13488,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13512,
+      "owner": "panelTurniejow",
+      "owner_line": 13293
+    },
+    {
+      "line": 13572,
+      "owner": "wynikTurniejuHTML",
+      "owner_line": 13569
+    },
+    {
+      "line": 13600,
+      "owner": "historiaTurniejowHTML",
+      "owner_line": 13597
+    },
+    {
+      "line": 13747,
+      "owner": "<global>",
+      "owner_line": 13747
+    },
+    {
+      "line": 13802,
+      "owner": "<global>",
+      "owner_line": 13802
+    },
+    {
+      "line": 13825,
+      "owner": "<global>",
+      "owner_line": 13825
+    },
+    {
+      "line": 13858,
+      "owner": "<global>",
+      "owner_line": 13858
+    },
+    {
+      "line": 14448,
+      "owner": "sanujZapis",
+      "owner_line": 14384
+    },
+    {
+      "line": 16645,
+      "owner": "wpisy",
+      "owner_line": 16638
+    },
+    {
+      "line": 16659,
+      "owner": "wpisy",
+      "owner_line": 16638
+    },
+    {
+      "line": 16663,
+      "owner": "wpisy",
+      "owner_line": 16638
+    },
+    {
+      "line": 16752,
+      "owner": "rysuj",
+      "owner_line": 16726
+    },
+    {
+      "line": 17167,
+      "owner": "poZlowieniu",
+      "owner_line": 17152
+    },
+    {
+      "line": 17342,
+      "owner": "obserwacje",
+      "owner_line": 17307
+    },
+    {
+      "line": 17354,
+      "owner": "poryTekst",
+      "owner_line": 17353
+    },
+    {
+      "line": 17478,
+      "owner": "<global>",
+      "owner_line": 17478
+    },
+    {
+      "line": 17990,
+      "owner": "trescPomocy",
+      "owner_line": 17969
+    },
+    {
+      "line": 19418,
+      "owner": "<global>",
+      "owner_line": 19418
+    },
+    {
+      "line": 21245,
+      "owner": "siecZarzuc",
+      "owner_line": 21239
+    },
+    {
+      "line": 22353,
+      "owner": "drawCard",
+      "owner_line": 21906
+    },
+    {
+      "line": 25997,
+      "owner": "nowaOferta",
+      "owner_line": 25980
+    },
+    {
+      "line": 26023,
+      "owner": "przeliczOferte",
+      "owner_line": 26009
+    },
+    {
+      "line": 26466,
+      "owner": "zbudujZlecenie",
+      "owner_line": 26447
+    },
+    {
+      "line": 26483,
+      "owner": "zbudujZlecenie",
+      "owner_line": 26447
+    },
+    {
+      "line": 28019,
+      "owner": "pokolenia",
+      "owner_line": 28017
+    },
+    {
+      "line": 29334,
+      "owner": "render",
+      "owner_line": 29302
+    }
+  ],
+  "json": [
+    {
+      "line": 11619,
+      "owner": "demoGrant",
+      "owner_line": 11612
+    },
+    {
+      "line": 14471,
+      "owner": "teraz",
+      "owner_line": 14469
+    },
+    {
+      "line": 14507,
+      "owner": "<global>",
+      "owner_line": 14507
+    },
+    {
+      "line": 14795,
+      "owner": "zrobKopieZapasowa",
+      "owner_line": 14794
+    },
+    {
+      "line": 15068,
+      "owner": "ustawKonf",
+      "owner_line": 15063
+    },
+    {
+      "line": 15129,
+      "owner": "zapiszSesje",
+      "owner_line": 15117
+    },
+    {
+      "line": 15194,
+      "owner": "odswiezToken",
+      "owner_line": 15190
+    },
+    {
+      "line": 15206,
+      "owner": "odswiezToken",
+      "owner_line": 15190
+    },
+    {
+      "line": 15234,
+      "owner": "sprawdzPotwierdzenie",
+      "owner_line": 15226
+    },
+    {
+      "line": 15240,
+      "owner": "sprawdzPotwierdzenie",
+      "owner_line": 15226
+    },
+    {
+      "line": 15249,
+      "owner": "anonim",
+      "owner_line": 15248
+    },
+    {
+      "line": 15256,
+      "owner": "rejestracja",
+      "owner_line": 15254
+    },
+    {
+      "line": 15263,
+      "owner": "logowanie",
+      "owner_line": 15261
+    },
+    {
+      "line": 15274,
+      "owner": "dopnijMail",
+      "owner_line": 15271
+    },
+    {
+      "line": 15279,
+      "owner": "dopnijMail",
+      "owner_line": 15271
+    },
+    {
+      "line": 15312,
+      "owner": "wyslijTeraz",
+      "owner_line": 15303
+    },
+    {
+      "line": 15452,
+      "owner": "wolajRpc",
+      "owner_line": 15447
+    },
+    {
+      "line": 15647,
+      "owner": "saveQueue",
+      "owner_line": 15645
+    },
+    {
+      "line": 15724,
+      "owner": "flush",
+      "owner_line": 15709
+    },
+    {
+      "line": 15866,
+      "owner": "saveLast",
+      "owner_line": 15864
+    },
+    {
+      "line": 16778,
+      "owner": "zapamietajRunde",
+      "owner_line": 16778
+    },
+    {
+      "line": 17234,
+      "owner": "save",
+      "owner_line": 17232
+    },
+    {
+      "line": 22445,
+      "owner": "<global>",
+      "owner_line": 22445
+    },
+    {
+      "line": 28844,
+      "owner": "odswiezDlaKarty",
+      "owner_line": 28842
+    },
+    {
+      "line": 28846,
+      "owner": "odswiezDlaKarty",
+      "owner_line": 28842
+    },
+    {
+      "line": 29107,
+      "owner": "save",
+      "owner_line": 29105
+    },
+    {
+      "line": 29440,
+      "owner": "save",
+      "owner_line": 29439
+    },
+    {
+      "line": 29925,
+      "owner": "tekst",
+      "owner_line": 29903
+    },
+    {
+      "line": 29926,
+      "owner": "tekst",
+      "owner_line": 29903
+    }
+  ],
+  "storage": [
+    {
+      "line": 11449,
+      "owner": "<global>",
+      "owner_line": 11449
+    },
+    {
+      "line": 11517,
+      "owner": "demoEntitlements",
+      "owner_line": 11514
+    },
+    {
+      "line": 11530,
+      "owner": "equipped",
+      "owner_line": 11528
+    },
+    {
+      "line": 11538,
+      "owner": "equip",
+      "owner_line": 11536
+    },
+    {
+      "line": 11616,
+      "owner": "demoGrant",
+      "owner_line": 11612
+    },
+    {
+      "line": 11619,
+      "owner": "demoGrant",
+      "owner_line": 11612
+    },
+    {
+      "line": 14205,
+      "owner": "<global>",
+      "owner_line": 14205
+    },
+    {
+      "line": 14206,
+      "owner": "<global>",
+      "owner_line": 14206
+    },
+    {
+      "line": 14207,
+      "owner": "<global>",
+      "owner_line": 14207
+    },
+    {
+      "line": 14867,
+      "owner": "lsGet",
+      "owner_line": 14866
+    },
+    {
+      "line": 14871,
+      "owner": "lsSet",
+      "owner_line": 14870
+    },
+    {
+      "line": 15620,
+      "owner": "getLocal",
+      "owner_line": 15619
+    },
+    {
+      "line": 15623,
+      "owner": "setLocal",
+      "owner_line": 15622
+    },
+    {
+      "line": 15858,
+      "owner": "lsGet",
+      "owner_line": 15858
+    },
+    {
+      "line": 15859,
+      "owner": "lsSet",
+      "owner_line": 15859
+    },
+    {
+      "line": 15866,
+      "owner": "saveLast",
+      "owner_line": 15864
+    },
+    {
+      "line": 17157,
+      "owner": "poZlowieniu",
+      "owner_line": 17152
+    },
+    {
+      "line": 17171,
+      "owner": "poZlowieniu",
+      "owner_line": 17152
+    },
+    {
+      "line": 17178,
+      "owner": "init",
+      "owner_line": 17175
+    },
+    {
+      "line": 17179,
+      "owner": "init",
+      "owner_line": 17175
+    },
+    {
+      "line": 17228,
+      "owner": "load",
+      "owner_line": 17226
+    },
+    {
+      "line": 17234,
+      "owner": "save",
+      "owner_line": 17232
+    },
+    {
+      "line": 29100,
+      "owner": "load",
+      "owner_line": 29098
+    },
+    {
+      "line": 29107,
+      "owner": "save",
+      "owner_line": 29105
+    },
+    {
+      "line": 29435,
+      "owner": "load",
+      "owner_line": 29433
+    },
+    {
+      "line": 29440,
+      "owner": "save",
+      "owner_line": 29439
+    }
+  ],
+  "drawImage": [
+    {
+      "line": 5901,
+      "owner": "<global>",
+      "owner_line": 5901
+    },
+    {
+      "line": 5907,
+      "owner": "sprS",
+      "owner_line": 5904
+    },
+    {
+      "line": 5913,
+      "owner": "<global>",
+      "owner_line": 5913
+    },
+    {
+      "line": 5919,
+      "owner": "spr",
+      "owner_line": 5916
+    },
+    {
+      "line": 5926,
+      "owner": "sprW",
+      "owner_line": 5923
+    },
+    {
+      "line": 5933,
+      "owner": "sprR",
+      "owner_line": 5930
+    },
+    {
+      "line": 6098,
+      "owner": "bakeWeeds",
+      "owner_line": 6085
+    },
+    {
+      "line": 6288,
+      "owner": "chmuraZGlebia",
+      "owner_line": 6266
+    },
+    {
+      "line": 6314,
+      "owner": "drawSky",
+      "owner_line": 6310
+    },
+    {
+      "line": 6337,
+      "owner": "drawTreeline",
+      "owner_line": 6326
+    },
+    {
+      "line": 6342,
+      "owner": "drawTreeline",
+      "owner_line": 6326
+    },
+    {
+      "line": 6442,
+      "owner": "bakeBrzeg",
+      "owner_line": 6433
+    },
+    {
+      "line": 6490,
+      "owner": "kafleBrzegu",
+      "owner_line": 6487
+    },
+    {
+      "line": 6499,
+      "owner": "drawBrzeg",
+      "owner_line": 6495
+    },
+    {
+      "line": 7156,
+      "owner": "odbicieBrzegu",
+      "owner_line": 7144
+    },
+    {
+      "line": 7199,
+      "owner": "bakeWater",
+      "owner_line": 7172
+    },
+    {
+      "line": 7203,
+      "owner": "bakeWater",
+      "owner_line": 7172
+    },
+    {
+      "line": 7215,
+      "owner": "bakeWater",
+      "owner_line": 7172
+    },
+    {
+      "line": 7246,
+      "owner": "drawWater",
+      "owner_line": 7225
+    },
+    {
+      "line": 7249,
+      "owner": "drawWater",
+      "owner_line": 7225
+    },
+    {
+      "line": 7324,
+      "owner": "drawBedItem",
+      "owner_line": 7311
+    },
+    {
+      "line": 7337,
+      "owner": "drawBed",
+      "owner_line": 7331
+    },
+    {
+      "line": 7610,
+      "owner": "drawGodRays",
+      "owner_line": 7592
+    },
+    {
+      "line": 9655,
+      "owner": "zKonturem",
+      "owner_line": 9647
+    },
+    {
+      "line": 9663,
+      "owner": "zKonturem",
+      "owner_line": 9647
+    },
+    {
+      "line": 9664,
+      "owner": "zKonturem",
+      "owner_line": 9647
+    },
+    {
+      "line": 12419,
+      "owner": "wytnijDoURI",
+      "owner_line": 12414
+    },
+    {
+      "line": 12435,
+      "owner": "ensure",
+      "owner_line": 12422
+    },
+    {
+      "line": 17706,
+      "owner": "tresc",
+      "owner_line": 17637
+    },
+    {
+      "line": 17718,
+      "owner": "tresc",
+      "owner_line": 17637
+    },
+    {
+      "line": 18145,
+      "owner": "rysuj",
+      "owner_line": 18120
+    },
+    {
+      "line": 18185,
+      "owner": "rysuj",
+      "owner_line": 18120
+    },
+    {
+      "line": 20883,
+      "owner": "paskiRyby",
+      "owner_line": 20844
+    },
+    {
+      "line": 20926,
+      "owner": "paskiRyby",
+      "owner_line": 20844
+    },
+    {
+      "line": 21086,
+      "owner": "drawFish",
+      "owner_line": 20936
+    },
+    {
+      "line": 21132,
+      "owner": "drawSchool",
+      "owner_line": 21109
+    },
+    {
+      "line": 21453,
+      "owner": "capture",
+      "owner_line": 21445
+    },
+    {
+      "line": 21460,
+      "owner": "draw",
+      "owner_line": 21457
+    },
+    {
+      "line": 22022,
+      "owner": "drawCard",
+      "owner_line": 21906
+    },
+    {
+      "line": 22058,
+      "owner": "drawCard",
+      "owner_line": 21906
+    },
+    {
+      "line": 22959,
+      "owner": "przemalujLodke",
+      "owner_line": 22949
+    },
+    {
+      "line": 22993,
+      "owner": "sylObrysu",
+      "owner_line": 22984
+    },
+    {
+      "line": 23002,
+      "owner": "rysujZObrysem",
+      "owner_line": 23000
+    },
+    {
+      "line": 23003,
+      "owner": "rysujZObrysem",
+      "owner_line": 23000
+    },
+    {
+      "line": 23221,
+      "owner": "drawRod",
+      "owner_line": 23204
+    },
+    {
+      "line": 23227,
+      "owner": "drawRod",
+      "owner_line": 23204
+    },
+    {
+      "line": 23232,
+      "owner": "drawRod",
+      "owner_line": 23204
+    },
+    {
+      "line": 23234,
+      "owner": "drawRod",
+      "owner_line": 23204
+    },
+    {
+      "line": 23592,
+      "owner": "<global>",
+      "owner_line": 23592
+    },
+    {
+      "line": 23745,
+      "owner": "rysuj",
+      "owner_line": 23715
+    },
+    {
+      "line": 28951,
+      "owner": "drawFish",
+      "owner_line": 28946
+    }
+  ],
+  "hot_gameplay_functions": [
+    {
+      "name": "drawSky",
+      "line": 6310,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawTreeline",
+      "line": 6326,
+      "counts": {
+        "gradient": 1,
+        "drawImage": 2
+      }
+    },
+    {
+      "name": "drawBrzeg",
+      "line": 6495,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "nadRyba",
+      "line": 6876,
+      "counts": {
+        "gradient": 2
+      }
+    },
+    {
+      "name": "wodaPoRybach",
+      "line": 7012,
+      "counts": {
+        "gradient": 1
+      }
+    },
+    {
+      "name": "bakeWater",
+      "line": 7172,
+      "counts": {
+        "gradient": 2,
+        "drawImage": 3
+      }
+    },
+    {
+      "name": "drawWater",
+      "line": 7225,
+      "counts": {
+        "drawImage": 2
+      }
+    },
+    {
+      "name": "drawBedItem",
+      "line": 7311,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawBed",
+      "line": 7331,
+      "counts": {
+        "gradient": 1,
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawBedForeground",
+      "line": 7361,
+      "counts": {
+        "gradient": 1
+      }
+    },
+    {
+      "name": "drawLightBreath",
+      "line": 7500,
+      "counts": {
+        "gradient": 1
+      }
+    },
+    {
+      "name": "drawGodRays",
+      "line": 7592,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawVignette",
+      "line": 7618,
+      "counts": {
+        "gradient": 1
+      }
+    },
+    {
+      "name": "fala",
+      "line": 10715,
+      "counts": {
+        "timeout": 1,
+        "rect": 1
+      }
+    },
+    {
+      "name": "setStep",
+      "line": 15902,
+      "counts": {
+        "timeout": 2
+      }
+    },
+    {
+      "name": "render",
+      "line": 15956,
+      "counts": {
+        "timeout": 3
+      }
+    },
+    {
+      "name": "paskiRyby",
+      "line": 20844,
+      "counts": {
+        "drawImage": 2
+      }
+    },
+    {
+      "name": "drawFish",
+      "line": 20936,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawSchool",
+      "line": 21109,
+      "counts": {
+        "sort": 1,
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "loop",
+      "line": 21210,
+      "counts": {
+        "raf": 2
+      }
+    },
+    {
+      "name": "step",
+      "line": 21212,
+      "counts": {
+        "raf": 1
+      }
+    },
+    {
+      "name": "draw",
+      "line": 21457,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "drawCard",
+      "line": 21906,
+      "counts": {
+        "gradient": 1,
+        "map": 1,
+        "drawImage": 2
+      }
+    },
+    {
+      "name": "hapLoop",
+      "line": 22634,
+      "counts": {
+        "raf": 2
+      }
+    },
+    {
+      "name": "tick",
+      "line": 22636,
+      "counts": {
+        "raf": 1
+      }
+    },
+    {
+      "name": "drawRod",
+      "line": 23204,
+      "counts": {
+        "drawImage": 4
+      }
+    },
+    {
+      "name": "stepFloatSettle",
+      "line": 24341,
+      "counts": {
+        "filter": 1
+      }
+    },
+    {
+      "name": "mechLoop",
+      "line": 25600,
+      "counts": {
+        "raf": 2
+      }
+    },
+    {
+      "name": "tick",
+      "line": 25602,
+      "counts": {
+        "raf": 1
+      }
+    },
+    {
+      "name": "drawFish",
+      "line": 28946,
+      "counts": {
+        "drawImage": 1
+      }
+    },
+    {
+      "name": "render",
+      "line": 29302,
+      "counts": {
+        "map": 1
+      }
+    }
+  ]
+}
