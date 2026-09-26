@@ -39,6 +39,7 @@ required_migrations = [
     "20260926_community_restoration_stage6_funded_transition.sql",
     "20260926_community_restoration_stage7_eko_reward.sql",
     "20260926_community_restoration_stage8_no_refunds.sql",
+    "20260926_community_restoration_stage9_launch_gate.sql",
 ]
 for name in required_migrations:
     require((root / "supabase/migrations" / name).exists(), f"missing migration: {name}")
