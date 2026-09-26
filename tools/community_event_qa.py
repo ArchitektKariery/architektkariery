@@ -16,6 +16,7 @@ require(any(x in html for x in [
     "2026-09-26-lucjanek-stage7-v1",
     "2026-09-26-fight-perf-v1",
     "2026-09-26-fight-perf-v2",
+    "2026-09-26-fight-perf-v3",
 ]), "missing supported QRyby build id")
 require(html.count("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -28,6 +29,9 @@ require("rybBuf.__holFrame" in html, "hooked-fish render cache missing")
 require("holStride = fpsNow < 45 ? 3 : 2" in html, "adaptive fight render stride missing")
 require("_fightSchoolBuf" in html, "fight school layer cache missing")
 require("g.drawImage(_fightSchoolBuf, 0, 0)" in html, "fight school cache draw missing")
+require("const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2" in html, "adaptive fight water stride missing")
+require("_fightSchoolUpdateAcc" in html, "fight school simulation accumulator missing")
+require("targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" in html, "fight school simulation throttle missing")
 
 for marker in [
     "community_contribute",
