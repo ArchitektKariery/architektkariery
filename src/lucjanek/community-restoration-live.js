@@ -63,6 +63,67 @@
     ).join('');
   }
 
+  function ensureContributionControls(card, event) {
+    let wrap = card.querySelector('.odn-contribute');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'odn-contribute';
+      wrap.style.cssText = 'display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:10px;align-items:center';
+      wrap.innerHTML =
+        '<input class="odn-amount" inputmode="numeric" pattern="[0-9]*" placeholder="Kwota QRYB" ' +
+        'style="min-width:0;padding:8px 9px;border:1px solid rgba(72,40,28,.28);border-radius:8px;background:rgba(255,255,255,.48)">' +
+        '<button class="odb odn-pay" type="button">WPŁAĆ</button>' +
+        '<div class="odn-pay-msg" style="grid-column:1/-1;font-size:9px;line-height:1.35;opacity:.72"></div>';
+      const disabled = card.querySelector('.odn-disabled');
+      if (disabled) disabled.replaceWith(wrap);
+      else card.appendChild(wrap);
+
+      const btn = wrap.querySelector('.odn-pay');
+      const input = wrap.querySelector('.odn-amount');
+      const msg = wrap.querySelector('.odn-pay-msg');
+
+      btn.addEventListener('click', async () => {
+        const amount = Math.trunc(Number(String(input.value || '').replace(/\s/g,'')));
+        if (!Number.isFinite(amount) || amount <= 0) {
+          msg.textContent = 'Wpisz poprawną kwotę QRYB.';
+          return;
+        }
+        btn.disabled = true;
+        input.disabled = true;
+        msg.textContent = 'Wpłata...';
+        try {
+          const requestId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+            '00000000-0000-4000-8000-' + Date.now().toString().padStart(12,'0').slice(-12);
+          const result = await callRpc('community_contribute', {
+            p_slug: SLUG,
+            p_amount: amount,
+            p_request_id: requestId,
+            p_anonymous: false
+          });
+          const accepted = Number(result && result.accepted_qryb) || 0;
+          msg.textContent = accepted > 0
+            ? 'Wpłacono ' + fmt(accepted) + ' QRYB. Odświeżam stan...'
+            : 'Wpłata zakończona.';
+          await refresh();
+          setTimeout(() => window.location.reload(), 700);
+        } catch (err) {
+          console.warn('[QRyby][Odnowa] wpłata nieudana', err);
+          const m = String(err && (err.message || err) || '');
+          msg.textContent =
+            m.includes('INSUFFICIENT_QRYB') ? 'Masz za mało QRYB.' :
+            m.includes('CONFIRMED_EMAIL_REQUIRED') ? 'Najpierw potwierdź adres e-mail.' :
+            m.includes('EVENT_NOT_OPEN') ? 'Zbiórka nie jest aktywna.' :
+            'Nie udało się wykonać wpłaty.';
+          btn.disabled = false;
+          input.disabled = false;
+        }
+      });
+    }
+
+    const open = event && event.state === 'funding';
+    wrap.style.display = open ? 'grid' : 'none';
+  }
+
   function renderLive(card, event, rows) {
     const raised = Number(event.raised_qryb) || 0;
     const target = Math.max(1, Number(event.target_qryb) || 500000000);
@@ -90,6 +151,7 @@
     }
 
     renderHistory(card, rows);
+    ensureContributionControls(card, event);
   }
 
   async function refresh() {
@@ -102,6 +164,8 @@
       if (!event) {
         const note = card.querySelector('.odn-stage-note');
         if (note) note.textContent = 'EVENT JESZCZE NIEAKTYWNY · PODGLĄD GOTOWY';
+        const wrap = card.querySelector('.odn-contribute');
+        if (wrap) wrap.style.display = 'none';
         return;
       }
 
