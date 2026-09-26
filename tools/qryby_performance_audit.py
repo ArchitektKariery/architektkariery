@@ -97,3 +97,5 @@ Path("docs/qryby-performance-audit.txt").write_text(
 )
 print(json.dumps(summary,ensure_ascii=False))
 print("hot_functions", len(hot))
+
+# trigger-full-perf-audit
