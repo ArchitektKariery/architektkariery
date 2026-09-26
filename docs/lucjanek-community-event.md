@@ -1,6 +1,6 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: STAGE_7_DONE
+STATUS: STAGE_8_DONE
 LIVE_FUNDING: OFF
 
 ## Parametry
@@ -54,3 +54,17 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - test pełnego przejścia wykonano w transakcji z rollbackiem; produkcyjny event nie został uruchomiony
 - aktualny stan produkcyjny: draft, niewidoczny, 0 QRYB, reward locked, brak wiersza Lucjana w eko_populacja
 - LIVE_FUNDING pozostaje OFF
+
+
+## Stan po Stage 8
+- jeśli po 7 dniach raised_qryb < 500 000 000 QRYB, event przechodzi automatycznie do FAILED
+- wpłaty przepadają; nie ma refundów ani zwrotu do portfeli
+- historia wpłat pozostaje zachowana
+- reward przechodzi do failed i nie może uruchomić tarła
+- community_contribute nadal blokuje wpłatę poza oknem czasowym i po zamknięciu eventu
+- wygaszanie działa serwerowo przez private.community_expire_events()
+- Supabase Cron uruchamia kontrolę wygasłych eventów co minutę
+- testowy event wygasł poprawnie: FAILED + closed_at + funds_refunded=false
+- testowy fixture został ukryty (is_visible=false)
+- właściwy event Lucjana nadal pozostaje: draft / invisible / 0 QRYB
+- NEXT: STAGE_9_QA_AND_LAUNCH
