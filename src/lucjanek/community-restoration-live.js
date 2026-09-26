@@ -122,6 +122,10 @@
 
     const open = event && event.state === 'funding';
     wrap.style.display = open ? 'grid' : 'none';
+    if (!open && event && (event.state === 'funded' || event.state === 'completed')) {
+      const msg = wrap.querySelector('.odn-pay-msg');
+      if (msg) msg.textContent = 'Cel osiągnięty — wpłaty są zamknięte.';
+    }
   }
 
   function renderLive(card, event, rows) {
@@ -146,7 +150,7 @@
     const note = card.querySelector('.odn-stage-note');
     if (note) {
       note.textContent = (event.state === 'funded' || event.state === 'completed')
-        ? 'CEL OSIĄGNIĘTY · LUCJANEK WRACA DO EKO'
+        ? 'CEL OSIĄGNIĘTY · IKRA WYPRZEDANA · NAGRODA OCZEKUJE NA EKO'
         : 'LIVE · POSTĘP I HISTORIA WPŁAT Z SERWERA';
     }
 
