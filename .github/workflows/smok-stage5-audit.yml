@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'qryby.html'
       - 'tools/smok-stage5-audit.py'
       - '.github/workflows/smok-stage5-audit.yml'
 
