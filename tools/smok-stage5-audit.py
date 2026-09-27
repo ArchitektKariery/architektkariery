@@ -43,7 +43,7 @@ checks["bobber_state_present"] = len(bob_terms) > 0
 checks["hook_state_present"] = len(hook_terms) > 0
 
 # Implementation-level line / bobber coherence during bite and fight.
-checks["shared_float_pose"] = "const floatPose = FloatFX.pose(t);" in src
+checks["shared_float_pose"] = ("let floatPose = FloatFX.pose(t);" in src) or ("const floatPose = FloatFX.pose(t);" in src)
 checks["float_held_at_rod_tip"] = "if (floatPose.mode === 'held') floatPose = FloatFX.heldAtTip(rodTipVisual);" in src
 checks["fight_line_targets_hooked_fish_mouth"] = (
     "if (G.hooked && typeof mouthOf === 'function')" in src and
