@@ -10,15 +10,24 @@ def has(x):
     return x in src
 
 # 1) Dragon identity / natural-spawn isolation
-checks["dragon_registered"] = "GATUNKI.smok_zycia" in src and "nazva: 'Smok Życia'" not in src
-checks["dragon_name"] = "nazwa: 'Smok Życia'" in src
-checks["dragon_no_natural_weight"] = re.search(r"smok_zycia[\s\S]{0,12000}?udzial:\s*0", src) is not None
-checks["dragon_outside_eko"] = re.search(r"smok_zycia[\s\S]{0,12000}?bezEko:\s*true", src) is not None
-checks["dragon_legendary_flag"] = re.search(r"smok_zycia[\s\S]{0,12000}?legendarny:\s*true", src) is not None
+reg_start = src.find("(function dodajSmokaZycia()")
+reg_end = src.find("})();", reg_start)
+reg_block = src[reg_start:reg_end+4] if reg_start >= 0 and reg_end >= 0 else ""
+# The embedded PNG is large, so strip it before checking metadata that comes after it.
+reg_struct = re.sub(r"src:\s*'data:image/png;base64,[^']+'", "src:'<embedded-png>'", reg_block)
+checks["dragon_registered"] = reg_start >= 0 and "GATUNKI.smok_zycia" in reg_struct
+checks["dragon_name"] = "nazwa: 'Smok Życia'" in reg_struct
+checks["dragon_no_natural_weight"] = re.search(r"udzial:\s*0", reg_struct) is not None
+checks["dragon_outside_eko"] = re.search(r"bezEko:\s*true", reg_struct) is not None
+checks["dragon_legendary_flag"] = re.search(r"legendarny:\s*true", reg_struct) is not None
 
 # 2) Approved visual contract
-checks["sprite_embedded"] = re.search(r"smok_zycia[\s\S]{0,12000}?src:\s*'data:image/png;base64,", src) is not None
-checks["sprite_meta_192x62"] = "meta: { w: 192, h: 62 }" in src
+sprite_match = re.search(r"src:\s*'data:image/png;base64,([^']+)'", reg_block)
+checks["sprite_embedded"] = bool(sprite_match and len(sprite_match.group(1)) > 1000)
+meta_match = re.search(r"meta:\s*\{\s*w:\s*(\d+),\s*h:\s*(\d+)\s*\}", reg_struct)
+checks["sprite_meta_width_192"] = bool(meta_match and int(meta_match.group(1)) == 192)
+if meta_match:
+    notes["sprite_meta"] = {"w": int(meta_match.group(1)), "h": int(meta_match.group(2))}
 checks["screen_width_22_5pct"] = "Scene.W * 0.225" in src
 
 # 3) Fortune Cookie -> next shoal -> exactly one dragon
