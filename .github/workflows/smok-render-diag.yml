@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'qryby.html'
       - 'tools/smok-render-diag.py'
       - '.github/workflows/smok-render-diag.yml'
 
@@ -32,5 +33,17 @@ jobs:
           if not m:
               print(s[-5000:])
               raise SystemExit("SMOK_DIAG_RESULT_NOT_FOUND")
-          print("SMOK_DIAG_RESULT="+m.group(1))
+          import json
+          data=json.loads(m.group(1))
+          print("SMOK_DIAG_RESULT="+json.dumps(data,ensure_ascii=False))
+          assert data.get("fishAtlasReady") is True, data
+          assert data.get("schoolLength")==1, data
+          assert data.get("gat")=="smok_zycia", data
+          assert data.get("imgComplete") is True, data
+          assert data.get("naturalWidth")==192 and data.get("naturalHeight")==62, data
+          assert data.get("zepsuty") is False, data
+          assert data.get("kontur") is True, data
+          assert data.get("directDrawAlphaPixels",0) > 500, data
+          assert data.get("schoolDrawAlphaPixels",0) > 500, data
+          print("SMOK_BROWSER_RENDER_OK")
           PY
