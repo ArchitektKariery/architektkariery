@@ -9,7 +9,8 @@
     "dragon_outside_eko": true,
     "dragon_legendary_flag": true,
     "sprite_embedded": true,
-    "sprite_meta_width_192": true,
+    "sprite_png_crc_valid": true,
+    "sprite_meta_192x62": true,
     "screen_width_22_5pct": true,
     "fortune_has_dragon_outcome": true,
     "fortune_pending_promotes_next_shoal": true,
@@ -63,7 +64,7 @@
   "notes": {
     "sprite_meta": {
       "w": 192,
-      "h": 66
+      "h": 62
     },
     "bite_simulation": {
       "n": 500000,
