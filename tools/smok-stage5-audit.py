@@ -42,6 +42,18 @@ checks["line_or_lure_state_present"] = len(line_terms) > 0
 checks["bobber_state_present"] = len(bob_terms) > 0
 checks["hook_state_present"] = len(hook_terms) > 0
 
+# Implementation-level line / bobber coherence during bite and fight.
+checks["shared_float_pose"] = "const floatPose = FloatFX.pose(t);" in src
+checks["float_held_at_rod_tip"] = "if (floatPose.mode === 'held') floatPose = FloatFX.heldAtTip(rodTipVisual);" in src
+checks["fight_line_targets_hooked_fish_mouth"] = (
+    "if (G.hooked && typeof mouthOf === 'function')" in src and
+    "mouthOf(G.hooked" in src
+)
+checks["fight_line_not_forced_to_float"] = "Przy wylawianiu zylka biegnie do ryby, a nie do splawika" in src
+checks["bobber_has_bite_state"] = "bite: 0," in src and "floatBob: 0" in src
+checks["bobber_water_pose_exists"] = "Scene.waterAt()" in src and "FloatFX.pose(t)" in src
+checks["splash_crash_fix_guard_present"] = "usunął crash przy plusku" in src or "usunal crash przy plusku" in src
+
 # Static cadence simulation for the heavy hooked-fish raster cache:
 # 60fps => redraw every 2 frames (~30Hz), low-FPS => every 3 frames (~20Hz at 60 frame clock;
 # actual game loop remains continuous for position/line).
