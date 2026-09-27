@@ -1,0 +1,20 @@
+{
+  "stage": "SMOK_6A_RENDER_FIX",
+  "bad_sprite_crc_before": true,
+  "after": {
+    "w": 192,
+    "h": 62,
+    "color_type": 3,
+    "bytes": 5083,
+    "chunks": [
+      "IHDR",
+      "PLTE",
+      "tRNS",
+      "IDAT",
+      "IEND"
+    ]
+  },
+  "scale_22_5pct": true,
+  "bite_50pct_unchanged": true,
+  "movement_unchanged": true
+}
