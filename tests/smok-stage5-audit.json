@@ -1,0 +1,596 @@
+{
+  "stage": "SMOK_STAGE5_FIGHT_HOOK_LINE_BOBBER",
+  "checks": {
+    "dragon_caught_bypasses_custom_motion": true,
+    "hooked_render_cache_marker": true,
+    "hooked_render_owner_cache": true,
+    "hooked_render_key_cache": true,
+    "hooked_render_frame_cache": true,
+    "adaptive_hol_stride": true,
+    "fight_school_cache": true,
+    "fight_school_draw_cache": true,
+    "adaptive_water_stride": true,
+    "fight_sim_accumulator": true,
+    "fight_sim_throttle": true,
+    "dragon_sprite_still_registered": true,
+    "dragon_scale_anchor": true,
+    "dragon_single_bite_roll": true,
+    "dragon_no_reroll_in_attack_gate": true,
+    "line_or_lure_state_present": true,
+    "bobber_state_present": true,
+    "hook_state_present": true,
+    "cache_reduces_heavy_redraws": true
+  },
+  "pass": true,
+  "perf_model": {
+    "60fps_1s_heavy_redraws": 30,
+    "lowfps_guard_60_frames_heavy_redraws": 20,
+    "position_updates_per_60_frames": 60
+  },
+  "line_or_lure_matches": [
+    {
+      "line": 74,
+      "text": ".bar b,.bar button{background:linear-gradient(180deg,rgba(42,32,68,.82),rgba(25,18,48,.88));"
+    },
+    {
+      "line": 79,
+      "text": ".bar button.on{background:linear-gradient(180deg,#7A5E2E,#4C3A1C);color:#F6E4BE}"
+    },
+    {
+      "line": 110,
+      "text": "#reset .et{display:block;line-height:1}"
+    },
+    {
+      "line": 148,
+      "text": "stroke-linejoin:round;stroke-linecap:round;"
+    },
+    {
+      "line": 244,
+      "text": "font-size:11.5px;line-height:1.25;letter-spacing:.08em}"
+    },
+    {
+      "line": 245,
+      "text": "#panelTresc .zan .zef{margin-top:5px;font-size:11px;line-height:1.35;"
+    },
+    {
+      "line": 255,
+      "text": "background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);"
+    },
+    {
+      "line": 270,
+      "text": "background:linear-gradient(180deg,rgba(255,247,224,.94),rgba(240,219,180,.92));"
+    },
+    {
+      "line": 291,
+      "text": "#panelTresc .odn-title small{display:block;margin-top:3px;font-size:9px;line-height:1.35;opacity:.62}"
+    },
+    {
+      "line": 298,
+      "text": "background:repeating-linear-gradient(90deg,#b7332e 0 12px,#d9543f 12px 24px);"
+    },
+    {
+      "line": 302,
+      "text": "border:1px solid rgba(72,40,28,.16);font-size:9px;line-height:1.35}"
+    },
+    {
+      "line": 304,
+      "text": "#panelTresc .odn-story{margin-top:10px;font-size:10px;line-height:1.5;opacity:.78}"
+    },
+    {
+      "line": 306,
+      "text": "background:rgba(154,77,53,.08);font-size:9px;line-height:1.45;font-weight:700}"
+    },
+    {
+      "line": 318,
+      "text": "background:linear-gradient(180deg,rgba(63,132,150,.62),rgba(19,55,78,.92))}"
+    },
+    {
+      "line": 321,
+      "text": "animation:odn-fala 4.8s linear infinite}"
+    },
+    {
+      "line": 329,
+      "text": "border:1px solid rgba(201,244,248,.82);opacity:.7;animation:odn-babel 3.8s linear infinite}"
+    },
+    {
+      "line": 348,
+      "text": "font-size:7px;line-height:1.2;font-weight:800}"
+    },
+    {
+      "line": 354,
+      "text": "#panelTresc .odn-history span{display:block;margin-top:4px;font-size:9px;line-height:1.4;opacity:.62}"
+    },
+    {
+      "line": 369,
+      "text": "stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}"
+    },
+    {
+      "line": 407,
+      "text": "#panelTresc .wiad-kar .kwota{font-size:23px;font-weight:900;line-height:1.1}"
+    },
+    {
+      "line": 423,
+      "text": "#panelTresc .wr .pl{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;"
+    },
+    {
+      "line": 425,
+      "text": "background:rgba(255,255,255,.18);font-size:8.4px;line-height:1;font-weight:900;"
+    },
+    {
+      "line": 433,
+      "text": "background:transparent;color:var(--tusz);font-size:13px;line-height:1;opacity:.55;cursor:pointer;"
+    },
+    {
+      "line": 448,
+      "text": "font-weight:800;letter-spacing:.02em;line-height:1.5;border-bottom:1.6px dashed var(--tusz);margin-bottom:6px}"
+    },
+    {
+      "line": 456,
+      "text": "letter-spacing:.04em;color:var(--tusz);opacity:.72;font-weight:700;line-height:1.4}"
+    },
+    {
+      "line": 516,
+      "text": "background:linear-gradient(180deg,rgba(246,224,170,.18),rgba(87,60,36,.08));"
+    },
+    {
+      "line": 525,
+      "text": "background:linear-gradient(145deg,#F5D986 0%,#E8B94F 54%,#B9782D 100%);"
+    },
+    {
+      "line": 544,
+      "text": "background:linear-gradient(145deg,#F8DE8E,#E7B84E 58%,#B67129);border:4px solid #342315;"
+    },
+    {
+      "line": 584,
+      "text": "stroke-linejoin:round}"
+    },
+    {
+      "line": 585,
+      "text": ".ik-puchar .ucha{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}"
+    },
+    {
+      "line": 604,
+      "text": "background:linear-gradient(180deg,rgba(16,11,32,.94),rgba(10,7,22,.94));"
+    },
+    {
+      "line": 649,
+      "text": "will-change:transform;animation:pasekJedzie linear infinite}"
+    },
+    {
+      "line": 651,
+      "text": "#pasekTVtresc .wpis{display:inline-flex;align-items:center;gap:5px;padding:0 12px;"
+    },
+    {
+      "line": 655,
+      "text": "#pasekTVtresc .wpis.out{opacity:.42;text-decoration:line-through}"
+    },
+    {
+      "line": 656,
+      "text": "#pasekTVtresc .dzial{display:inline-flex;align-items:center;gap:6px;padding:0 12px;"
+    },
+    {
+      "line": 673,
+      "text": "background:linear-gradient(180deg,rgba(36,26,66,.96),rgba(20,14,42,.96));"
+    },
+    {
+      "line": 735,
+      "text": "#szukajRyb{flex:1;min-width:0;background:transparent;border:0;outline:0;"
+    },
+    {
+      "line": 743,
+      "text": "line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}"
+    },
+    {
+      "line": 771,
+      "text": "background:linear-gradient(105deg,transparent 40%,rgba(255,240,200,.30) 50%,transparent 60%);"
+    },
+    {
+      "line": 848,
+      "text": "background:linear-gradient(180deg,rgba(247,239,214,.98),rgba(223,209,170,.98));"
+    }
+  ],
+  "bobber_matches": [
+    {
+      "line": 3057,
+      "text": "<script>window.ATLAS_SRC=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAIgCAMAAADqaldFAAADAFBMVEVmVGGloJ5cXWZdXWEiGymjmZ5cKlFeXmLl2dzp4OLKoKeYXXbIo6ujm52PY3UfJSyqnKCWboXVp6rj395fM17kz8/GoaZHFDiKaHSVcYWUXXk6NFnkusPKusQfISchJCyKWYk1OUY2"
+    },
+    {
+      "line": 3085,
+      "text": "window.RAMKA6_SRC=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAagAAAJQCAMAAADsRQAbAAACQFBMVEUpJyo4MiwZFiMzKigmGRdFIgZGNyhpSybnq0AaFBxGOjRVOCJqREE4HAlbQibWrGo3MjsYCQWDVihbND94XEpkOTttQx/kuWuFSjF4UCExHxPJlVaYWT772GfWolZCKRs6IAurZzlJRU4sKjr"
+    },
+    {
+      "line": 5155,
+      "text": "kladzie sie na niebo, wode i dno, a wedkarz, wedka, splawik i ryby"
+    },
+    {
+      "line": 5809,
+      "text": "SURFACE  = 690   tafla wody, tu wchodzi splawik i haczyk"
+    },
+    {
+      "line": 5815,
+      "text": "Scene.slots.surface(g, t)     lodka, wedkarz, splawik"
+    },
+    {
+      "line": 6734,
+      "text": "- nie zmieniamy mechaniki splawika, bran ani ryb,"
+    },
+    {
+      "line": 7778,
+      "text": "lodka, wedkarz i splawik ida po nim w pelnych barwach i dlatego"
+    },
+    {
+      "line": 11634,
+      "text": "splawik: 'SPLAWIK', wedka: 'WEDKA', lodka: 'LODKA' };"
+    },
+    {
+      "line": 16024,
+      "text": "html(guide, 'PATRZ NA SPŁAWIK', 'zarzut leci sam');"
+    },
+    {
+      "line": 16212,
+      "text": "{ id: 'splawik', d: 'M12 2 15 9H9zM9 9h6l-1 7H10zM11 16h2v6h-2z' },"
+    },
+    {
+      "line": 16911,
+      "text": "'Spławik zawsze leci w to samo miejsce, więc nie musisz celować.',"
+    },
+    {
+      "line": 16921,
+      "text": "'Gdy chwyci, spławik znika pod wodą, a telefon drgnie.'] },"
+    },
+    {
+      "line": 23084,
+      "text": "(imituje wode zamykajaca sie nad spławikiem) plus niski \"blup\". */"
+    },
+    {
+      "line": 23158,
+      "text": "Wedkarz, wedka, splawik i haczyk wpiete w mechanike"
+    },
+    {
+      "line": 23162,
+      "text": "Zylka  -> krzywa od szczytu wedki do splawika, luz maleje z naprezeniem"
+    },
+    {
+      "line": 23163,
+      "text": "Splawik-> siedzi na Scene.waterAt(), nurkuje przy braniu"
+    },
+    {
+      "line": 23167,
+      "text": "const A = { boat: null, rod: null, float: null, boatRys: null, ready: 0, meta: window.ANGLER_META };"
+    },
+    {
+      "line": 23266,
+      "text": "for (const k of ['boat', 'rod', 'float']) {"
+    },
+    {
+      "line": 23273,
+      "text": "if (k === 'float') A.floatOutline = sylObrysu(A.float);"
+    },
+    {
+      "line": 23295,
+      "text": "floW: M.float.w * SC, floH: M.float.h * SC"
+    },
+    {
+      "line": 23306,
+      "text": "bite: 0,               /* 0..1 zanurzenie splawika */"
+    },
+    {
+      "line": 23309,
+      "text": "floatBob: 0, floatBobV: 0, rings: [],"
+    },
+    {
+      "line": 23498,
+      "text": "/* Faktyczna pozycja splawika przy koncowce wedki, potrzebna mechanice,"
+    },
+    {
+      "line": 23499,
+      "text": "zeby lot zaczynal sie dokladnie tam, gdzie splawik przed chwila wisial. */"
+    },
+    {
+      "line": 23528,
+      "text": "sceny. Ten etap nie przerabia wedki, splawika ani linki — ich moment"
+    },
+    {
+      "line": 23634,
+      "text": "Stage 7.3 zamknal spójność splawika i usunal crash przy plusku."
+    },
+    {
+      "line": 23635,
+      "text": "Ten etap nie zmienia FloatFX.pose(t) ani mechaniki lowienia."
+    },
+    {
+      "line": 23746,
+      "text": "let floatPose = FloatFX.pose(t);"
+    },
+    {
+      "line": 23747,
+      "text": "if (floatPose.mode === 'held') floatPose = FloatFX.heldAtTip(rodTipVisual);"
+    },
+    {
+      "line": 23769,
+      "text": "/* Zylka do splawika tylko wtedy, gdy splawik faktycznie jest na wodzie."
+    },
+    {
+      "line": 23770,
+      "text": "Przy wylawianiu zylka biegnie do ryby, a nie do splawika, wiec rysowanie"
+    },
+    {
+      "line": 23778,
+      "text": "podwodny zaczynal sie na TAFLI, a nadwodny konczyl na SPLAWIKU, wiec"
+    },
+    {
+      "line": 23779,
+      "text": "gdy splawik zanurzal sie przy braniu, miedzy nimi otwierala sie szpara."
+    },
+    {
+      "line": 23781,
+      "text": "splawika i razem z nim opadaja."
+    },
+    {
+      "line": 23784,
+      "text": "/* Zarzut: koniec linki = gorny anchor TEGO SAMEGO floatPose,"
+    },
+    {
+      "line": 23786,
+      "text": "const px2 = floatPose.upperX, py2 = floatPose.upperY;"
+    },
+    {
+      "line": 23804,
+      "text": "const px2 = floatPose.upperX, py2 = floatPose.upperY;"
+    },
+    {
+      "line": 23876,
+      "text": "/* Splawik korzysta z TEGO SAMEGO pose co linka nad woda. */"
+    },
+    {
+      "line": 23882,
+      "text": "podwodny zaczynal sie na TAFLI, a nadwodny konczyl na SPLAWIKU, wiec"
+    },
+    {
+      "line": 23883,
+      "text": "gdy splawik zanurzal sie przy braniu, miedzy nimi otwierala sie szpara."
+    }
+  ],
+  "hook_matches": [
+    {
+      "line": 4394,
+      "text": "zacieralo te roznice. */"
+    },
+    {
+      "line": 5094,
+      "text": "window.RAMKA7_SRC=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAsAAAAMACAMAAAAdbiHdAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB"
+    },
+    {
+      "line": 5954,
+      "text": "dopiero przy pelnym zaciagnieciu. Dzieki temu pogodnie wyglada jak"
+    },
+    {
+      "line": 6170,
+      "text": "/* Przy pelnym zaciagnieciu tarcza gasnie, bo i tak by jej nie bylo widac. */"
+    },
+    {
+      "line": 6392,
+      "text": "odczul: klatki zaczely sie zacinac."
+    },
+    {
+      "line": 7243,
+      "text": "const fightPerf = !!(window.G && G.phase === 'fight' && G.hooked);"
+    },
+    {
+      "line": 7720,
+      "text": "-- srednia sama w sobie ukrywa pojedyncze zaciecia, a to wlasnie one"
+    },
+    {
+      "line": 7737,
+      "text": "/* Druga liczba to najgorsza klatka w oknie -- jesli sa zacieca,"
+    },
+    {
+      "line": 7909,
+      "text": "\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANwAAACcCAYAAAAUAsXtAABJRUlEQVR42u29e3Bc9ZXv+9397lZ3qx+S2m1ZT1u2bINtDIYQExMeCQQ4OZAQkgl1zzlVIbnhxmRq8pqaggsFBXdqTpikEsiBmiF1z8xUMoRkcG5CeNsJDh4eBj+xLUvWw5bkdkvqh7pb/e7e94/d66ff3r13d+thgvFef2DUL"
+    },
+    {
+      "line": 7940,
+      "text": "\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANwAAACOCAYAAABaHGZ9AABFe0lEQVR42u29eXQb150u+FUBKKCwECTAnRQlURQpkVJLVLwkshNncewkHSdjOxPbSabT6bin07Gd1/3mtNOZmViWc970jHvOe/1iJ++lo8QznY4dp215vCRxe4njOPIiu025RVLiIkoiIYIbQIJYCqgCquaPqnt5q1AAQW3Wg"
+    },
+    {
+      "line": 7952,
+      "text": "\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGwAAADICAYAAAAN6wQ1AABfMElEQVR42u39e5Rc13XmCf7Ofca9ERmPjMxEJoHEi6QIUhAgUKBFSXyJImXJbdmiLY5Htkq2ekpjVc1a01aPp2rV9GjKbveaWmu6puT+o6ekdler5LFU46YluSwvPUwSoghaIsUHSAoiQfGBRwLMBDIj4x037vPMH+femxGZC"
+    },
+    {
+      "line": 9169,
+      "text": "wymuszonego atalu na strike/hooked)."
+    },
+    {
+      "line": 10590,
+      "text": "if (G.hooked) { G.hooked.caught = false; G.hooked.mood = 'idle'; G.hooked = null; }"
+    },
+    {
+      "line": 10597,
+      "text": "G.tension = 0; G.bite = 0; G.strike = 0; G.czerw = 0; G.zryw = 0;"
+    },
+    {
+      "line": 10603,
+      "text": "if (typeof biteWait !== 'undefined') biteWait = 1.0;"
+    },
+    {
+      "line": 11395,
+      "text": "if (!f || f.caught || !GATUNKI[f.gat]) continue;"
+    },
+    {
+      "line": 15622,
+      "text": "else if (name === 'fish_caught') sessionStats.catches++;"
+    },
+    {
+      "line": 16029,
+      "text": "} else if (ph === 'fight' && G.hooked) {"
+    },
+    {
+      "line": 18914,
+      "text": "mood: 'idle',        /* idle, inspect, strike, hooked, odplywa */"
+    },
+    {
+      "line": 19553,
+      "text": "if (!f || f.gat !== 'smok_zycia' || f.caught) return false;"
+    },
+    {
+      "line": 20152,
+      "text": "const fightPerf = !!(window.G && G.phase === 'fight' && G.hooked);"
+    },
+    {
+      "line": 20165,
+      "text": "/* Nadecie na 'strike'/'hooked' musi zadzialac PRZED wczesnymi 'continue'"
+    },
+    {
+      "line": 20173,
+      "text": "if (f.caught) { f.phase += dt * (7 + Math.abs(f.thrash || 0) * 6); continue; }"
+    },
+    {
+      "line": 20174,
+      "text": "if (f.mood === 'inspect' || f.mood === 'strike') { f.phase += dt * (3 + Math.abs(f.vx) * 0.2); continue; }"
+    },
+    {
+      "line": 20196,
+      "text": "kat skakal w ulamku sekundy i ryba wygladala, jakby sie zacinala."
+    },
+    {
+      "line": 20426,
+      "text": "if (f.caught || f.mood === 'odplywa' || f.karencja > 0) return 0;"
+    },
+    {
+      "line": 20574,
+      "text": "if (f.caught) return false;"
+    },
+    {
+      "line": 20588,
+      "text": "if (ofi === f || ofi.caught) return false;"
+    },
+    {
+      "line": 20645,
+      "text": "const zywa = o && !o.caught && school.indexOf(o) >= 0;"
+    },
+    {
+      "line": 20810,
+      "text": "2. ZACIECIE. Ryba na 'strike' i 'hooked' ma byc nadeta przez caly czas"
+    },
+    {
+      "line": 20849,
+      "text": "if (f.mood === 'strike' || f.mood === 'hooked') {"
+    },
+    {
+      "line": 20860,
+      "text": "nie ze mruga. Piata klatka, z jezykiem, wchodzi WYLACZNIE na 'strike'"
+    },
+    {
+      "line": 20861,
+      "text": "i 'hooked': to jest klatka na atak i na caly hol, nie na spokojne"
+    },
+    {
+      "line": 20868,
+      "text": "wiec widzi KAZDY tryb, wlacznie ze strike i hooked,"
+    },
+    {
+      "line": 20888,
+      "text": "if (f.mood === 'strike' || f.mood === 'hooked') f.pyskKlatka = atak;"
+    },
+    {
+      "line": 20941,
+      "text": "od trybu, bo atak bez obslugi to wlasnie zrodlo zacinania z powietrza. */"
+    },
+    {
+      "line": 20942,
+      "text": "if (lure) { puscLure(4 + Math.random() * 4); biteWait = 1.2; }"
+    },
+    {
+      "line": 20944,
+      "text": "if (f.caught || f.mood === 'strike') continue;"
+    },
+    {
+      "line": 20956,
+      "text": "for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);"
+    },
+    {
+      "line": 20999,
+      "text": "if (f.caught || f.mood === 'inspect' || f.mood === 'strike' || f.mood === 'odplywa') continue;"
+    },
+    {
+      "line": 21017,
+      "text": "if (f.caught) continue;"
+    },
+    {
+      "line": 21105,
+      "text": "let profilFali = (RP && f.mood === 'idle' && !f.caught) ? RP.wave : 1;"
+    },
+    {
+      "line": 21232,
+      "text": "const idleWiz = !angle && f.mood === 'idle' && !f.caught;"
+    },
+    {
+      "line": 21292,
+      "text": "przemnozone przez skale, a przy zacieciu doklada sie jeszcze obrot,"
+    },
+    {
+      "line": 21367,
+      "text": "const fight = !!(window.G && G.phase === 'fight' && G.hooked);"
+    },
+    {
+      "line": 21383,
+      "text": "for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);"
+    },
+    {
+      "line": 21394,
+      "text": "for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);"
+    },
+    {
+      "line": 21502,
+      "text": "const zywe = school.filter(f => !f.caught);"
+    },
+    {
+      "line": 22007,
+      "text": "Telemetry.event('fish_caught', tp);"
+    },
+    {
+      "line": 22785,
+      "text": "const gk = (typeof G !== \"undefined\" && G.hooked && G.hooked.gat) || \"ploc\";"
+    },
+    {
+      "line": 22853,
+      "text": "palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej."
+    },
+    {
+      "line": 23305,
+      "text": "hooked: null,"
+    },
+    {
+      "line": 23311,
+      "text": "strike: 0,             /* 0..1 impuls przy ataku i zrywie */"
+    },
+    {
+      "line": 23321,
+      "text": "let b = G.tension * 26 + G.bite * 6 + G.strike * 22 + (G.phase === 'fight' ? 4 : 0);"
+    },
+    {
+      "line": 24053,
+      "text": "+ G.strike * 9"
+    },
+    {
+      "line": 24089,
+      "text": "const calm = 1 - clamp(G.bite * 0.85 + G.strike * 0.90, 0, 1);"
+    },
+    {
+      "line": 24095,
+      "text": "+ (G.bite * 0.31 + G.strike * 0.29) * Math.sin(t * 8.4);"
+    },
+    {
+      "line": 24267,
+      "text": "if (G.hooked && typeof mouthOf === 'function') {"
+    },
+    {
+      "line": 24268,
+      "text": "const m = mouthOf(G.hooked, (G.hooked.thrash || 0) * 0.42 - 0.55);"
+    },
+    {
+      "line": 24289,
+      "text": "if (!G.hooked) {"
+    }
+  ]
+}
