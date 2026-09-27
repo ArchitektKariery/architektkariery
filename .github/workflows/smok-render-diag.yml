@@ -1,0 +1,36 @@
+name: Diagnose Smok Zycia Render
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/smok-render-diag.py'
+      - '.github/workflows/smok-render-diag.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build diagnostic page
+        run: python tools/smok-render-diag.py
+      - name: Run headless Chrome
+        run: |
+          python3 -m http.server 8765 >/tmp/smok-http.log 2>&1 &
+          sleep 1
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          echo "chrome=$CHROME"
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000             --dump-dom http://127.0.0.1:8765/tests/smok-render-diag.html > /tmp/smok-dom.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('/tmp/smok-dom.txt').read_text(encoding='utf-8',errors='replace')
+          m=re.search(r'<pre id="smok-render-diag">(.*?)</pre>',s,re.S)
+          if not m:
+              print(s[-5000:])
+              raise SystemExit("SMOK_DIAG_RESULT_NOT_FOUND")
+          print("SMOK_DIAG_RESULT="+m.group(1))
+          PY
