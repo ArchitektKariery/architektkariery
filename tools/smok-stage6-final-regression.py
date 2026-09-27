@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, random, re, subprocess, tempfile, os, sys
+import json, random, re, subprocess, tempfile, os, sys, base64, binascii, struct
 
 root = Path(".")
 src = (root / "qryby.html").read_text(encoding="utf-8")
@@ -24,8 +24,30 @@ checks["dragon_legendary_flag"] = re.search(r"legendarny:\s*true", reg_struct) i
 # 2) Approved visual contract
 sprite_match = re.search(r"src:\s*'data:image/png;base64,([^']+)'", reg_block)
 checks["sprite_embedded"] = bool(sprite_match and len(sprite_match.group(1)) > 1000)
+
+def png_crc_valid(b64):
+    try:
+        raw = base64.b64decode(b64, validate=True)
+        if raw[:8] != b"\x89PNG\r\n\x1a\n":
+            return False
+        p = 8
+        while p + 12 <= len(raw):
+            ln = struct.unpack(">I", raw[p:p+4])[0]
+            typ = raw[p+4:p+8]
+            data = raw[p+8:p+8+ln]
+            stored = struct.unpack(">I", raw[p+8+ln:p+12+ln])[0]
+            if (binascii.crc32(typ + data) & 0xffffffff) != stored:
+                return False
+            p += 12 + ln
+            if typ == b"IEND":
+                return p == len(raw)
+        return False
+    except Exception:
+        return False
+
+checks["sprite_png_crc_valid"] = bool(sprite_match and png_crc_valid(sprite_match.group(1)))
 meta_match = re.search(r"meta:\s*\{\s*w:\s*(\d+),\s*h:\s*(\d+)\s*\}", reg_struct)
-checks["sprite_meta_width_192"] = bool(meta_match and int(meta_match.group(1)) == 192)
+checks["sprite_meta_192x62"] = bool(meta_match and int(meta_match.group(1)) == 192 and int(meta_match.group(2)) == 62)
 if meta_match:
     notes["sprite_meta"] = {"w": int(meta_match.group(1)), "h": int(meta_match.group(2))}
 checks["screen_width_22_5pct"] = "Scene.W * 0.225" in src
