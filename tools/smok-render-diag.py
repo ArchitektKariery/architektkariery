@@ -21,16 +21,32 @@ setTimeout(() => {
       try {
         const f = school[0] || null;
         const G2 = f ? gat(f) : null;
+        function alphaStats(canvas) {
+          const dat = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+          let pixels = 0, sum = 0;
+          for (let i=3;i<dat.length;i+=4) {
+            if (dat[i]) { pixels++; sum += dat[i]; }
+          }
+          return {pixels, sum};
+        }
+
+        /* Test A: sama funkcja rysujaca rybe. */
         const c = document.createElement('canvas');
         c.width = Scene.W; c.height = Scene.H;
         const cx = c.getContext('2d');
         cx.imageSmoothingEnabled = false;
         if (f) drawFish(cx, f);
-        const dat = cx.getImageData(0,0,c.width,c.height).data;
-        let alphaPixels = 0, alphaSum = 0;
-        for (let i=3;i<dat.length;i+=4) {
-          if (dat[i]) { alphaPixels++; alphaSum += dat[i]; }
-        }
+        const direct = alphaStats(c);
+
+        /* Test B: prawdziwa sciezka gry — drawSchool -> sortowanie -> drawFish.
+           To jest ten test, ktorego brakowalo przed nagraniem z telefonu. */
+        const sCanvas = document.createElement('canvas');
+        sCanvas.width = Scene.W; sCanvas.height = Scene.H;
+        const sx = sCanvas.getContext('2d');
+        sx.imageSmoothingEnabled = false;
+        drawSchool(sx, performance.now()/1000);
+        const schoolDraw = alphaStats(sCanvas);
+
         finish({
           fishAtlasReady: FishAtlas.ready,
           schoolLength: school.length,
@@ -45,8 +61,10 @@ setTimeout(() => {
           zepsuty: !!(G2 && G2.zepsuty),
           kontur: !!(G2 && G2.kontur),
           meta: G2 && G2.meta,
-          directDrawAlphaPixels: alphaPixels,
-          directDrawAlphaSum: alphaSum
+          directDrawAlphaPixels: direct.pixels,
+          directDrawAlphaSum: direct.sum,
+          schoolDrawAlphaPixels: schoolDraw.pixels,
+          schoolDrawAlphaSum: schoolDraw.sum
         });
       } catch (e) { finish({innerError:String(e), stack:e&&e.stack}); }
     }, 3500);
