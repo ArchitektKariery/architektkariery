@@ -1,0 +1,28 @@
+name: Patch QRyby Smok Zycia Stage 6A Render
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/patch-smok-stage6a-render.py'
+      - '.github/workflows/patch-smok-stage6a-render.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply validated dragon sprite render fix
+        run: python tools/patch-smok-stage6a-render.py
+      - name: Commit production HTML and report
+        run: |
+          git config user.name "QRyby Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html tests/smok-stage6a-render.json
+          git commit -m "QRyby: fix Smok Życia invisible sprite [skip ci]"
+          git push
