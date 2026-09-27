@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-27-life-dragon-rework-v2';
+window.QRYBY_BUILD = '2026-09-27-life-dragon-motion-v3';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -19597,9 +19597,34 @@ const SmokZycia = (() => {
     f.face = (f.x < Scene.W * 0.5) ? -1 : 1;
     f.vTarget = f.face * Math.max(34, Math.abs(f.base) * 2.6);
     f.vx = f.vTarget * 0.55;
+    f.smokOdpT = 0;
+    f.smokOdpStartS = f.s;
+    f.smokOdpStartAlpha = (f.alpha === undefined ? 1 : f.alpha);
+    f.smokOdpStartY = f.y;
     f.home = Math.min(Scene.BED - 70,
       f.y + (Scene.BED - Scene.SURFACE) * 0.16);
     f.turn = 999; f.hover = 0; f.karencja = 999;
+  }
+
+  /* Odejscie Smoka jest czescia animacji, nie teleportem poza kadr:
+     jednoczesnie przyspiesza, schodzi w glebie, lekko maleje i zanika.
+     Nie rusza x bezposrednio — poziomy ruch nadal prowadzi wspolny silnik,
+     dzieki czemu zachowujemy fizyke, obrot i limity FPS calej gry. */
+  function odplywanie(f, dt) {
+    if (!f || f.gat !== 'smok_zycia' || f.mood !== 'odplywa') return false;
+    f.smokOdpT = (f.smokOdpT || 0) + dt;
+    const u = smooth(f.smokOdpT / 2.8);
+    const kol = Scene.BED - Scene.SURFACE;
+    const s0 = f.smokOdpStartS || f.smokSkala || skalaDocelowa();
+    const a0 = (f.smokOdpStartAlpha === undefined ? 1 : f.smokOdpStartAlpha);
+    const y0 = (f.smokOdpStartY === undefined ? f.y : f.smokOdpStartY);
+
+    f.s = s0 * (1 - 0.22 * u);
+    f.sy = f.s;
+    f.alpha = Math.max(0.06, a0 * (1 - 0.94 * u));
+    f.home = Math.min(Scene.BED - 55, y0 + kol * 0.20 * u);
+    f.machnij = 0.76 + 0.14 * u;
+    return true;
   }
 
   function zastapLawiceJesliCzeka(arr) {
@@ -19630,7 +19655,7 @@ const SmokZycia = (() => {
 
   return {
     zastapLawiceJesliCzeka, aktywnaLawica, koniecLawicy, poZlowieniu,
-    zachowanie, poOdmowie
+    zachowanie, poOdmowie, odplywanie
   };
 })();
 window.SmokZycia=SmokZycia;
@@ -20095,6 +20120,8 @@ function updateSchool(dt) {
     if (f.caught) { f.phase += dt * (7 + Math.abs(f.thrash || 0) * 6); continue; }
     if (f.mood === 'inspect' || f.mood === 'strike') { f.phase += dt * (3 + Math.abs(f.vx) * 0.2); continue; }
     if (f.mood === 'odplywa') {
+      if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.odplywanie)
+        SmokZycia.odplywanie(f, dt);
       /* Szarza rozpedza sie trzy razy szybciej niz zwykla ucieczka. */
       f.vx += (f.vTarget - f.vx) * Math.min(1, dt * (f.szarza ? 5.0 : 1.6));
       f.x += f.vx * dt;
