@@ -1,0 +1,41 @@
+name: QRyby server authority CAS v2
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/server_authority_cas_v2.py'
+      - '.github/workflows/server-authority-cas-v2.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 tools/server_authority_cas_v2.py
+      - name: Validate
+        run: |
+          git diff --check
+          grep -F "2026-09-27-server-authority-cas-v2" qryby.html
+          grep -F "COMPARE-AND-SWAP" qryby.html
+          grep -F "resolution=ignore-duplicates,return=representation" qryby.html
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('qryby.html').read_text(encoding='utf-8')
+          assert s.count("window.QRYBY_BUILD = '2026-09-27-server-authority-cas-v2';") == 1
+          assert s.count("let autorytetZmieniono = '', autorytetMaWiersz = false;") == 1
+          block=s[s.find("async function wyslijTeraz()"):s.find("function zaplanujWyslanie()")]
+          assert "resolution=merge-duplicates,return=minimal" not in block
+          assert s.rstrip().endswith("</html>")
+          print("server authority CAS v2 validation OK")
+          PY
+      - name: Commit
+        run: |
+          if git diff --quiet -- qryby.html; then exit 0; fi
+          git config user.name "qryby-server-authority"
+          git config user.email "actions@users.noreply.github.com"
+          git add qryby.html
+          git commit -m "QRyby: enforce server-authoritative compare-and-swap [skip ci]"
+          git push origin HEAD:main
