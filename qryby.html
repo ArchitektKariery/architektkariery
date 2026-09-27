@@ -38,7 +38,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-09-26-server-authority-v1';
+window.QRYBY_BUILD = '2026-09-27-server-authority-cas-v2';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
@@ -14461,9 +14461,9 @@ const Zapis = (() => {
   function teraz() {
     if (!Magazyn.czyDziala()) return;
     Magazyn.pisz(KLUCZ, JSON.stringify(dane));
-    /* Dysk jest zrodlem prawdy, chmura kopia. Wyslanie jest planowane,
-       nie natychmiastowe, i nigdy nie blokuje gry: brak sieci znaczy tylko
-       tyle, ze kopia poczeka do nastepnego razu. */
+    /* Lokalny zapis jest cachem. Dla zalogowanego konta wyslanie przechodzi
+       przez Chmura CAS: serwer nie zostanie nadpisany, jesli zmienil sie od
+       ostatniego pobrania. Brak sieci nie blokuje lokalnej gry. */
     if (typeof Chmura !== 'undefined' && Chmura.zaplanujWyslanie) Chmura.zaplanujWyslanie();
   }
   function zapisz() {
@@ -15034,6 +15034,10 @@ const Chmura = (() => {
   /* Dla zalogowanego konta zapis lokalny nie moze nic wyslac, dopoki
      nie pobierzemy aktualnego stanu serwera. */
   let autorytetGotowy = false, autorytetPromise = null;
+  /* CAS: zapamietujemy DOKLADNA wersje wiersza pobrana z serwera.
+     Kazdy pozniejszy upload moze przejsc tylko, jesli serwer nadal ma
+     te sama wartosc zmieniono. Inaczej serwer wygrywa i robimy pull. */
+  let autorytetZmieniono = '', autorytetMaWiersz = false;
   const sluchacze = [];
   function powiadom() { for (const f of sluchacze) { try { f(); } catch (e) {} } }
 
@@ -15126,6 +15130,8 @@ const Chmura = (() => {
     if (!sesja || nowyUid != staryUid) {
       autorytetGotowy = false;
       autorytetPromise = null;
+      autorytetZmieniono = '';
+      autorytetMaWiersz = false;
     }
     if (sesja) Magazyn.pisz(K_SESJA, JSON.stringify(sesja));
     else Magazyn.skasuj(K_SESJA);
@@ -15312,6 +15318,8 @@ const Chmura = (() => {
         /* SERWER WYGRYWA. Lokalny stan jest tylko cachem. */
         Zapis.wczytajObiekt(zdalny.zapis);
         Magazyn.pisz(K_KONTO, sesja.uid);
+        autorytetZmieniono = String(zdalny.zmieniono || '');
+        autorytetMaWiersz = true;
         autorytetGotowy = true;
         ostatniaKopia = Date.now();
         blad = '';
@@ -15321,6 +15329,8 @@ const Chmura = (() => {
 
       /* Nowe konto bez zapisu: dopiero teraz wolno utworzyc pierwszy
          serwerowy stan z lokalnego cache. */
+      autorytetZmieniono = '';
+      autorytetMaWiersz = false;
       autorytetGotowy = true;
       return { co: 'brak' };
     })();
@@ -15347,14 +15357,56 @@ const Chmura = (() => {
         return true;
       }
 
-      await zadanie('/rest/v1/gracze', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify(wiersz())
-      }, true);
+      const payload = wiersz();
+      let zapisane = null;
+
+      if (autorytetMaWiersz) {
+        /* COMPARE-AND-SWAP.
+           Nie robimy juz slepego UPSERT. Aktualizacja przejdzie tylko,
+           gdy zmieniono na serwerze nadal jest wersja, ktora ten klient
+           ostatnio pobral. Stara karta, drugi telefon albo zmiana admina
+           nie moga zostac nadpisane lokalnym cachem. */
+        const wersja = encodeURIComponent(autorytetZmieniono || '');
+        zapisane = await zadanie(
+          '/rest/v1/gracze?id=eq.' + sesja.uid +
+          '&zmieniono=eq.' + wersja +
+          '&select=zmieniono',
+          {
+            method: 'PATCH',
+            headers: { 'Prefer': 'return=representation' },
+            body: JSON.stringify(payload)
+          }, true
+        );
+
+        if (!zapisane || !zapisane.length) {
+          /* Serwer zmienil sie od ostatniego pull. SERWER WYGRYWA. */
+          autorytetGotowy = false;
+          autorytetPromise = null;
+          const nowszy = await zapewnijAutorytetSerwera();
+          blad = '';
+          return !!(nowszy && nowszy.co === 'pobrano');
+        }
+      } else {
+        /* Nowe konto bez wiersza: probujemy tylko INSERT. Jesli wiersz
+           powstal rownolegle, niczego nie nadpisujemy i pobieramy serwer. */
+        zapisane = await zadanie('/rest/v1/gracze?select=zmieniono', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=ignore-duplicates,return=representation' },
+          body: JSON.stringify(payload)
+        }, true);
+
+        if (!zapisane || !zapisane.length) {
+          autorytetGotowy = false;
+          autorytetPromise = null;
+          const nowszy = await zapewnijAutorytetSerwera();
+          blad = '';
+          return !!(nowszy && nowszy.co === 'pobrano');
+        }
+        autorytetMaWiersz = true;
+      }
+
+      autorytetZmieniono = String(zapisane[0].zmieniono || payload.zmieniono || '');
       ostatniaKopia = Date.now(); blad = '';
-      /* Zapamietujemy, do ktorego konta poszla ostatnia kopia. Sluzy do
-         rozpoznania sytuacji, w ktorej gracz loguje sie na CUDZE konto. */
       Magazyn.pisz(K_KONTO, sesja.uid);
     } catch (e) {
       blad = e.message || 'Nie udało się wysłać.';
