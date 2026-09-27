@@ -19,9 +19,16 @@
     "line_or_lure_state_present": true,
     "bobber_state_present": true,
     "hook_state_present": true,
+    "shared_float_pose": false,
+    "float_held_at_rod_tip": true,
+    "fight_line_targets_hooked_fish_mouth": true,
+    "fight_line_not_forced_to_float": true,
+    "bobber_has_bite_state": true,
+    "bobber_water_pose_exists": true,
+    "splash_crash_fix_guard_present": true,
     "cache_reduces_heavy_redraws": true
   },
-  "pass": true,
+  "pass": false,
   "perf_model": {
     "60fps_1s_heavy_redraws": 30,
     "lowfps_guard_60_frames_heavy_redraws": 20,
