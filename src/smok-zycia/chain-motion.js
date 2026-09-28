@@ -23,6 +23,9 @@
 
   const oryginalnePaskiRyby = paskiRyby;
   const OGNIWA = 16;
+  /* B2: większa bezwładność ogniw. Przy 60 FPS daje ok. 2,1 s różnicy
+     głowa→ogon zamiast ~0,4 s w B1 — na płaskim sprite'cie widać więc
+     przemieszczające się S przez całe ciało, a nie wspólne kołysanie. */
 
   function terazMs() {
     return (typeof performance !== 'undefined' && performance.now)
@@ -73,7 +76,7 @@
        Czyta WYŁĄCZNIE pozycję poprzedniego ogniwa. */
     for (let i = 1; i < OGNIWA; i++) {
       const q = i / (OGNIWA - 1);
-      const tau = 0.024 + 0.020 * q;
+      const tau = 0.090 + 0.120 * q;
       const a = 1 - Math.exp(-dt / tau);
       C.y[i] += (C.y[i - 1] - C.y[i]) * a;
     }
@@ -119,7 +122,7 @@
        więc koszt jest mały, a przy 22,5% szerokości ekranu ruch nie skacze
        czteropikselowymi schodami. */
     const krok = (kr > 1) ? 1 : 2;
-    const zapas = Math.ceil((G2.fala + G2.ogon + 3) * kr) + 2;
+    const zapas = Math.ceil(24 * kr) + 2;
     const bw = M.w * kr + 2;
     const bh = M.h * kr + zapas * 2 + 2;
 
@@ -168,9 +171,9 @@
   };
 
   window.QRYBY_SMOK_CHAIN_MOTION = Object.freeze({
-    version: 'B1',
+    version: 'B2',
     links: OGNIWA
   });
 
-  console.info('[QRyby][Smok Życia] ETAP B chain-motion aktywny');
+  console.info('[QRyby][Smok Życia] ETAP B2 chain-motion aktywny');
 })();
