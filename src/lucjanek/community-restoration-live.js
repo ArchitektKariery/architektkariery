@@ -414,3 +414,15 @@
     get lastEventId() { return lastEventId; }
   });
 })();
+
+/* [QRyby][Smok Życia] loader — ETAP B.
+   qryby.html już ładuje ten plik na samym końcu, więc dokładamy osobny,
+   mały moduł ruchu Smoka bez przepisywania wielkiego pliku gry. */
+(() => {
+  if (document.querySelector('script[data-qryby-smok-chain]')) return;
+  const s = document.createElement('script');
+  s.src = 'src/smok-zycia/chain-motion.js?v=20260928-b1';
+  s.async = false;
+  s.dataset.qrybySmokChain = '1';
+  document.body.appendChild(s);
+})();
