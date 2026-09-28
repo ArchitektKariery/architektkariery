@@ -421,7 +421,7 @@
 (() => {
   if (document.querySelector('script[data-qryby-smok-chain]')) return;
   const s = document.createElement('script');
-  s.src = 'src/smok-zycia/chain-motion.js?v=20260928-b1';
+  s.src = 'src/smok-zycia/chain-motion.js?v=20260928-b2';
   s.async = false;
   s.dataset.qrybySmokChain = '1';
   document.body.appendChild(s);
