@@ -3,9 +3,9 @@
   "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
   "sourceBytes": 6357001,
   "entry": "qryby-modular.html",
-  "entryBytes": 602288,
+  "entryBytes": 382895,
   "version": "20260930-mod1",
-  "stage": 5,
+  "stage": 6,
   "files": [
     {
       "path": "src/core/config.js",
@@ -179,6 +179,15 @@
       "sha256": "c9fdacfbfd1d4abe78aa237403b8e4bcea0c2ddc9bf9d47f2c4f8e5af6465e12"
     },
     {
+      "path": "src/ui/zegar.js",
+      "block": "script#6",
+      "stage": 6,
+      "fromLine": 5464,
+      "toLine": 5712,
+      "bytes": 12049,
+      "sha256": "d669fb8d9b51cdbca6a535d50654efe07c428f1f31e64ced2b4f15897992f032"
+    },
+    {
       "path": "src/rarity/rejestr.js",
       "block": "script#7",
       "stage": 4,
@@ -269,6 +278,24 @@
       "sha256": "94d5928d019129fcf2d6723ea129ced2f70c2743f284182699ea5f3c2d600193"
     },
     {
+      "path": "src/ui/ruch.js",
+      "block": "script#11",
+      "stage": 6,
+      "fromLine": 10679,
+      "toLine": 10883,
+      "bytes": 9615,
+      "sha256": "336d36fcc8021390ba7fc4bc409b1f7ca351484e44c259ab8645f8566f0aafa2"
+    },
+    {
+      "path": "src/ui/panel.js",
+      "block": "script#11",
+      "stage": 6,
+      "fromLine": 10884,
+      "toLine": 14112,
+      "bytes": 165499,
+      "sha256": "166454bcd8bbe48079ea9633046350bab638bd73670e7464bcbbf18f58f14dbb"
+    },
+    {
       "path": "src/fish/movement.js",
       "block": "script#11",
       "stage": 4,
@@ -341,6 +368,24 @@
       "sha256": "d6056093db4cfb11ba75ab38513976ea84bb9c21c13e56b99c3cb12e18e9981b"
     },
     {
+      "path": "src/audio/haptics.js",
+      "block": "script#13",
+      "stage": 6,
+      "fromLine": 22668,
+      "toLine": 22905,
+      "bytes": 9897,
+      "sha256": "0adbb05a662754ced2a22fe859aa9f7c15d487c32bb2630a98c3feefd1cbd9f5"
+    },
+    {
+      "path": "src/audio/ambient.js",
+      "block": "script#13",
+      "stage": 6,
+      "fromLine": 22906,
+      "toLine": 23154,
+      "bytes": 9864,
+      "sha256": "5402e4351eb9fcf85e78b260262a781d1fefd0f3091e3549378ce652e0458620"
+    },
+    {
       "path": "src/angler/avatar.js",
       "block": "script#14",
       "stage": 4,
@@ -386,6 +431,15 @@
       "sha256": "43972f37439b930644eb1aad6f77827fb0a4b0ce0c256ef7776629f36a8b04a4"
     },
     {
+      "path": "src/fx/water-traces.js",
+      "block": "script#15",
+      "stage": 6,
+      "fromLine": 24836,
+      "toLine": 24960,
+      "bytes": 5354,
+      "sha256": "f5d5fa0e46f3b68bc13a71679fc145e795ed3f9495fe8d018b7e2f9c02a33b1e"
+    },
+    {
       "path": "src/fish/charge.js",
       "block": "script#15",
       "stage": 4,
@@ -402,6 +456,15 @@
       "toLine": 25295,
       "bytes": 10444,
       "sha256": "ee74077ad8be5511181280070302defbc7cae5c4ad83dabc8b96edba435e9eff"
+    },
+    {
+      "path": "src/fx/context-fx.js",
+      "block": "script#15",
+      "stage": 6,
+      "fromLine": 25296,
+      "toLine": 25550,
+      "bytes": 7525,
+      "sha256": "e7c71828e683c4cf76c2e7e585fe2b70a6bd27b682242d40eca276ec9d3edee4"
     },
     {
       "path": "src/fish/catching.js",
