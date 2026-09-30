@@ -39,4 +39,6 @@ python3 tools/modularize/ci_check.py e5e4f0b
 
 ## Po przełączeniu
 
+`qryby.html` jest już wersją modułową, a dawny monolit leży w historii git (`git show e5e4f0b:qryby.html`). `split.js` odmawia pracy na modułowym `qryby.html`.
+
 Po przełączeniu `qryby.html` na wersję modułową źródłem prawdy są pliki w `src/`, `css/` i `assets/sprites/`. `split.js` i `plan.js` służą wtedy tylko jako zapis tego, jak powstał podział. `difftest.js` zostaje przydatny przy każdej większej przebudowie: porównuje dwie wersje gry w identycznych warunkach.
