@@ -29,6 +29,10 @@ node tools/modularize/difftest.js --save-a out/A.json      # oryginał 2x + wers
 node tools/modularize/difftest.js --load-a out/A.json      # tylko wersja modułowa
 node tools/modularize/difftest.js --mode stress            # prawdziwy czas, pliki z opóźnieniem
 
+# po przełączeniu: porównanie dwóch commitów (np. przed i po przeniesieniu sekcji)
+git worktree add /tmp/stary <commit>
+node tools/modularize/difftest.js --root-a /tmp/stary --a qryby.html --b qryby.html
+
 # stare testy CI na trzech wariantach
 python3 tools/modularize/ci_check.py e5e4f0b
 ```

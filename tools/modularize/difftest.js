@@ -42,6 +42,10 @@ const argv = process.argv.slice(2);
 const arg = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 // --root: katalog repo do testu (np. git worktree innego commita)
 const ROOT = path.resolve(arg('--root', path.resolve(__dirname, '..', '..')));
+// --root-a / --root-b: dwie rozne kopie repo (np. worktree starego commita i biezace
+// drzewo). Domyslnie obie wersje z tego samego katalogu ROOT.
+const ROOT_A = path.resolve(arg('--root-a', ROOT));
+const ROOT_B = path.resolve(arg('--root-b', ROOT));
 const MODE = arg('--mode', 'det');
 const FILE_A = arg('--a', 'qryby.html');
 const FILE_B = arg('--b', 'qryby-modular.html');
@@ -56,11 +60,22 @@ const sha = (s) => crypto.createHash('sha256').update(String(s)).digest('hex').s
 
 /* ---------- lista globalnych nazw z oryginalu ---------- */
 function globalNames() {
-  const html = fs.readFileSync(path.join(ROOT, 'qryby.html'), 'utf8');
+  const html = fs.readFileSync(path.join(ROOT_A, FILE_A), 'utf8');
   const names = new Set();
-  const re = /<script>([\s\S]*?)<\/script>/g;
+  // Monolit: kod w blokach inline. Wersja modulowa: kod w plikach <script src>.
+  const codes = [];
+  const re0 = /<script>([\s\S]*?)<\/script>/g;
+  let m0;
+  while ((m0 = re0.exec(html))) if (!/^QRybyGate\./.test(m0[1])) codes.push(m0[1]);
+  if (html.includes('QRybyGate.open()')) {
+    for (const s of html.matchAll(/<script src="([^"?#:]+)[^"]*"><\/script>/g)) {
+      const f = path.join(ROOT_A, s[1]);
+      if (fs.existsSync(f) && !s[1].startsWith('src/lucjanek/') && !s[1].endsWith('load-gate.js')) codes.push(fs.readFileSync(f, 'utf8'));
+    }
+  }
   let m;
-  while ((m = re.exec(html))) {
+  for (const code of codes) {
+    m = [null, code];
     const ast = acorn.parse(m[1], { ecmaVersion: 'latest', sourceType: 'script' });
     for (const st of ast.body) {
       if (st.type === 'FunctionDeclaration' || st.type === 'ClassDeclaration') names.add(st.id.name);
@@ -279,8 +294,9 @@ async function snapshot(page, names, label) {
 }
 
 /* ---------- jeden przebieg ---------- */
-async function runVariant(file, { mode, names, port, server }) {
+async function runVariant(file, { mode, names, port, server, root }) {
   server.setEntry(file);
+  server.setRoot(root || ROOT);
   const browser = await chromium.launch({ executablePath: CHROME, args: ['--disable-background-networking',
     '--disable-component-update', '--disable-sync', '--no-pings', '--disable-default-apps',
     '--disable-features=AutofillServerCommunication,OptimizationHints,Translate,MediaRouter,OptimizationGuideModelDownloading'] });
@@ -453,6 +469,7 @@ function compare(A, B, { stress } = {}) {
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const names = globalNames();
+  if (argv.includes('--names')) { console.log(`${FILE_A} (${ROOT_A}): ${names.length} nazw globalnych`); return; }
   // Jeden serwer, jeden port: obie wersje pod /qryby.html.
   let entry = 'qryby.html';
   const moduleOrder = [];
@@ -465,12 +482,14 @@ function compare(A, B, { stress } = {}) {
     }
     return 0;
   };
-  const { server, port } = await start(ROOT, {
+  let rootNow = ROOT;
+  const { server, port } = await start(() => rootNow, {
     delayFor,
     rewrite: (p) => (p === '/qryby.html' ? '/' + entry : p),
     slowHtml: MODE === 'stress' ? { chunk: 256 * 1024, pause: 45 } : null,
   });
   server.setEntry = (f) => { entry = f; moduleOrder.length = 0; };
+  server.setRoot = (r) => { rootNow = r; };
 
   const t0 = Date.now();
   const report = { mode: MODE, a: FILE_A, b: FILE_B, names: names.length };
@@ -485,8 +504,8 @@ function compare(A, B, { stress } = {}) {
       A1 = JSON.parse(fs.readFileSync(loadA, 'utf8'));
       report.powtarzalnosc = 'z pliku ' + path.basename(loadA);
     } else {
-      A1 = await runVariant(FILE_A, { mode: MODE, names, port, server });
-      const A2 = await runVariant(FILE_A, { mode: MODE, names, port, server });
+      A1 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
+      const A2 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
       det = compare(A1, A2);
       report.powtarzalnosc = det.length ? det : 'OK';
       if (saveA && !det.length) fs.writeFileSync(saveA, JSON.stringify(A1));
@@ -499,7 +518,7 @@ function compare(A, B, { stress } = {}) {
       console.log(JSON.stringify(report.powtarzalnosc, null, 1).slice(0, 3000));
       server.close(); return;
     }
-    const B = await runVariant(FILE_B, { mode: MODE, names, port, server });
+    const B = await runVariant(FILE_B, { mode: MODE, names, port, server, root: ROOT_B });
     diffs = compare(A1, B);
     report.zrzuty = A1.snaps.map((s) => s.label);
     report.zapytania = A1.net.length;
@@ -515,10 +534,10 @@ function compare(A, B, { stress } = {}) {
        zmiesci w oknie pomiaru, raz nie). Dlatego po dwa przebiegi kazdej
        wersji: roznica liczy sie tylko, gdy jest w OBU przebiegach jednej
        wersji i w ZADNYM drugiej. */
-    const A = await runVariant(FILE_A, { mode: MODE, names, port, server });
-    const A2 = await runVariant(FILE_A, { mode: MODE, names, port, server });
-    const B = await runVariant(FILE_B, { mode: MODE, names, port, server });
-    const B2 = await runVariant(FILE_B, { mode: MODE, names, port, server });
+    const A = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
+    const A2 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
+    const B = await runVariant(FILE_B, { mode: MODE, names, port, server, root: ROOT_B });
+    const B2 = await runVariant(FILE_B, { mode: MODE, names, port, server, root: ROOT_B });
     const stale = (x, y) => x.filter((v) => y.includes(v));
     const stableA = new Set(stale(A.regs, A2.regs)); const stableB = new Set(stale(B.regs, B2.regs));
     const anyA = new Set([...A.regs, ...A2.regs]); const anyB = new Set([...B.regs, ...B2.regs]);

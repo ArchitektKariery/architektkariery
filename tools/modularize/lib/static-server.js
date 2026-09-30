@@ -4,7 +4,8 @@
    - rewrite(urlPath) -> urlPath: podmiana pliku pod tym samym adresem
      (wersja modulowa serwowana jako /qryby.html),
    - slowHtml {chunk, pause}: HTML wysylany kawalkami z przerwami, tak jak
-     duzy plik plynie przez slaba siec (parser robi wtedy przerwy). */
+     duzy plik plynie przez slaba siec (parser robi wtedy przerwy).
+   root moze byc funkcja (katalog wybierany przy kazdym zapytaniu). */
 'use strict';
 
 const http = require('http');
@@ -23,8 +24,9 @@ const TYPES = {
 function start(root, { port = 0, delayFor = () => 0, rewrite = (p) => p, slowHtml = null } = {}) {
   const server = http.createServer((req, res) => {
     const urlPath = rewrite(decodeURIComponent(req.url.split('?')[0]));
-    const file = path.join(root, urlPath);
-    if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
+    const base = typeof root === 'function' ? root() : root;
+    const file = path.join(base, urlPath);
+    if (!file.startsWith(base)) { res.writeHead(403); res.end(); return; }
     fs.readFile(file, (err, data) => {
       const send = () => {
         if (err) { res.writeHead(404); res.end('not found'); return; }
