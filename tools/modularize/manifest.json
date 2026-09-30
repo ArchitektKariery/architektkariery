@@ -3,10 +3,19 @@
   "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
   "sourceBytes": 6357001,
   "entry": "qryby-modular.html",
-  "entryBytes": 1293108,
+  "entryBytes": 1183192,
   "version": "20260930-mod1",
-  "stage": 2,
+  "stage": 3,
   "files": [
+    {
+      "path": "src/core/config.js",
+      "block": "script#0",
+      "stage": 3,
+      "fromLine": 29,
+      "toLine": 59,
+      "bytes": 1245,
+      "sha256": "f3af3be4207a2806a90368378869d6569c702d34ff19dd83c0b7f0d4049d7810"
+    },
     {
       "path": "css/01-hud.css",
       "block": "style#0",
@@ -80,6 +89,15 @@
       "sha256": "4aca808b878ceb63a3af8412aa95db8c62f49361f27e298f76bbaeef2a49c35b"
     },
     {
+      "path": "src/world/pora.js",
+      "block": "script#4",
+      "stage": 3,
+      "fromLine": 3255,
+      "toLine": 3565,
+      "bytes": 14763,
+      "sha256": "44916844ada09863576b8bafa5045811d35963a631745513ccbe5b94469d04e8"
+    },
+    {
       "path": "assets/sprites/card-frames.js",
       "block": "script#5",
       "stage": 2,
@@ -89,6 +107,15 @@
       "sha256": "47b4acac74e4b3d98836c0c4cd311d8c1145b1aa315cf130d5a0dd5ad43b4176"
     },
     {
+      "path": "src/world/pogoda.js",
+      "block": "script#6",
+      "stage": 3,
+      "fromLine": 5097,
+      "toLine": 5177,
+      "bytes": 3805,
+      "sha256": "93bba76cb35d2e412ca4597aed28b4f55ce9aa9d6a77e09878804151d2724c01"
+    },
+    {
       "path": "assets/sprites/shore.js",
       "block": "script#8",
       "stage": 2,
@@ -96,6 +123,15 @@
       "toLine": 5798,
       "bytes": 37441,
       "sha256": "3034a0252fc01c95b9028a05ad3be431c0ef2741a3c5bb991c2f39ddf0ee494e"
+    },
+    {
+      "path": "src/scene/makieta.js",
+      "block": "script#9",
+      "stage": 3,
+      "fromLine": 5799,
+      "toLine": 7844,
+      "bytes": 80399,
+      "sha256": "30c9732174d1313acce60b9418e6e3f9842ec97c1922e53430e4282b2ca54c6a"
     },
     {
       "path": "assets/sprites/baits.js",
@@ -123,6 +159,51 @@
       "toLine": 8034,
       "bytes": 1691257,
       "sha256": "3c8913533c6b4430554c7e256391811ed52c653d4996c02dd1b52b5b83504a9c"
+    },
+    {
+      "path": "src/core/state.js",
+      "block": "script#14",
+      "stage": 3,
+      "fromLine": 23298,
+      "toLine": 23331,
+      "bytes": 1302,
+      "sha256": "08dd1a490ae2608869e03af76081910f52fc6e39b216803f48f5b20ef479de89"
+    },
+    {
+      "path": "src/core/input-loop.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 25793,
+      "toLine": 25885,
+      "bytes": 4074,
+      "sha256": "3d76db514a0184dab93e153a1b1544ecf36a9486030b247fc45cfa05f3b16c85"
+    },
+    {
+      "path": "src/core/qdiag.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 30154,
+      "toLine": 30218,
+      "bytes": 2789,
+      "sha256": "e99dcf9c2b95fe1f2d6394d399258e9aa9bc8db267504d2cf430fdb468824457"
+    },
+    {
+      "path": "src/ui/zoom-guard.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 30219,
+      "toLine": 30253,
+      "bytes": 1904,
+      "sha256": "2514530d9e9318b63abc788b0cb6a463a5e3cd25fb6078e1b83c09d352a2d0cd"
+    },
+    {
+      "path": "src/ui/rhythm.js",
+      "block": "script#16",
+      "stage": 3,
+      "fromLine": 30256,
+      "toLine": 30268,
+      "bytes": 428,
+      "sha256": "2f0f803343c800b90cc5f04a069a02f4516a17d881be910cf73b6d62ff394c88"
     }
   ]
 }
