@@ -5,6 +5,10 @@ on:
     branches: [ main ]
     paths:
       - 'qryby.html'
+      - 'src/**'
+      - 'css/**'
+      - 'assets/sprites/**'
+      - 'tools/qryby_source.py'
       - 'tools/smok-render-diag.py'
       - '.github/workflows/smok-render-diag.yml'
 

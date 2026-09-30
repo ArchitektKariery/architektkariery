@@ -1,0 +1,525 @@
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#0B0714;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color:#EADCF2;-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}
+#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:100%;height:100%;max-width:560px;overflow:hidden;background:#231838}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;
+  object-fit:cover;object-position:center;image-rendering:pixelated;image-rendering:crisp-edges}
+#hold{position:absolute;inset:0;z-index:3;touch-action:none}
+.bar{position:absolute;z-index:4;left:0;right:0;top:calc(10px + env(safe-area-inset-top));
+  display:flex;justify-content:center;gap:6px;pointer-events:none}
+.bar b,.bar button{background:linear-gradient(180deg,rgba(42,32,68,.82),rgba(25,18,48,.88));
+  border:1px solid rgba(106,78,46,.75);border-radius:4px;
+  box-shadow:inset 0 0 0 1px rgba(185,147,71,.5);
+  padding:5px 11px;font:inherit;font-size:9px;letter-spacing:.2em;font-weight:700;color:#C9A227}
+.bar button{pointer-events:auto;cursor:pointer}
+.bar button.on{background:linear-gradient(180deg,#7A5E2E,#4C3A1C);color:#F6E4BE}
+.foot{position:absolute;z-index:4;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));
+  text-align:center;font-size:10px;color:rgba(234,220,242,.6);
+  text-shadow:0 1px 3px rgba(0,0,0,.9);pointer-events:none}
+.foot b{color:#C9A227}
+
+/* PRZYCISK NOWEJ LAWICY.
+   Prawy gorny rog, bo lewy zajmuje medalion karty, a dolny prawy szyld
+   rekordu sesji. Ksztalt pigulki, tlo poltransparentne, wiec tafla i chmury
+   pod nim zostaja widoczne. Wysokosc 44 px to minimalny wygodny cel dotyku
+   na telefonie, przy szerokosci napisu okolo 130 px zajmuje niecale 4%
+   powierzchni kadru. Powolny oddech obwodki co 4,5 sekundy przyciaga oko,
+   ale nie miga w polu widzenia w trakcie holu. */
+/* NOWA LAWICA to jedyny przycisk, ktory gracz nacisnie kciukiem w trakcie
+   lowienia, wiec dostaje 60 px wysokosci i schodzi pod HUD. Nad nim stoja
+   teraz zadania i licznik qryb, czyli rzeczy do czytania, nie do klikania. */
+#reset{position:absolute;z-index:6;
+  top:calc(62px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));
+  width:106px;height:106px;padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:radial-gradient(circle at 50% 38%,rgba(58,44,92,.22),rgba(22,16,44,.08) 62%,rgba(22,16,44,0) 100%);
+  border:1.8px solid rgba(212,168,64,.58);border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(185,147,71,.16),0 2px 12px rgba(0,0,0,.28);
+  font:inherit;font-size:13px;letter-spacing:.14em;font-weight:800;color:#F8DE92;
+  text-shadow:0 1px 2px rgba(0,0,0,.82);cursor:pointer;opacity:.88;
+  animation:oddech 4.5s ease-in-out infinite;
+  transition:opacity .15s,transform .09s,background .25s var(--wyj),border-color .25s var(--wyj)}
+#reset::before{content:'';position:absolute;inset:7px;border-radius:50%;
+  border:1px solid rgba(255,231,170,.14);pointer-events:none}
+#reset:hover,#reset:focus-visible{background:radial-gradient(circle at 50% 38%,rgba(58,44,92,.30),rgba(22,16,44,.12) 62%,rgba(22,16,44,0) 100%);
+  border-color:rgba(232,199,101,.76);opacity:.96}
+#reset .et{display:block;line-height:1}
+/* ============================================================
+   WARSTWA RUCHU. Cala otoczka gry: ikony, panele, zadania, monety.
+
+   Zasady, ktore trzymaja to w kupie:
+     1. Nic nie porusza sie liniowo. Kazde wejscie ma sprezyne z lekkim
+        przeskoczeniem celu, kazde wyjscie gasnie szybciej niz weszlo.
+     2. Dotkniecie ma odpowiedz fizyczna: element ugina sie pod palcem
+        i wraca sprezyna, a z punktu dotkniecia rozchodzi sie fala.
+     3. Nic nie stoi martwe. Ikony oddychaja w wolnym, nierownym rytmie,
+        po zlocie przechodzi refleks co kilkanascie sekund.
+     4. Liczby nigdy nie przeskakuja. Zawsze dobijaja do nowej wartosci.
+     5. Wszystko rysowane wektorowo, zero plikow graficznych, zero wagi.
+   ============================================================ */
+:root{
+  --spr:cubic-bezier(.34,1.56,.64,1);      /* sprezyna z przeskokiem */
+  --wyj:cubic-bezier(.4,0,.2,1);           /* wyjscie, bez przeskoku */
+  --zloto:#E8C765; --zloto-c:#B08840; --zielen:#8CE0A0;
+  /* barwy z logo Himawari: platek, srodek kwiatu, tusz konturu, papier */
+  --bursztyn:#F4C63D; --rdza:#6B3F1D; --tusz:#141210; --papier:#F2ECDF;
+}
+/* ============================================================
+   JEZYK HIMAWARI.
+
+   Referencja marki: gruby czarny kontur, plaskie cieple wypelnienie,
+   papier zamiast szkla, duzo pustej przestrzeni i kadr, ktory ucieka poza
+   rame. Poprzednie ikony byly rysowane cienka zlota kreska na przezroczystym
+   tle, czyli dokladnie odwrotnie.
+
+   Przelozenie na interfejs gry:
+     kontur   czarny, gruby, jednakowy na calej ikonie
+     wnetrze  plaski bursztyn, ten sam co platki slonecznika
+     ruch     rozkwitanie zamiast pojawiania sie
+   Ciemna toń zostaje pod spodem, wiec ikona ma dzialac jak naklejka
+   przylozona do szyby, a nie jak swiecacy przycisk.
+   ============================================================ */
+.ik-sv{width:20px;height:20px;overflow:visible;
+  fill:var(--bursztyn);stroke:var(--tusz);stroke-width:1.9;
+  stroke-linejoin:round;stroke-linecap:round;
+  paint-order:stroke fill;
+  transition:transform .34s var(--spr)}
+.ik-sv .linijka,.ik-sv .wiersze,.ik-sv .kreski{fill:none;stroke:var(--tusz);
+  stroke-width:1.3;opacity:.72}
+.ik-sv .frendzle,.ik-sv .rolka,.ik-sv .grzbiet{fill:none}
+.ik-sv .rant{fill:none;stroke-width:1.2;opacity:.5}
+.ik-sv .ryba{fill:var(--tusz);stroke:none}
+.ik-sv .znak{fill:none;stroke:var(--tusz);stroke-width:2.1}
+.ik-sv .kropka{fill:var(--tusz);stroke:none}
+.ik-sv .srodek{fill:var(--rdza);stroke-width:1.6}
+
+/* --- kolumna ikon po lewej --- */
+.ikonka{position:relative;flex:0 0 auto;
+  width:38px;height:38px;border-radius:19px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(24,18,42,.30);
+  border:1px solid rgba(185,147,71,.30);
+  box-shadow:0 1px 6px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,235,190,.07);
+  color:var(--zloto);cursor:pointer;opacity:.58;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .34s var(--spr),opacity .22s var(--wyj),
+             background .22s var(--wyj),border-color .22s var(--wyj);
+  animation:oddech-ikony 7s ease-in-out infinite}
+/* NAPRAWA dostepnosc (audyt IX 2026): "ikony 38x38, warto zwiekszyc
+   obszar dotyku do ok. 44-48px, nawet bez powiekszania grafiki". Caly
+   lewy slupek to sztywno wyliczone odsuniecia co 44px w DWOCH wariantach
+   ukladu (zwykly i "z-paskiem") -- zmiana samego rozmiaru ikony wymuszalaby
+   przeliczenie kilkunastu wartosci na slepo, bez podgladu w przegladarce.
+   Bezpieczniejsza droga: niewidoczna, powiekszona strefa dotyku dorysowana
+   pseudo-elementem NA WIERZCHU tej samej ikony -- widoczny okragly przycisk
+   zostaje dokladnie taki sam rozmiar i w tym samym miejscu, klika sie w nim
+   tylko szerszy obszar dookola.
+   `overflow:hidden` (bylo tu DWA RAZY, wpisane osobno) musialo zniknac --
+   przycinaloby wlasnie te rozszerzona strefe do zera, robiac ta poprawke
+   caly czas obecna w kodzie, ale niedzialajaca. Bezpieczne do usuniecia:
+   ikona w srodku to SVG ze swoim viewBox, skalowane do wnetrza, nie
+   wieksze od 38px; a plakietka `.gotowe::after` (right:-2px;top:-2px,
+   nizej w tym pliku) juz i tak liczyla na to, ze odrobina wyjscia poza
+   ramke nie jest przycinana. */
+.ikonka::before{content:'';position:absolute;inset:-3px}
+.ikonka:nth-of-type(2){animation-delay:-2.3s}
+.ikonka:nth-of-type(3){animation-delay:-4.6s}
+@keyframes oddech-ikony{0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-1.5px) scale(1.02)}}
+.ikonka:active{transform:scale(.86);opacity:1;
+  background:rgba(122,94,46,.55);border-color:rgba(232,199,101,.75);animation:none}
+.ikonka.otwarta{opacity:1;border-color:rgba(232,199,101,.85);
+  background:rgba(122,94,46,.42);box-shadow:0 0 16px rgba(232,199,101,.28)}
+/* Otwarta ksiega zabiera ekran dla siebie: caly HUD gasnie i przestaje
+   lapac dotkniecia, wiec nic nie nachodzi na strone i nic nie przechwytuje
+   palca przewracajacego kartki. Wyjscie ma teraz wlasny krzyzyk na okladce
+   i przeciagniecie w dol, wiec ikona ksiegi nie jest do niczego potrzebna. */
+body.ksiega-otwarta .ikonka,
+body.ksiega-otwarta #hud,
+body.ksiega-otwarta #reset{
+  opacity:0 !important;pointer-events:none;transform:translateY(-8px) scale(.94);
+  transition:opacity .3s var(--wyj),transform .34s var(--spr)}
+/* Licznik zanety: mala papierowa plakietka tuz pod straganem, odliczajaca
+   pozostale lawice w dol. Wchodzi z podskokiem i znika sama, gdy zaneta
+   sie konczy, wiec nie zajmuje miejsca, kiedy nie ma czego liczyc. */
+#zanetaLicz{position:absolute;z-index:6;display:none;
+  left:100%;top:50%;margin-left:-4px;transform:translateY(-50%);white-space:nowrap;
+  width:36px;padding:2px 0;border-radius:2px;text-align:center;
+  background:rgba(244,198,61,.94);border:1.4px solid var(--tusz);color:var(--tusz);
+  /* Ta plakietka jest zolta, wiec problem ma odwrotny niz ciemne:
+     nie ginie w tle, tylko wyglada jak naklejka wycieta nozyczkami.
+     Cien pod spodem i swiatlo po gornej krawedzi robia z niej
+     emaliowana tabliczke, spojna z reszta liftingu. */
+  box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,252,225,.55);
+  font:inherit;font-size:8px;letter-spacing:.02em;font-weight:800;pointer-events:none}
+#zanetaLicz.on{display:block;animation:wjazd-licznik .42s var(--spr)}
+/* Plakietka dostaje nad soba sprite tego, co akurat pracuje w wodzie.
+   Obrazek wchodzi zmienna, bo pseudoelement nie przyjmuje src z kodu. */
+/* Sprite przeniesiony ZNAD plakietki NA JEJ PRAWO (IX 2026). Nad soba
+   mial 26 px wysokosci plus odstep, a plakietka siedzi teraz przy ikonie
+   straganu, wiec ten sprite wchodzilby na ikone atlasu w rzedzie wyzej.
+   Obok plakietki nie ma nic, co moglby zaslonic. */
+#zanetaLicz::before{content:'';position:absolute;left:100%;top:50%;
+  width:26px;height:26px;margin:-13px 0 0 5px;background:var(--zgraf) center/contain no-repeat;
+  image-rendering:pixelated;filter:drop-shadow(0 1px 0 rgba(20,18,16,.5));
+  animation:zan-plyw 3.6s ease-in-out infinite}
+/* ZANETY NA STRAGANIE.
+   Kafel jest siatka: sprite po lewej, naglowek i dzialanie po prawej, opis
+   i guzik na calej szerokosci. Sprite oddycha w miejscu, bo stragan bez
+   zadnego ruchu wyglada jak lista, a nie jak polka z towarem. */
+#panelTresc .zan{display:grid;grid-template-columns:76px 1fr;gap:4px 12px;align-items:center}
+#panelTresc .zan .zsp,#panelTresc .zan-akt .zsp{width:76px;height:76px;
+  object-fit:contain;image-rendering:pixelated;grid-row:span 1;
+  filter:drop-shadow(0 3px 0 rgba(20,18,16,.24));
+  animation:zan-plyw 3.4s ease-in-out infinite}
+#panelTresc .zan.stac .zsp{animation-duration:2.6s}
+@keyframes zan-plyw{0%,100%{transform:translateY(0) rotate(-1.2deg)}
+  50%{transform:translateY(-4px) rotate(1.2deg)}}
+#panelTresc .zan .zin{min-width:0}
+#panelTresc .zan .gw{display:flex;justify-content:space-between;gap:8px;
+  font-size:11.5px;line-height:1.25;letter-spacing:.08em}
+#panelTresc .zan .zef{margin-top:5px;font-size:11px;line-height:1.35;
+  color:#2F6B44;font-weight:800;letter-spacing:.02em}
+#panelTresc .zan .zlaw{margin-top:3px;font-size:10px;letter-spacing:.06em;
+  color:var(--tusz);opacity:.62;font-weight:700}
+#panelTresc .zan .tr{grid-column:1/-1;margin:8px 0 2px}
+#panelTresc .zan .odb{grid-column:1/-1;width:100%}
+/* Stac na nia: po kaflu przechodzi smuga swiatla, raz na cztery sekundy. */
+#panelTresc .zan.stac{position:relative;overflow:hidden}
+#panelTresc .zan.stac::after{content:'';position:absolute;top:0;bottom:0;width:42%;
+  left:-60%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);
+  animation:zan-blysk 4.2s ease-in-out infinite}
+@keyframes zan-blysk{0%,72%{left:-60%}100%{left:120%}}
+#panelTresc .zan.ok{opacity:.62}
+#panelTresc .zan-akt{display:grid;grid-template-columns:76px 1fr;gap:4px 12px;
+  align-items:center;border-color:var(--tusz);border-width:2px;
+  background:rgba(244,198,61,.22)}
+#panelTresc .zan-akt .pas{grid-column:1/-1;margin-top:8px}
+
+/* ============================================================
+   ODNOWA GATUNKOW — etap 1: bezpieczny podglad interfejsu.
+   Ten etap nie dotyka salda ani Supabase.
+   ============================================================ */
+#panelTresc .odn-card{position:relative;overflow:hidden;margin-top:8px;padding:13px;
+  border:2px solid rgba(116,44,38,.52);border-radius:13px;
+  background:linear-gradient(180deg,rgba(255,247,224,.94),rgba(240,219,180,.92));
+  box-shadow:0 5px 14px rgba(25,18,13,.18),inset 0 1px 0 rgba(255,255,255,.7)}
+#panelTresc .odn-head{display:flex;align-items:center;gap:12px}
+#panelTresc .odn-hero{width:82px;height:82px;flex:0 0 82px;display:grid;place-items:center;
+  border-radius:12px;border:1.5px solid rgba(92,51,32,.32);
+  background:radial-gradient(circle at 50% 35%,rgba(255,120,82,.18),rgba(109,35,31,.08))}
+#panelTresc .odn-roe{position:relative;width:62px;height:54px;animation:odn-oddech 3.2s ease-in-out infinite}
+#panelTresc .odn-roe i{position:absolute;width:16px;height:16px;border-radius:50%;
+  border:2px solid #5d1f1e;
+  background:radial-gradient(circle at 34% 30%,#ffd2b5 0 13%,#ff7556 16% 42%,#dc2d28 45% 72%,#841b22 75%);
+  box-shadow:0 2px 0 rgba(48,15,16,.28)}
+#panelTresc .odn-roe i:nth-child(1){left:3px;top:18px}
+#panelTresc .odn-roe i:nth-child(2){left:13px;top:5px}
+#panelTresc .odn-roe i:nth-child(3){left:26px;top:15px}
+#panelTresc .odn-roe i:nth-child(4){left:39px;top:4px}
+#panelTresc .odn-roe i:nth-child(5){left:45px;top:24px}
+#panelTresc .odn-roe i:nth-child(6){left:29px;top:34px}
+#panelTresc .odn-roe i:nth-child(7){left:11px;top:34px}
+@keyframes odn-oddech{0%,100%{transform:translateY(1px) scale(.98)}50%{transform:translateY(-3px) scale(1.03)}}
+#panelTresc .odn-title{min-width:0;flex:1}
+#panelTresc .odn-title b{display:block;font-size:16px;letter-spacing:.08em;color:#6c201f}
+#panelTresc .odn-title small{display:block;margin-top:3px;font-size:9px;line-height:1.35;opacity:.62}
+#panelTresc .odn-progress{margin-top:13px}
+#panelTresc .odn-numbers{display:flex;justify-content:space-between;gap:8px;
+  font-size:10px;font-weight:900;font-variant-numeric:tabular-nums}
+#panelTresc .odn-meter{height:14px;margin-top:6px;border:1.5px solid rgba(38,26,20,.5);
+  border-radius:8px;overflow:hidden;background:rgba(43,30,24,.12)}
+#panelTresc .odn-meter i{display:block;height:100%;width:0%;
+  background:repeating-linear-gradient(90deg,#b7332e 0 12px,#d9543f 12px 24px);
+  transition:width .45s ease}
+#panelTresc .odn-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+#panelTresc .odn-chip{padding:7px;border-radius:8px;background:rgba(89,49,31,.08);
+  border:1px solid rgba(72,40,28,.16);font-size:9px;line-height:1.35}
+#panelTresc .odn-chip b{display:block;font-size:10px}
+#panelTresc .odn-story{margin-top:10px;font-size:10px;line-height:1.5;opacity:.78}
+#panelTresc .odn-stage-note{margin-top:9px;padding:7px 8px;border-left:3px solid #9a4d35;
+  background:rgba(154,77,53,.08);font-size:9px;line-height:1.45;font-weight:700}
+#panelTresc .odn-disabled{width:100%;margin-top:10px;opacity:.58;cursor:default}
+
+/* ============================================================
+   ODNOWA GATUNKOW — etap 2: grafiki i animacje.
+   Nadal brak zapisu salda, RPC i Supabase. Stany 25/50/75/100
+   sa gotowe wizualnie; aktywuje je dopiero prawdziwy stan eventu.
+   ============================================================ */
+#panelTresc .odn-card{--odn-progress:0%}
+#panelTresc .odn-tank{position:relative;width:100%;height:100%;overflow:hidden;
+  border-radius:10px;background:#08060d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+#panelTresc .odn-water{position:absolute;inset:43% 0 0;
+  background:linear-gradient(180deg,rgba(63,132,150,.62),rgba(19,55,78,.92))}
+#panelTresc .odn-water::before{content:'';position:absolute;left:-20%;right:-20%;top:-4px;height:8px;
+  background:repeating-radial-gradient(ellipse at 50% 100%,rgba(151,227,235,.52) 0 3px,transparent 4px 12px);
+  animation:odn-fala 4.8s linear infinite}
+@keyframes odn-fala{from{transform:translateX(-8px)}to{transform:translateX(8px)}}
+#panelTresc .odn-fish{position:absolute;z-index:2;width:92%;height:92%;left:4%;top:4%;
+  object-fit:contain;image-rendering:pixelated;opacity:.08;transform:translateY(7px) scale(.82);
+  filter:saturate(.55) brightness(.72);transition:opacity .5s ease,transform .5s ease,filter .5s ease}
+#panelTresc .odn-tank .odn-roe{position:absolute;z-index:4;left:9px;bottom:4px}
+#panelTresc .odn-bubbles{position:absolute;z-index:3;inset:0;pointer-events:none}
+#panelTresc .odn-bubbles i{position:absolute;bottom:-8px;width:5px;height:5px;border-radius:50%;
+  border:1px solid rgba(201,244,248,.82);opacity:.7;animation:odn-babel 3.8s linear infinite}
+#panelTresc .odn-bubbles i:nth-child(1){left:16%;animation-delay:-.4s}
+#panelTresc .odn-bubbles i:nth-child(2){left:43%;width:4px;height:4px;animation-delay:-2.1s}
+#panelTresc .odn-bubbles i:nth-child(3){left:72%;width:6px;height:6px;animation-delay:-1.2s}
+#panelTresc .odn-bubbles i:nth-child(4){left:86%;width:3px;height:3px;animation-delay:-3.1s}
+@keyframes odn-babel{0%{transform:translateY(0) scale(.7);opacity:0}
+  15%{opacity:.7}100%{transform:translateY(-86px) scale(1.18);opacity:0}}
+#panelTresc .odn-meter i{width:var(--odn-progress)}
+#panelTresc .odn-card[data-tier="25"] .odn-fish{opacity:.18;transform:translateY(5px) scale(.86)}
+#panelTresc .odn-card[data-tier="50"] .odn-fish{opacity:.34;transform:translateY(3px) scale(.9);filter:saturate(.72) brightness(.82)}
+#panelTresc .odn-card[data-tier="75"] .odn-fish{opacity:.58;transform:translateY(1px) scale(.95);filter:saturate(.86) brightness(.93)}
+#panelTresc .odn-card[data-tier="100"] .odn-fish{opacity:.96;transform:none;filter:none;animation:odn-ryba 2.8s ease-in-out infinite}
+#panelTresc .odn-card[data-tier="50"] .odn-roe,
+#panelTresc .odn-card[data-tier="75"] .odn-roe{opacity:.68}
+#panelTresc .odn-card[data-tier="100"] .odn-roe{opacity:.16}
+@keyframes odn-ryba{0%,100%{transform:translateX(-2px) translateY(1px)}50%{transform:translateX(2px) translateY(-2px)}}
+#panelTresc .odn-milestones{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}
+#panelTresc .odn-milestones span{position:relative;padding:6px 2px 5px;border-radius:7px;text-align:center;
+  border:1px solid rgba(72,40,28,.14);background:rgba(89,49,31,.045);opacity:.5;
+  font-size:7px;line-height:1.2;font-weight:800}
+#panelTresc .odn-milestones span b{display:block;font-size:8px;margin-bottom:2px}
+#panelTresc .odn-milestones span.akt{opacity:1;border-color:rgba(135,47,42,.45);background:rgba(181,61,53,.10)}
+#panelTresc .odn-history{margin-top:9px;padding:8px;border-radius:8px;border:1px dashed rgba(72,40,28,.28);
+  background:rgba(255,255,255,.22)}
+#panelTresc .odn-history b{display:block;font-size:9px;letter-spacing:.08em}
+#panelTresc .odn-history span{display:block;margin-top:4px;font-size:9px;line-height:1.4;opacity:.62}
+#panelTresc .odn-stamp{display:none;position:absolute;right:9px;top:56px;z-index:7;
+  transform:rotate(-8deg);padding:6px 8px;border:3px double #7b201d;border-radius:7px;
+  color:#7b201d;background:rgba(255,239,208,.88);font-size:12px;font-weight:1000;letter-spacing:.08em;
+  box-shadow:0 2px 0 rgba(55,20,15,.18)}
+#panelTresc .odn-stamp small{display:block;font-size:7px;letter-spacing:.05em;text-align:center}
+#panelTresc .odn-card[data-state="funded"] .odn-stamp,
+#panelTresc .odn-card[data-state="sold"] .odn-stamp{display:block;animation:odn-stempel .42s cubic-bezier(.2,.9,.25,1.25)}
+@keyframes odn-stempel{from{opacity:0;transform:rotate(-8deg) scale(1.7)}to{opacity:1;transform:rotate(-8deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  #panelTresc .odn-water::before,#panelTresc .odn-bubbles i,#panelTresc .odn-fish,#panelTresc .odn-roe{animation:none!important}
+}
+
+/* IKONA I PANEL WIADERKA. */
+.ik-wiadro .palak,.ik-wiadro .korpus,.ik-wiadro .woda{fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ik-wiadro .woda{opacity:.75}
+/* PLAKIETKI HUD: czytelnosc nad ruchoma scena (IX 2026, ewolucja
+   graficzna). Byly plaskimi prostokatami na polprzezroczystej czerni.
+   Nad spokojna woda czytalo sie to dobrze, ale nad jasnym niebem o
+   swicie, deszczem albo smuga swiatla (nowe snopy!) tekst zaczynal
+   ginac. Trzy warstwy naraz: ciemniejsze i mniej przezroczyste tlo,
+   cien rzucony na scene (odkleja plakietke od tego, co pod nia), oraz
+   wlasny cien tekstu -- litera zostaje czytelna nawet gdy tlo zawiedzie.
+   Zero zmiany pozycji i rozmiaru, wiec caly sztywno liczony slupek
+   ikon zostaje nietkniety. */
+#wiadLicz{position:absolute;z-index:7;display:none;
+  left:100%;top:-4px;margin-left:-6px;white-space:nowrap;
+  font:800 9px/1 system-ui,-apple-system,sans-serif;letter-spacing:.06em;
+  color:#F8EFD6;background:rgba(14,12,11,.86);border-radius:6px;padding:3px 6px;
+  box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,240,205,.10);
+  text-shadow:0 1px 2px rgba(0,0,0,.9);
+  pointer-events:none}
+/* Maly zegar handlarza, wprost pod ikona wiaderka. Pokazuje sie tylko
+   wtedy, gdy w wiaderku cos jest -- puste wiaderko nie ma na co czekac. */
+#wiadZeg{position:absolute;z-index:7;display:none;
+  left:0;top:100%;margin-top:2px;
+  width:38px;text-align:center;
+  font:800 9px/1 system-ui,-apple-system,sans-serif;letter-spacing:.02em;
+  color:rgba(244,233,204,.82);text-shadow:0 1px 2px rgba(0,0,0,.7);
+  font-variant-numeric:tabular-nums;pointer-events:none}
+#wiadZeg.on{display:block}
+#wiadZeg.pilne{color:#F4C63D}
+#wiadLicz.on{display:block;animation:wjazd-licznik .42s var(--spr)}
+#wiadLicz.pilne{background:rgba(163,55,38,.92)}
+#panelTresc .wiad-kar{display:grid;grid-template-columns:96px 1fr;gap:4px 12px;align-items:center;
+  border-color:var(--tusz);border-width:2px;background:rgba(244,198,61,.18)}
+#panelTresc .wiad-kar .portbox{width:96px;height:104px;display:flex;align-items:flex-end;justify-content:center;
+  overflow:hidden;position:relative;isolation:isolate}
+#panelTresc .wiad-kar img{width:88px;height:88px;object-fit:contain;image-rendering:pixelated;
+  filter:drop-shadow(0 3px 0 rgba(20,18,16,.24));animation:zan-plyw 3.8s ease-in-out infinite}
+#panelTresc .wiad-kar .portbox img{width:auto;height:auto;max-width:90px;max-height:100px;display:block}
+#panelTresc .wiad-kar img.portret{animation:none;transform:none;transform-origin:50% 100%}
+#panelTresc .wiad-kar .kwota{font-size:23px;font-weight:900;line-height:1.1}
+#panelTresc .wiad-kar .kto{font-size:11.5px;font-weight:800;letter-spacing:.08em;margin-top:3px}
+#panelTresc .wiad-kar .tr{grid-column:1/-1;margin:8px 0 2px}
+#panelTresc .wiad-kar .wybor{grid-column:1/-1;display:flex;gap:8px;margin-top:6px}
+#panelTresc .wiad-kar .wybor button{flex:1}
+#panelTresc .wr{display:grid;grid-template-columns:36px 1fr auto auto;gap:2px 8px;align-items:center;
+  padding:7px 0;border-bottom:1px dashed rgba(112,84,46,.28)}
+#panelTresc .wr:last-of-type{border-bottom:0}
+#panelTresc .wr img{width:36px;height:26px;object-fit:contain;image-rendering:pixelated}
+#panelTresc .wr .nz{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11.5px;font-weight:800;letter-spacing:.05em}
+#panelTresc .wr .mt{font-size:10px;opacity:.72;font-weight:700;margin-top:1px}
+#panelTresc .wr .cn{text-align:right;font-size:13.5px;font-weight:900;white-space:nowrap}
+#panelTresc .wr .dt{display:block;font-size:10px;font-weight:800;margin-top:1px}
+#panelTresc .wr .dt.w{color:#2F6B44}
+#panelTresc .wr .dt.n{color:#A33726}
+#panelTresc .wr .chr{font-size:9px;font-weight:800;color:#A33726;letter-spacing:.04em}
+#panelTresc .wr .pl{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;
+  padding:0 4px;border-radius:999px;border:1px solid rgba(50,37,28,.18);
+  background:rgba(255,255,255,.18);font-size:8.4px;line-height:1;font-weight:900;
+  letter-spacing:0;opacity:.74;transform:translateY(-.5px)}
+#panelTresc .wr .pl.m{color:#486E8F;background:rgba(98,140,178,.10)}
+#panelTresc .wr .pl.f{color:#8D5677;background:rgba(184,109,154,.10)}
+/* Wypuszczenie: mala ikonka-krzyzyk, zawsze dostepna. W trybie wymiany
+   ten sam slot dostaje szerszy, opisany przycisk -- caly wiersz jest
+   wtedy celem, wiec przycisk musi to jasno mowic, nie tylko "wypusc". */
+#panelTresc .wr .wyp{width:26px;height:26px;border-radius:2px;border:1.4px solid var(--tusz);
+  background:transparent;color:var(--tusz);font-size:13px;line-height:1;opacity:.55;cursor:pointer;
+  position:relative}
+/* NAPRAWA dostepnosc (audyt IX 2026): 26x26 to za malo do wygodnego
+   trafienia kciukiem. Tu, w przeciwienstwie do lewego slupka ikon,
+   przycisk siedzi w gridzie razem z sasiadami (`.wr` ma
+   grid-template-columns i gap 2px 8px) -- rozszerzam wiec ostrozniej,
+   tylko na tyle, zeby zmiescic sie w pustej przerwie miedzy kolumnami
+   (8px), nie w kolumne z cena obok. Bez podgladu w przegladarce wole
+   mniejszy, bezpieczny zysk niz zgadywac pelne 44px na slepo. */
+#panelTresc .wr .wyp::before{content:'';position:absolute;inset:-3px}
+#panelTresc .wr .wym{padding:7px 10px;border-radius:2px;border:1.6px solid var(--tusz);
+  background:var(--tusz);color:var(--papier);font:inherit;font-size:10px;font-weight:800;
+  letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+#panelTresc .wr.cel{background:rgba(244,198,61,.16);border-radius:3px}
+#panelTresc .wym-baner{padding:10px 4px 14px;text-align:center;font-size:11px;
+  font-weight:800;letter-spacing:.02em;line-height:1.5;border-bottom:1.6px dashed var(--tusz);margin-bottom:6px}
+#panelTresc .wym-baner button{margin-top:8px;padding:8px 20px;border-radius:2px;
+  border:1.6px solid var(--tusz);background:var(--papier);color:var(--tusz);
+  font:inherit;font-size:10.5px;font-weight:800;letter-spacing:.08em;cursor:pointer}
+#panelTresc .zegar{margin-top:12px;text-align:center;font-size:11px;font-weight:800;
+  letter-spacing:.08em;opacity:.85}
+#panelTresc .zegar b{font-size:16px;font-variant-numeric:tabular-nums}
+#panelTresc .zan-akt .zlaw{grid-column:1/-1;margin-top:6px;font-size:10px;
+  letter-spacing:.04em;color:var(--tusz);opacity:.72;font-weight:700;line-height:1.4}
+
+/* ============================================================
+   PACZKI, SPIS, OTWIERANIE. Dodane IX 2026 razem z gieldą zanet losowych. */
+#panelTresc .zsekcja{grid-column:1/-1;margin:14px 0 4px;padding-top:10px;
+  border-top:1.6px dashed var(--tusz);font-size:11px;font-weight:800;
+  letter-spacing:.1em;opacity:.75}
+#panelTresc .zad.zpacz{display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:14px 12px}
+#panelTresc .zpsp{width:112px;height:112px;object-fit:contain;image-rendering:pixelated;
+  margin-bottom:6px;filter:drop-shadow(0 4px 0 rgba(20,18,16,.22))}
+#panelTresc .zpacz .gw{font-size:13px}
+#panelTresc .zpacz .tr{margin-bottom:8px}
+#panelTresc .pszan{display:grid;grid-template-columns:56px 1fr 32px;gap:8px;
+  align-items:center;width:100%;font-size:9.5px;font-weight:800;
+  letter-spacing:.05em;opacity:.85;margin:2px 0}
+#panelTresc .pszan-et{text-align:left;text-transform:uppercase}
+#panelTresc .pszan-l{text-align:right;font-variant-numeric:tabular-nums}
+#panelTresc .pszan-pas{height:6px;border-radius:3px;background:rgba(112,84,46,.18);overflow:hidden}
+#panelTresc .pszan-pas i{display:block;height:100%;border-radius:3px}
+#panelTresc .pszan-pas .rz-pos{background:#8A8A8A}
+#panelTresc .pszan-pas .rz-rz{background:#2F6B9E}
+#panelTresc .pszan-pas .rz-ep{background:#A8801E}
+#panelTresc .zpacz .odb{width:100%;margin-top:10px}
+#panelTresc .rzb{font-size:8px;font-weight:800;letter-spacing:.06em;
+  padding:2px 6px;border-radius:2px;border:1.2px solid currentColor;margin-left:6px}
+#panelTresc .rz-pospolita{color:#6E6A63}
+#panelTresc .rz-rzadka{color:#2F6B9E}
+#panelTresc .rz-epicka{color:#A8801E}
+#panelTresc .zad.spis{opacity:.92}
+/* Otwieranie: prawdziwe klatki z materialu Andrzeja (43-dane-anim-paczki.js),
+   podmieniane przez JS na tym samym <img> -- brak animacji CSS, krok robi
+   robi kod (patrz KROK_MS w podepnijSklep). Format ramek ~220x150, nie
+   kwadrat: pudelko szersze niz wysokie, plomien swiatla wystrzeliwuje w
+   gore w kadrze o tych samych proporcjach co zrodlowe wideo. */
+#panelTresc .paczka-otw{display:flex;justify-content:center;align-items:flex-end;
+  padding:20px 0 10px;min-height:170px}
+#panelTresc .paczka-otw-sp{width:220px;height:auto;object-fit:contain;
+  image-rendering:pixelated}
+/* Karta wygranej: kolor tla zalezny od rzadkosci, zeby epicka wyraznie
+   zlocila sie na tle skromnej pospolitej. */
+#panelTresc .wygrana{display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:20px 16px;border-radius:3px;border:1.8px solid var(--tusz);
+  animation:wygrana-wjazd .38s var(--spr)}
+@keyframes wygrana-wjazd{from{opacity:0;transform:scale(.82)}}
+#panelTresc .wygrana.rz-tlo-pospolita{background:rgba(110,106,99,.12)}
+#panelTresc .wygrana.rz-tlo-rzadka{background:rgba(47,107,158,.14)}
+#panelTresc .wygrana.rz-tlo-epicka{background:rgba(168,128,30,.16)}
+#panelTresc .wygrana-sp{width:96px;height:96px;object-fit:contain;
+  image-rendering:pixelated;margin:8px 0}
+#panelTresc .wygrana .gw{font-size:14px;margin-top:2px}
+#panelTresc .wygrana .zef{margin:4px 0}
+#panelTresc #paczkaOdbierz{width:100%;margin-top:12px}
+
+/* ============================================================
+   CIASTKO Z WROZBA — 10 000 000 QRYB.
+   Kafel NIE zdradza, ze skutki sa negatywne. Reveal robi to dopiero po
+   animacji pekniecia ciastka. Grafika jest CSS/paper-artem, bez assetu. */
+#panelTresc .fortune-card{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:16px 12px;border:1.8px solid var(--tusz);border-radius:3px;
+  background:linear-gradient(180deg,rgba(246,224,170,.18),rgba(87,60,36,.08));
+  box-shadow:inset 0 1px 0 rgba(255,250,228,.48)}
+#panelTresc .fortune-card .gw{font-size:14px;letter-spacing:.08em;margin:5px 0 3px}
+#panelTresc .fortune-card .tr{max-width:290px}
+#panelTresc .fortune-price{font-size:12px;font-weight:900;letter-spacing:.06em;margin:8px 0}
+#panelTresc .fortune-cookie{position:relative;width:132px;height:92px;margin:4px auto 8px;
+  filter:drop-shadow(0 5px 0 rgba(20,18,16,.20))}
+#panelTresc .fortune-cookie::before,#panelTresc .fortune-cookie::after{
+  content:'';position:absolute;top:15px;width:67px;height:58px;
+  background:linear-gradient(145deg,#F5D986 0%,#E8B94F 54%,#B9782D 100%);
+  border:3px solid #342315;box-shadow:inset 0 0 0 2px rgba(255,246,199,.36)}
+#panelTresc .fortune-cookie::before{left:8px;border-radius:52% 45% 58% 38%;transform:rotate(18deg) skewX(-9deg)}
+#panelTresc .fortune-cookie::after{right:8px;border-radius:45% 52% 38% 58%;transform:rotate(-18deg) skewX(9deg)}
+#panelTresc .fortune-cookie i{position:absolute;z-index:3;left:43px;top:37px;width:46px;height:16px;
+  background:#FFF7DB;border:2px solid #342315;transform:rotate(-2deg);box-shadow:0 2px 0 rgba(20,18,16,.18)}
+#panelTresc .fortune-cookie i::after{content:'?';display:block;text-align:center;color:#6F522B;
+  font:900 11px/13px ui-monospace,monospace}
+#panelTresc .fortune-species-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;
+  max-height:46vh;overflow:auto;margin:12px 0 8px;padding:2px}
+#panelTresc .fortune-species{min-height:40px;padding:7px 6px;border:1.4px solid rgba(52,35,21,.65);
+  border-radius:3px;background:rgba(255,248,222,.62);color:var(--tusz);
+  font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.03em;text-transform:uppercase}
+#panelTresc .fortune-species:active{transform:scale(.97);background:rgba(244,198,61,.28)}
+#panelTresc .fortune-selected{margin:9px 0 12px;padding:9px 10px;width:100%;border:1.5px dashed var(--tusz);
+  background:rgba(244,198,61,.10);font-size:12px;font-weight:900;letter-spacing:.04em}
+#panelTresc .fortune-open-stage{min-height:228px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#panelTresc .fortune-opening{position:relative;width:230px;height:190px;animation:fc-wobble .72s ease-in-out 2}
+#panelTresc .fortune-opening .fc-half{position:absolute;z-index:2;top:58px;width:90px;height:70px;
+  background:linear-gradient(145deg,#F8DE8E,#E7B84E 58%,#B67129);border:4px solid #342315;
+  box-shadow:inset 0 0 0 3px rgba(255,248,206,.35),0 5px 0 rgba(20,18,16,.16)}
+#panelTresc .fortune-opening .fc-left{left:27px;border-radius:56% 40% 58% 34%;transform-origin:90% 52%;
+  animation:fc-left 2.45s cubic-bezier(.2,.8,.2,1) forwards}
+#panelTresc .fortune-opening .fc-right{right:27px;border-radius:40% 56% 34% 58%;transform-origin:10% 52%;
+  animation:fc-right 2.45s cubic-bezier(.2,.8,.2,1) forwards}
+#panelTresc .fortune-opening .fc-slip{position:absolute;z-index:1;left:50%;top:91px;width:150px;height:34px;
+  margin-left:-75px;padding:8px 10px;background:#FFF8DF;border:3px solid #342315;color:#6C512C;
+  text-align:center;font:900 10px/12px ui-monospace,monospace;letter-spacing:.08em;opacity:0;
+  transform:translateY(0) scaleX(.15);animation:fc-slip 1.15s 1.10s cubic-bezier(.15,.9,.2,1) forwards}
+#panelTresc .fortune-opening .fc-spark{position:absolute;z-index:0;left:50%;top:95px;width:12px;height:12px;
+  margin:-6px;border-radius:50%;background:#F4C63D;box-shadow:0 0 26px 14px rgba(244,198,61,.44);
+  opacity:0;animation:fc-flash .55s .86s ease-out forwards}
+@keyframes fc-wobble{0%,100%{transform:rotate(0) scale(1)}35%{transform:rotate(-3deg) scale(1.03)}70%{transform:rotate(3deg) scale(1.03)}}
+@keyframes fc-left{0%,36%{transform:rotate(12deg)}56%{transform:rotate(16deg) translateX(-4px)}100%{transform:rotate(-24deg) translate(-38px,10px)}}
+@keyframes fc-right{0%,36%{transform:rotate(-12deg)}56%{transform:rotate(-16deg) translateX(4px)}100%{transform:rotate(24deg) translate(38px,10px)}}
+@keyframes fc-slip{0%{opacity:0;transform:translateY(0) scaleX(.15)}35%{opacity:1}100%{opacity:1;transform:translateY(-47px) scaleX(1)}}
+@keyframes fc-flash{0%{opacity:0;transform:scale(.4)}45%{opacity:1;transform:scale(1.8)}100%{opacity:0;transform:scale(3)}}
+#panelTresc .fortune-reveal{margin:8px 0;padding:17px 14px 15px;border:2px solid #342315;border-radius:3px;
+  background:#FFF8DF;color:#342315;text-align:center;box-shadow:0 5px 0 rgba(20,18,16,.15);
+  animation:fortune-paper .42s var(--spr)}
+#panelTresc .fortune-reveal .fortune-quote{font:900 15px/1.35 Georgia,serif;font-style:italic;margin:4px 0 14px}
+#panelTresc .fortune-reveal .fortune-result{padding-top:13px;border-top:1.5px dashed rgba(52,35,21,.55);
+  font:900 11px/1.45 ui-monospace,monospace;letter-spacing:.035em;opacity:0;transform:translateY(8px);
+  animation:fortune-result .32s 1.15s ease-out forwards}
+#panelTresc .fortune-reveal .fortune-fish{display:block;margin-top:9px;color:#8B2C32;font-size:10px;letter-spacing:.08em}
+#panelTresc .fortune-sign{margin-top:10px;font:800 8px/1.2 ui-monospace,monospace;letter-spacing:.12em;opacity:.6}
+@keyframes fortune-paper{from{opacity:0;transform:translateY(12px) rotate(-1deg)}}
+@keyframes fortune-result{to{opacity:1;transform:none}}
+@keyframes wjazd-licznik{from{opacity:0;transform:translateY(-7px) scale(.78)}}
+/* Kolumna ikon: 44 px skoku, kazda ma WLASNE top. Wiaderko weszlo na
+   trzecia pozycje, wiec pomoc, zapis i turnieje zjechaly o jeden slot.
+   Bez tego wiaderko nie mialo top w ogole i ladowalo na atlasie. */
+/* Ekosystem NA KONCU kolumny, a nie na jej poczatku. Pierwsza wersja
+   wstawila go przed atlasem, wiec zepchnal cala reszte o jedno miejsce
+   i wypadl poza gorna krawedz kadru. Ten sam odstep 44 px co miedzy
+   pozostalymi ikonkami. */
+/* Pod sklepem (IX 2026, prosba Andrzeja) -- kolumna schodzila za nisko
+   i ostatnie ikonki nachodzily na siebie na nizszych ekranach. */
+.ik-puchar .korpus,.ik-puchar .stopa,.ik-puchar .noga{fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linejoin:round}
+.ik-puchar .ucha{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+

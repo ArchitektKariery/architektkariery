@@ -1,0 +1,488 @@
+/* ============================================================
+   PREMIUM HUD — 18 IX 2026.
+   TYLKO INTERFEJS: nie zmienia losowania, tarła, ekologii, ekonomii,
+   zapisu ani turniejów. Istniejące przyciski zachowują te same ID i
+   te same handlery; zmienia się wyłącznie ich rozmieszczenie i oprawa.
+   ============================================================ */
+#hud{left:50%;right:auto;top:calc(7px + env(safe-area-inset-top));transform:translateX(-50%);z-index:7}
+body.z-paskiem #hud{top:calc(35px + env(safe-area-inset-top))}
+#monety{height:29px;padding:0 11px;border-radius:15px;background:rgba(15,12,28,.42);
+  border-color:rgba(232,199,101,.38);box-shadow:0 2px 12px rgba(0,0,0,.22);backdrop-filter:blur(5px)}
+
+#ikony{left:calc(9px + env(safe-area-inset-left));right:calc(9px + env(safe-area-inset-right));
+  top:calc(43px + env(safe-area-inset-top));width:auto;display:grid;
+  grid-template-columns:.88fr 1.05fr 1.05fr 1.02fr;gap:5px;align-items:stretch;
+  padding:5px;border-radius:18px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(18,13,34,.48),rgba(12,9,26,.26));
+  border:1px solid rgba(232,199,101,.22);box-shadow:0 5px 22px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,235,190,.05);
+  backdrop-filter:blur(7px)}
+body.z-paskiem #ikony{top:calc(71px + env(safe-area-inset-top))}
+body.bez-konta #hud{top:calc(35px + env(safe-area-inset-top))}
+body.bez-konta #ikony{top:calc(69px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #ikony{top:calc(99px + env(safe-area-inset-top))}
+
+#ikony .nav-karta{min-width:0;width:100%;display:block}
+#ikony .nav-glowna,#ikony>.nav-zadania{width:100%;height:54px;min-width:0;margin:0;padding:5px 3px;
+  border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:linear-gradient(180deg,rgba(34,25,57,.44),rgba(21,16,42,.26));
+  border:1px solid rgba(214,174,86,.30);box-shadow:inset 0 1px 0 rgba(255,236,194,.05);
+  color:#F3D985;opacity:.92;animation:none;overflow:visible;pointer-events:auto}
+#ikony .nav-glowna::before{inset:-3px}
+#ikony .nav-glowna .ik-sv,#ikony>.nav-zadania .ik-sv{width:19px;height:19px;flex:0 0 19px}
+#ikony .navLabel{display:block;font:800 9px/1 ui-monospace,monospace;letter-spacing:.13em;color:#F3D985;white-space:nowrap}
+#ikony .navSub{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font:600 6.4px/1.05 ui-monospace,monospace;letter-spacing:.02em;color:rgba(244,229,190,.52)}
+#ikony .nav-glowna:active,#ikony>.nav-zadania:active{transform:scale(.96);background:rgba(85,63,36,.32)}
+#ikony .ik-grupa.otw>.nav-glowna{opacity:1;background:linear-gradient(180deg,rgba(89,65,39,.50),rgba(43,31,55,.42));
+  border-color:rgba(232,199,101,.68);box-shadow:0 0 18px rgba(232,199,101,.12),inset 0 0 0 1px rgba(232,199,101,.08)}
+#ikony>.nav-zadania.gotowe{background:linear-gradient(180deg,rgba(89,125,84,.78),rgba(39,73,53,.72));color:#E9FFE9}
+#ikony>.nav-zadania.gotowe .navLabel{color:#E9FFE9}
+#ikony>.nav-zadania .wykrzyknik{top:-5px;right:-4px}
+
+#ikony .premiumDrop{left:0;top:calc(100% + 7px);min-width:max-content;display:flex;flex-direction:row;gap:5px;
+  align-items:center;transform:translateY(-5px) scale(.97);transform-origin:top left;z-index:12}
+#ikony .ik-grupa.otw .premiumDrop{transform:translateY(0) scale(1)}
+#ikony .zakMini{height:36px;min-width:76px;padding:0 9px;border-radius:12px;
+  background:linear-gradient(180deg,rgba(27,20,48,.96),rgba(16,12,32,.95));
+  border-color:rgba(214,174,86,.48);box-shadow:0 7px 22px rgba(0,0,0,.42);font-size:8px}
+#ikony .zakMini svg{width:16px;height:16px;flex-basis:16px}
+#nawigacjaMenu{left:0}
+#menuMenu{left:0;top:calc(100% + 7px);transform:translateY(-5px) scale(.97)}
+#grupaMenu.otw #menuMenu{transform:translateY(0) scale(1)}
+#kompendiumMenu{left:auto;right:0}
+#kompendiumMenu .zakMini,#menuMenu .zakMini,#nawigacjaMenu .zakMini{min-width:76px}
+#ikony #wiaderko{margin-bottom:0}
+#ikony #wiadZeg{top:calc(100% + 3px);bottom:auto}
+
+/* ŁAWICA ma wyglądać jak element świata, nie jak modalny guzik. */
+#reset{top:calc(139px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+  width:132px;height:132px;background:radial-gradient(circle at 50% 40%,rgba(35,27,58,.18),rgba(20,15,39,.05) 66%,transparent 78%);
+  border:1.6px solid rgba(232,199,101,.52);box-shadow:inset 0 0 0 1px rgba(255,238,197,.10),0 4px 18px rgba(0,0,0,.18);
+  opacity:.84;backdrop-filter:blur(1.8px)}
+#reset::before{inset:10px;border-color:rgba(255,236,189,.12)}
+#reset .ik{font-size:48px;opacity:.86}
+#reset .et{font-size:14px;letter-spacing:.10em;color:rgba(248,222,146,.96)}
+#reset:hover,#reset:focus-visible{background:radial-gradient(circle at 50% 40%,rgba(54,41,82,.28),rgba(20,15,39,.08) 66%,transparent 78%);opacity:.97}
+body.z-paskiem #reset{top:calc(167px + env(safe-area-inset-top))}
+body.bez-konta #reset{top:calc(165px + env(safe-area-inset-top))}
+
+/* Tarło przeniesione pod MENU: ten sam HUD, ale bez walki z dużą ŁAWICĄ. */
+#tarla{top:calc(89px + env(safe-area-inset-top));left:calc(10px + env(safe-area-inset-left));right:auto;width:88px;
+  padding:5px 4px;border-radius:10px;background:rgba(20,15,39,.42);border-color:rgba(212,168,64,.30);
+  box-shadow:0 3px 12px rgba(0,0,0,.18);backdrop-filter:blur(3px)}
+body.z-paskiem #tarla{top:calc(116px + env(safe-area-inset-top))}
+body.bez-konta #tarla{top:calc(117px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #tarla{top:calc(144px + env(safe-area-inset-top))}
+body.menu-master-open #tarla{opacity:0;pointer-events:none}
+
+/* Zegar jeziora wraca jako spokojny element świata, nie debug box. */
+#lakeClock{position:absolute;z-index:8;left:50%;top:calc(54px + env(safe-area-inset-top));transform:translateX(-50%);
+  min-width:104px;padding:7px 12px 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  pointer-events:none;background:linear-gradient(180deg,rgba(17,13,34,.66),rgba(12,10,24,.42));
+  border:1.2px solid rgba(214,174,86,.42);box-shadow:0 4px 16px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,240,196,.07);
+  backdrop-filter:blur(3px);opacity:.96}
+#lakeClock b{display:block;font:900 17px/1 ui-monospace,monospace;letter-spacing:.10em;color:#FFF2C7;text-shadow:0 1px 2px rgba(0,0,0,.75)}
+#lakeClock span{display:block;font:800 7px/1 ui-monospace,monospace;letter-spacing:.15em;color:rgba(243,217,133,.90)}
+body.z-paskiem #lakeClock{top:calc(82px + env(safe-area-inset-top))}
+body.bez-konta #lakeClock{top:calc(84px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #lakeClock{top:calc(112px + env(safe-area-inset-top))}
+body.menu-master-open #lakeClock{opacity:0;pointer-events:none}
+
+#nowaRunda{top:calc(139px + env(safe-area-inset-top))}
+body.z-paskiem #nowaRunda{top:calc(167px + env(safe-area-inset-top))}
+
+/* Przy karcie i atlasie cała premium nawigacja naprawdę znika z dotyku. */
+body.karta-otwarta #ikony,body.ksiega-otwarta #ikony,
+body.karta-otwarta #zadania,body.ksiega-otwarta #zadania{opacity:0;pointer-events:none;transition:opacity .2s ease}
+
+@media (max-width:380px){
+  #ikony{left:5px;right:5px;gap:3px;padding:4px}
+  #ikony .nav-glowna,#ikony>.nav-zadania{height:50px;border-radius:12px}
+  #ikony .navLabel{font-size:8px;letter-spacing:.09em}
+  #ikony .navSub{font-size:5.8px}
+  #ikony .zakMini{min-width:68px;padding:0 7px}
+  #menuMenu{left:0;right:auto;transform:translateY(-5px) scale(.97)}
+  #grupaMenu.otw #menuMenu{transform:translateY(0) scale(1)}
+  #reset{right:9px;width:92px;height:92px}
+  #tarla{right:9px;width:92px}
+}
+
+
+
+/* ============================================================
+   TRYB JEZIORO / KOMPAKT — 18 IX 2026.
+   Cel: oddac wiecej ekranu wodzie i rybom. Bez zmian mechanik.
+   Zmiany tylko wizualne: mniejsza nawigacja, zwiniete podpisy,
+   mniejsza lawica, mniejszy panel tarla, lzejsza tafla HUD.
+   ============================================================ */
+#hud{top:calc(4px + env(safe-area-inset-top))}
+body.z-paskiem #hud{top:calc(31px + env(safe-area-inset-top))}
+body.bez-konta #hud{top:calc(31px + env(safe-area-inset-top))}
+#monety{height:24px;padding:0 10px;border-radius:13px;background:rgba(15,12,28,.32);
+  border-color:rgba(232,199,101,.28);box-shadow:0 2px 10px rgba(0,0,0,.16);backdrop-filter:blur(3px)}
+#monety b{font-size:13px}
+#monety .ik-sv{width:16px;height:16px}
+
+#ikony{top:calc(33px + env(safe-area-inset-top));gap:4px;padding:3px 4px;border-radius:14px;
+  background:linear-gradient(180deg,rgba(18,13,34,.28),rgba(12,9,26,.10));
+  border-color:rgba(232,199,101,.12);box-shadow:0 4px 16px rgba(0,0,0,.10);backdrop-filter:blur(3px)}
+body.z-paskiem #ikony{top:calc(60px + env(safe-area-inset-top))}
+body.bez-konta #ikony{top:calc(61px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #ikony{top:calc(88px + env(safe-area-inset-top))}
+
+#ikony .nav-glowna,#ikony>.nav-zadania{height:42px;padding:4px 2px;border-radius:11px;gap:1px;
+  background:linear-gradient(180deg,rgba(34,25,57,.28),rgba(21,16,42,.16));
+  border-color:rgba(214,174,86,.20);box-shadow:inset 0 1px 0 rgba(255,236,194,.03)}
+#ikony .nav-glowna .ik-sv,#ikony>.nav-zadania .ik-sv{width:16px;height:16px;flex:0 0 16px}
+#ikony .navLabel{font-size:8px;letter-spacing:.11em}
+#ikony .navSub{display:none}
+#ikony .ik-grupa.otw>.nav-glowna{background:linear-gradient(180deg,rgba(89,65,39,.42),rgba(43,31,55,.30));
+  border-color:rgba(232,199,101,.52);box-shadow:0 0 12px rgba(232,199,101,.08),inset 0 0 0 1px rgba(232,199,101,.06)}
+#ikony .premiumDrop{top:calc(100% + 5px)}
+#ikony .zakMini{height:34px;min-width:70px;font-size:7.5px;padding:0 8px}
+#ikony .zakMini svg{width:15px;height:15px;flex-basis:15px}
+#ikony>.nav-zadania .wykrzyknik{top:-4px;right:-3px;transform:scale(.92)}
+
+#reset{top:calc(92px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));
+  width:118px;height:118px;opacity:.68;box-shadow:inset 0 0 0 1px rgba(255,238,197,.08),0 3px 14px rgba(0,0,0,.14)}
+#reset::before{inset:9px}
+#reset .ik{font-size:42px;opacity:.82}
+#reset .et{font-size:12px;letter-spacing:.10em}
+#reset:hover,#reset:focus-visible{opacity:.86}
+body.z-paskiem #reset{top:calc(119px + env(safe-area-inset-top))}
+body.bez-konta #reset{top:calc(118px + env(safe-area-inset-top))}
+
+#tarla{top:calc(102px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:auto;width:80px;
+  padding:4px 3px;border-radius:9px;background:rgba(20,15,39,.26);border-color:rgba(212,168,64,.20);
+  box-shadow:0 2px 10px rgba(0,0,0,.12);backdrop-filter:blur(2px)}
+body.z-paskiem #tarla{top:calc(129px + env(safe-area-inset-top))}
+body.bez-konta #tarla{top:calc(130px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #tarla{top:calc(157px + env(safe-area-inset-top))}
+
+#lakeClock{position:fixed!important;left:auto!important;right:calc(14px + env(safe-area-inset-right))!important;top:auto!important;bottom:calc(18px + env(safe-area-inset-bottom))!important;width:58px;min-width:58px;max-width:58px;height:34px;min-height:0;max-height:34px;padding:3px 4px 2px;border-radius:7px;box-sizing:border-box;transform:none!important;overflow:hidden;z-index:80}
+#lakeClock b{font-size:8px;line-height:1.05}
+#lakeClock span{font-size:6.5px}
+body.z-paskiem #lakeClock{top:calc(77px + env(safe-area-inset-top))}
+body.bez-konta #lakeClock{top:calc(80px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #lakeClock{top:calc(107px + env(safe-area-inset-top))}
+
+#nowaRunda{top:calc(92px + env(safe-area-inset-top))}
+body.z-paskiem #nowaRunda{top:calc(119px + env(safe-area-inset-top))}
+
+@media (max-width:380px){
+  #ikony{left:4px;right:4px;gap:3px;padding:3px}
+  #ikony .nav-glowna,#ikony>.nav-zadania{height:40px;border-radius:10px}
+  #ikony .navLabel{font-size:7.6px;letter-spacing:.09em}
+  #ikony .zakMini{min-width:64px;padding:0 6px}
+  #reset{right:8px;width:76px;height:76px}
+  #tarla{right:8px;width:78px}
+}
+
+
+
+/* ============================================================
+   TRYB 50/50 + IKONY POWIADOMIEN (18 IX 2026, po tescie Andrzeja)
+   - pasek turniejowy dzielony po rowno: 50% opis / 50% przewijanie
+   - zero wykrzyknikow i zero pulsowania
+   - powiadomienia maja swoje znaki: $ / ♥ / 🐟 / 📘
+   ============================================================ */
+#pasekTV{display:none}
+body.z-paskiem #pasekTV{display:flex;align-items:stretch}
+#pasekTVetyk{flex:0 0 50%;max-width:50%;min-width:0;overflow:hidden;justify-content:flex-start;
+  white-space:nowrap;text-overflow:ellipsis}
+#pasekTVokno{flex:0 0 50%;max-width:50%;min-width:0}
+#pasekTVtresc .wpis{padding:0 10px}
+#pasekTVtresc .dzial{padding:0 10px}
+
+#zadania .wykrzyknik,
+.ik-grupa.has-alert > .ikonka::after,
+.zakMini.gotowe::after,
+.ikonka.gotowe::after{display:none !important;content:none !important}
+#zadania.gotowe,
+#zadania.gotowe .wykrzyknik,
+#wiadSerce.on,
+#tarla .tg u,
+#ikony .zakMini,
+#ikony .nav-glowna,
+#ikony>.nav-zadania{animation:none !important}
+#zadania.gotowe{box-shadow:0 0 0 1px rgba(151,209,154,.22) inset}
+#wiadLicz.on,#ekoWykrz.on{animation:none !important}
+
+.navAlert,.miniPowiad{position:absolute;display:none;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:999px;
+  color:#FFF7E6;font:800 10px/16px system-ui,-apple-system,sans-serif;letter-spacing:0;
+  text-shadow:0 1px 1px rgba(0,0,0,.55);box-shadow:0 2px 6px rgba(0,0,0,.30);
+  pointer-events:none;z-index:9}
+.navAlert.on,.miniPowiad.on{display:flex}
+.navAlert--trade,.miniPowiad--trade{background:rgba(56,128,80,.94)}
+.navAlert--heart,.miniPowiad--heart{background:rgba(196,52,74,.96)}
+.navAlert--fish,.miniPowiad--fish{background:rgba(62,109,190,.96)}
+.navAlert--book,.miniPowiad--book{background:rgba(94,77,152,.96)}
+#alertMenuHandel{top:-5px;right:-4px}
+#alertMenuSerce{top:-5px;right:18px}
+#alertSwiatEko{top:-5px;right:-4px}
+#alertSwiatAtlas{top:-5px;right:18px}
+#wiadHandel{left:100%;top:14px;margin-left:-6px}
+#wiadSerce{animation:none !important}
+#wiadSerce.on{display:block}
+#atlasNoweIk{left:100%;top:-4px;margin-left:-6px}
+
+#ekoWykrz{left:100%;top:-4px;margin-left:-6px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:999px;background:rgba(62,109,190,.96);color:#FFF7E6;
+  font:800 10px/16px system-ui,-apple-system,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.30)}
+
+.ik-grupa.has-alert > .ikonka{border-color:rgba(232,199,101,.52);box-shadow:0 0 10px rgba(232,199,101,.05),inset 0 0 0 1px rgba(232,199,101,.05)}
+
+
+
+/* ============================================================
+   JEDEN PRZYCISK MENU — 18 IX 2026.
+   W spoczynku zostaje tylko jeden mały przycisk. Wszystkie aktywne
+   powiadomienia mogą być widoczne jednocześnie na nim. Po otwarciu
+   menu każda odznaka wraca na właściwą funkcję: WIADRO / EKO / ATLAS /
+   ZADANIA. To jest wyłącznie warstwa UI, bez zmian gameplayu.
+   ============================================================ */
+#menuMaster{position:absolute;z-index:9;left:calc(10px + env(safe-area-inset-left));
+  top:calc(33px + env(safe-area-inset-top));width:54px;height:46px;padding:5px 5px 4px;
+  border-radius:14px;border:1px solid rgba(214,174,86,.25);
+  background:linear-gradient(180deg,rgba(28,21,49,.42),rgba(17,13,34,.22));
+  color:#F3D985;box-shadow:0 4px 16px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,236,194,.04);
+  backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+body.z-paskiem #menuMaster{top:calc(60px + env(safe-area-inset-top))}
+body.bez-konta #menuMaster{top:calc(61px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #menuMaster{top:calc(88px + env(safe-area-inset-top))}
+#menuMaster svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#menuMaster>span{font:800 7.5px/1 ui-monospace,monospace;letter-spacing:.12em}
+#menuMaster[aria-expanded="true"]{background:linear-gradient(180deg,rgba(89,65,39,.52),rgba(43,31,55,.38));
+  border-color:rgba(232,199,101,.62)}
+#masterAlerts{position:absolute;left:3px;right:3px;bottom:-5px;display:flex;justify-content:center;align-items:center;
+  gap:2px;flex-wrap:wrap;pointer-events:none}
+.masterAlert{display:none;min-width:13px;height:13px;padding:0 2px;box-sizing:border-box;border-radius:7px;
+  align-items:center;justify-content:center;color:#fff7e6;font:800 8px/13px system-ui,-apple-system,sans-serif;
+  text-shadow:0 1px 1px rgba(0,0,0,.5);box-shadow:0 1px 4px rgba(0,0,0,.30);font-style:normal}
+.masterAlert.on{display:flex}
+.masterAlert--trade{background:rgba(56,128,80,.96)}
+.masterAlert--heart{background:rgba(196,52,74,.96)}
+.masterAlert--fish{background:rgba(62,109,190,.96);font-size:9px}
+.masterAlert--book{background:rgba(94,77,152,.96);font-size:9px}
+.masterAlert--task{background:rgba(88,139,76,.96)}
+.masterAlert--net{background:rgba(62,100,124,.96)}
+
+/* Zamknięty stan: stary pasek ikon nie zajmuje ani piksela. */
+#ikony{display:none !important}
+/* Otwarty stan: wszystkie końcowe akcje są od razu widoczne — bez drugiego poziomu kliknięć. */
+body.menu-master-open #ikony{display:grid !important;position:absolute;z-index:9;
+  left:calc(9px + env(safe-area-inset-left));right:calc(9px + env(safe-area-inset-right));
+  top:calc(85px + env(safe-area-inset-top));width:auto;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px;padding:6px;border-radius:15px;pointer-events:auto;
+  background:linear-gradient(180deg,rgba(18,13,34,.78),rgba(12,9,26,.64));
+  border:1px solid rgba(232,199,101,.24);box-shadow:0 8px 28px rgba(0,0,0,.36);backdrop-filter:blur(7px)}
+body.z-paskiem.menu-master-open #ikony{top:calc(112px + env(safe-area-inset-top))}
+body.bez-konta.menu-master-open #ikony{top:calc(113px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem.menu-master-open #ikony{top:calc(140px + env(safe-area-inset-top))}
+body.menu-master-open #ikony .ik-grupa{display:contents !important}
+body.menu-master-open #ikony .nav-glowna{display:none !important}
+body.menu-master-open #ikony .premiumDrop{display:contents !important;position:static !important;opacity:1 !important;
+  pointer-events:auto !important;transform:none !important;transition:none !important}
+body.menu-master-open #ikony .zakMini,
+body.menu-master-open #ikony>#zadania{display:flex !important;width:100%;min-width:0;height:44px;margin:0;padding:4px 3px;
+  border-radius:11px;align-items:center;justify-content:center;flex-direction:column;gap:2px;
+  background:linear-gradient(180deg,rgba(34,25,57,.50),rgba(21,16,42,.34));
+  border:1px solid rgba(214,174,86,.26);box-shadow:inset 0 1px 0 rgba(255,236,194,.04);
+  color:#F3D985;opacity:.96;font:800 7.5px/1 ui-monospace,monospace;letter-spacing:.08em;overflow:visible}
+body.menu-master-open #ikony .zakMini svg,
+body.menu-master-open #ikony>#zadania svg{width:17px;height:17px;flex:0 0 17px}
+body.menu-master-open #ikony .zakMini span,
+body.menu-master-open #ikony>#zadania .navLabel{font-size:7.5px;line-height:1;letter-spacing:.09em}
+body.menu-master-open #ikony>#zadania .navSub{display:none}
+body.menu-master-open #ikony #wiaderko{margin-bottom:0}
+body.menu-master-open #ikony #wiadZeg{display:none !important}
+body.menu-master-open #ikony #wiadLicz{top:-4px;left:auto;right:-4px;margin:0}
+body.menu-master-open #ikony #wiadSerce{right:auto;left:-3px;top:-3px;margin:0}
+body.menu-master-open #ikony #wiadHandel{left:auto;right:-4px;top:14px;margin:0}
+body.menu-master-open #ikony #ekoWykrz,
+body.menu-master-open #ikony #atlasNoweIk,
+body.menu-master-open #ikony #zadaniaGotoweIk{left:auto;right:-4px;top:-4px;margin:0}
+body.karta-otwarta #menuMaster,body.ksiega-otwarta #menuMaster{opacity:0;pointer-events:none}
+body.karta-otwarta #ikony,body.ksiega-otwarta #ikony{display:none !important}
+
+.miniPowiad--task{background:rgba(88,139,76,.96)}
+#zadaniaGotoweIk{position:absolute;display:none;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;border-radius:999px;color:#FFF7E6;
+  font:800 10px/16px system-ui,-apple-system,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.30);pointer-events:none}
+#zadaniaGotoweIk.on{display:flex}
+
+@media(max-width:380px){
+  #menuMaster{left:7px;width:50px;height:44px}
+  body.menu-master-open #ikony{left:5px;right:5px;gap:4px;padding:5px;grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.menu-master-open #ikony .zakMini,body.menu-master-open #ikony>#zadania{height:42px;font-size:7px}
+}
+
+
+/* Pasek turniejowy — 50/50 bez ucinania końcówki czasu na wąskich ekranach. */
+#pasekTVetyk{
+  padding:0 7px;
+  gap:4px;
+  font-size:8.3px;
+  letter-spacing:.055em;
+}
+#pasekTVetyk b{
+  font-size:9.4px;
+  letter-spacing:.01em;
+}
+@media (max-width:390px){
+  #pasekTVetyk{
+    padding:0 5px;
+    font-size:7.8px;
+    letter-spacing:.035em;
+  }
+  #pasekTVetyk b{font-size:8.8px}
+}
+
+
+/* ============================================================
+   TABLICA OGŁOSZEŃ — TRYB "PINEZKA".
+   Oferta zlecenia NIE wyskakuje sama. Pojawia się tylko pinezka:
+   - na zamkniętym przycisku MENU,
+   - po otwarciu menu na kafelku OGŁOSZENIA.
+   Dopiero kliknięcie OGŁOSZENIA otwiera tablicę.
+   ============================================================ */
+.masterAlert--job{background:rgba(166,91,52,.97);font-size:9px}
+.miniPowiad--job{background:rgba(166,91,52,.97);font-size:10px}
+#zleceniaPowiad{position:absolute;right:-4px;top:-4px}
+#zleceniaTablica.ma-oferte{
+  border-color:rgba(228,174,92,.70) !important;
+  background:linear-gradient(180deg,rgba(93,59,34,.62),rgba(45,31,38,.42)) !important;
+}
+body.menu-master-open #ikony{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+@media(max-width:380px){
+  body.menu-master-open #ikony{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+
+/* ============================================================
+   ETAP 1/6 — AUTO-HIDE HUD.
+   Po 2,5 s bez interakcji przygasza tylko elementy stale wiszace nad
+   jeziorem. Odznaki powiadomien na MENU zostaja w pelnej czytelnosci.
+   ============================================================ */
+#menuMaster,
+#menuMaster>svg,
+#menuMaster>span,
+#hud,
+#reset{
+  transition:opacity .38s ease, background-color .38s ease, border-color .38s ease,
+             box-shadow .38s ease, filter .38s ease;
+}
+body.ui-idle:not(.menu-master-open) #menuMaster{
+  background:linear-gradient(180deg,rgba(28,21,49,.13),rgba(17,13,34,.05));
+  border-color:rgba(214,174,86,.08);
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  backdrop-filter:blur(1px);
+}
+body.ui-idle:not(.menu-master-open) #menuMaster>svg,
+body.ui-idle:not(.menu-master-open) #menuMaster>span{opacity:.26}
+body.ui-idle:not(.menu-master-open) #masterAlerts{opacity:1}
+body.ui-idle #hud{opacity:.28}
+body.ui-idle #reset{opacity:.30;filter:saturate(.72)}
+body.ui-idle #lakeClock{opacity:.34;filter:saturate(.72)}
+body.ui-idle #reset:hover,
+body.ui-idle #reset:focus-visible{opacity:.78}
+
+/* Otwarte elementy zawsze odzyskuja pelna czytelnosc. */
+body.menu-master-open #menuMaster,
+body.menu-master-open #menuMaster>svg,
+body.menu-master-open #menuMaster>span,
+body:has(#panel.on) #hud,
+body:has(#panel.on) #reset{
+  opacity:1;
+  filter:none;
+}
+
+/* Otwarta liga/panel nie moze dostawac naklejki MENU na tresci.
+   Gdy panel jest otwarty, przycisk menu znika z kadru i nie zaslania tabeli. */
+body:has(#panel.on) #menuMaster,
+body.panel-otwarty #menuMaster{
+  opacity:0 !important;
+  pointer-events:none !important;
+  visibility:hidden !important;
+}
+body:has(#panel.on) #lakeClock,
+body.panel-otwarty #lakeClock,
+body.panel-otwarty #tarla{
+  opacity:0 !important;
+  pointer-events:none !important;
+  visibility:hidden !important;
+}
+
+
+/* ============================================================
+   ETAP 2/6 — JEDEN JEZYK POWIADOMIEN.
+   Ten sam symbol jest widoczny na glownym MENU i na funkcji docelowej.
+   Wszystkie badge sa statyczne: zero pulsowania/migania.
+   ============================================================ */
+.miniPowiad--net{background:rgba(62,100,124,.96)}
+#wiadSiec{left:-4px;bottom:-4px;top:auto;right:auto;margin:0}
+.masterAlert,.miniPowiad,.navAlert,#wiadSerce,#ekoWykrz,#zadaniaGotoweIk{
+  animation:none !important;
+}
+
+
+/* ============================================================
+   ETAP 3/6 — PARA W WIADERKU.
+   Obie ryby tego samego gatunku dostaja ledwie widoczny wspolny akcent.
+   Bez animacji i bez dodatkowego serca w liscie.
+   ============================================================ */
+#panelTresc .wr.para-wiadra{
+  position:relative;
+  background:linear-gradient(90deg,rgba(156,72,102,.055),transparent 48%);
+}
+#panelTresc .wr.para-wiadra::before{
+  content:'';position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;
+  background:rgba(156,72,102,.34);
+}
+#panelTresc .wr.para-wiadra .pl{
+  border-color:rgba(156,72,102,.26);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+
+/* ============================================================
+   ETAP 5/6 — UKRYTY PANEL DIAGNOSTYCZNY.
+   Normalny gracz go nie widzi. Wlacza sie przez #diag w adresie
+   albo QDiag.toggle() z konsoli.
+   ============================================================ */
+#qDiag{position:fixed;z-index:9999;left:6px;bottom:6px;width:min(92vw,380px);max-height:46vh;
+  overflow:auto;display:none;padding:8px 9px;border-radius:8px;
+  background:rgba(8,8,12,.92);border:1px solid rgba(244,198,61,.42);
+  color:#EDE7D8;font:600 10px/1.42 ui-monospace,SFMono-Regular,Consolas,monospace;
+  white-space:pre-wrap;text-align:left;pointer-events:auto;box-shadow:0 8px 30px rgba(0,0,0,.50)}
+#qDiag.on{display:block}
+#qDiag b{color:#F4C63D}
+#qDiag .ok{color:#91D69A}
+#qDiag .err{color:#FF8C79}
+
+
+/* ============================================================
+   ETAP 6/6 — KRONIKA SWIATA.
+   Wspolny feed dostaje forme osi czasu: data + ikona typu zdarzenia +
+   konkretna zmiana swiata. To prezentacja istniejacych danych, nie nowa
+   mechanika ekologii.
+   ============================================================ */
+#panelTresc .eko-kron-swiat{max-height:170px}
+#panelTresc .eko-k.swiat{position:relative;padding:7px 7px 7px 24px;
+  border-left:1px solid rgba(58,47,34,.16);background:rgba(255,255,255,.13);
+  border-radius:0 6px 6px 0;opacity:.9}
+#panelTresc .eko-k.swiat::before{content:'';position:absolute;left:-4px;top:12px;
+  width:7px;height:7px;border-radius:50%;background:#8A6B3F;border:1px solid rgba(242,236,223,.8)}
+#panelTresc .eko-k.swiat.narybek::before{background:#4E7D58}
+#panelTresc .eko-k.swiat.odlow::before{background:#9A4A3B}
+#panelTresc .eko-k.swiat .eko-czas{display:block;font-size:8.5px;line-height:1.2;
+  letter-spacing:.08em;opacity:.48;margin-bottom:2px;text-transform:uppercase}
+#panelTresc .eko-k.swiat .eko-evt{font-size:10.8px;line-height:1.4}
+#panelTresc .eko-k.swiat .eko-evt strong{font-weight:900}
+#panelTresc .eko-k.swiat .eko-evt i{font-style:normal;font-weight:800;color:#75501B}
+
+

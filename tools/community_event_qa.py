@@ -8,7 +8,9 @@ def require(cond, msg):
         errors.append(msg)
 
 root = Path(".")
-html = (root / "qryby.html").read_text(encoding="utf-8")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from qryby_source import read_game_source  # qryby.html + moduly src/, css/
+html = read_game_source(root)
 live = (root / "src/lucjanek/community-restoration-live.js").read_text(encoding="utf-8")
 doc = (root / "docs/lucjanek-community-event.md").read_text(encoding="utf-8")
 

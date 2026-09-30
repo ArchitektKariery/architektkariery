@@ -1,0 +1,704 @@
+{
+  "source": "qryby.html",
+  "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
+  "sourceBytes": 6357001,
+  "entry": "qryby-modular.html",
+  "entryBytes": 24325,
+  "version": "20260930-mod1",
+  "stage": 7,
+  "files": [
+    {
+      "path": "src/core/config.js",
+      "block": "script#0",
+      "stage": 3,
+      "fromLine": 29,
+      "toLine": 59,
+      "bytes": 1245,
+      "sha256": "f3af3be4207a2806a90368378869d6569c702d34ff19dd83c0b7f0d4049d7810"
+    },
+    {
+      "path": "css/01-hud.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 62,
+      "toLine": 586,
+      "bytes": 36161,
+      "sha256": "e9a04e806131fb6b114c80b5487b9b096e5576b75dbf63799eab696188b0ca1f"
+    },
+    {
+      "path": "css/02-panels.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 587,
+      "toLine": 1377,
+      "bytes": 49899,
+      "sha256": "03a5ba98b3e2982d2ee07ef144c6b0bbb798205b9a0dca17932ccd4f6edf917c"
+    },
+    {
+      "path": "css/03-eko-icons.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 1378,
+      "toLine": 1698,
+      "bytes": 19519,
+      "sha256": "02c1622e0de7651fbcaa808cafb03797a1658234d17deb7f1a47b6643cb94644"
+    },
+    {
+      "path": "css/04-premium-hud.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 1699,
+      "toLine": 2186,
+      "bytes": 26786,
+      "sha256": "30b313a7772d7f71d6fcbfe1bfb302636f2fd73c0a573547bd17e3aaaef93719"
+    },
+    {
+      "path": "css/05-product.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 2187,
+      "toLine": 2867,
+      "bytes": 27895,
+      "sha256": "b69bf96d428a79af671b0450b41c5c9c2227580557f7339077dbf4cdfaf6bc67"
+    },
+    {
+      "path": "assets/sprites/scene-angler.js",
+      "block": "script#1",
+      "stage": 2,
+      "fromLine": 3057,
+      "toLine": 3057,
+      "bytes": 291591,
+      "sha256": "e9ed3cbc810aa0787718d25c47badc823a25078031da39ca043936cbfe166cf3"
+    },
+    {
+      "path": "assets/sprites/tier6-bottom.js",
+      "block": "script#2",
+      "stage": 2,
+      "fromLine": 3058,
+      "toLine": 3085,
+      "bytes": 276307,
+      "sha256": "480ddf6973c8681534606a0374498b6845d32973b83b8eb47d487d2a94a97cda"
+    },
+    {
+      "path": "assets/sprites/species.js",
+      "block": "script#3",
+      "stage": 2,
+      "fromLine": 3087,
+      "toLine": 3253,
+      "bytes": 443576,
+      "sha256": "4aca808b878ceb63a3af8412aa95db8c62f49361f27e298f76bbaeef2a49c35b"
+    },
+    {
+      "path": "src/world/pora.js",
+      "block": "script#4",
+      "stage": 3,
+      "fromLine": 3255,
+      "toLine": 3565,
+      "bytes": 14763,
+      "sha256": "44916844ada09863576b8bafa5045811d35963a631745513ccbe5b94469d04e8"
+    },
+    {
+      "path": "src/rarity/skala-beta.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 3566,
+      "toLine": 3775,
+      "bytes": 7638,
+      "sha256": "f8f35010eea1f2419b45030e43c65d9c30a9be0cdc45d76a113e4bcbab747e7a"
+    },
+    {
+      "path": "src/rarity/okna.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 3776,
+      "toLine": 4240,
+      "bytes": 21365,
+      "sha256": "681af5545ee50ec4221de134d80d5014148c8ea75de3a03619c928fd9b71aafd"
+    },
+    {
+      "path": "src/rarity/pasma.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4241,
+      "toLine": 4404,
+      "bytes": 7454,
+      "sha256": "c70c9b40d4a60c5f183c007f12e2993c3c676ebf964756007f880e4e29225782"
+    },
+    {
+      "path": "src/card/rekord.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4405,
+      "toLine": 4563,
+      "bytes": 6644,
+      "sha256": "f3be37b06eb1ae587844800cd95d3c40d079e19501168688e414af903b3fa3b8"
+    },
+    {
+      "path": "src/card/xscore.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4564,
+      "toLine": 5043,
+      "bytes": 23856,
+      "sha256": "512c56ac707a66f93636ade76441a8ec5c470e2d62ce80d609902254f41fc507"
+    },
+    {
+      "path": "assets/sprites/card-frames.js",
+      "block": "script#5",
+      "stage": 2,
+      "fromLine": 5045,
+      "toLine": 5095,
+      "bytes": 626899,
+      "sha256": "47b4acac74e4b3d98836c0c4cd311d8c1145b1aa315cf130d5a0dd5ad43b4176"
+    },
+    {
+      "path": "src/world/pogoda.js",
+      "block": "script#6",
+      "stage": 3,
+      "fromLine": 5097,
+      "toLine": 5177,
+      "bytes": 3805,
+      "sha256": "93bba76cb35d2e412ca4597aed28b4f55ce9aa9d6a77e09878804151d2724c01"
+    },
+    {
+      "path": "src/rarity/pierwszenstwo.js",
+      "block": "script#6",
+      "stage": 4,
+      "fromLine": 5178,
+      "toLine": 5341,
+      "bytes": 6929,
+      "sha256": "5f6a3a2bbcf64df9ee9493fcc7458ee683123d26691b5eb0c32b5f11f572fe8d"
+    },
+    {
+      "path": "src/rarity/tiery.js",
+      "block": "script#6",
+      "stage": 4,
+      "fromLine": 5342,
+      "toLine": 5463,
+      "bytes": 6457,
+      "sha256": "c9fdacfbfd1d4abe78aa237403b8e4bcea0c2ddc9bf9d47f2c4f8e5af6465e12"
+    },
+    {
+      "path": "src/ui/zegar.js",
+      "block": "script#6",
+      "stage": 6,
+      "fromLine": 5464,
+      "toLine": 5712,
+      "bytes": 12049,
+      "sha256": "d669fb8d9b51cdbca6a535d50654efe07c428f1f31e64ced2b4f15897992f032"
+    },
+    {
+      "path": "src/rarity/rejestr.js",
+      "block": "script#7",
+      "stage": 4,
+      "fromLine": 5714,
+      "toLine": 5796,
+      "bytes": 10480,
+      "sha256": "451074e04e5807168617f54b5c3dd0ddf7227bb54ef4595a48190bdeed6c50ca"
+    },
+    {
+      "path": "assets/sprites/shore.js",
+      "block": "script#8",
+      "stage": 2,
+      "fromLine": 5798,
+      "toLine": 5798,
+      "bytes": 37441,
+      "sha256": "3034a0252fc01c95b9028a05ad3be431c0ef2741a3c5bb991c2f39ddf0ee494e"
+    },
+    {
+      "path": "src/scene/makieta.js",
+      "block": "script#9",
+      "stage": 3,
+      "fromLine": 5799,
+      "toLine": 7844,
+      "bytes": 80399,
+      "sha256": "30c9732174d1313acce60b9418e6e3f9842ec97c1922e53430e4282b2ca54c6a"
+    },
+    {
+      "path": "assets/sprites/baits.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7846,
+      "toLine": 7884,
+      "bytes": 329778,
+      "sha256": "160587e5d7ed3e0fa6013d592f0eba6f70abeb7ea40968ce514d3fa829f15afb"
+    },
+    {
+      "path": "assets/sprites/packs.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7885,
+      "toLine": 7947,
+      "bytes": 1207658,
+      "sha256": "23d8a810535c9ebd42aa86c9e8eaaa245b26f4592921bab625a0f5d054c39042"
+    },
+    {
+      "path": "assets/sprites/traders.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7948,
+      "toLine": 8034,
+      "bytes": 1691257,
+      "sha256": "3c8913533c6b4430554c7e256391811ed52c653d4996c02dd1b52b5b83504a9c"
+    },
+    {
+      "path": "src/fish/species.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 8036,
+      "toLine": 9903,
+      "bytes": 86027,
+      "sha256": "0470edb30e6e743561712ac7961279fd34f22936f320aae6f9a17e67c520c95a"
+    },
+    {
+      "path": "src/smok-zycia/species.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 9904,
+      "toLine": 9931,
+      "bytes": 7927,
+      "sha256": "9bcdec2baf4462fd72118a66fa5e98674b7682b7640fcdd9444f78a02694e823"
+    },
+    {
+      "path": "src/fish/fish-core.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 9932,
+      "toLine": 10519,
+      "bytes": 31196,
+      "sha256": "ba68cdeb3cc261625d91e5654ead57516cf4de79c2272d4241598b95b90c3fa2"
+    },
+    {
+      "path": "src/fish/school.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 10520,
+      "toLine": 10678,
+      "bytes": 8515,
+      "sha256": "94d5928d019129fcf2d6723ea129ced2f70c2743f284182699ea5f3c2d600193"
+    },
+    {
+      "path": "src/ui/ruch.js",
+      "block": "script#11",
+      "stage": 6,
+      "fromLine": 10679,
+      "toLine": 10883,
+      "bytes": 9615,
+      "sha256": "336d36fcc8021390ba7fc4bc409b1f7ca351484e44c259ab8645f8566f0aafa2"
+    },
+    {
+      "path": "src/ui/panel.js",
+      "block": "script#11",
+      "stage": 6,
+      "fromLine": 10884,
+      "toLine": 14112,
+      "bytes": 165499,
+      "sha256": "166454bcd8bbe48079ea9633046350bab638bd73670e7464bcbbf18f58f14dbb"
+    },
+    {
+      "path": "src/player/save.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 14113,
+      "toLine": 14801,
+      "bytes": 35254,
+      "sha256": "20fa8ce44def30f1428d56ce251c660d669a4af3c841ed5a84caaa7625449780"
+    },
+    {
+      "path": "src/events/raptor-love.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 14802,
+      "toLine": 14978,
+      "bytes": 5081,
+      "sha256": "aa4e91f748f7388c23813f9bb08333d6c8ca7de51a85c7e4fbe762268041a58a"
+    },
+    {
+      "path": "src/supabase/chmura.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 14979,
+      "toLine": 15571,
+      "bytes": 24883,
+      "sha256": "9ebddfb50c13c2606ae52f092c66e9772fe54d35c46b4207230b63b2a041e1d9"
+    },
+    {
+      "path": "src/product/telemetry.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 15572,
+      "toLine": 15874,
+      "bytes": 10619,
+      "sha256": "4a6ebcfa151d652c3f3051dc964ec0f3943cb71d16b32f69697eceb39c65ba74"
+    },
+    {
+      "path": "src/product/onboarding.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 15875,
+      "toLine": 16177,
+      "bytes": 10754,
+      "sha256": "c1b20522dbf4aae501cf49cf7731520fffccc3e7648a42e1f5718ad700290d4c"
+    },
+    {
+      "path": "src/tournaments/tournaments.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 16178,
+      "toLine": 16876,
+      "bytes": 33295,
+      "sha256": "32950f688009f5b005b11f81c78db017674dfe29d3252781f8aedbdd48786be0"
+    },
+    {
+      "path": "src/atlas/atlas-data.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 16877,
+      "toLine": 17055,
+      "bytes": 19865,
+      "sha256": "45842faf55b9dd2ee4628c501873e437937c2d054e22c781b8dda2678e897e3c"
+    },
+    {
+      "path": "src/product/progression.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 17056,
+      "toLine": 17259,
+      "bytes": 7967,
+      "sha256": "9aca4f89484bec9d57a65399e0f17dfccc48aab3a149082f8960faba9c8e8048"
+    },
+    {
+      "path": "src/atlas/atlas.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 17260,
+      "toLine": 18386,
+      "bytes": 50976,
+      "sha256": "9f8e04581db85990eedb8a2913f2331d6f13ee59015ae9dc63940fc64201ef61"
+    },
+    {
+      "path": "src/tasks/tasks.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 18387,
+      "toLine": 18566,
+      "bytes": 32035,
+      "sha256": "b5d1093875b2a22e3ed4b95f98478f45e88237e733f4af0c094fd6165fb19f57"
+    },
+    {
+      "path": "src/fish/movement.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 18567,
+      "toLine": 18930,
+      "bytes": 14275,
+      "sha256": "38723bc8fa97e36fd0bf3f84980f663b580061b44bdb5518587266b7fea64b53"
+    },
+    {
+      "path": "src/fish/spawning.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 18931,
+      "toLine": 19047,
+      "bytes": 5488,
+      "sha256": "2f64ed42328b5e054c5178fcda5c141640ed164e665543a946382bc5fcd4a631"
+    },
+    {
+      "path": "src/market/baits.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 19048,
+      "toLine": 19486,
+      "bytes": 28102,
+      "sha256": "a9c2623c5514b28abf7a5f4658ad572453c3b95538ddb0c5e4ef4ee8a2231499"
+    },
+    {
+      "path": "src/smok-zycia/event.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 19487,
+      "toLine": 19715,
+      "bytes": 8021,
+      "sha256": "5fad7c7e9b829529b25097e4ab7313c3323d058c9baeb7da50daca475e60e1ce"
+    },
+    {
+      "path": "src/market/bait-effects.js",
+      "block": "script#11",
+      "stage": 7,
+      "fromLine": 19716,
+      "toLine": 19925,
+      "bytes": 8571,
+      "sha256": "987bb79edc4e7c9d1af0ce77db94320481527cda497d2c603ef70ebfceba4e72"
+    },
+    {
+      "path": "src/fish/school-update.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 19926,
+      "toLine": 20381,
+      "bytes": 22891,
+      "sha256": "461ce03a82a470e0ed966e4de806b03fa7d8505eda3531b22e603fd7de653c4b"
+    },
+    {
+      "path": "src/fish/behavior.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 20382,
+      "toLine": 21044,
+      "bytes": 32026,
+      "sha256": "db9526ecd5e50348c19ea705c84b9ba521b87325f83016bfb9e1d219aaca97a0"
+    },
+    {
+      "path": "src/fish/rendering.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 21045,
+      "toLine": 21481,
+      "bytes": 22122,
+      "sha256": "fc8a5af07aa2109983bcade44d71eb5dbcc1b798bfd8dbfdd7ed5811127d295e"
+    },
+    {
+      "path": "src/ecosystem/net-anim.js",
+      "block": "script#11",
+      "stage": 5,
+      "fromLine": 21482,
+      "toLine": 21588,
+      "bytes": 4560,
+      "sha256": "3c6a07e03c9a1761fa27d749624a88e60db898afd2c4bb6898d1341fd43ddcf2"
+    },
+    {
+      "path": "src/card/card.js",
+      "block": "script#12",
+      "stage": 4,
+      "fromLine": 21590,
+      "toLine": 22666,
+      "bytes": 52888,
+      "sha256": "d6056093db4cfb11ba75ab38513976ea84bb9c21c13e56b99c3cb12e18e9981b"
+    },
+    {
+      "path": "src/audio/haptics.js",
+      "block": "script#13",
+      "stage": 6,
+      "fromLine": 22668,
+      "toLine": 22905,
+      "bytes": 9897,
+      "sha256": "0adbb05a662754ced2a22fe859aa9f7c15d487c32bb2630a98c3feefd1cbd9f5"
+    },
+    {
+      "path": "src/audio/ambient.js",
+      "block": "script#13",
+      "stage": 6,
+      "fromLine": 22906,
+      "toLine": 23154,
+      "bytes": 9864,
+      "sha256": "5402e4351eb9fcf85e78b260262a781d1fefd0f3091e3549378ce652e0458620"
+    },
+    {
+      "path": "src/angler/avatar.js",
+      "block": "script#14",
+      "stage": 4,
+      "fromLine": 23156,
+      "toLine": 23297,
+      "bytes": 6437,
+      "sha256": "c5c5da51d3c2bd61c044f94a59c6efa1edd230cd25e78a3cd0090f667bc49678"
+    },
+    {
+      "path": "src/core/state.js",
+      "block": "script#14",
+      "stage": 3,
+      "fromLine": 23298,
+      "toLine": 23331,
+      "bytes": 1302,
+      "sha256": "08dd1a490ae2608869e03af76081910f52fc6e39b216803f48f5b20ef479de89"
+    },
+    {
+      "path": "src/angler/angler.js",
+      "block": "script#14",
+      "stage": 4,
+      "fromLine": 23332,
+      "toLine": 24317,
+      "bytes": 35753,
+      "sha256": "e80fec7c34a0e032355e4347af16bb3123984582336a460bfe00a32fc5199490"
+    },
+    {
+      "path": "src/fish/mechanics.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24319,
+      "toLine": 24660,
+      "bytes": 17195,
+      "sha256": "60f91a96aff18f8df510c9ce9c82c846d785626efb361283b364b0ea18dca42d"
+    },
+    {
+      "path": "src/fish/bite.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24661,
+      "toLine": 24835,
+      "bytes": 8989,
+      "sha256": "43972f37439b930644eb1aad6f77827fb0a4b0ce0c256ef7776629f36a8b04a4"
+    },
+    {
+      "path": "src/fx/water-traces.js",
+      "block": "script#15",
+      "stage": 6,
+      "fromLine": 24836,
+      "toLine": 24960,
+      "bytes": 5354,
+      "sha256": "f5d5fa0e46f3b68bc13a71679fc145e795ed3f9495fe8d018b7e2f9c02a33b1e"
+    },
+    {
+      "path": "src/fish/charge.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24961,
+      "toLine": 25051,
+      "bytes": 3726,
+      "sha256": "8aa6382b24c514d7e592d47f11c7d9ceed676ee59e34ab3c22bc8e57e819ad6d"
+    },
+    {
+      "path": "src/fish/hook.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 25052,
+      "toLine": 25295,
+      "bytes": 10444,
+      "sha256": "ee74077ad8be5511181280070302defbc7cae5c4ad83dabc8b96edba435e9eff"
+    },
+    {
+      "path": "src/fx/context-fx.js",
+      "block": "script#15",
+      "stage": 6,
+      "fromLine": 25296,
+      "toLine": 25550,
+      "bytes": 7525,
+      "sha256": "e7c71828e683c4cf76c2e7e585fe2b70a6bd27b682242d40eca276ec9d3edee4"
+    },
+    {
+      "path": "src/fish/catching.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 25551,
+      "toLine": 25792,
+      "bytes": 11893,
+      "sha256": "fed62d7356059c7d02651a1930fb2f903223bbf65623878867d7b65a76500c41"
+    },
+    {
+      "path": "src/core/input-loop.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 25793,
+      "toLine": 25885,
+      "bytes": 4074,
+      "sha256": "3d76db514a0184dab93e153a1b1544ecf36a9486030b247fc45cfa05f3b16c85"
+    },
+    {
+      "path": "src/bucket/pricing.js",
+      "block": "script#15",
+      "stage": 7,
+      "fromLine": 25886,
+      "toLine": 26336,
+      "bytes": 25089,
+      "sha256": "a3666fe91e166041d148885e5c65c2c3af188b5f517fe198045d936850c95065"
+    },
+    {
+      "path": "src/bucket/bucket.js",
+      "block": "script#15",
+      "stage": 7,
+      "fromLine": 26337,
+      "toLine": 26526,
+      "bytes": 9635,
+      "sha256": "1b7d649c517fad4f2847bcfe8ee0bbd7dc8a182e5c68d8193d62c9492f33d2bb"
+    },
+    {
+      "path": "src/bucket/orders.js",
+      "block": "script#15",
+      "stage": 7,
+      "fromLine": 26527,
+      "toLine": 27040,
+      "bytes": 25071,
+      "sha256": "b34ce6d5ade8fcf2ab83a051ee0665b46b8eead1e010e028037bc32e7409a93d"
+    },
+    {
+      "path": "src/ecosystem/population.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 27041,
+      "toLine": 28434,
+      "bytes": 65873,
+      "sha256": "a27ae2fc4e2b2d301fa08c9be4ea12776f6888319456db946a44effd66213f24"
+    },
+    {
+      "path": "src/ecosystem/eko-tab.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 28435,
+      "toLine": 28785,
+      "bytes": 16285,
+      "sha256": "62daaf34bbb48ad96c84df67a685ab90a4c9c080fe5e05d91a6a77b031d54069"
+    },
+    {
+      "path": "src/ecosystem/server.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 28786,
+      "toLine": 29009,
+      "bytes": 9119,
+      "sha256": "3f83de01786d02a5260411b65f6704397c0f4fbeb6b59fde2ab462225626ed54"
+    },
+    {
+      "path": "src/product/engagement.js",
+      "block": "script#15",
+      "stage": 7,
+      "fromLine": 29010,
+      "toLine": 29917,
+      "bytes": 32299,
+      "sha256": "6ec100dbb8bdbd1aae1412d4c4119d51e8a56f9453a2f2b14c6d07cb5db7fdd3"
+    },
+    {
+      "path": "src/ecosystem/net-catch.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 29918,
+      "toLine": 30035,
+      "bytes": 5410,
+      "sha256": "015cbc219b215a7d5cebd0a86023349087d3ea468e9c5d2168eca58bb85cfe14"
+    },
+    {
+      "path": "src/ecosystem/reproduction.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 30036,
+      "toLine": 30153,
+      "bytes": 5061,
+      "sha256": "533a3529a5718d504f5a9c6a4c2846bd465927164170035b67f0b369ca31f0dc"
+    },
+    {
+      "path": "src/core/qdiag.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 30154,
+      "toLine": 30218,
+      "bytes": 2789,
+      "sha256": "e99dcf9c2b95fe1f2d6394d399258e9aa9bc8db267504d2cf430fdb468824457"
+    },
+    {
+      "path": "src/ui/zoom-guard.js",
+      "block": "script#15",
+      "stage": 3,
+      "fromLine": 30219,
+      "toLine": 30253,
+      "bytes": 1904,
+      "sha256": "2514530d9e9318b63abc788b0cb6a463a5e3cd25fb6078e1b83c09d352a2d0cd"
+    },
+    {
+      "path": "src/ui/rhythm.js",
+      "block": "script#16",
+      "stage": 3,
+      "fromLine": 30256,
+      "toLine": 30268,
+      "bytes": 428,
+      "sha256": "2f0f803343c800b90cc5f04a069a02f4516a17d881be910cf73b6d62ff394c88"
+    }
+  ]
+}

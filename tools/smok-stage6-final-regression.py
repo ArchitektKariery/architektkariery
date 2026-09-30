@@ -2,7 +2,9 @@ from pathlib import Path
 import json, random, re, subprocess, tempfile, os, sys, base64, binascii, struct
 
 root = Path(".")
-src = (root / "qryby.html").read_text(encoding="utf-8")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from qryby_source import read_game_source  # qryby.html + moduly src/, css/
+src = read_game_source(root)
 checks = {}
 notes = {}
 

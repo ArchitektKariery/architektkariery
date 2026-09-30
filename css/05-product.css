@@ -1,0 +1,681 @@
+/* ============================================================
+   PRODUCT STAGE 1 — FIRST 30 MINUTES.
+   Jeden kontekstowy komunikat naraz. Zero modali, zero migania.
+   Wskazowki nie przechwytuja dotyku i nie blokuja normalnej gry.
+   ============================================================ */
+#onbGuide,#onbKarta{
+  position:absolute;z-index:7;left:50%;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 12px 8px;border-radius:999px;
+  color:rgba(255,246,220,.96);
+  background:rgba(11,10,22,.48);
+  border:1px solid rgba(244,198,61,.30);
+  box-shadow:0 5px 18px rgba(0,0,0,.18);
+  backdrop-filter:blur(3px);
+  font:800 10px/1.12 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.12em;text-align:center;
+  pointer-events:none;opacity:0;
+  transform:translate(-50%,8px);
+  transition:opacity .28s ease,transform .28s ease;
+}
+#onbGuide{top:43%;max-width:min(82vw,330px)}
+#onbKarta{bottom:9%;max-width:min(90vw,370px)}
+#onbGuide.on,#onbKarta.on{opacity:.94;transform:translate(-50%,0)}
+#onbGuide small,#onbKarta small{
+  font:700 8px/1.18 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.06em;opacity:.64
+}
+#onbKarta{color:#FFF4CE;background:rgba(10,8,20,.72)}
+#onbKarta strong{font-size:11px;letter-spacing:.08em}
+
+/* Cel jest statyczny — wskazuje, ale nie pulsuje. */
+.onbCel{
+  box-shadow:0 0 0 2px rgba(244,198,61,.64),0 6px 20px rgba(0,0,0,.20) !important;
+  border-color:rgba(244,198,61,.72) !important;
+}
+body:has(#panel.on) #onbGuide,
+body.ksiega-otwarta #onbGuide{opacity:0}
+body:not(.karta-otwarta) #onbKarta{opacity:0}
+@media(max-width:390px){
+  #onbGuide{top:41%;padding:6px 10px 7px;font-size:9.3px}
+  #onbKarta{bottom:7%;padding:6px 10px 7px;font-size:9px}
+}
+
+
+/* ============================================================
+   PRODUCT STAGE 3 — SWIAT SERWERA JAKO BOHATER.
+   Maksymalnie trzy zdarzenia. Bez czerwonego lasu alertow.
+   ============================================================ */
+#panelTresc #ekoWorldPulse{margin:4px 0 12px}
+#panelTresc .wp-card{padding:8px 9px 7px;border-radius:7px;
+  background:linear-gradient(180deg,rgba(82,69,48,.10),rgba(255,255,255,.08));
+  border:1px solid rgba(91,70,38,.16)}
+#panelTresc .wp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-bottom:5px;font-size:9px;font-weight:900;letter-spacing:.12em;opacity:.62}
+#panelTresc .wp-head i{font-style:normal;font-size:8px;opacity:.62;white-space:nowrap}
+#panelTresc .wp-row{display:grid;grid-template-columns:18px 1fr;gap:6px;align-items:start;
+  padding:5px 0;border-top:1px solid rgba(52,42,31,.10)}
+#panelTresc .wp-row:first-of-type{border-top:0}
+#panelTresc .wp-ico{font-size:12px;line-height:1.2;text-align:center;opacity:.82}
+#panelTresc .wp-txt{font-size:10.5px;line-height:1.38;font-weight:700}
+#panelTresc .wp-txt strong{font-weight:900}
+#panelTresc .wp-sub{display:block;margin-top:1px;font-size:8.5px;font-weight:700;opacity:.52}
+#panelTresc .wp-row.extinct .wp-txt{color:#8D3F33}
+#panelTresc .wp-row.reborn .wp-txt{color:#477553}
+#panelTresc .wp-row.drop .wp-txt{color:#755A2B}
+
+
+/* ============================================================
+   PRODUCT STAGE 4 — SHARE CARD.
+   Mały przycisk-trofeum. Nie miga i nie przechwytuje gestu swipe.
+   ============================================================ */
+#shareCatch{
+  position:absolute;z-index:8;right:10px;top:calc(10px + env(safe-area-inset-top));
+  display:flex;align-items:center;gap:6px;min-height:34px;padding:6px 9px;
+  border-radius:10px;border:1px solid rgba(244,198,61,.34);
+  background:rgba(12,10,22,.66);color:#F1DFC0;
+  box-shadow:0 4px 16px rgba(0,0,0,.20);backdrop-filter:blur(4px);
+  font:800 8.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.08em;opacity:0;pointer-events:none;transform:translateY(-5px);
+  transition:opacity .22s ease,transform .22s ease,background .18s ease;
+}
+#shareCatch svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8}
+body.karta-otwarta.share-catch-ready #shareCatch{opacity:.86;pointer-events:auto;transform:translateY(0)}
+body.karta-otwarta.share-catch-busy #shareCatch{opacity:.38;pointer-events:none}
+#shareCatch:active{transform:scale(.96);background:rgba(31,24,47,.86)}
+@media(max-width:390px){
+  #shareCatch{right:8px;top:calc(8px + env(safe-area-inset-top));padding:6px 8px;font-size:8px}
+}
+
+
+/* ============================================================
+   PRODUCT STAGE 6 — PROGRES 1–70.
+   Poziom otwiera narzedzia i wiedze. Nigdy +% do szans na rybe.
+   ============================================================ */
+.prog-card{
+  margin:8px 0 12px;padding:10px 10px 9px;border-radius:8px;
+  background:linear-gradient(180deg,rgba(70,58,40,.10),rgba(255,255,255,.07));
+  border:1px solid rgba(95,72,39,.18)
+}
+.prog-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.prog-lvl{font-size:22px;font-weight:950;line-height:1;letter-spacing:-.03em}
+.prog-lvl small{display:block;margin-bottom:3px;font-size:8px;font-weight:900;
+  letter-spacing:.13em;opacity:.52}
+.prog-xp{font:800 8px/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;
+  text-align:right;opacity:.56}
+.prog-bar{height:5px;margin:8px 0 7px;border-radius:99px;
+  background:rgba(60,46,30,.11);overflow:hidden}
+.prog-bar i{display:block;height:100%;border-radius:inherit;background:rgba(122,92,43,.62)}
+.prog-next{font-size:10px;line-height:1.35;font-weight:800}
+.prog-next b{font-weight:950}
+.prog-road{margin-top:8px;border-top:1px solid rgba(60,46,30,.10);padding-top:4px}
+.prog-row{display:grid;grid-template-columns:31px 1fr;gap:6px;padding:4px 0;
+  font-size:9px;line-height:1.25;opacity:.56}
+.prog-row.on{opacity:.92}
+.prog-row.next{opacity:1;font-weight:900}
+.prog-n{font:900 8px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
+.prog-title{font-weight:900}
+.prog-desc{display:block;margin-top:1px;font-size:8px;font-weight:700;opacity:.62}
+[data-prog-lock]{position:relative;opacity:.43!important;filter:saturate(.58)}
+[data-prog-lock]::after{
+  content:'L' attr(data-prog-lock);
+  position:absolute;right:3px;top:3px;min-width:17px;padding:2px 3px;border-radius:5px;
+  background:rgba(18,15,24,.78);color:#E7D6AE;border:1px solid rgba(231,214,174,.23);
+  font:900 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center
+}
+#shareCatch[data-prog-lock]::after{right:-2px;top:-4px}
+.prog-lock-line{
+  padding:8px 9px;border-radius:7px;border:1px dashed rgba(91,70,38,.18);
+  font-size:9px;line-height:1.35;font-weight:800;opacity:.55
+}
+
+
+/* ============================================================
+   PRODUCT STAGE 7 — POWROT DO ZYJACEGO SWIATA.
+   Nie reward za login. Pokazujemy tylko realna zmiane jeziora.
+   ============================================================ */
+#returnDigest{
+  position:absolute;z-index:19;left:50%;top:50%;
+  width:min(88vw,390px);max-height:min(72vh,590px);overflow:auto;
+  transform:translate(-50%,-46%) scale(.98);
+  padding:13px 13px 12px;border-radius:14px;
+  background:rgba(15,13,23,.93);color:#F1E4C8;
+  border:1px solid rgba(236,199,119,.28);
+  box-shadow:0 18px 55px rgba(0,0,0,.38);
+  backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease,transform .22s ease;
+}
+#returnDigest.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+#returnDigest .rd-kicker{
+  font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.14em;opacity:.48;margin-bottom:5px
+}
+#returnDigest h3{margin:0 0 4px;font-size:17px;line-height:1.12}
+#returnDigest .rd-time{
+  margin-bottom:9px;font:800 8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;
+  opacity:.48
+}
+#returnDigest .rd-row{
+  display:grid;grid-template-columns:21px 1fr;gap:7px;
+  padding:8px 0;border-top:1px solid rgba(242,225,188,.10)
+}
+#returnDigest .rd-row:first-of-type{border-top:0}
+#returnDigest .rd-ico{font-size:13px;line-height:1.25;text-align:center;opacity:.85}
+#returnDigest .rd-txt{font-size:11px;line-height:1.35;font-weight:850}
+#returnDigest .rd-sub{
+  display:block;margin-top:2px;font:750 8.5px/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;
+  opacity:.52
+}
+#returnDigest .rd-actions{
+  display:flex;justify-content:flex-end;gap:7px;margin-top:9px;
+  padding-top:9px;border-top:1px solid rgba(242,225,188,.10)
+}
+#returnDigest button{
+  min-height:34px;padding:7px 10px;border-radius:9px;
+  border:1px solid rgba(236,199,119,.25);
+  background:rgba(236,199,119,.10);color:#F1E4C8;
+  font:900 8.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.06em
+}
+#returnDigest button:active{transform:scale(.97)}
+#returnDigest .rd-open{background:rgba(236,199,119,.18)}
+body.return-digest-open #c,body.return-digest-open #ui{
+  filter:saturate(.90) brightness(.82)
+}
+@media(max-width:390px){
+  #returnDigest{width:min(90vw,360px);padding:11px}
+  #returnDigest h3{font-size:15px}
+}
+
+
+/* ============================================================
+   PRODUCT STAGE 8 — KOSMETYCZNA MONETYZACJA / DARK LAUNCH.
+   Zadnego pay-to-win. Platne rzeczy nie zmieniaja mechaniki lowienia.
+   ============================================================ */
+.support-intro{
+  margin:6px 0 10px;padding:9px 10px;border-radius:8px;
+  border:1px solid rgba(129,96,47,.20);
+  background:rgba(73,57,37,.08);
+  font-size:10px;line-height:1.42;font-weight:750
+}
+.support-intro b{font-weight:950}
+.support-zero{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:7px;
+  font:800 8px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;opacity:.58
+}
+.support-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.support-pack{
+  position:relative;padding:10px;border-radius:9px;
+  border:1px solid rgba(122,91,44,.19);
+  background:linear-gradient(180deg,rgba(113,85,48,.08),rgba(255,255,255,.05))
+}
+.support-pack.owned{border-color:rgba(98,126,76,.34)}
+.support-pack .sp-kicker{
+  font:900 7.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.12em;opacity:.48;margin-bottom:4px
+}
+.support-pack .sp-title{font-size:13px;font-weight:950;line-height:1.15}
+.support-pack .sp-price{
+  position:absolute;right:9px;top:9px;font:900 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  opacity:.72
+}
+.support-pack .sp-list{margin:7px 0 8px;font-size:9px;line-height:1.45;font-weight:750;opacity:.74}
+.support-pack .sp-list span{display:block}
+.support-pack .sp-note{
+  margin:7px 0 0;font:750 7.5px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;
+  opacity:.46
+}
+.support-pack button{
+  width:100%;min-height:34px;padding:7px 8px;border-radius:8px;
+  border:1px solid rgba(122,91,44,.24);background:rgba(122,91,44,.11);
+  color:inherit;font:900 8.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.05em
+}
+.support-pack button:active{transform:scale(.985)}
+.support-pack button[disabled]{opacity:.40}
+.support-badge{
+  display:inline-flex;align-items:center;gap:5px;margin:0 0 8px;padding:4px 7px;
+  border-radius:99px;border:1px solid rgba(161,123,59,.22);
+  background:rgba(161,123,59,.08);
+  font:900 7.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.08em
+}
+.support-badge i{font-style:normal;opacity:.66}
+.support-lock{
+  margin-top:8px;padding:8px 9px;border-radius:7px;
+  border:1px dashed rgba(91,70,38,.20);
+  font:800 8.5px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;
+  opacity:.56
+}
+
+
+/* ============================================================
+   STAGE 9.1 — PLAYER FEEDBACK PATCH.
+   Pierwszy feedback testerow. Bez zmian balansu i ekonomii.
+   ============================================================ */
+
+/* MENU 3x3 — kolejnosc wybrana przez testerow. */
+body.menu-master-open #sklep{order:1}
+body.menu-master-open #atlas{order:2}
+body.menu-master-open #ekosystem{order:3}
+body.menu-master-open #zleceniaTablica{order:4}
+body.menu-master-open #zadania{order:5}
+body.menu-master-open #wiaderko{order:6}
+body.menu-master-open #turnieje{order:7}
+body.menu-master-open #zapisz{order:8}
+body.menu-master-open #pomoc{order:9}
+
+/* Szybkie WIADRO + ZADANIA na ekranie. */
+#quickAccess{
+  position:absolute;z-index:8;right:calc(9px + env(safe-area-inset-right));
+  top:calc(33px + env(safe-area-inset-top));display:flex;gap:5px;align-items:flex-start;
+  transition:opacity .24s ease,transform .24s ease
+}
+body.z-paskiem #quickAccess{top:calc(60px + env(safe-area-inset-top))}
+body.bez-konta #quickAccess{top:calc(61px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #quickAccess{top:calc(88px + env(safe-area-inset-top))}
+.quickBtn{
+  position:relative;width:48px;height:44px;padding:4px 3px;border-radius:12px;
+  border:1px solid rgba(214,174,86,.22);
+  background:linear-gradient(180deg,rgba(28,21,49,.36),rgba(17,13,34,.20));
+  color:#F3D985;box-shadow:0 4px 14px rgba(0,0,0,.12);backdrop-filter:blur(3px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font:800 7px/1 ui-monospace,monospace;letter-spacing:.06em;
+  -webkit-tap-highlight-color:transparent
+}
+.quickBtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+.quickBtn i{
+  position:absolute;right:-3px;top:-4px;display:none;align-items:center;justify-content:center;
+  min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:rgba(88,139,76,.96);
+  color:#fff7e6;font:900 9px/15px system-ui,sans-serif;font-style:normal
+}
+.quickBtn i.on{display:flex}
+body.menu-master-open #quickAccess,
+body.karta-otwarta #quickAccess,
+body.ksiega-otwarta #quickAccess,
+body:has(#panel.on) #quickAccess{opacity:0;pointer-events:none;transform:translateY(-4px)}
+
+/* Aktywna zaneta na HUD — pozostale LAWICE, nie sekundy. */
+#baitRoundsHud{
+  position:absolute;z-index:8;right:calc(9px + env(safe-area-inset-right));
+  top:calc(83px + env(safe-area-inset-top));display:none;align-items:center;gap:5px;
+  padding:5px 8px;border-radius:9px;background:rgba(23,17,36,.62);color:#ECD69C;
+  border:1px solid rgba(214,174,86,.22);box-shadow:0 3px 12px rgba(0,0,0,.13);
+  backdrop-filter:blur(3px);font:900 7.5px/1 ui-monospace,monospace;
+  letter-spacing:.055em;white-space:nowrap;transition:opacity .2s ease
+}
+#baitRoundsHud.on{display:flex}
+#baitRoundsHud b{font-size:9px}
+body.z-paskiem #baitRoundsHud{top:calc(110px + env(safe-area-inset-top))}
+body.bez-konta #baitRoundsHud{top:calc(111px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #baitRoundsHud{top:calc(138px + env(safe-area-inset-top))}
+body.menu-master-open #baitRoundsHud,
+body.karta-otwarta #baitRoundsHud,
+body.ksiega-otwarta #baitRoundsHud,
+body:has(#panel.on) #baitRoundsHud{opacity:0;pointer-events:none}
+
+/* Pasek Ligi zostaje tickerem, klik otwiera pełną tabelę. */
+#pasekTV{cursor:pointer;-webkit-tap-highlight-color:transparent}
+#pasekTV::after{
+  content:'⌄';position:absolute;right:4px;top:1px;z-index:2;color:rgba(255,241,194,.62);
+  font:900 11px/26px ui-monospace,monospace;pointer-events:none
+}
+#pasekTV.rozwiniety{overflow:visible}
+#pasekTV.rozwiniety::after{content:'⌃'}
+#pasekTVlista{
+  position:absolute;display:none;left:6px;right:6px;top:34px;
+  max-height:min(54vh,430px);overflow:auto;padding:7px 8px 8px;
+  border-radius:0 0 11px 11px;background:rgba(12,9,25,.96);color:#F2E1B8;
+  border:1px solid rgba(212,168,64,.48);border-top:0;
+  box-shadow:0 12px 28px rgba(0,0,0,.42);backdrop-filter:blur(7px)
+}
+#pasekTV.rozwiniety #pasekTVlista{display:block}
+.tvListHead{
+  display:flex;justify-content:space-between;gap:8px;padding:3px 3px 7px;
+  font:900 8px/1.25 ui-monospace,monospace;letter-spacing:.08em;color:#DDB95D
+}
+.tvListRow{
+  display:grid;grid-template-columns:26px 1fr auto;gap:7px;align-items:center;
+  padding:6px 4px;border-top:1px solid rgba(255,238,190,.09);
+  font:800 9px/1.15 ui-monospace,monospace
+}
+.tvListRow.me{background:rgba(255,201,60,.08);color:#FFD76C}
+.tvListRow.out{opacity:.42;text-decoration:line-through}
+.tvListRow .pos{opacity:.55;text-align:center}
+.tvListRow .nick{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tvListRow .pts{font-size:10px;color:#fff}
+body.karta-otwarta #pasekTVlista,body.ksiega-otwarta #pasekTVlista{display:none!important}
+
+@media(max-width:390px){
+  #quickAccess{right:6px;gap:4px}
+  .quickBtn{width:45px;height:42px}
+  #baitRoundsHud{right:6px}
+  .tvListHead{font-size:7px}
+}
+
+
+/* ============================================================
+   STAGE 9.3 — PANI RAPTOROWA.
+   Prywatna wiadomosc raz na lokalny dzien.
+   ============================================================ */
+#raptorLove{
+  position:absolute;z-index:30;left:50%;top:50%;
+  width:min(88vw,390px);max-height:min(76vh,620px);overflow:auto;
+  transform:translate(-50%,-46%) scale(.975);
+  padding:16px 15px 14px;border-radius:16px;
+  background:
+    radial-gradient(circle at 86% 12%,rgba(217,154,174,.13),transparent 30%),
+    linear-gradient(180deg,rgba(27,19,36,.97),rgba(15,13,24,.97));
+  color:#F5E7DE;border:1px solid rgba(228,180,192,.30);
+  box-shadow:0 22px 62px rgba(0,0,0,.46);
+  backdrop-filter:blur(9px);
+  opacity:0;pointer-events:none;
+  transition:opacity .28s ease,transform .28s ease
+}
+#raptorLove.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+#raptorLove .rl-kicker{
+  font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.16em;color:#DFA6B4;opacity:.82;margin-bottom:7px
+}
+#raptorLove .rl-title{
+  margin:0 0 12px;font-size:20px;line-height:1.08;font-weight:950;
+  letter-spacing:-.025em;color:#FFF3EA
+}
+#raptorLove .rl-quote{
+  margin:3px 0 14px;font:750 16px/1.48 Georgia,'Times New Roman',serif;
+  color:#FFF7F0
+}
+#raptorLove .rl-work{
+  padding-top:10px;border-top:1px solid rgba(245,231,222,.11);
+  font:800 8.5px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.05em;color:#C7B8B0;opacity:.72
+}
+#raptorLove .rl-sign{
+  margin-top:8px;text-align:right;font:900 14px/1 Georgia,'Times New Roman',serif;
+  color:#EAB7C3
+}
+#raptorLove .rl-day{
+  margin-top:4px;text-align:right;
+  font:800 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  color:#A99A94;opacity:.52
+}
+#raptorLove .rl-actions{display:flex;justify-content:flex-end;margin-top:13px}
+#raptorLove button{
+  min-height:36px;padding:8px 12px;border-radius:10px;
+  border:1px solid rgba(228,180,192,.23);
+  background:rgba(228,180,192,.10);color:#F9E8E7;
+  font:900 8.5px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.07em
+}
+#raptorLove button:active{transform:scale(.97)}
+body.raptor-love-open #c,body.raptor-love-open #ui{
+  filter:saturate(.92) brightness(.80)
+}
+@media(max-width:390px){
+  #raptorLove{width:min(91vw,360px);padding:14px 13px}
+  #raptorLove .rl-title{font-size:18px}
+  #raptorLove .rl-quote{font-size:15px}
+}
+
+
+/* ============================================================
+   VISUAL AUDIT — STAGE 1 / MENU + ICON SYSTEM
+   ART DIRECTION LOCK:
+   - jezioro jest bohaterem,
+   - UI = cichy mosiadz + atrament,
+   - jedna geometria ikon 24x24,
+   - zero stalego "oddychania" UI,
+   - ruch tylko przy otwarciu / kliknieciu / nowym zdarzeniu.
+   ============================================================ */
+
+:root{
+  --qa-ui-gold:#E3C36F;
+  --qa-ui-gold-soft:#C9AA61;
+  --qa-ui-ink:#171122;
+  --qa-ui-panel:rgba(16,12,30,.82);
+  --qa-ui-tile:rgba(31,23,50,.58);
+  --qa-ui-edge:rgba(222,188,99,.28);
+  --qa-ui-edge-hot:rgba(235,204,119,.68);
+}
+
+/* Wspolny jezyk wszystkich ikon menu. */
+.menuGlyph{
+  width:20px;height:20px;display:block;overflow:visible;
+  fill:none !important;
+  stroke:currentColor !important;
+  stroke-width:1.65 !important;
+  stroke-linecap:round !important;
+  stroke-linejoin:round !important;
+  vector-effect:non-scaling-stroke;
+  shape-rendering:geometricPrecision;
+}
+.menuGlyph path,.menuGlyph circle,.menuGlyph rect,.menuGlyph line,.menuGlyph polyline{
+  vector-effect:non-scaling-stroke;
+}
+.menuGlyphDot{
+  fill:currentColor !important;
+  stroke:none !important;
+}
+
+/* Master MENU: spokojniejszy i optycznie wycentrowany. */
+#menuMaster{
+  width:54px;height:48px;padding:5px 5px 4px;gap:2px;
+  border-radius:13px;
+  color:var(--qa-ui-gold);
+  background:linear-gradient(180deg,rgba(28,21,45,.48),rgba(15,12,28,.26));
+  border-color:rgba(222,188,99,.24);
+  box-shadow:0 4px 14px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,240,196,.045);
+}
+#menuMaster .menuGlyph{width:19px;height:19px}
+#menuMaster>span{
+  font-size:7.4px;line-height:1;letter-spacing:.105em;
+  transform:translateX(.3px)
+}
+#menuMaster[aria-expanded="true"]{
+  background:linear-gradient(180deg,rgba(77,59,38,.58),rgba(34,27,43,.48));
+  border-color:var(--qa-ui-edge-hot);
+  box-shadow:0 5px 18px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,237,185,.08)
+}
+
+/* Otwarty panel nie zajmuje calej szerokosci ekranu.
+   To ma wygladac jak kieszonkowy przybornik, nie dashboard. */
+body.menu-master-open #ikony{
+  left:calc(9px + env(safe-area-inset-left));
+  right:auto !important;
+  width:min(330px,calc(100vw - 18px)) !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:6px !important;
+  padding:7px !important;
+  border-radius:14px !important;
+  background:linear-gradient(180deg,rgba(17,13,31,.88),rgba(11,9,23,.76)) !important;
+  border-color:rgba(222,188,99,.20) !important;
+  box-shadow:0 10px 30px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,238,193,.025) !important;
+  backdrop-filter:blur(8px) !important;
+}
+
+/* Wszystkie 9 kafli: identyczna geometria i optyczne centrum. */
+body.menu-master-open #ikony .zakMini,
+body.menu-master-open #ikony>#zadania{
+  height:48px !important;
+  padding:5px 4px 4px !important;
+  gap:3px !important;
+  border-radius:10px !important;
+  color:var(--qa-ui-gold) !important;
+  background:linear-gradient(180deg,rgba(35,27,54,.56),rgba(22,17,39,.40)) !important;
+  border:1px solid var(--qa-ui-edge) !important;
+  box-shadow:inset 0 1px 0 rgba(255,240,197,.035),0 2px 8px rgba(0,0,0,.12) !important;
+  font:800 7.7px/1 ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  letter-spacing:.075em !important;
+  transform:none;
+  animation:qa-menu-tile-in .17s cubic-bezier(.2,.72,.25,1) both !important;
+  transition:background .14s ease,border-color .14s ease,transform .10s ease,color .14s ease !important;
+}
+body.menu-master-open #ikony .zakMini .menuGlyph,
+body.menu-master-open #ikony>#zadania .menuGlyph{
+  width:19px !important;height:19px !important;flex:0 0 19px !important;
+}
+body.menu-master-open #ikony .zakMini span,
+body.menu-master-open #ikony>#zadania .navLabel{
+  font-size:7.7px !important;
+  line-height:1 !important;
+  letter-spacing:.075em !important;
+}
+body.menu-master-open #ikony .zakMini:active,
+body.menu-master-open #ikony>#zadania:active{
+  transform:scale(.965) !important;
+  color:#F5D98A !important;
+  border-color:var(--qa-ui-edge-hot) !important;
+  background:linear-gradient(180deg,rgba(79,59,37,.58),rgba(42,31,48,.50)) !important;
+}
+
+/* Krotkie wejscie jest zdarzeniem, nie animacja bez konca. */
+body.menu-master-open #sklep{animation-delay:0ms !important}
+body.menu-master-open #atlas{animation-delay:12ms !important}
+body.menu-master-open #ekosystem{animation-delay:24ms !important}
+body.menu-master-open #zleceniaTablica{animation-delay:36ms !important}
+body.menu-master-open #zadania{animation-delay:48ms !important}
+body.menu-master-open #wiaderko{animation-delay:60ms !important}
+body.menu-master-open #turnieje{animation-delay:72ms !important}
+body.menu-master-open #zapisz{animation-delay:84ms !important}
+body.menu-master-open #pomoc{animation-delay:96ms !important}
+
+@keyframes qa-menu-tile-in{
+  from{opacity:0;transform:translateY(-3px) scale(.985)}
+  to{opacity:.97;transform:translateY(0) scale(1)}
+}
+
+/* Powiadomienie zmienia stan, ale nie pulsuje stale. */
+body.menu-master-open #ikony .gotowe,
+body.menu-master-open #ikony .ma-oferte{
+  border-color:rgba(230,194,100,.54) !important;
+}
+body.menu-master-open #ikony .gotowe::after,
+body.menu-master-open #ikony .ma-oferte::after{
+  animation:none !important;
+}
+
+/* Szybkie akcje sa ta sama rodzina wizualna co MENU. */
+.quickBtn{
+  width:48px;height:44px;
+  color:var(--qa-ui-gold);
+  border-radius:11px;
+  background:linear-gradient(180deg,rgba(28,21,45,.43),rgba(15,12,28,.24));
+  border-color:rgba(222,188,99,.21);
+  box-shadow:0 3px 12px rgba(0,0,0,.11),inset 0 1px 0 rgba(255,240,196,.035);
+  gap:2px;
+  transition:background .14s ease,border-color .14s ease,transform .10s ease,opacity .24s ease !important;
+}
+.quickBtn .menuGlyph{width:17px;height:17px}
+.quickBtn span{font-size:7px;letter-spacing:.055em}
+.quickBtn:active{
+  transform:scale(.96);
+  border-color:rgba(235,204,119,.58);
+  background:linear-gradient(180deg,rgba(72,54,36,.52),rgba(36,27,43,.40))
+}
+
+/* Usuwamy stale oddychanie starego systemu ikon. Ukryte nav-glowne
+   pozostaja w DOM dla logiki, ale nie prowadza juz wlasnego ruchu. */
+#ikony .ikonka,
+#menuMaster,
+.quickBtn,
+.masterAlert,
+.miniPowiad{
+  animation:none !important;
+}
+
+/* Dostepnosc: klawiatura ma rownie czytelny stan co dotyk. */
+#menuMaster:focus-visible,
+.quickBtn:focus-visible,
+body.menu-master-open #ikony .zakMini:focus-visible,
+body.menu-master-open #ikony>#zadania:focus-visible{
+  outline:2px solid rgba(244,214,132,.82);
+  outline-offset:2px;
+}
+
+/* Waski telefon: nie sciskamy symboli, zmniejszamy tylko caly przybornik. */
+@media(max-width:380px){
+  body.menu-master-open #ikony{
+    width:min(318px,calc(100vw - 10px)) !important;
+    left:5px !important;
+    gap:5px !important;
+    padding:6px !important;
+  }
+  body.menu-master-open #ikony .zakMini,
+  body.menu-master-open #ikony>#zadania{
+    height:46px !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.menu-master-open #ikony .zakMini,
+  body.menu-master-open #ikony>#zadania{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+
+/* ============================================================
+   VISUAL AUDIT — STAGE 13 / VISUAL RHYTHM
+
+   Jedna hierarchia:
+   FAST   120 ms  — feedback dotyku
+   MENU   260 ms  — nawigacja
+   FOCUS  340 ms  — panel / ksiega
+   RESULT 620 ms  — karta polowu
+
+   Najwazniejsza zasada: stary stan schodzi ZANIM wchodzi nastepny.
+   ============================================================ */
+:root{
+  --qr-fast:120ms;
+  --qr-menu:260ms;
+  --qr-focus:340ms;
+  --qr-result:620ms;
+}
+
+body.menu-master-open #ikony{
+  animation:qr-menu-shell-in var(--qr-menu) cubic-bezier(.18,.76,.24,1) both !important;
+  transform-origin:28px 0;
+}
+@keyframes qr-menu-shell-in{
+  from{opacity:0;transform:translateY(-7px) scale(.965)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+body.menu-master-open #ikony .zakMini,
+body.menu-master-open #ikony>#zadania{
+  animation-duration:240ms !important;
+  animation-timing-function:cubic-bezier(.18,.76,.24,1) !important;
+}
+body.menu-master-open #sklep{animation-delay:18ms !important}
+body.menu-master-open #atlas{animation-delay:36ms !important}
+body.menu-master-open #ekosystem{animation-delay:54ms !important}
+body.menu-master-open #zleceniaTablica{animation-delay:72ms !important}
+body.menu-master-open #zadania{animation-delay:90ms !important}
+body.menu-master-open #wiaderko{animation-delay:108ms !important}
+body.menu-master-open #turnieje{animation-delay:126ms !important}
+body.menu-master-open #zapisz{animation-delay:144ms !important}
+body.menu-master-open #pomoc{animation-delay:162ms !important}
+
+#panel{
+  transition:opacity 180ms var(--wyj),
+             background var(--qr-menu) var(--wyj),
+             backdrop-filter var(--qr-menu) var(--wyj) !important;
+}
+#panelTresc{
+  transition:transform var(--qr-focus) cubic-bezier(.18,.78,.22,1),
+             opacity 210ms var(--wyj) !important;
+}
+
+#hud,#reset,#pasekTV,#menuMaster,#quickAccess{
+  transition:opacity 220ms var(--wyj),transform var(--qr-menu) var(--spr);
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.menu-master-open #ikony,
+  #panel,#panelTresc{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+

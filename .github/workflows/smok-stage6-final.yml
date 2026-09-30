@@ -5,6 +5,10 @@ on:
     branches: [ main ]
     paths:
       - 'qryby.html'
+      - 'src/**'
+      - 'css/**'
+      - 'assets/sprites/**'
+      - 'tools/qryby_source.py'
       - 'tests/test_smok_stage4_bite.py'
       - 'tools/smok-stage5-audit.py'
       - 'tools/smok-stage6-final-regression.py'

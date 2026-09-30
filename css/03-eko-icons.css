@@ -1,0 +1,321 @@
+/* ============================================================
+   WIDOCZNY FOKUS KLAWIATURY (IX 2026, lifting "jakosc studia").
+   W calej grze nie bylo ANI JEDNEJ reguly :focus -- kto nawiguje
+   tabem (klawiatura, przelacznik, czytnik ekranu) poruszal sie po
+   niewidzialnym interfejsie, bo przegladarki tlumia domyslna
+   obwodke, gdy element ma wlasne tlo i obramowanie.
+   :focus-visible, nie :focus -- obwodka pojawia sie przy nawigacji
+   klawiatura, ale NIE po dotknieciu palcem czy kliknieciu myszka,
+   wiec gracz na telefonie nigdy jej nie zobaczy i nic sie dla niego
+   nie zmienia.
+   Bursztyn, nie systemowy niebieski: ten sam kolor co reszta
+   sygnalow w grze, wiec fokus wyglada jak czesc swiata, nie jak
+   element wklejony z formularza. outline-offset odsuwa go od
+   krawedzi, zeby nie zlewal sie ze zlota ramka przyciskow. */
+:focus-visible{outline:2px solid var(--bursztyn);outline-offset:3px;border-radius:2px}
+#panelTresc button:focus-visible,#panelTresc a:focus-visible{outline-offset:2px}
+.ikonka:focus-visible{outline-offset:4px;opacity:1}
+/* Zadnego outline: none bez zamiany -- gdyby ktos kiedys chcial
+   scisniejszy fokus na jakims elemencie, ma go PRZESUNAC, nie skasowac. */
+
+   interfejs ma wiele stale animowanych elementow" -- oddech ikon, puls
+   zadan, obrot monety i tak dalej, caly czas w petli. Zamiast wylaczac
+   kazda animacje osobno (dziesiatki miejsc, latwo cos przeoczyc), jedna
+   globalna regula: gdy system prosi o mniej ruchu, KAZDA animacja i
+   przejscie w calej grze staja sie niemal natychmiastowe (0.01ms, nie 0 --
+   zerowy czas trwania w niektorych przegladarkach w ogole pomija
+   animacje, w tym te, ktore ustawiaja stan koncowy). Efekt koncowy
+   zostaje, tylko bez migania/pulsowania po drodze. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   KONIEC AUTO-ZOOMU NA iOS -- reguly celowo na SAMYM KONCU arkusza.
+   Wczesniejsza proba wstawienia ich obok definicji pol nie zadzialala:
+   pozniejsze reguly `#panelTresc input#nickPole{...font-size:14px}`
+   nadpisywaly je przy tej samej specyficznosci. Kolejnosc rozstrzyga,
+   wiec te trzy deklaracje musza stac po wszystkim innym.
+   ============================================================ */
+#panelTresc input:not(#nickPole){font-size:16px;letter-spacing:.03em;
+  transform:scale(.75);transform-origin:left center;width:133.33%}
+#panelTresc input#nickPole{font-size:16px;
+  transform:scale(.875);transform-origin:left center;width:114.28%}
+
+/* --- ZAKLADKA EKOSYSTEM ---
+   Poprawione po zgloszeniu Andrzeja "wyglada zle". Trzy rzeczy:
+   1. LICZBA JEST BOHATEREM WIERSZA. Wczesniej nazwa, liczba i status
+      mialy podobna wage, wiec oko nie mialo sie czego zlapac. Teraz
+      liczba jest wieksza i w tabularnych cyfrach, wiec kolumna sie
+      rownna i widac rzad wielkosci bez czytania.
+   2. STATUS JAKO PLAKIETKA, nie szary dopisek -- to jest ta informacja,
+      po ktora gracz tu przychodzi ("czy cos ginie"), wiec ma byc widoczna
+      z odleglosci.
+   3. WIERSZE ODDYCHAJA. Kreska co wiersz przy 24 pozycjach robila
+      z panelu tabelke ksiegowa; zostaje delikatne tlo co drugi wiersz. */
+#panelTresc .eko-grupa{margin:16px 0 7px;font-size:9px;font-weight:800;
+  letter-spacing:.2em;opacity:.45;border-bottom:1px solid rgba(58,47,34,.14);
+  padding-bottom:5px}
+#panelTresc .eko-lista{display:flex;flex-direction:column}
+#panelTresc .eko-w{display:grid;grid-template-columns:1fr auto auto;
+  gap:10px;align-items:center;padding:7px 8px;border-radius:3px;font-size:12px}
+#panelTresc .eko-w:nth-child(odd){background:rgba(58,47,34,.05)}
+#panelTresc .eko-n{font-weight:700;letter-spacing:.03em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#panelTresc .eko-l{font-variant-numeric:tabular-nums;font-weight:800;
+  font-size:14px;letter-spacing:-.01em}
+#panelTresc .eko-s{font-size:8.5px;font-weight:800;letter-spacing:.1em;
+  padding:3px 7px;border-radius:2px;white-space:nowrap;
+  background:rgba(58,47,34,.10);opacity:.65}
+#panelTresc .eko-s.zly{background:rgba(168,50,42,.16);color:#8E2A22;opacity:1}
+#panelTresc .eko-s.uwaga{background:rgba(181,118,30,.16);color:#8A5A16;opacity:1}
+#panelTresc .eko-s.dobry{background:rgba(62,122,66,.15);color:#2F5F33;opacity:1}
+/* --- ROZWIJAJACE SIE POKOLENIA: pasek etapu i scenariusz ---
+   Pasek pokazuje postep w BIEZACYM etapie, nie w calym cyklu: gracza
+   interesuje "ile jeszcze do wylegu", a nie abstrakcyjny procent calosci.
+   Numer etapu obok nazwy (2/4) daje te druga informacje bez drugiego
+   paska. Scenariusz pod spodem, bo to on rozstrzyga, ile z tej ikry
+   w ogole zostanie -- i dlatego zly scenariusz zmienia kolor obu. */
+#panelTresc .eko-pok{grid-template-columns:1fr auto auto;row-gap:6px}
+#panelTresc .eko-pas{grid-column:1/-1;display:block;height:4px;
+  border-radius:2px;background:rgba(58,47,34,.14);overflow:hidden}
+#panelTresc .eko-pas i{display:block;height:100%;border-radius:2px;
+  background:var(--tusz);opacity:.55;transition:width .4s linear}
+#panelTresc .eko-pok .eko-s.uwaga ~ .eko-pas i{background:#B5761E;opacity:.75}
+#panelTresc .eko-scen{grid-column:1/-1;font-size:10px;opacity:.6;
+  letter-spacing:.05em;font-style:italic}
+#panelTresc .eko-scen.zly{color:#8A5A16;opacity:.95;font-style:normal;
+  font-weight:700}
+#panelTresc .eko-d{grid-column:1/-1;font-size:10px;opacity:.55;margin-top:2px;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em}
+#panelTresc .eko-kron{display:flex;flex-direction:column;gap:5px;
+  max-height:200px;overflow-y:auto;overscroll-behavior:contain;
+  padding-right:4px}
+#panelTresc .eko-k{font-size:11px;line-height:1.45;opacity:.8;
+  padding-left:9px;border-left:2px solid rgba(58,47,34,.18)}
+#panelTresc .eko-k b{font-variant-numeric:tabular-nums;opacity:.55;
+  margin-right:4px}
+#panelTresc .eko-pusto{font-size:11px;opacity:.45;font-style:italic}
+
+/* ============================================================
+   ROZROD W WIADERKU.
+   Wiersz pary dostaje cieple tlo i serce z pierscieniem odliczajacym,
+   zgodne z dymkiem godowym w toni (ten sam czerwony, to samo serce),
+   zeby gracz od razu wiedzial, ze to to samo zjawisko. Co bedzie dalej,
+   pokazuje zakladka EKOSYSTEM -- wiaderko nie ma wlasnego wyniku.
+   Wszystko na transform i opacity, zeby nie wywolywac przeliczen ukladu
+   60 razy na sekunde w otwartym panelu.
+   ============================================================ */
+#panelTresc .wr.rozr{background:linear-gradient(90deg,rgba(196,52,74,.16),transparent 62%)}
+#panelTresc .rozr-info{grid-column:2/-1;display:flex;align-items:center;gap:7px;margin-top:3px}
+#panelTresc .rozr-serce{width:15px;height:15px;flex:0 0 15px;position:relative;
+  animation:rozr-bicie 1.15s ease-in-out infinite}
+#panelTresc .rozr-serce svg{width:15px;height:15px;display:block}
+@keyframes rozr-bicie{0%,100%{transform:scale(1)}18%{transform:scale(1.26)}36%{transform:scale(1.02)}54%{transform:scale(1.16)}}
+#panelTresc .rozr-pas{flex:1 1 auto;height:4px;border-radius:2px;background:rgba(58,47,34,.14);overflow:hidden}
+#panelTresc .rozr-pas i{display:block;height:100%;background:#C4344A;border-radius:2px;
+  transition:width .45s linear}
+#panelTresc .rozr-et{font-size:9.5px;letter-spacing:.09em;opacity:.72;white-space:nowrap}
+
+/* ============================================================
+   KOLUMNA IKON.
+   BYLO: kazda ikona i kazda odznaka miala wpisany na sztywno `top`
+   w pikselach, osobno dla ukladu zwyklego i osobno dla "z-paskiem".
+   Czternascie liczb, ktore trzeba bylo przepisywac recznie przy kazdej
+   zmianie. Rozjechalo sie dokladnie tak, jak musialo:
+     - `#pomoc` i `#wiaderko` mialy w wariancie z paskiem OBIE 224 px,
+       czyli lezaly jedna na drugiej (ikony 1-4 przesuwaly sie o +30,
+       ikony 5-7 o -14, czyli o caly slot za malo);
+     - `#wiadZeg` (190) wchodzil na ikone wiaderka (194-232), mimo ze
+       komentarz obok mowil "wprost pod ikona";
+     - `#zanetaLicz` (100) wchodzil na `#ekosystem` (106);
+     - `#wiadLicz` wisial 18 px nad wiaderkiem i 42 px w prawo od kolumny.
+
+   JEST: jeden pojemnik, odstepy z `gap`, kolejnosc z DOM. Odznaki siedza
+   w srodku swoich przyciskow, wiec nie da sie ich rozjechac z ikona --
+   moga sie najwyzej przesunac razem z nia. Pasek konkursu zmienia JEDNA
+   liczbe: gore pojemnika.
+   ============================================================ */
+#ikony{position:absolute;z-index:6;
+  left:calc(18px + env(safe-area-inset-left));
+  top:calc(2px + env(safe-area-inset-top));
+  display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  pointer-events:none}
+/* ============================================================
+   KLIKALNOSC IKON WRACA NA `.ikonka`, NIE NA `#ikony>*`.
+
+   BLAD (IX 2026, zgloszenie: "podczas klikania w otwartych zakladkach
+   otwieraja sie inne, jakby klikniecie przez obraz otwartej karty").
+   Pojemnik kolumny ma `pointer-events:none`, wiec dzieci musialy je
+   odzyskac. Pierwsza wersja robila to przez `#ikony>*` -- swoistosc
+   (1,0,0), czyli JEDNO ID. A regula, ktora gasi ikony pod otwarta karta,
+   to `body.karta-otwarta .ikonka` -- swoistosc (0,2,1), czyli dwie klasy
+   i element. ID bije dwie klasy, wiec moja regula wygrywala i ikony
+   zostawaly KLIKALNE pod karta. Widac ich nie bylo (`opacity:0` dzialalo
+   dalej, bo tej wlasciwosci nie nadpisywalem), wiec gracz stukal w karte,
+   trafial w niewidzialna ikone i otwieral losowy panel.
+
+   `.ikonka` ma swoistosc (0,1,0), czyli przegrywa z kazda regula stanu
+   `body.<cos>-otwarta .ikonka`. O to chodzi: gaszenie ma byc silniejsze
+   od przywracania.
+   ============================================================ */
+.ikonka{pointer-events:auto}
+body.z-paskiem #ikony{top:calc(32px + env(safe-area-inset-top))}
+/* Wiaderko trzyma swoj zegar POD soba, wiec potrzebuje na niego miejsca.
+   Rezerwacja idzie na samym wiaderku, nie na gapie calej kolumny --
+   inaczej rozsuwalyby sie wszystkie ikony, takze te bez odznak. */
+#ikony #wiaderko{margin-bottom:11px}
+
+
+/* ============================================================
+   GRUPY IKON (IX 2026).
+   Zamiast sześciu stałych ikon są cztery pozycje, a część zakładek
+   otwiera się z tej samej ikony jako małe zakładki obok. Ekran robi się
+   lżejszy, lewy słupek krótszy, a najważniejsze akcje nie spychają sceny.
+   ============================================================ */
+.ik-grupa{position:relative;display:flex;align-items:center;pointer-events:auto}
+.ik-grupa > .ikonka{opacity:.66}
+.ik-grupa.otw > .ikonka,
+.ik-grupa.has-alert > .ikonka{opacity:1;border-color:rgba(232,199,101,.82);
+  background:rgba(122,94,46,.42);box-shadow:0 0 16px rgba(232,199,101,.24)}
+.ik-grupa.has-alert > .ikonka::after{content:attr(data-alert);position:absolute;right:-5px;top:-5px;
+  min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--bursztyn);
+  color:#3a2400;border:2px solid rgba(22,18,30,.92);display:flex;align-items:center;
+  justify-content:center;font:900 11px/1 Inter,system-ui,sans-serif;letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.28);animation:kropka-nowa 2.2s var(--spr) infinite}
+.miniZakladki{position:absolute;left:46px;top:50%;display:flex;align-items:center;gap:6px;
+  opacity:0;pointer-events:none;transform:translateY(-50%) translateX(-8px) scale(.96);
+  transition:opacity .18s var(--wyj),transform .28s var(--spr)}
+.ik-grupa.otw .miniZakladki{opacity:1;pointer-events:auto;
+  transform:translateY(-50%) translateX(0) scale(1)}
+.miniZakladki.kolumna{top:0;align-items:flex-start;flex-direction:column;
+  transform:translateX(-8px) scale(.96)}
+.ik-grupa.otw .miniZakladki.kolumna{transform:translateX(0) scale(1)}
+.zakMini{position:relative;display:flex;align-items:center;gap:6px;
+  min-width:72px;height:30px;padding:0 10px;border-radius:15px;
+  background:rgba(24,18,42,.82);border:1px solid rgba(185,147,71,.42);
+  box-shadow:0 2px 8px rgba(0,0,0,.3);color:#F6E4BE;
+  font:800 9px/1 ui-monospace,monospace;letter-spacing:.11em;
+  white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .24s var(--spr),opacity .18s var(--wyj),background .2s var(--wyj),border-color .2s var(--wyj)}
+.zakMini svg{width:15px;height:15px;flex:0 0 15px}
+.zakMini:active{transform:scale(.94);background:rgba(122,94,46,.48);border-color:rgba(232,199,101,.8)}
+.zakMini.gotowe{background:rgba(244,198,61,.22);border-color:rgba(212,168,64,.82);color:#FFE9AE}
+.zakMini.gotowe::after{content:'';position:absolute;right:-2px;top:-2px;
+  width:10px;height:10px;border-radius:50%;background:var(--bursztyn);
+  border:2px solid var(--tusz);animation:kropka-nowa 2.2s var(--spr) infinite}
+#kompendiumMenu{min-width:max-content}
+#menuMenu .zakMini{min-width:78px;justify-content:flex-start}
+#menuMenu{left:46px;top:-2px}
+#kompendiumMenu .zakMini{min-width:70px}
+#kompendiumMenu #ekoWykrz{left:auto;right:-4px;top:-4px;margin:0}
+body.ksiega-otwarta .miniZakladki,
+body.karta-otwarta .miniZakladki,
+body.ksiega-otwarta .zakMini,
+body.karta-otwarta .zakMini{opacity:0 !important;pointer-events:none !important}
+
+/* Nick w kronice lowiska: ma sie odcinac od reszty wpisu, zeby dalo sie
+   przebiec wzrokiem po autorach, nie czytajac calych zdan. */
+/* Nick ma sie odcinac od reszty wpisu, ale na kremie zloty jest
+   nieczytelny -- bierzemy ten sam ciemny bursztyn, co scenariusz zly. */
+#panelTresc .eko-nick{font-style:normal;font-weight:800;color:#8A5A16;letter-spacing:.04em}
+
+/* ============================================================
+   SERCE NA IKONIE WIADERKA -- para trze sie w srodku.
+   Lewy gorny rog, bo prawy gorny zajmuje licznik towaru ("3/10"),
+   a dol -- zegar handlarza. Trzy odznaki, trzy rogi, zaden nie zachodzi
+   na drugi. Bicie to ta sama animacja `rozr-bicie`, co serce w panelu:
+   gracz ma rozpoznac, ze to jedno i to samo zjawisko, zanim otworzy.
+   ============================================================ */
+#wiadSerce{position:absolute;z-index:8;display:none;
+  right:100%;top:-3px;margin-right:-7px;
+  width:14px;height:14px;pointer-events:none;
+  background:no-repeat center/contain;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 13.6C4.1 11 2.6 9.5 2.6 7.3 2.6 5.5 4 4.2 5.8 4.2c1.1 0 2 .5 2.2 1.5C8.2 4.7 9.1 4.2 10.2 4.2c1.8 0 3.2 1.3 3.2 3.1 0 2.2-1.5 3.7-5.4 6.3z' fill='%23C4344A' stroke='%23140E12' stroke-width='1.1'/%3E%3C/svg%3E");
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+#wiadSerce.on{display:block;animation:rozr-bicie 1.15s ease-in-out infinite}
+body.ksiega-otwarta #wiadSerce,
+body.karta-otwarta #wiadSerce{opacity:0 !important}
+
+/* ============================================================
+   TABLICA TARLA obok przycisku LAWICA.
+   Zastepuje serca rysowane nad lbami ryb -- te psuly imersje, bo
+   scena jest pixel-artem, a nad nia wisialy ikonki interfejsu.
+   Tutaj informacja jest ta sama i siedzi tam, gdzie reszta HUD-u.
+   Szerokosc rowna przyciskowi, zeby tworzyly jedna kolumne.
+   ============================================================ */
+#tarla{position:absolute;z-index:6;
+  top:calc(191px + env(safe-area-inset-top));right:calc(15px + env(safe-area-inset-right));
+  width:106px;display:none;flex-direction:column;gap:4px;
+  padding:5px 4px;border-radius:12px;
+  background:rgba(22,16,44,.80);border:1.6px solid rgba(212,168,64,.45);
+  box-shadow:0 3px 14px rgba(0,0,0,.5);pointer-events:none}
+#tarla.on{display:flex}
+#tarla .tg{display:flex;align-items:center;gap:5px;justify-content:center}
+#tarla .tg img{width:26px;height:18px;object-fit:contain;image-rendering:pixelated}
+#tarla .tg u{width:11px;height:11px;flex:0 0 11px;text-decoration:none;
+  background:no-repeat center/contain;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 13.6C4.1 11 2.6 9.5 2.6 7.3 2.6 5.5 4 4.2 5.8 4.2c1.1 0 2 .5 2.2 1.5C8.2 4.7 9.1 4.2 10.2 4.2c1.8 0 3.2 1.3 3.2 3.1 0 2.2-1.5 3.7-5.4 6.3z' fill='%23C4344A'/%3E%3C/svg%3E");
+  animation:rozr-bicie 1.15s ease-in-out infinite}
+#tarla .tp{height:3px;border-radius:2px;background:rgba(255,255,255,.16);overflow:hidden}
+#tarla .tp i{display:block;height:100%;background:#C4344A;border-radius:2px}
+body.ksiega-otwarta #tarla,body.karta-otwarta #tarla{opacity:0}
+
+/* Wykrzyknik na ikonie ekosystemu: czeka meldunek o narybku.
+   Ten sam rog i ten sam ksztalt, co licznik towaru przy wiaderku,
+   zeby "cos na ciebie czeka" wygladalo wszedzie tak samo. */
+#ekoWykrz{position:absolute;z-index:7;display:none;
+  left:100%;top:-4px;margin-left:-6px;
+  min-width:15px;height:15px;padding:0 4px;box-sizing:border-box;
+  border-radius:8px;background:rgba(163,55,38,.94);
+  color:#FFE9AE;font:800 10px/15px ui-monospace,monospace;text-align:center;
+  letter-spacing:.04em;pointer-events:none;
+  box-shadow:0 1px 4px rgba(0,0,0,.5)}
+#ekoWykrz.on{display:block;animation:wjazd-licznik .42s var(--spr)}
+/* ============================================================
+   KOLORY PANELU: CIEMNY TUSZ NA KREMIE (poprawka IX 2026).
+   Pierwsza wersja tych trzech regul byla pisana tak, jakby panel byl
+   ciemny -- jasny kremowy tekst (#FFE9AE), zloty nick (#F2C14E) i bialy
+   tor paska. Panel jest KREMOWY (--papier #F2ECDF), wiec wszystkie trzy
+   znikaly w tle; przycisk OK byl praktycznie niewidoczny.
+   Paleta tej zakladki: tusz #141210, przygaszenia przez rgba(58,47,34,a),
+   akcenty #B5761E i #8A5A16. Trzymamy sie jej.
+   ============================================================ */
+#panelTresc .eko-ok{display:block;width:100%;margin:8px 0 2px;padding:10px 10px;
+  border:0;border-radius:9px;
+  background:linear-gradient(180deg,#D9A93F,#B5761E);
+  color:#2A1E0C;text-shadow:0 1px 0 rgba(255,255,255,.28);
+  box-shadow:0 2px 0 #7E5314,0 3px 10px rgba(58,47,34,.35);
+  font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.08em;cursor:pointer}
+#panelTresc .eko-ok:active{box-shadow:0 1px 0 #7E5314,0 2px 6px rgba(58,47,34,.3)}
+#panelTresc .eko-ok:active{transform:translateY(1px)}
+
+/* ============================================================
+   PASEK BRAKU KONTA.
+   Czerwony, na gorze, przez cala szerokosc. Nie gasnie i nie da sie
+   go zamknac -- bez konta polowa gry nie reaguje i gracz ma wiedziec
+   dlaczego, a nie szukac winy w sobie.
+   Kolumna ikon zjezdza pod niego tak samo, jak pod pasek turniejowy:
+   jedna liczba, ta sama zasada.
+   ============================================================ */
+#pasekKonta{position:absolute;z-index:9;display:none;
+  left:0;right:0;top:env(safe-area-inset-top);
+  padding:5px 12px;box-sizing:border-box;
+  background:linear-gradient(180deg,#A33726,#7E2618);
+  color:#FFE4D4;font:600 10.5px/1.35 ui-monospace,monospace;
+  letter-spacing:.04em;text-align:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.5);cursor:pointer}
+#pasekKonta b{font-weight:800;letter-spacing:.08em}
+#pasekKonta u{text-underline-offset:2px}
+body.bez-konta #pasekKonta{display:block}
+body.bez-konta #ikony{top:calc(32px + env(safe-area-inset-top))}
+body.bez-konta.z-paskiem #ikony{top:calc(62px + env(safe-area-inset-top))}
+body.bez-konta #reset{top:calc(78px + env(safe-area-inset-top))}
+body.bez-konta #tarla{top:calc(207px + env(safe-area-inset-top))}
+body.karta-otwarta #pasekKonta,body.ksiega-otwarta #pasekKonta{opacity:0;pointer-events:none}
+
