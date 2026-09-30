@@ -367,6 +367,11 @@ function verify(html, resolved) {
 
 /* ---------- Main ---------- */
 const html = read(PLAN.source);
+if (html.includes('QRybyGate.open()')) {
+  console.error(`${PLAN.source} jest juz wersja modulowa (zawiera QRybyGate). Zrodlem prawdy sa pliki src/, css/, assets/sprites/.`);
+  console.error('Dawny monolit jest w historii git: git show e5e4f0b:qryby.html');
+  process.exit(3);
+}
 const { resolved } = resolvePlan(html);
 
 if (!onlyVerify) {

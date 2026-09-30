@@ -38,9 +38,10 @@ const acorn = require('acorn');
 const { chromium } = require('playwright');
 const { start } = require('./lib/static-server.js');
 
-const ROOT = path.resolve(__dirname, '..', '..');
 const argv = process.argv.slice(2);
 const arg = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
+// --root: katalog repo do testu (np. git worktree innego commita)
+const ROOT = path.resolve(arg('--root', path.resolve(__dirname, '..', '..')));
 const MODE = arg('--mode', 'det');
 const FILE_A = arg('--a', 'qryby.html');
 const FILE_B = arg('--b', 'qryby-modular.html');
