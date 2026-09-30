@@ -85,6 +85,13 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - READY_FOR_LAUNCH: USED
 
 
+## Naprawa 2026-09-30
+- blok gatunku `lucjan_czerwony` zniknął z gry 2026-09-27 razem z przepisaniem bloku Smoka Życia (commit 3384a8e); od tego dnia EKO pokazywało surowy klucz `lucjan_czerwony`, a QA community event świeciło na czerwono
+- gatunek wrócił jako osobny moduł `src/lucjanek/species.js`, ładowany zaraz po `src/smok-zycia/species.js`, z tymi samymi parametrami co w Stage 7 (pasmo 4, `odnowa: true`, populacja startowa 0)
+- `assets/lucjanek/lucjanek-128.png` miał od początku jeden przestawiony bit w danych obrazu; przeglądarka pokazywała tylko górne 75 z 128 wierszy; po naprawie CRC zgadza się z zapisanym w pliku, więc to oryginalny pixel-art
+- sprite w jeziorze: ten sam pixel-art odbity w poziomie (ryby w grze patrzą w prawo), bez czarnego tła, przycięty do 120 × 75 px
+- para startowa (1 samiec + 1 samica): `supabase/migrations/20260930_lucjan_czerwony_para.sql`, uruchamiana ręcznie w Supabase SQL Editor
+
 ## LIVE START
 - event uruchomiony: 2026-09-26 13:02:43 UTC
 - koniec zbiórki: 2026-10-03 13:02:43 UTC
