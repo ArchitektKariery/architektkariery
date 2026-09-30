@@ -146,7 +146,7 @@ Funkcje wywoływane z HTML (`onclick="..."` w szablonach budowanych przez JS, 55
 ## Cache i wdrożenie
 
 - Każdy tag ma token wersji, np. `src/fish/movement.js?v=20260930-mod1`. Wszystkie moduły mają **ten sam** token.
-- Po każdej zmianie dowolnego pliku `src/`, `css/` lub `assets/sprites/` podbij token we **wszystkich** tagach naraz. Wtedy gracz nigdy nie dostanie nowego `qryby.html` ze starym modułem z pamięci podręcznej.
+- Po każdej zmianie dowolnego pliku `src/`, `css/` lub `assets/sprites/` podbij token we **wszystkich** tagach naraz: `python3 tools/bump_version.py` (albo `python3 tools/bump_version.py 20261001-mod2`). Wtedy gracz nigdy nie dostanie nowego `qryby.html` ze starym modułem z pamięci podręcznej.
 - `src/lucjanek/community-restoration-live.js` i `src/smok-zycia/chain-motion.js` mają własne tokeny (`?v=20260926-live5`, `?v=20260928-b2`), bo powstały przed podziałem.
 
 ## Czego nie przenosić z powrotem do `qryby.html`
