@@ -37,7 +37,7 @@ src/
   product/                 telemetria, samouczek, progres, historia ryby, share card, puls świata
   events/                  Pani Raptorowa
   smok-zycia/              Smok Życia: gatunek, wydarzenie ławicy, ruch łańcuchowy
-  lucjanek/                odnowa gatunków (wpłaty społeczności)
+  lucjanek/                odnowa gatunków (wpłaty społeczności), gatunek Lucjan czerwony
   bootstrap.js             przestrzeń nazw window.QRYBY (na razie nigdzie nie ładowana)
 tools/
   qryby_source.py          wirtualny monolit dla testów tekstowych CI
