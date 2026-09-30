@@ -3,9 +3,9 @@
   "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
   "sourceBytes": 6357001,
   "entry": "qryby-modular.html",
-  "entryBytes": 6197056,
+  "entryBytes": 1293108,
   "version": "20260930-mod1",
-  "stage": 1,
+  "stage": 2,
   "files": [
     {
       "path": "css/01-hud.css",
@@ -51,6 +51,78 @@
       "toLine": 2867,
       "bytes": 27895,
       "sha256": "b69bf96d428a79af671b0450b41c5c9c2227580557f7339077dbf4cdfaf6bc67"
+    },
+    {
+      "path": "assets/sprites/scene-angler.js",
+      "block": "script#1",
+      "stage": 2,
+      "fromLine": 3057,
+      "toLine": 3057,
+      "bytes": 291591,
+      "sha256": "e9ed3cbc810aa0787718d25c47badc823a25078031da39ca043936cbfe166cf3"
+    },
+    {
+      "path": "assets/sprites/tier6-bottom.js",
+      "block": "script#2",
+      "stage": 2,
+      "fromLine": 3058,
+      "toLine": 3085,
+      "bytes": 276307,
+      "sha256": "480ddf6973c8681534606a0374498b6845d32973b83b8eb47d487d2a94a97cda"
+    },
+    {
+      "path": "assets/sprites/species.js",
+      "block": "script#3",
+      "stage": 2,
+      "fromLine": 3087,
+      "toLine": 3253,
+      "bytes": 443576,
+      "sha256": "4aca808b878ceb63a3af8412aa95db8c62f49361f27e298f76bbaeef2a49c35b"
+    },
+    {
+      "path": "assets/sprites/card-frames.js",
+      "block": "script#5",
+      "stage": 2,
+      "fromLine": 5045,
+      "toLine": 5095,
+      "bytes": 626899,
+      "sha256": "47b4acac74e4b3d98836c0c4cd311d8c1145b1aa315cf130d5a0dd5ad43b4176"
+    },
+    {
+      "path": "assets/sprites/shore.js",
+      "block": "script#8",
+      "stage": 2,
+      "fromLine": 5798,
+      "toLine": 5798,
+      "bytes": 37441,
+      "sha256": "3034a0252fc01c95b9028a05ad3be431c0ef2741a3c5bb991c2f39ddf0ee494e"
+    },
+    {
+      "path": "assets/sprites/baits.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7846,
+      "toLine": 7884,
+      "bytes": 329778,
+      "sha256": "160587e5d7ed3e0fa6013d592f0eba6f70abeb7ea40968ce514d3fa829f15afb"
+    },
+    {
+      "path": "assets/sprites/packs.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7885,
+      "toLine": 7947,
+      "bytes": 1207658,
+      "sha256": "23d8a810535c9ebd42aa86c9e8eaaa245b26f4592921bab625a0f5d054c39042"
+    },
+    {
+      "path": "assets/sprites/traders.js",
+      "block": "script#10",
+      "stage": 2,
+      "fromLine": 7948,
+      "toLine": 8034,
+      "bytes": 1691257,
+      "sha256": "3c8913533c6b4430554c7e256391811ed52c653d4996c02dd1b52b5b83504a9c"
     }
   ]
 }
