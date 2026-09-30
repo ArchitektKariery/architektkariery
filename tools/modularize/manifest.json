@@ -3,9 +3,9 @@
   "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
   "sourceBytes": 6357001,
   "entry": "qryby-modular.html",
-  "entryBytes": 708196,
+  "entryBytes": 602288,
   "version": "20260930-mod1",
-  "stage": 4,
+  "stage": 5,
   "files": [
     {
       "path": "src/core/config.js",
@@ -323,6 +323,15 @@
       "sha256": "fc8a5af07aa2109983bcade44d71eb5dbcc1b798bfd8dbfdd7ed5811127d295e"
     },
     {
+      "path": "src/ecosystem/net-anim.js",
+      "block": "script#11",
+      "stage": 5,
+      "fromLine": 21482,
+      "toLine": 21588,
+      "bytes": 4560,
+      "sha256": "3c6a07e03c9a1761fa27d749624a88e60db898afd2c4bb6898d1341fd43ddcf2"
+    },
+    {
       "path": "src/card/card.js",
       "block": "script#12",
       "stage": 4,
@@ -411,6 +420,51 @@
       "toLine": 25885,
       "bytes": 4074,
       "sha256": "3d76db514a0184dab93e153a1b1544ecf36a9486030b247fc45cfa05f3b16c85"
+    },
+    {
+      "path": "src/ecosystem/population.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 27041,
+      "toLine": 28434,
+      "bytes": 65873,
+      "sha256": "a27ae2fc4e2b2d301fa08c9be4ea12776f6888319456db946a44effd66213f24"
+    },
+    {
+      "path": "src/ecosystem/eko-tab.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 28435,
+      "toLine": 28785,
+      "bytes": 16285,
+      "sha256": "62daaf34bbb48ad96c84df67a685ab90a4c9c080fe5e05d91a6a77b031d54069"
+    },
+    {
+      "path": "src/ecosystem/server.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 28786,
+      "toLine": 29009,
+      "bytes": 9119,
+      "sha256": "3f83de01786d02a5260411b65f6704397c0f4fbeb6b59fde2ab462225626ed54"
+    },
+    {
+      "path": "src/ecosystem/net-catch.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 29918,
+      "toLine": 30035,
+      "bytes": 5410,
+      "sha256": "015cbc219b215a7d5cebd0a86023349087d3ea468e9c5d2168eca58bb85cfe14"
+    },
+    {
+      "path": "src/ecosystem/reproduction.js",
+      "block": "script#15",
+      "stage": 5,
+      "fromLine": 30036,
+      "toLine": 30153,
+      "bytes": 5061,
+      "sha256": "533a3529a5718d504f5a9c6a4c2846bd465927164170035b67f0b369ca31f0dc"
     },
     {
       "path": "src/core/qdiag.js",
