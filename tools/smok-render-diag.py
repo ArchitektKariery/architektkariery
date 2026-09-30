@@ -1,6 +1,10 @@
 from pathlib import Path
 
-src = Path("qryby.html").read_text(encoding="utf-8")
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from qryby_source import read_game_source  # qryby.html + moduly src/, css/
+
+src = read_game_source()
 probe = r"""
 <script>
 setTimeout(() => {

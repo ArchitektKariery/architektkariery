@@ -2,7 +2,11 @@ from pathlib import Path
 import random
 import re
 
-src = Path("qryby.html").read_text(encoding="utf-8")
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from qryby_source import read_game_source  # qryby.html + moduly src/, css/
+
+src = read_game_source()
 
 # --- 1. One roll per appearance ---
 roll = "f.smokBierze = Math.random() < 0.50;"

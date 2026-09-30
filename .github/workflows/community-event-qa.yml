@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'qryby.html'
+      - 'src/**'
+      - 'css/**'
+      - 'assets/sprites/**'
+      - 'tools/qryby_source.py'
       - 'src/lucjanek/**'
       - 'supabase/migrations/*community_restoration*'
       - 'docs/lucjanek-community-event.md'

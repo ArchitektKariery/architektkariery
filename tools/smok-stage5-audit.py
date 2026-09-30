@@ -1,7 +1,11 @@
 from pathlib import Path
 import re, json, math
 
-src = Path("qryby.html").read_text(encoding="utf-8")
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from qryby_source import read_game_source  # qryby.html + moduly src/, css/
+
+src = read_game_source()
 lines = src.splitlines()
 
 def find_lines(patterns, limit=80):
