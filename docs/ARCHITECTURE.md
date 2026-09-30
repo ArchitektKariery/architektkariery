@@ -4,7 +4,6 @@ Gra to HTML5 + JavaScript (klasyczne skrypty, bez modułów ES i bez procesu bui
 
 `qryby.html` zawiera szkielet DOM, linki CSS, tagi `<script src>` i minimalny bootstrap (bramka ładowania). Cała logika gry leży w `src/`, style w `css/`, grafika w `assets/sprites/`.
 
-> **Stan przejściowy.** Do czasu przełączenia gracze dostają stary monolit `qryby.html`, a wersja modułowa działa równolegle jako `qryby-modular.html` (ten sam kod, te same moduły). Przełączenie to jeden commit: `qryby-modular.html` zastępuje `qryby.html`. Wtedy ta notka znika.
 
 Szybki indeks „temat → plik”: [`AI_WORK_MAP.md`](AI_WORK_MAP.md). Każda funkcja i stała z linią: [`SYMBOL_INDEX.md`](SYMBOL_INDEX.md). Historia podziału i ryzyka: [`MODULARIZATION_MAP.md`](MODULARIZATION_MAP.md).
 
