@@ -1,0 +1,56 @@
+{
+  "source": "qryby.html",
+  "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
+  "sourceBytes": 6357001,
+  "entry": "qryby-modular.html",
+  "entryBytes": 6197056,
+  "version": "20260930-mod1",
+  "stage": 1,
+  "files": [
+    {
+      "path": "css/01-hud.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 62,
+      "toLine": 586,
+      "bytes": 36161,
+      "sha256": "e9a04e806131fb6b114c80b5487b9b096e5576b75dbf63799eab696188b0ca1f"
+    },
+    {
+      "path": "css/02-panels.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 587,
+      "toLine": 1377,
+      "bytes": 49899,
+      "sha256": "03a5ba98b3e2982d2ee07ef144c6b0bbb798205b9a0dca17932ccd4f6edf917c"
+    },
+    {
+      "path": "css/03-eko-icons.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 1378,
+      "toLine": 1698,
+      "bytes": 19519,
+      "sha256": "02c1622e0de7651fbcaa808cafb03797a1658234d17deb7f1a47b6643cb94644"
+    },
+    {
+      "path": "css/04-premium-hud.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 1699,
+      "toLine": 2186,
+      "bytes": 26786,
+      "sha256": "30b313a7772d7f71d6fcbfe1bfb302636f2fd73c0a573547bd17e3aaaef93719"
+    },
+    {
+      "path": "css/05-product.css",
+      "block": "style#0",
+      "stage": 1,
+      "fromLine": 2187,
+      "toLine": 2867,
+      "bytes": 27895,
+      "sha256": "b69bf96d428a79af671b0450b41c5c9c2227580557f7339077dbf4cdfaf6bc67"
+    }
+  ]
+}

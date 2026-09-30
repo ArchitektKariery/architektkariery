@@ -1,0 +1,791 @@
+/* ============================================================
+   PASEK TURNIEJOWY, JAK NA PASKU INFORMACYJNYM W TELEWIZJI.
+
+   Siedzi na samej gorze, na calej szerokosci, i przesuwa wyniki
+   od prawej do lewej. Po lewej stoi nieruchoma plakietka z nazwa
+   turnieju i zegarem, tak samo jak w telewizji stoi tam nazwa stacji.
+
+   Tresc jest podwojona w kodzie i animacja przesuwa dokladnie o polowe
+   szerokosci, wiec petla domyka sie bez skoku i bez pustego miejsca.
+   Czas trwania przewijania liczy sie z dlugosci tresci, zeby dziesieciu
+   zawodnikow jechalo tak samo szybko jak dwoch.
+
+   Gdy pasek jest wlaczony, cala reszta HUD schodzi o 30 px, bo pasek
+   ma pierwszenstwo: to on jest powodem, dla ktorego gracz tu wrocil.
+   ============================================================ */
+#pasekTV{position:absolute;z-index:8;display:none;left:0;right:0;
+  top:env(safe-area-inset-top);height:30px;
+  background:linear-gradient(180deg,rgba(16,11,32,.94),rgba(10,7,22,.94));
+  border-bottom:1.6px solid rgba(212,168,64,.75);
+  box-shadow:0 3px 10px rgba(0,0,0,.5);overflow:hidden}
+body.z-paskiem #pasekTV{display:flex;align-items:stretch}
+body.z-paskiem #hud{top:calc(44px + env(safe-area-inset-top))}
+body.z-paskiem #reset{top:calc(92px + env(safe-area-inset-top))}
+/* REGULA MARTWA OD POCZATKU, NAPRAWIONA IX 2026.
+   Bylo: `body.z-paskiem` powtorzone SIEDEM razy jako lancuch potomkow,
+   czyli `body.z-paskiem body.z-paskiem ... #pasekTV`. Ktos chcial
+   podbic swoistosc i uzyl zagniezdzenia zamiast laczenia klas na tym
+   samym elemencie. Taki selektor wymaga `body` WEWNATRZ `body`, wiec
+   nie dopasowuje sie NIGDY i pasek turniejowy nie gasl pod otwartym
+   atlasem. Dodatkowo nie odbieral dotyku, wiec dalo sie w niego trafic
+   przez ksiege.
+   Zadnej walki o swoistosc tu zreszta nie bylo: `opacity` nikt inny
+   na `#pasekTV` nie ustawia, a `display` to osobna wlasciwosc. */
+body.ksiega-otwarta #pasekTV{opacity:0;pointer-events:none;transition:opacity .2s}
+
+/* ============================================================
+   KARTA ZDOBYCZY MA PIERWSZENSTWO.
+   Wszystko, co lezy nad kanwa, gasnie na czas jej trwania: przycisk
+   lawicy, licznik qryb, zadania, lewa kolumna ikon i pasek turniejowy.
+   Gasnie, a nie znika: display none przerywaloby animacje wjazdu,
+   a przezroczystosc z pointer-events none zdejmuje takze dotyk, wiec
+   klikniecie w rog ekranu zamyka karte zamiast wymieniac lawice.
+   ============================================================ */
+body.karta-otwarta #reset,
+body.karta-otwarta #hud,
+body.karta-otwarta #pasekTV,
+body.karta-otwarta #zanetaLicz,
+/* Licznik i zegar wiaderka gasna razem z reszta HUD. Bez tego wisialy
+   na wierzchu otwartej karty polowu, bo maja wyzszy z-index niz kanwa. */
+body.karta-otwarta #wiadLicz,
+body.karta-otwarta #wiadZeg,
+body.karta-otwarta .ikonka{opacity:0;pointer-events:none;transition:opacity .22s ease}
+/* Ksiega gasi caly HUD, wiec te dwa tez. */
+body.ksiega-otwarta #wiadLicz,
+body.ksiega-otwarta #wiadZeg{opacity:0 !important;pointer-events:none}
+
+#pasekTVetyk{flex:0 0 auto;display:flex;align-items:center;gap:6px;
+  padding:0 10px;background:rgba(212,168,64,.92);color:#1A1030;
+  font:inherit;font-size:9px;letter-spacing:.10em;font-weight:800;white-space:nowrap}
+#pasekTVetyk b{font-size:11px;letter-spacing:.02em}
+#pasekTVokno{flex:1;min-width:0;overflow:hidden;display:flex;align-items:center}
+#pasekTVtresc{display:flex;align-items:center;white-space:nowrap;
+  will-change:transform;animation:pasekJedzie linear infinite}
+@keyframes pasekJedzie{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+#pasekTVtresc .wpis{display:inline-flex;align-items:center;gap:5px;padding:0 12px;
+  font:inherit;font-size:11px;letter-spacing:.04em;font-weight:800;color:#F3E3B8}
+#pasekTVtresc .wpis .mj{color:#FFC93C}
+#pasekTVtresc .wpis i{font-style:normal;opacity:.5;font-size:9px}
+#pasekTVtresc .wpis.out{opacity:.42;text-decoration:line-through}
+#pasekTVtresc .dzial{display:inline-flex;align-items:center;gap:6px;padding:0 12px;
+  font:inherit;font-size:10px;letter-spacing:.16em;font-weight:800;color:#FFC93C}
+#pasekTVtresc .rb{display:block;image-rendering:pixelated}
+
+/* ============================================================
+   BANER NOWEJ RUNDY.
+
+   Zmiana gatunku doby jest jedyna rzecza w lidze, ktora gracz MUSI
+   zauwazyc: lowi nie te rybe, co trzeba, i cala doba przepada. Pasek
+   u gory to pokazuje, ale pasek przewija sie w kolko i oko go odfiltrowuje.
+   Dlatego przy kazdym przejsciu miedzy rundami wjezdza osobny baner
+   z sylwetka ryby i gasnie po osmiu sekundach.
+   ============================================================ */
+#nowaRunda{position:absolute;z-index:9;display:none;
+  left:50%;transform:translateX(-50%);
+  top:calc(46px + env(safe-area-inset-top));
+  max-width:86%;padding:10px 16px;border-radius:16px;text-align:center;
+  background:linear-gradient(180deg,rgba(36,26,66,.96),rgba(20,14,42,.96));
+  border:2px solid rgba(212,168,64,.9);
+  box-shadow:0 6px 22px rgba(0,0,0,.6);pointer-events:none}
+#nowaRunda.on{display:block;animation:runda-wjazd .5s var(--spr)}
+#nowaRunda.gasnie{opacity:0;transition:opacity .6s ease}
+#nowaRunda span{display:block;font:inherit;font-size:8.5px;letter-spacing:.24em;
+  font-weight:800;color:#D4A840}
+#nowaRunda b{display:block;margin:3px 0 2px;font:inherit;font-size:19px;
+  letter-spacing:.06em;font-weight:800;color:#FFE9AE;text-shadow:0 2px 4px rgba(0,0,0,.8)}
+#nowaRunda img{display:block;margin:4px auto 0;image-rendering:pixelated}
+#nowaRunda i{display:block;font-style:normal;font-size:10px;opacity:.72;color:#F3E3B8}
+@keyframes runda-wjazd{
+  from{opacity:0;transform:translateX(-50%) translateY(-18px) scale(.92)}
+  to{opacity:1;transform:translateX(-50%) none}}
+#pasekTVtresc .wpis b{color:#FFF;font-size:12px}
+#pasekTVtresc .sep{opacity:.35;color:#D4A840}
+#pasekTVtresc .ikZ{display:block;border-radius:50%}
+
+/* Ksiega otwiera sie, gdy atlas jest otwarty: karty rozchylaja sie na boki. */
+.ik-ksiega .karta{transform-origin:12px 12px;transition:transform .5s var(--spr)}
+.otwarta .ik-ksiega .karta.l{transform:rotateY(0) skewY(-4deg) translateX(-1.2px)}
+.otwarta .ik-ksiega .karta.p{transform:skewY(4deg) translateX(1.2px)}
+.otwarta .ik-ksiega .linijka{animation:pisz .9s var(--wyj)}
+@keyframes pisz{from{stroke-dasharray:0 40}to{stroke-dasharray:40 0}}
+/* Frendzle straganu falują pod palcem, jak plotno na wietrze. */
+.ik-stragan .frendzle{transform-origin:center;transition:transform .4s var(--spr)}
+.ikonka:active .ik-stragan .frendzle{transform:translateY(1.4px) scaleY(1.25)}
+/* Dyskietka: szpula chowa sie w korpus przy zapisie. */
+.ik-zapis .szpula{transform-origin:12px 6px;transition:transform .34s var(--spr)}
+.ikonka:active .ik-zapis .szpula{transform:scaleY(.55)}
+
+/* ============================================================
+   WYSZUKIWARKA RYB.
+   Zywy element HTML nad kanwa ksiegi, bo klawiatura systemowa jest jedynym
+   sensownym sposobem wpisywania na telefonie. Widoczna wylacznie wtedy, gdy
+   otwarty jest ATLAS: instrukcja nie ma czego szukac.
+   Siedzi na samej gorze, nad okladka, zeby nie zaslaniac ryciny.
+   ============================================================ */
+#szukajka{position:absolute;z-index:9;display:none;
+  left:50%;transform:translateX(-50%);
+  top:calc(10px + env(safe-area-inset-top));
+  width:min(78%,300px);align-items:center;gap:6px;
+  padding:0 6px 0 12px;height:38px;border-radius:19px;
+  background:rgba(28,20,10,.82);border:1.4px solid rgba(212,168,64,.65);
+  box-shadow:0 3px 12px rgba(0,0,0,.55)}
+body.atlas-otwarty #szukajka{display:flex;animation:wjazd-szukajki .34s var(--spr)}
+@keyframes wjazd-szukajki{from{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+/* ============================================================
+   AUTO-ZOOM NA IPHONE (IX 2026, zgloszenie Andrzeja z filmiku: ekran
+   przyblizal sie przy wpisywaniu w wyszukiwarke atlasu).
+   Safari na iOS SAM powieksza strone, gdy dotkniete pole ma font-size
+   mniejszy niz 16 px -- to nie jest blad gry, tylko zachowanie systemu,
+   ktorego nie da sie wylaczyc inaczej niz podajac 16 px.
+   Rozwiazanie przez `font-size: 16px` + `transform: scale()`, a NIE przez
+   `maximum-scale=1` w meta viewport: tamto wylaczyloby powiekszanie
+   szczypaniem w CALEJ grze, czyli zabralo dostepnosc slabiej widzacym
+   po to, zeby naprawic jedno pole. Tutaj pole jest FIZYCZNIE 16 px
+   (Safari nie zoomuje), a wizualnie zmniejszone do 12 px przez skale,
+   wiec wyglada dokladnie tak jak wczesniej.
+   transform-origin na lewej krawedzi, zeby tekst nie odjechal od ikony
+   lupy przy zmniejszaniu. Szerokosc powiekszona o odwrotnosc skali
+   (16/12), zeby pole po przeskalowaniu zajmowalo te sama przestrzen. */
+#szukajRyb{flex:1;min-width:0;background:transparent;border:0;outline:0;
+  font:inherit;font-size:16px;letter-spacing:.075em;font-weight:700;
+  color:#FFE9AE;-webkit-appearance:none;
+  transform:scale(.75);transform-origin:left center;width:133.33%}
+#szukajRyb::placeholder{color:rgba(255,233,174,.42);letter-spacing:.14em}
+#szukajRyb::-webkit-search-cancel-button{display:none}
+#szukajX{width:26px;height:26px;flex:0 0 26px;border:0;border-radius:13px;
+  background:rgba(212,168,64,.18);color:#FFE9AE;font:inherit;font-size:15px;
+  line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#szukajX:active{background:rgba(212,168,64,.4)}
+
+@keyframes komunikat-wjazd{
+  from{opacity:0;transform:translateY(-8px) scale(.98)}
+  to{opacity:1;transform:none}}
+
+/* --- fala z punktu dotkniecia --- */
+.fala{position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,238,200,.55),rgba(255,238,200,0) 70%);
+  transform:translate(-50%,-50%) scale(0);animation:fala .55s var(--wyj) forwards}
+@keyframes fala{to{transform:translate(-50%,-50%) scale(2.6);opacity:0}}
+
+/* --- monety i zadania --- */
+/* Prawa kolumna ma dwa pietra i nie wolno im na siebie wchodzic:
+   NOWA LAWICA stoi na 10 px i ma 44 px wysokosci, wiec konczy sie na 54.
+   HUD startuje od 64, czyli dziesiec pikseli nizej. Wczesniej oba mialy
+   po kilkanascie pikseli od gory i lezaly jeden na drugim. */
+#hud{position:absolute;z-index:6;
+  top:calc(14px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));
+  display:flex;align-items:center;gap:8px}
+#monety{display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;
+  border-radius:16px;background:rgba(38,28,12,.36);
+  border:1px solid rgba(212,168,64,.42);color:#F7DE8C;opacity:.92;
+  font:inherit;font-size:12px;letter-spacing:.08em;font-weight:800;
+  position:relative;overflow:hidden;
+  transition:transform .34s var(--spr),opacity .22s var(--wyj)}
+#monety::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,240,200,.30) 50%,transparent 60%);
+  transform:translateX(-140%);animation:refleks 14s ease-in-out infinite}
+@keyframes refleks{0%,88%{transform:translateX(-140%)}96%,100%{transform:translateX(140%)}}
+#monety.bije{transform:scale(1.16);opacity:1}
+#monety.brzek{animation:brzek .5s var(--spr)}
+@keyframes brzek{0%,100%{transform:scale(1)}35%{transform:scale(1.18)}}
+#monety .ik-moneta{animation:obrot-monety 9s ease-in-out infinite}
+@keyframes obrot-monety{0%,72%,100%{transform:rotateY(0)}82%{transform:rotateY(180deg) scaleX(.9)}}
+#zadania{position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;
+  border-radius:16px;background:rgba(24,18,42,.30);
+  border:1px solid rgba(185,147,71,.42);color:var(--zloto);opacity:.88;
+  font:inherit;font-size:10px;letter-spacing:.16em;font-weight:800;cursor:pointer;
+  position:relative;-webkit-tap-highlight-color:transparent;overflow:visible;
+  transition:transform .34s var(--spr),opacity .22s var(--wyj),
+             background .3s var(--wyj),color .3s var(--wyj),border-color .3s var(--wyj)}
+#zadania:active{transform:scale(.9);opacity:1}
+#zadania .wykrzyknik{position:absolute;top:-6px;right:-6px;width:17px;height:17px;
+  border-radius:9px;display:none;align-items:center;justify-content:center;
+  background:var(--zielen);color:#0E1A12;font-style:normal;font-size:11px;font-weight:800;
+  box-shadow:0 0 0 2px rgba(14,26,18,.55)}
+#zadania.gotowe{opacity:1;color:#0E1A12;background:rgba(140,224,160,.92);
+  border-color:rgba(200,255,215,.9)}
+/* Ikona ksiegi z nowym wpisem: bursztynowa kropka w rogu i lekki podskok.
+   Cichsza niz zadania, bo to zaproszenie, a nie nagroda do odebrania. */
+.ikonka.gotowe{opacity:1;border-color:var(--tusz);background:rgba(244,198,61,.22)}
+.ikonka.gotowe::after{content:'';position:absolute;right:-2px;top:-2px;
+  width:11px;height:11px;border-radius:50%;
+  background:var(--bursztyn);border:2px solid var(--tusz);
+  animation:kropka-nowa 2.2s var(--spr) infinite}
+@keyframes kropka-nowa{0%,70%,100%{transform:scale(1)}80%{transform:scale(1.35)}}
+#zadania.gotowe .wykrzyknik{display:flex;animation:skok-wykrzyknika 1.5s var(--spr) infinite}
+#zadania.gotowe .ik-zwoj .pergamin{fill:rgba(14,26,18,.12)}
+@keyframes skok-wykrzyknika{0%,58%,100%{transform:translateY(0) scale(1)}
+  70%{transform:translateY(-4px) scale(1.14)}84%{transform:translateY(0) scale(1)}}
+#zadania.gotowe{animation:puls-zadan 1.9s ease-in-out infinite}
+@keyframes puls-zadan{0%,100%{box-shadow:0 0 0 0 rgba(140,224,160,0)}
+  50%{box-shadow:0 0 16px 4px rgba(140,224,160,.42)}}
+
+/* Mnoznik serii: szept, nie komunikat. Bez tla, bez ramki, sam znak. */
+.mnoznik{position:absolute;pointer-events:none;z-index:8;
+  transform:translate(-50%,0) scale(.7);opacity:1;
+  font:inherit;font-weight:800;letter-spacing:.06em;
+  text-shadow:0 2px 6px rgba(0,0,0,.75);
+  transition:transform 1.1s cubic-bezier(.16,.9,.3,1),opacity 1.1s ease-out}
+
+/* ============================================================
+   WARSTWA EFEKTOW.
+
+   Ten kontener nie mial ZADNEJ reguly stylu. Byl zwyklym blokiem w toku
+   dokumentu, o wysokosci zero, wiec getBoundingClientRect zwracal dla niego
+   pasek o zerowej wysokosci przyklejony do gory sceny. Wszystko, co z niego
+   liczylo pozycje, ladowalo w lewym gornym rogu albo poza kadrem:
+     mnoznik serii     wyliczany na 42 procent wysokosci, czyli na zerze
+     chmura monet      startowala z punktu zamiast ze srodka
+   Stad wrazenie, ze animacji serii nie ma w ogole. Ona byla, tylko nikt
+   nie mial szans jej zobaczyc.
+   ============================================================ */
+#iskry{position:absolute;inset:0;pointer-events:none;z-index:8;overflow:hidden}
+
+/* --- iskry monet lecace do licznika ---
+   Platek slonecznika zamiast krazka: ostry romb w bursztynie z ciemnym
+   konturem, ten sam ksztalt co w logo. Leci z przycisku na licznik. --- */
+.iskra{position:absolute;width:9px;height:13px;pointer-events:none;opacity:0;
+  background:var(--bursztyn);border:1.4px solid var(--tusz);
+  border-radius:60% 60% 55% 55% / 72% 72% 40% 40%;
+  box-shadow:0 0 8px rgba(244,198,61,.5)}
+
+/* --- toast --- */
+/* Pasek meldunkow tez jest kartka: papier, gruby kontur, cien polozony
+   nizej. Zielony wariant zostaje tylko jako obwodka, bo w jezyku marki
+   kolor niesie tresc, a nie tlo. */
+#toast{position:absolute;z-index:8;left:50%;
+  top:calc(112px + env(safe-area-inset-top));
+  transform:translate(-50%,-8px) rotate(-.6deg);
+  width:max-content;max-width:min(64vw,220px);
+  padding:10px 12px 8px;border-radius:2px;pointer-events:none;
+  box-sizing:border-box;text-align:center;white-space:normal;
+  background:linear-gradient(180deg,rgba(247,239,214,.98),rgba(223,209,170,.98));
+  border:1px solid rgba(104,74,40,.82);color:#3B2D1D;
+  box-shadow:0 2px 0 rgba(53,36,20,.28),0 8px 18px rgba(0,0,0,.32),
+             inset 0 1px 0 rgba(255,255,255,.50);
+  font:inherit;font-size:8.5px;line-height:1.3;letter-spacing:.12em;font-weight:800;
+  opacity:0;
+  transition:opacity .18s var(--wyj),transform .30s var(--spr)}
+#toast::before{content:'';position:absolute;left:50%;top:3px;
+  width:4px;height:4px;margin-left:-2px;border-radius:50%;
+  background:#765631;opacity:.72;
+  box-shadow:0 1px 1px rgba(0,0,0,.30)}
+#toast.on{transform:translate(-50%,0) rotate(-.6deg);opacity:1}
+#toast.zielony{border-color:rgba(104,74,40,.82);color:#3B2D1D;
+  box-shadow:0 2px 0 rgba(53,36,20,.28),0 8px 18px rgba(0,0,0,.32),
+             inset 0 1px 0 rgba(255,255,255,.50)}
+@keyframes toast-note-pop{
+  0%{transform:translate(-50%,-8px) scale(.84) rotate(-2deg)}
+  62%{transform:translate(-50%,1px) scale(1.025) rotate(.3deg)}
+  100%{transform:translate(-50%,0) scale(1) rotate(-.6deg)}
+}
+#toast.rozkwita{animation:toast-note-pop .38s var(--spr)}
+
+/* ============================================================
+   PYTANIE O WYMIANE. Wiaderko pelne, zlowiona ryba czeka na decyzje.
+   Ten sam jezyk co toast (papier, tusz, cien), ale ZOSTAJE na ekranie
+   (pointer-events:auto, brak automatycznego znikania) i ma dwa przyciski
+   zamiast zadnego -- to pytanie, nie komunikat. */
+#pytanieWymiany{position:absolute;z-index:9;left:50%;top:38%;
+  transform:translate(-50%,-14px);width:min(78vw,320px);
+  padding:16px 18px;border-radius:3px;pointer-events:none;
+  background:var(--papier);border:1.8px solid var(--tusz);color:var(--tusz);
+  box-shadow:0 8px 0 -4px rgba(20,18,16,.4),0 20px 40px rgba(0,0,0,.5);
+  text-align:center;opacity:0;
+  transition:opacity .24s var(--wyj),transform .42s var(--spr)}
+#pytanieWymiany.on{pointer-events:auto;opacity:1;transform:translate(-50%,0)}
+#pytanieWymiany .tr{font-size:12px;line-height:1.5;font-weight:700}
+#pytanieWymiany .wyb{display:flex;gap:10px;margin-top:14px}
+#pytanieWymiany button{flex:1;padding:10px 8px;border-radius:2px;
+  font:inherit;font-size:11px;font-weight:800;letter-spacing:.08em;
+  border:1.6px solid var(--tusz);background:var(--papier);color:var(--tusz);
+  cursor:pointer}
+#pytanieWymiany #pytWymTak{background:var(--tusz);color:var(--papier)}
+body.karta-otwarta #pytanieWymiany{opacity:0;pointer-events:none}
+
+/* ============================================================
+   ZLECENIA (IX 2026). Okno propozycji dziedziczy wyglad po
+   #pytanieWymiany -- to ta sama sytuacja (pytanie z dwoma wyjsciami),
+   wiec ma wygladac tak samo, a nie jak nowy, obcy element. Rozni je
+   tylko naglowek i to, ze kwota kaucji jest wyrozniona: to jedyna
+   liczba, ktora gracz realnie TRACI, gdy sie pomyli. */
+#zlecenieOkno{position:absolute;z-index:9;left:10px;top:calc(108px + env(safe-area-inset-top));
+  width:min(46vw,230px);min-width:182px;
+  padding:12px 12px 10px 12px;border-radius:8px;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(109,79,39,.94),rgba(73,49,28,.96)) padding-box,
+    linear-gradient(180deg,rgba(246,222,170,.46),rgba(86,57,29,.72)) border-box;
+  border:2px solid transparent;color:var(--tusz);
+  box-shadow:0 8px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,242,212,.10);
+  text-align:left;opacity:0;transform:translateY(-10px) scale(.98);
+  transition:opacity .22s var(--wyj),transform .34s var(--spr)}
+#zlecenieOkno::before{content:'';position:absolute;inset:8px;border-radius:5px;
+  background:
+    radial-gradient(circle at 18px 16px, rgba(255,255,255,.12) 0 3px, transparent 3px),
+    linear-gradient(180deg,rgba(250,241,220,.97),rgba(236,221,192,.96));
+  box-shadow:inset 0 0 0 1px rgba(74,50,30,.14)}
+#zlecenieOkno::after{content:'';position:absolute;left:16px;right:16px;top:30px;height:1px;
+  background:rgba(76,53,32,.18)}
+#zlecenieOkno.on{pointer-events:auto;opacity:1;transform:translateY(0) scale(1)}
+#zlecenieOkno .tyt,#zlecenieOkno .tr,#zlecenieOkno .wyb{position:relative;z-index:1}
+#zlecenieOkno .tyt{font-size:9px;font-weight:900;letter-spacing:.18em;
+  margin-bottom:8px;text-align:center;opacity:.72}
+#zlecenieOkno .tr{font-size:11px;line-height:1.45;font-weight:700;text-align:left}
+#zlecenieOkno .tr b{font-size:13px}
+#zlecenieOkno .zle{color:#A8322A;font-weight:900;letter-spacing:.04em}
+#zlecenieOkno .kauc{display:block;margin-top:8px;padding:6px 6px;
+  border:1.2px dashed rgba(52,37,23,.56);font-size:10px;letter-spacing:.03em;
+  background:rgba(255,252,246,.34)}
+#zlecenieOkno .wyb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+#zlecenieOkno button{padding:8px 6px;border-radius:6px;
+  font:inherit;font-size:10px;font-weight:900;letter-spacing:.06em;
+  border:1.4px solid rgba(52,37,23,.82);background:rgba(255,247,234,.92);color:var(--tusz);
+  cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.5) inset}
+#zlecenieOkno #zlecTak{background:var(--tusz);color:var(--papier)}
+body.karta-otwarta #zlecenieOkno{opacity:0;pointer-events:none}
+body.menu-master-open #zlecenieOkno{top:calc(250px + env(safe-area-inset-top))}
+@media (max-width:390px){
+  #zlecenieOkno{left:8px;top:calc(104px + env(safe-area-inset-top));width:min(48vw,214px);min-width:174px;padding:10px 10px 9px}
+  body.menu-master-open #zlecenieOkno{top:calc(242px + env(safe-area-inset-top))}
+  #zlecenieOkno .tr{font-size:10.4px}
+  #zlecenieOkno .tr b{font-size:12px}
+  #zlecenieOkno .tyt{font-size:8.4px}
+  #zlecenieOkno button{font-size:9.4px;padding:7px 5px}
+}
+
+/* Pasek aktywnego zlecenia: stoi u gory, zeby gracz ANI RAZU nie musial
+   otwierac panelu, zeby sprawdzic, czego szuka i ile mu zostalo. */
+#zlecPasek{position:absolute;z-index:6;left:50%;top:8px;transform:translateX(-50%);
+  padding:5px 12px;border-radius:2px;pointer-events:none;opacity:0;
+  background:rgba(20,16,28,.82);border:1.4px solid rgba(255,210,103,.55);
+  color:#FFD267;font-size:10px;font-weight:800;letter-spacing:.10em;
+  white-space:nowrap;text-align:center;transition:opacity .3s ease}
+#zlecPasek.on{opacity:1}
+#zlecPasek .malo{color:#FF8C6B}
+/* Druga linia paska: kwoty. Mniejsza i przygaszona, zeby nie konkurowala
+   z glowna trescia (czego szukasz i ile zostalo), ale stale widoczna. */
+#zlecPasek .kwoty{display:block;margin-top:2px;font-size:9px;
+  letter-spacing:.08em;color:rgba(255,210,103,.72)}
+body.karta-otwarta #zlecPasek{opacity:0}
+
+/* --- panel: wychodzi Z PRZYCISKU, ktory go otworzyl --- */
+#panel{position:absolute;z-index:9;inset:0;display:flex;align-items:center;justify-content:center;
+  /* Dolny margines robi miejsce na ZAMKNIJ, zeby przycisk nigdy nie
+     lezal na tresci, nawet przy pelnej liscie zadan. */
+  padding:24px 24px 104px;background:rgba(8,6,14,0);backdrop-filter:blur(0px);
+  opacity:0;pointer-events:none;
+  transition:opacity .26s var(--wyj),background .34s var(--wyj),backdrop-filter .34s var(--wyj)}
+#panel.on{opacity:1;pointer-events:auto;background:rgba(8,6,14,.72);backdrop-filter:blur(7px)}
+/* Panel przestaje byc szklana plytka, a staje sie kartka papieru: kremowe
+   tlo, gruby ciemny kontur, cien polozony nizej niz szerzej, tak jak lezy
+   kartka na stole. W prawym gornym rogu slonecznik UCIEKAJACY POZA RAME,
+   dokladnie ten kadr, ktory jest w materialach marki: widac trzy czwarte
+   kwiatu, reszta wychodzi poza papier. */
+/* Panel przewija sie, gdy tresc nie miesci sie na ekranie. Bez tego
+   naglowek uciekal za gorna krawedz, a przycisk ZAMKNIJ lezal na zadaniach.
+   Wysokosc liczona z dvh, wiec pasek adresu przegladarki jej nie zjada. */
+#panelTresc{max-width:390px;width:100%;padding:24px 22px 24px;border-radius:4px;
+  position:relative;overflow-y:auto;overflow-x:hidden;
+  max-height:calc(100dvh - 190px);
+  -webkit-overflow-scrolling:touch;
+  /* ZIARNO PAPIERU (IX 2026, ewolucja graficzna). Panel byl plaskim
+     kremowym prostokatem -- czytelnym, ale plastikowym. Prawdziwy papier
+     ma nierowna powierzchnie, a jej brak to jedna z tych rzeczy, ktorych
+     sie nie zauwaza swiadomie, tylko odbiera jako "cyfrowe".
+     Ziarno robi filtr SVG (feTurbulence) wpisany w adres data: -- wazy
+     kilkaset bajtow zamiast obrazka i skaluje sie bezstratnie na kazdym
+     ekranie. Nalozone przez multiply z bardzo niska nieprzezroczystoscia (0,14 po korekcie -- 0,055 bylo niewidoczne):
+     ma byc WYCZUWALNE, nie krzykliwe. baseFrequency 0.8 daje drobne
+     wlokno, nie szum telewizyjny. */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E");
+  background-color:var(--papier);
+  background-blend-mode:multiply;
+  border:2px solid var(--tusz);
+  color:#241E17;
+  font:inherit;font-size:13px;line-height:1.55;text-align:center;
+  /* Cien trojwarstwowy zamiast dwuwarstwowego: styk kartki ze stolem
+     (ciasny i ciemny), jej wlasna grubosc, i miekki cien rzucony dalej.
+     Do tego jasna linia po wewnetrznej stronie gornej krawedzi --
+     papier lapiacy swiatlo z gory. To ona najbardziej odklejala panel
+     od tla. */
+  box-shadow:0 2px 3px rgba(20,18,16,.30),
+             0 14px 0 -6px rgba(20,18,16,.35),
+             0 26px 60px rgba(0,0,0,.55),
+             inset 0 1px 0 rgba(255,252,242,.75);
+  transform:translate(var(--zx,0),var(--zy,0)) scale(.86);opacity:0;
+  transition:transform .46s var(--spr),opacity .28s var(--wyj)}
+#panel.on #panelTresc{transform:scale(1) translate(0,0);opacity:1}
+#panelTresc h3{margin:0 0 14px;font-size:13px;letter-spacing:.24em;color:var(--tusz);position:relative;font-weight:800}
+/* Katakana pod naglowkiem, tak jak pod nazwa marki. Male, ciche, obecne. */
+#panelTresc h3 em{display:block;margin-top:5px;font-style:normal;
+  font-size:10px;letter-spacing:.34em;color:rgba(36,30,23,.42)}
+/* Slonecznik uciekajacy poza rame, w prawym gornym rogu kartki. */
+#panelTresc::before{content:'';position:absolute;right:-56px;top:-56px;
+  width:150px;height:150px;pointer-events:none;opacity:.16;
+  background:radial-gradient(circle at 50% 50%,var(--rdza) 0 17%,transparent 17.5%),
+    conic-gradient(from 0deg,var(--bursztyn) 0 6%,transparent 6% 12.5%,var(--bursztyn) 12.5% 18.5%,
+    transparent 18.5% 25%,var(--bursztyn) 25% 31%,transparent 31% 37.5%,var(--bursztyn) 37.5% 43.5%,
+    transparent 43.5% 50%,var(--bursztyn) 50% 56%,transparent 56% 62.5%,var(--bursztyn) 62.5% 68.5%,
+    transparent 68.5% 75%,var(--bursztyn) 75% 81%,transparent 81% 87.5%,var(--bursztyn) 87.5% 93.5%,
+    transparent 93.5%);
+  border-radius:50%;
+  animation:kwiat-obraca 46s linear infinite}
+@keyframes kwiat-obraca{to{transform:rotate(360deg)}}
+#panelTresc h3::after{content:'';position:absolute;left:50%;bottom:-7px;height:2px;background:var(--tusz);
+  width:0;
+  transform:translateX(-50%);transition:width .5s var(--wyj) .12s}
+#panel.on #panelTresc h3::after{width:76%}
+#panelTresc textarea{width:100%;height:96px;margin-top:12px;padding:8px;border-radius:10px;
+  background:rgba(20,18,16,.07);border:1.6px solid var(--tusz);color:#3A2F22;
+  font-family:monospace;font-size:10px;resize:none}
+
+/* ============================================================
+   PANEL GRACZA: nick, stroje, komunikaty.
+   Ten sam papierowy jezyk co reszta panelu, wiec bez wlasnych barw:
+   wszystko idzie z --tusz i --bursztyn.
+   ============================================================ */
+#panelTresc textarea{height:74px}
+#panelTresc .pole{display:flex;align-items:center;gap:10px;margin:16px 0 6px}
+#panelTresc .pole label{font-size:10px;letter-spacing:.20em;font-weight:800;
+  color:var(--tusz);opacity:.72;white-space:nowrap}
+#panelTresc .pole::after{content:'';flex:1;height:1px;background:var(--tusz);opacity:.22}
+#panelTresc .pole input{flex:0 0 auto;width:auto}
+#panelTresc input:not(#nickPole){width:100%;margin-top:8px;padding:9px 11px;border-radius:10px;
+  background:rgba(20,18,16,.07);border:1.4px solid rgba(20,18,16,.35);color:#3A2F22;
+  font:inherit;font-size:12px;letter-spacing:.04em}
+#panelTresc input::placeholder{color:rgba(58,47,34,.42)}
+#panelTresc .drobne a{color:var(--tusz);font-weight:800;text-decoration:underline}
+#panelTresc .uid{font-family:monospace;font-size:10px;letter-spacing:0;
+  padding:2px 5px;border-radius:6px;background:rgba(20,18,16,.09);cursor:pointer}
+#panelTresc .komunikat a{color:var(--tusz);font-weight:800;text-decoration:underline}
+#panelTresc input#nickPole{width:100%;padding:9px 11px;border-radius:10px;
+  background:rgba(20,18,16,.07);border:1.6px solid var(--tusz);color:#3A2F22;
+  font:inherit;font-size:14px;font-weight:800;letter-spacing:.10em}
+#panelTresc input#nickPole::placeholder{color:rgba(58,47,34,.38);font-weight:700}
+#panelTresc .drobne{font-size:11px;line-height:1.5;opacity:.78;margin-top:2px}
+#panelTresc .komunikat{margin:0 0 12px;padding:11px 12px;border-radius:10px;
+  animation:komunikat-wjazd .3s var(--spr);
+  background:rgba(154,115,38,.16);border:1.4px solid rgba(122,90,30,.5);
+  font-size:11px;line-height:1.45;font-weight:700}
+/* ============================================================
+   SIATKA TOWARU NA STRAGANIE. Podglad, nazwa, stan. Zalozone dostaje
+   obwodke, posiadane przygaszona nazwe ceny, na ktore nie stac blednie.
+   ============================================================ */
+#panelTresc .towary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+#panelTresc .tow{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 4px;border-radius:11px;cursor:pointer;
+  border:1.6px solid rgba(20,18,16,.22);background:rgba(20,18,16,.05);
+  -webkit-tap-highlight-color:transparent}
+#panelTresc .tow .pr{width:34px;height:34px;border-radius:9px;display:block;
+  box-shadow:inset 0 -6px 10px rgba(0,0,0,.3)}
+#panelTresc .tow .ikZ{border-radius:50%}
+#panelTresc .tow .nz{font:inherit;font-size:7.5px;letter-spacing:.04em;font-weight:800;
+  color:var(--tusz);white-space:nowrap;overflow:hidden;max-width:100%}
+#panelTresc .tow .st{font:inherit;font-size:8px;font-weight:800;opacity:.6;color:var(--tusz)}
+#panelTresc .tow.mam .st{opacity:.4}
+#panelTresc .tow.zal{border-color:var(--tusz);background:rgba(154,115,38,.22)}
+#panelTresc .tow.zal .st{opacity:1;color:#6B4E1C}
+#panelTresc .tow.brak{opacity:.45}
+#panelTresc .ikony{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:4px}
+#panelTresc .barwy{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:4px}
+#panelTresc .brB{height:30px;border-radius:8px;cursor:pointer;padding:0;
+  border:1.6px solid rgba(20,18,16,.25);-webkit-tap-highlight-color:transparent;
+  box-shadow:inset 0 -5px 8px rgba(0,0,0,.22)}
+#panelTresc .brB.wybrany{border-color:var(--tusz);border-width:2.4px;
+  box-shadow:inset 0 -5px 8px rgba(0,0,0,.22),0 0 0 2px rgba(122,90,30,.45)}
+#panelTresc .ikB{padding:5px 0;border-radius:10px;cursor:pointer;line-height:0;
+  border:1.6px solid rgba(20,18,16,.22);background:rgba(20,18,16,.05);
+  -webkit-tap-highlight-color:transparent}
+#panelTresc .ikB.wybrany{border-color:var(--tusz);background:rgba(154,115,38,.22)}
+#panelTresc .stroje{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px}
+#panelTresc .stroj{position:relative;height:40px;border-radius:9px;cursor:pointer;
+  border:2px solid rgba(20,18,16,.28);box-shadow:inset 0 -8px 12px rgba(0,0,0,.28);
+  -webkit-tap-highlight-color:transparent;padding:0;overflow:hidden}
+#panelTresc .stroj span{position:absolute;left:0;right:0;bottom:1px;
+  /* NAPRAWA dostepnosc (audyt IX 2026): 5,5px bylo nazwane wprost jako
+     "powazny kandydat do poprawy czytelnosci". Komorka ma tylko 1/6
+     szerokosci panelu (grid-template-columns: repeat(6,1fr)), wiec pelne
+     powiekszenie do rozmiaru reszty drobnych podpisow (8-11px) obcinaloby
+     dluzsze nazwy stroju niemal do zera -- 7.5px to kompromis: wyraznie
+     czytelniejsze, a dluzsze nazwy nadal miesza sie w jednej linii u
+     wiekszosci strojow. Dodane text-overflow:ellipsis, zeby to, co sie
+     jednak nie zmiesci, koczylo sie "...", a nie urwanym w polowie znaku. */
+  font:inherit;font-size:7.5px;letter-spacing:0;font-weight:800;color:#FFF;
+  text-shadow:0 1px 2px rgba(0,0,0,.9);overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis;padding:0 2px}
+#panelTresc .stroj.wybrany{border-color:var(--tusz);
+  box-shadow:inset 0 -8px 12px rgba(0,0,0,.28),0 0 0 2px rgba(122,90,30,.45)}
+#panelTresc .stroj.wybrany::before{content:'\2713';position:absolute;top:2px;right:5px;
+  font-size:13px;color:#FFF;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+#panelTresc .zawCzas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+#panelTresc .zawCzas button.akt{background:var(--tusz);color:#F3E7CE}
+#panelTresc .godziny{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+#panelTresc .godziny button{padding:9px 0;border-radius:9px;border:1.4px solid rgba(20,18,16,.35);
+  background:rgba(20,18,16,.05);color:var(--tusz);cursor:pointer;
+  font:inherit;font-size:9px;letter-spacing:.02em;font-weight:800}
+#panelTresc .godziny button.akt{background:var(--tusz);color:#F3E7CE;border-color:var(--tusz)}
+
+/* ============================================================
+   LISTA RUND LIGI. Kazda doba to jeden wiersz z numerem i gatunkiem.
+   ============================================================ */
+#panelTresc .rundy{margin-top:6px}
+#panelTresc .rundaW{display:flex;align-items:center;gap:8px;padding:6px 8px;
+  border-bottom:1px solid rgba(20,18,16,.14)}
+#panelTresc .rundaW .nr{width:20px;text-align:right;opacity:.55;font-weight:800;font-size:11px}
+#panelTresc .rundaW .gt{flex:1;font-weight:800;font-size:12px;letter-spacing:.04em}
+#panelTresc .rundaW .x{width:26px;height:26px;border:0;border-radius:13px;cursor:pointer;
+  background:rgba(20,18,16,.10);color:var(--tusz);font:inherit;font-size:15px;line-height:1}
+/* ============================================================
+   LISTA RYB DO ZAZNACZANIA.
+   Kazda pozycja to sylwetka, nazwa i pasmo. Zaznaczona dostaje numer,
+   ktory mowi, ktora to bedzie runda. Lista ma wlasne przewijanie, zeby
+   panel nie rosl do kilometra przy siedemdziesieciu jeden gatunkach.
+   ============================================================ */
+/* overscroll-behavior contain: dojechanie do konca listy NIE przenosi
+   przewijania na panel pod spodem. Bez tego palec zsuwa cala kartke
+   w chwili, w ktorej lista sie konczy. */
+#panelTresc .rybyLista{max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;touch-action:pan-y;
+  margin-top:8px;border:1.4px solid rgba(20,18,16,.22);border-radius:11px;
+  background:rgba(20,18,16,.04);padding:4px}
+#panelTresc .rybW{position:relative;display:flex;align-items:center;gap:8px;width:100%;
+  padding:5px 8px;border:0;border-radius:9px;background:transparent;cursor:pointer;
+  text-align:left;-webkit-tap-highlight-color:transparent}
+#panelTresc .rybW img{width:52px;height:auto;image-rendering:pixelated;flex:0 0 52px}
+#panelTresc .rybW .nz{flex:1;font:inherit;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--tusz)}
+#panelTresc .rybW .ps{font:inherit;font-size:9px;opacity:.5;font-weight:800}
+#panelTresc .rybW.wybrana{background:rgba(154,115,38,.22)}
+#panelTresc .rybW .kolej{position:absolute;left:2px;top:2px;min-width:17px;height:17px;
+  border-radius:9px;background:var(--tusz);color:#F3E7CE;font:inherit;font-size:9px;
+  font-weight:800;line-height:17px;text-align:center;padding:0 4px}
+#panelTresc .pasma{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+#panelTresc .pasma button{padding:8px 0;border-radius:8px;cursor:pointer;
+  border:1.4px solid rgba(20,18,16,.3);background:rgba(20,18,16,.05);color:var(--tusz);
+  font:inherit;font-size:9px;font-weight:800}
+#panelTresc .pasma button.akt{background:var(--tusz);color:#F3E7CE;border-color:var(--tusz)}
+
+/* ============================================================
+   POKRETLA PUNKTACJI I PANEL GOSPODARZA
+   ============================================================ */
+#panelTresc .zasadyG{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+#panelTresc .zas{display:flex;flex-direction:column;gap:3px}
+#panelTresc .zas span{font-size:8px;letter-spacing:.10em;font-weight:800;opacity:.66}
+#panelTresc .zas input{width:100%;margin-top:0;padding:8px 9px;border-radius:9px;
+  background:rgba(20,18,16,.07);border:1.4px solid rgba(20,18,16,.35);color:#3A2F22;
+  font:inherit;font-size:13px;font-weight:800;text-align:center}
+#panelTresc .admW{display:flex;align-items:center;gap:6px;padding:6px 4px;
+  border-bottom:1px solid rgba(20,18,16,.14)}
+#panelTresc .admW .n{flex:1;font-size:11px;font-weight:800;letter-spacing:.03em}
+#panelTresc .admW .n i{font-style:normal;font-size:8px;opacity:.55}
+#panelTresc .admW .p{width:44px;text-align:right;font-size:13px;font-weight:800}
+#panelTresc .admW input{width:56px!important;margin-top:0!important;padding:7px 4px!important;
+  text-align:center;font-size:12px!important;font-weight:800}
+#panelTresc .admW button{padding:8px 9px;border-radius:9px;border:1.4px solid var(--tusz);
+  background:var(--tusz);color:#F3E7CE;cursor:pointer;font:inherit;font-size:9px;font-weight:800}
+#panelTresc .admW button.wroc{background:transparent;color:var(--tusz)}
+
+#panelTresc .podpowiedzi{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+#panelTresc .podpowiedzi button{padding:7px 10px;border-radius:9px;cursor:pointer;
+  border:1.4px solid rgba(20,18,16,.3);background:rgba(20,18,16,.05);color:var(--tusz);
+  font:inherit;font-size:10px;font-weight:800;letter-spacing:.04em}
+#panelTresc .podpowiedzi button i{font-style:normal;opacity:.5;font-size:8px}
+
+/* ============================================================
+   PAS BIEZACEJ RUNDY. Najwazniejsza informacja w calej lidze,
+   wiec stoi osobno nad tablica i nie da sie jej przeoczyc.
+   ============================================================ */
+#panelTresc .rundaTeraz{margin-top:10px;padding:9px 11px;border-radius:11px;
+  background:rgba(154,115,38,.18);border:1.6px solid rgba(122,90,30,.55);text-align:center}
+#panelTresc .rundaTeraz.czeka{background:rgba(20,18,16,.06);border-color:rgba(20,18,16,.22)}
+#panelTresc .rundaTeraz span{display:block;font-size:8.5px;letter-spacing:.22em;font-weight:800;opacity:.7}
+#panelTresc .rundaTeraz b{display:block;margin:2px 0 1px;font-size:16px;letter-spacing:.06em}
+#panelTresc .rundaTeraz i{display:block;font-style:normal;font-size:10px;opacity:.68}
+#panelTresc table.tablicaZ tr.out td{opacity:.45;text-decoration:line-through}
+#panelTresc .zawCzas button{padding:11px 0;border-radius:10px;border:1.4px solid var(--tusz);
+  background:rgba(20,18,16,.07);color:var(--tusz);cursor:pointer;
+  font:inherit;font-size:10px;letter-spacing:.10em;font-weight:800}
+#panelTresc .zawCzas button:active{background:var(--tusz);color:#F3E7CE}
+#panelTresc .turKarta{margin-top:14px;padding:10px 11px;border-radius:12px;
+  background:rgba(20,18,16,.05);border:1.4px solid rgba(20,18,16,.18)}
+#panelTresc .turGlowa{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#panelTresc .turGlowa b{font-size:13px;letter-spacing:.06em}
+#panelTresc .turGlowa span{font-size:10px;opacity:.62;white-space:nowrap;letter-spacing:.04em}
+#panelTresc table.tablicaZ td.ik{width:26px;line-height:0;padding-right:0}
+#panelTresc table.tablicaZ td.ik .ikZ{border-radius:50%}
+#panelTresc table.tablicaZ{width:100%;margin-top:10px;border-collapse:collapse;font-size:12px}
+#panelTresc table.tablicaZ td{padding:6px 4px;border-bottom:1px solid rgba(20,18,16,.14)}
+#panelTresc table.tablicaZ td:first-child{width:22px;opacity:.55;font-weight:800}
+#panelTresc table.tablicaZ td.n{font-weight:800}
+#panelTresc table.tablicaZ td.p{text-align:right;font-weight:800;font-size:14px;white-space:nowrap}
+#panelTresc table.tablicaZ td.s{text-align:right;width:52px;opacity:.6;font-size:10px;white-space:nowrap}
+#panelTresc table.tablicaZ tr.ja td{background:rgba(154,115,38,.18)}
+/* NAPRAWA/DODATEK (IX 2026): tabelka wynikow turnieju i historia --
+   reuzywaja .tablicaZ (td.n, td.p, tr.ja juz istnieja), tylko dwie
+   nowe kolumny potrzebuja wlasnego stylu. */
+#panelTresc table.tablicaZ td.miej{width:24px;opacity:1;font-size:15px;text-align:center}
+#panelTresc table.tablicaZ td.w{text-align:right;font-weight:800;font-size:13px;
+  white-space:nowrap;color:#2F6B44}
+#panelTresc table.histTur td.n i,
+#panelTresc table.wynikTur td.n i{display:block;font-style:normal;font-size:9.5px;
+  opacity:.55;font-weight:400;margin-top:1px}
+/* PRZYCISK JAKO PRZEDMIOT, NIE PROSTOKAT (IX 2026, ewolucja graficzna).
+   Bylo: plaski ciemny prostokat, a wcisniecie to samo przygaszenie
+   (opacity .8) i lekkie zmniejszenie. Przygaszenie to najtanszy mozliwy
+   sygnal dotyku -- wyglada jak wylaczony element, nie jak wcisniety.
+   Jest: przycisk ma GRUBOSC (twardy cien pod spodem, jak klawisz) i
+   wlasne swiatlo po gornej krawedzi. Wcisniecie ZJEZDZA go w dol o te
+   grubosc i sciska cien do zera -- palec czuje, ze cos sie fizycznie
+   zapadlo. Zero zmiany geometrii w spoczynku, wiec zaden uklad sie nie
+   przesuwa. */
+#panelTresc button.duzy{width:100%;margin-top:10px;padding:12px;border-radius:12px;
+  background:linear-gradient(180deg,#241E17 0%,var(--tusz) 62%);
+  color:#F3E7CE;border:0;cursor:pointer;position:relative;
+  box-shadow:0 3px 0 rgba(11,10,9,.85),0 5px 10px rgba(0,0,0,.34),
+             inset 0 1px 0 rgba(255,240,205,.13);
+  transition:transform .08s var(--wyj),box-shadow .08s var(--wyj);
+  font:inherit;font-size:12px;letter-spacing:.18em;font-weight:800}
+#panelTresc button.duzy:active{transform:translateY(3px);
+  box-shadow:0 0 0 rgba(11,10,9,.85),0 1px 3px rgba(0,0,0,.4),
+             inset 0 1px 0 rgba(255,240,205,.08)}
+#panelTresc .duzo{font-size:22px;letter-spacing:.16em;color:var(--rdza);font-weight:800;margin:12px 0;
+  animation:wjazd-duzo .6s var(--spr)}
+@keyframes wjazd-duzo{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+#panelX{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));
+  padding:12px 26px;border-radius:22px;background:rgba(42,32,68,.9);
+  border:1px solid rgba(185,147,71,.7);color:var(--zloto);
+  font:inherit;font-size:11px;letter-spacing:.18em;font-weight:700;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .3s var(--spr)}
+#panelX:active{transform:scale(.94)}
+
+/* ============================================================
+   KARTY ZADAN W JEZYKU HIMAWARI.
+
+   Poprzednia wersja tych regul pochodzila jeszcze z ciemnego, szklanego
+   interfejsu: jasny tekst, poswiaty, gradient w pasku. Po przeniesieniu
+   panelu na kremowy papier napis zrobil sie prawie niewidoczny, bo jasna
+   kremowa czcionka lezala na jasnym kremowym tle.
+
+   Zasada jest jedna i obowiazuje wszedzie na papierze: TUSZ NA PAPIERZE.
+   Zaden element wnetrza nie moze byc jasniejszy od podloza.
+   ============================================================ */
+#panelTresc .zad{margin:11px 0;padding:12px 14px;border-radius:3px;text-align:left;
+  background:rgba(20,18,16,.05);border:1.6px solid rgba(20,18,16,.34);
+  opacity:0;transform:translateY(14px) scale(.97);
+  animation:wjazd-zadania .5s var(--spr) forwards}
+#panelTresc .zad:nth-of-type(2){animation-delay:.06s}
+#panelTresc .zad:nth-of-type(3){animation-delay:.12s}
+#panelTresc .zad:nth-of-type(4){animation-delay:.18s}
+#panelTresc .zad:nth-of-type(5){animation-delay:.24s}
+@keyframes wjazd-zadania{to{opacity:1;transform:translateY(0) scale(1)}}
+/* ROZKWIT. Sygnaturowy ruch marki: platki rozchodza sie ze srodka, a nie
+   element pojawia sie z niczego. Tam, gdzie cos konczy sie dobrze. */
+@keyframes rozkwit{
+  0%{transform:scale(.2) rotate(-38deg)}
+  55%{transform:scale(1.12) rotate(6deg)}
+  78%{transform:scale(.96) rotate(-2deg)}
+  100%{transform:scale(1) rotate(0)}}
+/* Wypelnienie 'both' zostawialo na elemencie ostatnia klatke, czyli
+   opacity 1. Pasek meldunku po dodaniu tej klasy nie dawal sie juz zgasic
+   zdjeciem klasy .on i napis "+100 QRYB" zostawal na ekranie na stale.
+   Teraz animacja nie dotyka krycia w ogole, a klasa zdejmuje sie sama. */
+.rozkwita{animation:rozkwit .62s var(--spr)}
+#panelTresc .zad.ok{border-color:rgba(47,107,68,.5);background:rgba(47,107,68,.08);opacity:.7}
+#panelTresc .zad.znika{animation:znika-zadanie .5s var(--wyj) forwards}
+@keyframes znika-zadanie{
+  26%{transform:scale(1.04) rotate(-.6deg);background:rgba(244,198,61,.4)}
+  100%{transform:scale(.95);opacity:.4;background:rgba(20,18,16,.05)}}
+#panelTresc .zad.czeka{border-color:var(--tusz);border-width:2px;
+  background:rgba(244,198,61,.22)}
+#panelTresc .gw{display:flex;justify-content:space-between;align-items:baseline;
+  color:var(--rdza);font-size:13px;letter-spacing:.14em}
+#panelTresc .gw span{color:#2F6B44;font-size:10px;letter-spacing:.08em;font-weight:700}
+#panelTresc .tr{margin:7px 0 10px;font-size:12.5px;line-height:1.45;
+  color:var(--tusz);font-weight:700}
+#panelTresc .pas{height:7px;border-radius:0;background:rgba(20,18,16,.12);
+  border:1.5px solid var(--tusz);overflow:hidden}
+#panelTresc .pas i{display:block;height:100%;width:0;background:var(--bursztyn);
+  position:relative;transition:width .9s var(--spr) .2s}
+#panelTresc .pas i::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  transform:translateX(-100%);animation:polysk 2.8s var(--wyj) infinite .8s}
+#panelTresc .li{margin-top:7px;font-size:10px;letter-spacing:.12em;
+  color:rgba(20,18,16,.55);text-align:right;font-weight:700}
+#panelTresc .stopka{margin-top:16px;font-size:11px;color:rgba(20,18,16,.62)}
+#panelTresc .stopka b{color:var(--rdza)}
+/* Przycisk odbioru: bursztyn w czarnym konturze, bez poswiat. Oddycha
+   samym konturem, bo na papierze swiatlo nie ma skad padac. */
+#panelTresc .odb{display:block;width:100%;margin:10px 0 0;padding:10px;border-radius:2px;
+  background:var(--bursztyn);border:2px solid var(--tusz);color:var(--tusz);
+  font:inherit;font-size:11px;letter-spacing:.16em;font-weight:800;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;animation:dysze 2.2s ease-in-out infinite;
+  transition:transform .3s var(--spr)}
+#panelTresc .odb:active{transform:scale(.96)}
+@keyframes dysze{0%,100%{box-shadow:0 3px 0 -1px rgba(20,18,16,.5)}
+  50%{box-shadow:0 3px 0 -1px rgba(20,18,16,.5),0 0 0 4px rgba(244,198,61,.35)}}
+#panelTresc .mini{margin-top:16px;padding:10px 22px;border-radius:2px;
+  background:transparent;border:2px solid var(--tusz);color:var(--tusz);
+  font:inherit;font-size:10px;letter-spacing:.18em;font-weight:800;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .3s var(--spr)}
+#panelTresc .mini:active{transform:scale(.95)}
+#panelTresc .mini[disabled]{opacity:.34}
+/* Zakladki sklepu: papierowe patki, aktywna wypelniona bursztynem. */
+#panelTresc .zakladki{display:flex;gap:6px;margin:4px 0 12px}
+#panelTresc .zakladki.drugi{margin:0 0 6px}
+#panelTresc .zak{flex:1;padding:9px 4px;border-radius:2px;cursor:pointer;
+  background:transparent;border:1.6px solid rgba(20,18,16,.4);color:rgba(20,18,16,.62);
+  font:inherit;font-size:9.5px;letter-spacing:.14em;font-weight:800;
+  transition:transform .2s var(--spr),background .2s,color .2s}
+#panelTresc .zak.maly{font-size:8.5px;padding:7px 3px}
+#panelTresc .zak.akt{background:var(--bursztyn);border-color:var(--tusz);color:var(--tusz)}
+#panelTresc .zak:active{transform:scale(.95)}
+#panelTresc .wybor{display:flex;gap:10px;margin-top:16px}
+#panelTresc .wybor .mini{flex:1;margin-top:0;padding:11px 8px}
+#panelTresc .mini.mocny{background:var(--bursztyn);
+  animation:dysze 2.4s ease-in-out infinite}
+
+
+
+#reset:active{transform:scale(.93);opacity:1;animation:none;
+  background:linear-gradient(180deg,#7A5E2E,#4C3A1C);color:#F6E4BE}
+#reset .ik{font-size:40px;line-height:1;color:#F6E4BE;margin-top:-3px}
+@keyframes oddech{
+  0%,100%{box-shadow:inset 0 0 0 1px rgba(185,147,71,.25),0 2px 10px rgba(0,0,0,.55)}
+  50%{box-shadow:inset 0 0 0 1px rgba(230,190,110,.55),0 2px 14px rgba(201,162,39,.35)}}
+/* ============================================================
+   NAPRAWA BLOKADY EKRANU NA iPHONE (IX 2026, zgloszenie: "na iphone
+   przybliza sie atlas i ekran sie tak blokuje").
+   TO MOJA REGRESJA Z TEJ SAMEJ SESJI. Wczesniej usunalem z meta
+   viewport `user-scalable=no, maximum-scale=1` "dla dostepnosci",
+   nie biorac pod uwagi, ze to nie jest dokument, tylko GRA
+   PELNOEKRANOWA. Skutek: dwuklik w atlas powieksza plansze i nie ma
+   jak wrocic, bo w grze nie ma czego przewijac, zeby wycofac zoom --
+   ekran zostaje zablokowany w powiekszeniu.
+   ROZWIAZANIE LEPSZE NIZ COFNIECIE ZMIANY: `touch-action` zamiast
+   `user-scalable=no`. Powiekszanie SZCZYPANIEM zostaje dostepne
+   (czyli dostepnosc dla slabowidzacych nie ginie), ale znika
+   DWUKLIK-DO-POWIEKSZENIA, ktory w grze jest zawsze pomylka -- nikt
+   nie dwuklika planszy, zeby ja powiekszyc, tylko zeby cos zrobic.
+   Przy okazji `manipulation` kasuje 300 ms opoznienia klikniecia na
+   iOS, wiec caly interfejs reaguje szybciej.
+   Na samym platnie gry `none`: tam zadne gesty przegladarki nie maja
+   sensu, a przypadkowe rozjechanie sceny palcem psuje rozgrywke. */
+html,body{touch-action:manipulation;overscroll-behavior:none}
+#scene,#panel,.ikonka,#panelTresc button,#panelX{touch-action:manipulation}
+#scene{touch-action:none}
+/* ============================================================
+   NAPRAWA "SWIPE NIE DZIALA" (IX 2026, zgloszenie Andrzeja z nagrania).
+   `#hold` to przezroczysta warstwa NAD scena (z-index 3) i to ona, nie
+   `#scene`, odbiera kazdy dotyk w grze. Nie miala wlasnego `touch-action`,
+   wiec dziedziczyla `manipulation` z body -- a `manipulation` NADAL
+   pozwala przegladarce obslugiwac przewijanie. Chrome na Androidzie
+   uznawal poziome przeciagniecie palcem za gest przewijania, przejmowal
+   go i zamiast `pointermove` wysylal `pointercancel`. Karta nie ruszala
+   sie ani o piksel, mimo ze cala logika swipe byla poprawna (testy
+   jednostkowe przechodzily, bo wolaja `decyzjaKarty` wprost, z pominieciem
+   warstwy dotyku).
+   `none` na `#hold`: zadne gesty przegladarki na tej warstwie nie maja
+   sensu -- pod spodem jest gra pelnoekranowa, nie ma czego przewijac.
+   Powiekszanie szczypaniem zostaje na reszcie interfejsu, wiec argument
+   o dostepnosci z komentarza wyzej dalej stoi. */
+#hold{touch-action:none}
+
