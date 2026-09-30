@@ -193,10 +193,15 @@ function initScript({ deterministic }) {
     regs.push(k);
     (W.__qSrc = W.__qSrc || {})[k] = src.slice(0, 160);
   };
+  // Sonda musi byc WARSTWA ZEWNETRZNA (nad bramka ladowania), inaczej widzi
+  // wewnetrzne funkcje bramki zamiast callbackow gry. Kazde owiniecie tworzy
+  // nowa warstwe; zapisuje tylko najnowsza.
+  let warstwa = 0;
   const wrapTimers = () => {
+    const moja = ++warstwa;
     for (const [name, kind] of [['setTimeout', 't'], ['setInterval', 'i'], ['requestAnimationFrame', 'r'], ['requestIdleCallback', 'c']]) {
       const orig = W[name]; if (!orig) continue;
-      W[name] = function (cb, ...rest) { rec(kind, cb); return orig.call(this, cb, ...rest); };
+      W[name] = function (cb, ...rest) { if (moja === warstwa) rec(kind, cb); return orig.call(this, cb, ...rest); };
     }
   };
   /* Timery owijamy dopiero przy PIERWSZYM skrypcie gry (przypisanie
@@ -205,6 +210,10 @@ function initScript({ deterministic }) {
   let chmura;
   Object.defineProperty(W, 'QRYBY_CHMURA', { configurable: true, enumerable: true,
     get() { return chmura; }, set(v) { chmura = v; Object.defineProperty(W, 'QRYBY_CHMURA', { value: v, writable: true, configurable: true, enumerable: true }); wrapTimers(); } });
+  // Bramka ladowania (wersja modulowa) podmienia timery; sonda wraca na wierzch.
+  let bramka;
+  Object.defineProperty(W, 'QRybyGate', { configurable: true, enumerable: true,
+    get() { return bramka; }, set(v) { bramka = v; Object.defineProperty(W, 'QRybyGate', { value: v, writable: true, configurable: true, enumerable: true }); if (warstwa > 0) wrapTimers(); } });
   EventTarget.prototype.addEventListener = function (type, cb, o) { if (cb) rec('e.' + type, cb.handleEvent || cb); return AEL.call(this, type, cb, o); };
   const then = Promise.prototype.then;
   Promise.prototype.then = function (a, b) { if (a || b) rec('p', a || b); return then.call(this, a, b); };
@@ -226,6 +235,8 @@ function initScript({ deterministic }) {
 
 /* ---------- zrzut stanu strony ---------- */
 const DETAIL = argv.includes('--detail');
+const PROBY = Number(arg('--proby', 4));
+const SHOTS = arg('--shots', null); // katalog na zrzuty ekranu (A-*.png, B-*.png)
 async function snapshot(page, names, label) {
   return page.evaluate(({ names, label, detail }) => {
     const hs = (s) => { let x = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(16); };
@@ -294,7 +305,7 @@ async function snapshot(page, names, label) {
 }
 
 /* ---------- jeden przebieg ---------- */
-async function runVariant(file, { mode, names, port, server, root }) {
+async function runVariant(file, { mode, names, port, server, root, tag }) {
   server.setEntry(file);
   server.setRoot(root || ROOT);
   const browser = await chromium.launch({ executablePath: CHROME, args: ['--disable-background-networking',
@@ -330,6 +341,15 @@ async function runVariant(file, { mode, names, port, server, root }) {
   page.on('response', (r) => { if (r.url().includes('127.0.0.1') && r.status() >= 400) errors.push(r.status() + ': ' + r.url()); });
 
   const snaps = [];
+  // Zrzut stanu (i opcjonalnie zrzut ekranu w tej samej chwili czasu wirtualnego).
+  const snap = async (label) => {
+    const s = await snapshot(page, names, label);
+    if (SHOTS && tag) {
+      fs.mkdirSync(SHOTS, { recursive: true });
+      await page.screenshot({ path: path.join(SHOTS, `${tag}-${String(snaps.length).padStart(2, '0')}-${label.replace(/[^\w-]+/g, '_')}.png`) });
+    }
+    return s;
+  };
   if (mode === 'det') {
     // Animacje CSS i Web Animations ida w czasie rzeczywistym, poza zegarem
     // testu. Zamrazamy je w obu wersjach identycznie.
@@ -355,11 +375,11 @@ async function runVariant(file, { mode, names, port, server, root }) {
     for (const a of held.splice(0)) await a();
     await settle();
     await waitImages();
-    snaps.push(await snapshot(page, names, 'po-zaladowaniu'));
+    snaps.push(await snap('po-zaladowaniu'));
     const run = async (ms, label) => {
       for (let t = 0; t < ms; t += 250) { krok++; await page.evaluate(() => window.__qStep(250)); }
       await waitImages();
-      if (label) snaps.push(await snapshot(page, names, label));
+      if (label) snaps.push(await snap(label));
     };
     const holdBox = await page.locator('#hold').boundingBox();
     const cx = holdBox.x + holdBox.width / 2;
@@ -371,18 +391,21 @@ async function runVariant(file, { mode, names, port, server, root }) {
     const SCEN = arg('--scenario', 'full');
     // Kilka pelnych prob polowu: zarzut, czekanie na branie, hol, karta.
     const fazy = [];
-    for (let proba = 0; proba < (SCEN === 'full' ? 4 : 0); proba++) {
+    for (let proba = 0; proba < (SCEN === 'full' ? PROBY : 0); proba++) {
       await tap();
       await run(1500, null);
       for (let k = 0; k < 60; k++) {
         const p = await phase();
         if (fazy[fazy.length - 1] !== proba + ':' + p) fazy.push(proba + ':' + p);
         if (p.endsWith('|true')) break;
-        if (p.startsWith('fight')) { await page.mouse.down(); await run(1200, null); await page.mouse.up(); await run(400, null); }
+        if (p.startsWith('fight')) {
+          if (SHOTS && !fazy.includes('hol-' + proba)) { fazy.push('hol-' + proba); snaps.push(await snap(`hol-${proba}`)); }
+          await page.mouse.down(); await run(1200, null); await page.mouse.up(); await run(400, null);
+        }
         else if (p.startsWith('ready')) break;
         else await run(1000, null);
       }
-      snaps.push(await snapshot(page, names, `proba-${proba}:` + (await phase())));
+      snaps.push(await snap(`proba-${proba}:` + (await phase())));
       if ((await phase()).endsWith('|true')) {
         await run(1500, null);
         const dx = proba % 2 === 0 ? 230 : -230;
@@ -390,7 +413,7 @@ async function runVariant(file, { mode, names, port, server, root }) {
         for (let k = 1; k <= 6; k++) { await page.mouse.move(cx + (dx * k) / 6, cy); await settle(); }
         await page.mouse.up(); await settle();
         await run(1500, null);
-        snaps.push(await snapshot(page, names, `karta-${proba}:` + (dx > 0 ? 'wiaderko' : 'woda') + ':' + (await phase())));
+        snaps.push(await snap(`karta-${proba}:` + (dx > 0 ? 'wiaderko' : 'woda') + ':' + (await phase())));
       }
       await run(1000, null);
     }
@@ -401,7 +424,7 @@ async function runVariant(file, { mode, names, port, server, root }) {
       const ok = await page.evaluate((i) => { const e = document.getElementById(i); if (!e) return false; e.click(); return true; }, id);
       await settle();
       await run(700, null);
-      snaps.push(await snapshot(page, names, 'klik:' + id + (ok ? '' : '(brak)')));
+      snaps.push(await snap('klik:' + id + (ok ? '' : '(brak)')));
     }
     await run(5000, 'koniec');
     const regs = regsAtLoad;
@@ -413,7 +436,7 @@ async function runVariant(file, { mode, names, port, server, root }) {
   await page.waitForTimeout(1500);
   const regs = await page.evaluate(() => (window.__qRegs || []).slice());
   const regSrc = await page.evaluate(() => window.__qSrc || {});
-  snaps.push(await snapshot(page, names, 'po-zaladowaniu+1.5s'));
+  snaps.push(await snap('po-zaladowaniu+1.5s'));
   await browser.close();
   return { snaps, errors, net, regs, regSrc };
 }
@@ -504,7 +527,7 @@ function compare(A, B, { stress } = {}) {
       A1 = JSON.parse(fs.readFileSync(loadA, 'utf8'));
       report.powtarzalnosc = 'z pliku ' + path.basename(loadA);
     } else {
-      A1 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
+      A1 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A, tag: 'A' });
       const A2 = await runVariant(FILE_A, { mode: MODE, names, port, server, root: ROOT_A });
       det = compare(A1, A2);
       report.powtarzalnosc = det.length ? det : 'OK';
@@ -518,7 +541,7 @@ function compare(A, B, { stress } = {}) {
       console.log(JSON.stringify(report.powtarzalnosc, null, 1).slice(0, 3000));
       server.close(); return;
     }
-    const B = await runVariant(FILE_B, { mode: MODE, names, port, server, root: ROOT_B });
+    const B = await runVariant(FILE_B, { mode: MODE, names, port, server, root: ROOT_B, tag: 'B' });
     diffs = compare(A1, B);
     report.zrzuty = A1.snaps.map((s) => s.label);
     report.zapytania = A1.net.length;
