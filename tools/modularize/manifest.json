@@ -3,9 +3,9 @@
   "sourceSha256": "aa93a59ff85249da2de751d21cd386ece9bd9ba44f2b6fac14fb760ce26847b8",
   "sourceBytes": 6357001,
   "entry": "qryby-modular.html",
-  "entryBytes": 1183192,
+  "entryBytes": 708196,
   "version": "20260930-mod1",
-  "stage": 3,
+  "stage": 4,
   "files": [
     {
       "path": "src/core/config.js",
@@ -98,6 +98,51 @@
       "sha256": "44916844ada09863576b8bafa5045811d35963a631745513ccbe5b94469d04e8"
     },
     {
+      "path": "src/rarity/skala-beta.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 3566,
+      "toLine": 3775,
+      "bytes": 7638,
+      "sha256": "f8f35010eea1f2419b45030e43c65d9c30a9be0cdc45d76a113e4bcbab747e7a"
+    },
+    {
+      "path": "src/rarity/okna.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 3776,
+      "toLine": 4240,
+      "bytes": 21365,
+      "sha256": "681af5545ee50ec4221de134d80d5014148c8ea75de3a03619c928fd9b71aafd"
+    },
+    {
+      "path": "src/rarity/pasma.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4241,
+      "toLine": 4404,
+      "bytes": 7454,
+      "sha256": "c70c9b40d4a60c5f183c007f12e2993c3c676ebf964756007f880e4e29225782"
+    },
+    {
+      "path": "src/card/rekord.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4405,
+      "toLine": 4563,
+      "bytes": 6644,
+      "sha256": "f3be37b06eb1ae587844800cd95d3c40d079e19501168688e414af903b3fa3b8"
+    },
+    {
+      "path": "src/card/xscore.js",
+      "block": "script#4",
+      "stage": 4,
+      "fromLine": 4564,
+      "toLine": 5043,
+      "bytes": 23856,
+      "sha256": "512c56ac707a66f93636ade76441a8ec5c470e2d62ce80d609902254f41fc507"
+    },
+    {
       "path": "assets/sprites/card-frames.js",
       "block": "script#5",
       "stage": 2,
@@ -114,6 +159,33 @@
       "toLine": 5177,
       "bytes": 3805,
       "sha256": "93bba76cb35d2e412ca4597aed28b4f55ce9aa9d6a77e09878804151d2724c01"
+    },
+    {
+      "path": "src/rarity/pierwszenstwo.js",
+      "block": "script#6",
+      "stage": 4,
+      "fromLine": 5178,
+      "toLine": 5341,
+      "bytes": 6929,
+      "sha256": "5f6a3a2bbcf64df9ee9493fcc7458ee683123d26691b5eb0c32b5f11f572fe8d"
+    },
+    {
+      "path": "src/rarity/tiery.js",
+      "block": "script#6",
+      "stage": 4,
+      "fromLine": 5342,
+      "toLine": 5463,
+      "bytes": 6457,
+      "sha256": "c9fdacfbfd1d4abe78aa237403b8e4bcea0c2ddc9bf9d47f2c4f8e5af6465e12"
+    },
+    {
+      "path": "src/rarity/rejestr.js",
+      "block": "script#7",
+      "stage": 4,
+      "fromLine": 5714,
+      "toLine": 5796,
+      "bytes": 10480,
+      "sha256": "451074e04e5807168617f54b5c3dd0ddf7227bb54ef4595a48190bdeed6c50ca"
     },
     {
       "path": "assets/sprites/shore.js",
@@ -161,6 +233,114 @@
       "sha256": "3c8913533c6b4430554c7e256391811ed52c653d4996c02dd1b52b5b83504a9c"
     },
     {
+      "path": "src/fish/species.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 8036,
+      "toLine": 9903,
+      "bytes": 86027,
+      "sha256": "0470edb30e6e743561712ac7961279fd34f22936f320aae6f9a17e67c520c95a"
+    },
+    {
+      "path": "src/smok-zycia/species.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 9904,
+      "toLine": 9931,
+      "bytes": 7927,
+      "sha256": "9bcdec2baf4462fd72118a66fa5e98674b7682b7640fcdd9444f78a02694e823"
+    },
+    {
+      "path": "src/fish/fish-core.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 9932,
+      "toLine": 10519,
+      "bytes": 31196,
+      "sha256": "ba68cdeb3cc261625d91e5654ead57516cf4de79c2272d4241598b95b90c3fa2"
+    },
+    {
+      "path": "src/fish/school.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 10520,
+      "toLine": 10678,
+      "bytes": 8515,
+      "sha256": "94d5928d019129fcf2d6723ea129ced2f70c2743f284182699ea5f3c2d600193"
+    },
+    {
+      "path": "src/fish/movement.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 18567,
+      "toLine": 18930,
+      "bytes": 14275,
+      "sha256": "38723bc8fa97e36fd0bf3f84980f663b580061b44bdb5518587266b7fea64b53"
+    },
+    {
+      "path": "src/fish/spawning.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 18931,
+      "toLine": 19047,
+      "bytes": 5488,
+      "sha256": "2f64ed42328b5e054c5178fcda5c141640ed164e665543a946382bc5fcd4a631"
+    },
+    {
+      "path": "src/smok-zycia/event.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 19487,
+      "toLine": 19715,
+      "bytes": 8021,
+      "sha256": "5fad7c7e9b829529b25097e4ab7313c3323d058c9baeb7da50daca475e60e1ce"
+    },
+    {
+      "path": "src/fish/school-update.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 19926,
+      "toLine": 20381,
+      "bytes": 22891,
+      "sha256": "461ce03a82a470e0ed966e4de806b03fa7d8505eda3531b22e603fd7de653c4b"
+    },
+    {
+      "path": "src/fish/behavior.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 20382,
+      "toLine": 21044,
+      "bytes": 32026,
+      "sha256": "db9526ecd5e50348c19ea705c84b9ba521b87325f83016bfb9e1d219aaca97a0"
+    },
+    {
+      "path": "src/fish/rendering.js",
+      "block": "script#11",
+      "stage": 4,
+      "fromLine": 21045,
+      "toLine": 21481,
+      "bytes": 22122,
+      "sha256": "fc8a5af07aa2109983bcade44d71eb5dbcc1b798bfd8dbfdd7ed5811127d295e"
+    },
+    {
+      "path": "src/card/card.js",
+      "block": "script#12",
+      "stage": 4,
+      "fromLine": 21590,
+      "toLine": 22666,
+      "bytes": 52888,
+      "sha256": "d6056093db4cfb11ba75ab38513976ea84bb9c21c13e56b99c3cb12e18e9981b"
+    },
+    {
+      "path": "src/angler/avatar.js",
+      "block": "script#14",
+      "stage": 4,
+      "fromLine": 23156,
+      "toLine": 23297,
+      "bytes": 6437,
+      "sha256": "c5c5da51d3c2bd61c044f94a59c6efa1edd230cd25e78a3cd0090f667bc49678"
+    },
+    {
       "path": "src/core/state.js",
       "block": "script#14",
       "stage": 3,
@@ -168,6 +348,60 @@
       "toLine": 23331,
       "bytes": 1302,
       "sha256": "08dd1a490ae2608869e03af76081910f52fc6e39b216803f48f5b20ef479de89"
+    },
+    {
+      "path": "src/angler/angler.js",
+      "block": "script#14",
+      "stage": 4,
+      "fromLine": 23332,
+      "toLine": 24317,
+      "bytes": 35753,
+      "sha256": "e80fec7c34a0e032355e4347af16bb3123984582336a460bfe00a32fc5199490"
+    },
+    {
+      "path": "src/fish/mechanics.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24319,
+      "toLine": 24660,
+      "bytes": 17195,
+      "sha256": "60f91a96aff18f8df510c9ce9c82c846d785626efb361283b364b0ea18dca42d"
+    },
+    {
+      "path": "src/fish/bite.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24661,
+      "toLine": 24835,
+      "bytes": 8989,
+      "sha256": "43972f37439b930644eb1aad6f77827fb0a4b0ce0c256ef7776629f36a8b04a4"
+    },
+    {
+      "path": "src/fish/charge.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 24961,
+      "toLine": 25051,
+      "bytes": 3726,
+      "sha256": "8aa6382b24c514d7e592d47f11c7d9ceed676ee59e34ab3c22bc8e57e819ad6d"
+    },
+    {
+      "path": "src/fish/hook.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 25052,
+      "toLine": 25295,
+      "bytes": 10444,
+      "sha256": "ee74077ad8be5511181280070302defbc7cae5c4ad83dabc8b96edba435e9eff"
+    },
+    {
+      "path": "src/fish/catching.js",
+      "block": "script#15",
+      "stage": 4,
+      "fromLine": 25551,
+      "toLine": 25792,
+      "bytes": 11893,
+      "sha256": "fed62d7356059c7d02651a1930fb2f903223bbf65623878867d7b65a76500c41"
     },
     {
       "path": "src/core/input-loop.js",
