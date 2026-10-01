@@ -6,9 +6,13 @@
    Serwer (Supabase, community_events) zna event po slugu; tu siedzi
    tylko to, czego serwer nie trzyma: nazwa na karcie, obrazek i teksty.
 
-   Zakladka pokazuje PIERWSZA pozycje listy. Starsze zbiorki dalej sa
-   obslugiwane w tle: klient domyka ich nagrode (tarlo Lucjanka) i oddaje
+   Zakladka pokazuje PIERWSZA pozycje listy. Starsze zbiorki z listy dalej
+   sa obslugiwane w tle: klient domyka ich nagrode (tarlo) i oddaje
    pokolenia do zakladki EKO.
+
+   1 X 2026: Lucjanek uzbierany, Lucjan czerwony juz plywa w jeziorze.
+   Jego zbiorke zamyka i chowa migracja Karpika, wiec na liscie zostaje
+   tylko Karpik Surinamski.
 
    nagroda:
      'tarlo' — po sukcesie 10-minutowe tarlo w EKO (Lucjanek, stage 7),
@@ -17,14 +21,14 @@
    ============================================================ */
 window.QRYBY_ODNOWY = Object.freeze([
   Object.freeze({
-    slug: 'lucjanek',
-    gat: 'lucjan_czerwony',
-    nazwa: 'LUCJANEK',
-    dopelniacz: 'Lucjanka',
-    nagroda: 'tarlo',
-    obraz: 'assets/lucjanek/lucjanek-128.png',
-    podtytul: 'PIERWSZA SPOŁECZNOŚCIOWA ODNOWA GATUNKU',
-    cel: 500000000,
+    slug: 'karpik',
+    gat: 'karpik_surinamski',
+    nazwa: 'KARPIK SURINAMSKI',
+    dopelniacz: 'Karpika Surinamskiego',
+    nagroda: 'para',
+    obraz: 'assets/odnowa/karpik-128.png',
+    podtytul: 'DRUGA SPOŁECZNOŚCIOWA ODNOWA GATUNKU',
+    cel: 1000000000,
     czasDni: 7
   })
 ]);

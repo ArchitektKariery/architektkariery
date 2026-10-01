@@ -103,5 +103,7 @@ if errors:
 print("COMMUNITY EVENT QA OK")
 if "STATUS: LIVE" in doc:
     print("Lucjan LIVE configuration validated.")
+elif "STATUS: CLOSED" in doc:
+    print("Lucjan closed configuration validated.")
 else:
     print("Lucjan pre-launch configuration validated.")

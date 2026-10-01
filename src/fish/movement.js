@@ -203,7 +203,7 @@ const RuchRyby = (() => {
 
     /* pasmo 7 / fantastyczne */
     dzolej_rudogrzywy:'mityczna', ksiaznik:'mityczna',
-    smucior:'mityczna', kupid:'mityczna', smok_zycia:'smok'
+    smucior:'mityczna', kupid:'mityczna', karpik_surinamski:'mityczna', smok_zycia:'smok'
   };
 
   /* Gatunki, ktorych biomechanika jest bliska spokojnemu plywaniu,

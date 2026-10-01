@@ -154,7 +154,7 @@ KLASA.barakuda = 5;   /* rzadka, ale nie mityczna */
    zacieralo te roznice. */
 for (const k of ['blazenek','konik_krysztalowy','muskellunge','zabnica',
                  'morswin','zagielnica','zolw_blotny']) KLASA[k] = 6;
-for (const k of ['tyrios_morski','minog_majlowy','dzolej_rudogrzywy','ksiaznik','nessy','japoniec','smucior','kupid','smokosz','krukkomrukko','wiezowak']) KLASA[k] = 7;
+for (const k of ['tyrios_morski','minog_majlowy','dzolej_rudogrzywy','ksiaznik','nessy','japoniec','smucior','kupid','smokosz','krukkomrukko','wiezowak','karpik_surinamski']) KLASA[k] = 7;
 
 function ramkaGatunku(slug) { return RAMKI[KLASA[slug] || 1]; }
 window.RAMKI = RAMKI; window.KLASA = KLASA; window.ramkaGatunku = ramkaGatunku;

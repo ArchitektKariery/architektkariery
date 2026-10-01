@@ -53,6 +53,7 @@ const Pierwszenstwo = (() => {
     kupid: 1,
     smokosz: 1,
     krukkomrukko: 1,
+    karpik_surinamski: 1,
     /* Tier 6: wyrownanie kompensuje pierwszenstwo przy haczyku wewnatrz polskiego rejestru; tier 6 ma wlasna stawke brania. */
     blazenek: 1,
     konik_krysztalowy: 1,

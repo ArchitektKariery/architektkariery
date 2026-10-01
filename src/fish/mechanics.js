@@ -119,6 +119,8 @@ const WALKA = {
   nessy:         { ucieczki: 1.15, zasieg: 0.36, szarpanie: 1.3, upor: 1.4 },
   /* Ten sam gatunek co karp, ten sam hol co karp. */
   japoniec:      { ucieczki: 0.80, zasieg: 0.30, szarpanie: 0.6, upor: 1.45 },
+  /* Rozmiary jak karp, wiec i hol jak karp: dlugie, uparte ucieczki w dol. */
+  karpik_surinamski: { ucieczki: 0.80, zasieg: 0.30, szarpanie: 0.6, upor: 1.45 },
   /* Dobre serduszko: odpuszcza szybciej niz reszta mitycznych, mimo
      pyska pelnego zebow. */
   smucior:       { ucieczki: 0.70, zasieg: 0.22, szarpanie: 0.9, upor: 0.85 },

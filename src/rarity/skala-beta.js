@@ -55,6 +55,7 @@ const SKALA = (() => {
     kupid: 1,
     smokosz: 1,
     krukkomrukko: 1,
+    karpik_surinamski: 1,
 
     jesiotr:               738.95619,
     minog_rzeczny:         665.41386,

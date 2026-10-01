@@ -30,7 +30,8 @@ const GRUBOSC = {
   /* Grubszy od minoga: welonowaty korpus i futrzana glowa daja sylwetke
      bardziej bryłowatą, wiec 0,62 zamiast 0,45. To jedyna liczba, ktora
      celowo odbiega od pierwowzoru, bo dotyczy ksztaltu, nie rzadkosci. */
-  dzolej_rudogrzywy: 0.62
+  dzolej_rudogrzywy: 0.62,
+  karpik_surinamski: 0.62
 };
 function grubosc(slug) { return GRUBOSC[slug] !== undefined ? GRUBOSC[slug] : GRUBOSC_DOM; }
 window.grubosc = grubosc;

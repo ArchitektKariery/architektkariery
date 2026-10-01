@@ -1,7 +1,7 @@
 # QRyby — Odnowa Lucjanka
 
-STATUS: LIVE
-LIVE_FUNDING: ON
+STATUS: CLOSED
+LIVE_FUNDING: OFF
 
 ## Parametry
 - cel: 500 000 000 QRYB
@@ -98,3 +98,10 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - target: 500 000 000 QRYB
 - stan startowy: funding / visible / 0 QRYB / 0 darczyńców / reward locked
 - metadata funding_live=true
+
+
+## Zamknięcie 2026-10-01
+- społeczność zebrała 500 000 000 QRYB 1 X 2026 wieczorem; Lucjan czerwony pływa w jeziorze (para z 30 IX)
+- decyzja Andrzeja: zbiórkę Lucjanka zamknąć i zastąpić nową
+- `supabase/migrations/20261001_odnowa_karpik.sql` ustawia Lucjankowi `state=completed`, `is_visible=false`, `closed_at`; historia wpłat zostaje w bazie
+- zakładka ODNOWA pokazuje odtąd zbiórkę Karpika Surinamskiego, opis w `docs/odnowa-karpik.md`

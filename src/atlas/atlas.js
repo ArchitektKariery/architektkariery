@@ -617,6 +617,7 @@ const Ksiega = (() => {
       japoniec: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Bierze, kiedy sam zechce.',
       smokosz: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
       krukkomrukko: 'Nikt nie potrafi powiedzieć, kiedy go szukać. Poluje, kiedy sam zechce.',
+      karpik_surinamski: 'Wraca do jeziora tylko dzięki zbiórce całej społeczności. Potem bierze, kiedy sam zechce.',
       smok_zycia: 'stworzenie z wróżby'
     };
     let szept = SZEPT_PORA.obojetna;
