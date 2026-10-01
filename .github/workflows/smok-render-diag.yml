@@ -1,6 +1,7 @@
 name: Diagnose Smok Zycia Render
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
@@ -18,6 +19,7 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Build diagnostic page
@@ -28,7 +30,14 @@ jobs:
           sleep 1
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           echo "chrome=$CHROME"
-          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000             --dump-dom http://127.0.0.1:8765/tests/smok-render-diag.html > /tmp/smok-dom.txt
+          # Gra probuje laczyc sie z Supabase. Wirtualny czas Chrome stoi,
+          # dopoki trwa jakiekolwiek zapytanie sieciowe, wiec z dostepem do
+          # internetu strona potrafila wisiec do limitu joba. Diagnoza ma byc
+          # offline: kazdy host poza 127.0.0.1 od razu nie istnieje.
+          timeout 300 "$CHROME" --headless --no-sandbox --disable-gpu --no-proxy-server \
+            --host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE 127.0.0.1" \
+            --virtual-time-budget=10000 \
+            --dump-dom http://127.0.0.1:8765/tests/smok-render-diag.html > /tmp/smok-dom.txt
           python3 - <<'PY'
           from pathlib import Path
           import re

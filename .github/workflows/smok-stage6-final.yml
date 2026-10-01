@@ -1,6 +1,7 @@
 name: QRyby Smok Zycia Stage 6 Final Regression
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
@@ -36,12 +37,4 @@ jobs:
 
       - name: Commit final regression report
         run: |
-          git config user.name "QRyby Builder"
-          git config user.email "actions@users.noreply.github.com"
-          git add tests/smok-stage5-audit.json tests/smok-stage6-final.json
-          if git diff --cached --quiet; then
-            echo "No report changes"
-            exit 0
-          fi
-          git commit -m "QRyby: Smok Życia final regression pass [skip ci]"
-          git push
+          bash tools/ci_commit_reports.sh "QRyby: Smok Życia final regression pass [skip ci]" tests/smok-stage5-audit.json tests/smok-stage6-final.json
