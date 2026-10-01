@@ -219,10 +219,28 @@ begin
 end;
 $$;
 
--- Wynik: obie odnowy, stan i okno czasu.
-select e.slug, e.state, e.is_visible, e.raised_qryb, e.target_qryb,
-       e.starts_at, e.ends_at, r.state as nagroda, e.reward_type
+-- Wynik w jednej kolumnie tekstu, czytelny na ekranie telefonu:
+-- stan obu odnow, wynik tarla Lucjanka i obecnosc funkcji pary.
+-- Pierwsze uruchomienie z telefonu (1 X 2026, 21:1x) nie zapisalo nic:
+-- diagnoza o 21:26 pokazala Lucjanka widocznego i "funkcja pary: BRAK".
+-- Oczekiwany wynik po sukcesie:
+--   lucjanek | completed | widoczny: false | nagroda: executed | koniec: ...
+--   karpik | funding | widoczny: true | nagroda: locked | koniec: <start + 7 dni>
+--   tarło lucjanka: <scenariusz> | ikra N | młode N | ryb w jeziorze N
+--   funkcja pary: private.community_reward_pair(uuid)
+select e.slug || ' | ' || e.state || ' | widoczny: ' || e.is_visible
+       || ' | nagroda: ' || coalesce(r.state, 'brak')
+       || ' | koniec: ' || coalesce(to_char(e.ends_at at time zone 'Europe/Warsaw', 'DD.MM HH24:MI'), '-') as stan
 from public.community_events e
 left join public.community_event_rewards r on r.event_id = e.id
 where e.slug in ('lucjanek', 'karpik')
-order by e.created_at;
+union all
+select 'tarło lucjanka: ' || coalesce(r.payload->>'scenario_text', '-')
+       || ' | ikra ' || coalesce(r.payload->>'eggs', '-')
+       || ' | młode ' || coalesce(r.payload->>'survivors', '-')
+       || ' | ryb w jeziorze ' || coalesce(r.payload->>'lake_population_before', '-')
+from public.community_event_rewards r
+join public.community_events e on e.id = r.event_id
+where e.slug = 'lucjanek'
+union all
+select 'funkcja pary: ' || coalesce(to_regprocedure('private.community_reward_pair(uuid)')::text, 'BRAK');

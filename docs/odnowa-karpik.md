@@ -43,7 +43,8 @@ Granica: sprite w `src/odnowa/karpik_surinamski.js` i plik PNG dalej leżą w pu
 
 ## Uruchomienie
 Supabase → SQL Editor → nowe zapytanie → wklejony cały plik `supabase/migrations/20261001_odnowa_karpik.sql` → Run.
-Na końcu plik pokazuje oba eventy: `lucjanek` ma `completed` i `is_visible=false`, `karpik` ma `funding`, `is_visible=true`, `ends_at` = start + 7 dni.
+Na końcu plik pokazuje 4 linijki tekstu: `lucjanek | completed | widoczny: false`, `karpik | funding | widoczny: true | nagroda: locked` z końcem zbiórki za 7 dni, wynik tarła Lucjanka (scenariusz, ikra, młode, ryby w jeziorze) i `funkcja pary: private.community_reward_pair(uuid)`.
+Linijka `funkcja pary: BRAK` znaczy, że plik się nie wykonał (tak było przy pierwszej próbie z telefonu 1 X 2026: Lucjanek dalej widoczny, karta ODNOWA bez pola WPŁAĆ).
 Ponowne uruchomienie niczego nie dubluje.
 
 ## Testy
