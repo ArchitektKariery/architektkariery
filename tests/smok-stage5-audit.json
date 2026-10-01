@@ -282,79 +282,79 @@
       "text": "if (dlSeg.length < n) dlSeg = new Float32Array(n * 2);"
     },
     {
-      "line": 24046,
+      "line": 24049,
       "text": "(imituje wode zamykajaca sie nad spławikiem) plus niski \"blup\". */"
     },
     {
-      "line": 24120,
+      "line": 24123,
       "text": "Wedkarz, wedka, splawik i haczyk wpiete w mechanike"
     },
     {
-      "line": 24124,
+      "line": 24127,
       "text": "Zylka  -> krzywa od szczytu wedki do splawika, luz maleje z naprezeniem"
     },
     {
-      "line": 24125,
+      "line": 24128,
       "text": "Splawik-> siedzi na Scene.waterAt(), nurkuje przy braniu"
     },
     {
-      "line": 24129,
+      "line": 24132,
       "text": "const A = { boat: null, rod: null, float: null, boatRys: null, ready: 0, meta: window.ANGLER_META };"
     },
     {
-      "line": 24228,
+      "line": 24231,
       "text": "for (const k of ['boat', 'rod', 'float']) {"
     },
     {
-      "line": 24235,
+      "line": 24238,
       "text": "if (k === 'float') A.floatOutline = sylObrysu(A.float);"
     },
     {
-      "line": 24257,
+      "line": 24260,
       "text": "floW: M.float.w * SC, floH: M.float.h * SC"
     },
     {
-      "line": 24268,
+      "line": 24271,
       "text": "bite: 0,               /* 0..1 zanurzenie splawika */"
     },
     {
-      "line": 24271,
+      "line": 24274,
       "text": "floatBob: 0, floatBobV: 0, rings: [],"
     },
     {
-      "line": 24460,
+      "line": 24463,
       "text": "/* Faktyczna pozycja splawika przy koncowce wedki, potrzebna mechanice,"
     },
     {
-      "line": 24461,
+      "line": 24464,
       "text": "zeby lot zaczynal sie dokladnie tam, gdzie splawik przed chwila wisial. */"
     },
     {
-      "line": 24490,
+      "line": 24493,
       "text": "sceny. Ten etap nie przerabia wedki, splawika ani linki — ich moment"
     },
     {
-      "line": 24596,
+      "line": 24599,
       "text": "Stage 7.3 zamknal spójność splawika i usunal crash przy plusku."
     },
     {
-      "line": 24597,
+      "line": 24600,
       "text": "Ten etap nie zmienia FloatFX.pose(t) ani mechaniki lowienia."
     },
     {
-      "line": 24708,
+      "line": 24711,
       "text": "let floatPose = FloatFX.pose(t);"
     },
     {
-      "line": 24709,
+      "line": 24712,
       "text": "if (floatPose.mode === 'held') floatPose = FloatFX.heldAtTip(rodTipVisual);"
     },
     {
-      "line": 24731,
+      "line": 24734,
       "text": "/* Zylka do splawika tylko wtedy, gdy splawik faktycznie jest na wodzie."
     },
     {
-      "line": 24732,
+      "line": 24735,
       "text": "Przy wylawianiu zylka biegnie do ryby, a nie do splawika, wiec rysowanie"
     }
   ],
@@ -556,47 +556,47 @@
       "text": "const hol = !!(f.caught && Gm && Gm.hooked === f);"
     },
     {
-      "line": 22455,
+      "line": 22458,
       "text": "const zywe = school.filter(f => !f.caught);"
     },
     {
-      "line": 22960,
+      "line": 22963,
       "text": "Telemetry.event('fish_caught', tp);"
     },
     {
-      "line": 23747,
+      "line": 23750,
       "text": "const gk = (typeof G !== \"undefined\" && G.hooked && G.hooked.gat) || \"ploc\";"
     },
     {
-      "line": 23815,
+      "line": 23818,
       "text": "palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej."
     },
     {
-      "line": 24267,
+      "line": 24270,
       "text": "hooked: null,"
     },
     {
-      "line": 24273,
+      "line": 24276,
       "text": "strike: 0,             /* 0..1 impuls przy ataku i zrywie */"
     },
     {
-      "line": 24283,
+      "line": 24286,
       "text": "let b = G.tension * 26 + G.bite * 6 + G.strike * 22 + (G.phase === 'fight' ? 4 : 0);"
     },
     {
-      "line": 25015,
+      "line": 25018,
       "text": "+ G.strike * 9"
     },
     {
-      "line": 25051,
+      "line": 25054,
       "text": "const calm = 1 - clamp(G.bite * 0.85 + G.strike * 0.90, 0, 1);"
     },
     {
-      "line": 25057,
+      "line": 25060,
       "text": "+ (G.bite * 0.31 + G.strike * 0.29) * Math.sin(t * 8.4);"
     },
     {
-      "line": 25229,
+      "line": 25232,
       "text": "if (G.hooked && typeof mouthOf === 'function') {"
     }
   ]
