@@ -226,135 +226,135 @@
       "text": "lodka, wedkarz i splawik ida po nim w pelnych barwach i dlatego"
     },
     {
-      "line": 11677,
+      "line": 11676,
       "text": "splawik: 'SPLAWIK', wedka: 'WEDKA', lodka: 'LODKA' };"
     },
     {
-      "line": 16067,
+      "line": 16066,
       "text": "html(guide, 'PATRZ NA SPŁAWIK', 'zarzut leci sam');"
     },
     {
-      "line": 16255,
+      "line": 16254,
       "text": "{ id: 'splawik', d: 'M12 2 15 9H9zM9 9h6l-1 7H10zM11 16h2v6h-2z' },"
     },
     {
-      "line": 16954,
+      "line": 16953,
       "text": "'Spławik zawsze leci w to samo miejsce, więc nie musisz celować.',"
     },
     {
-      "line": 16964,
+      "line": 16963,
       "text": "'Gdy chwyci, spławik znika pod wodą, a telefon drgnie.'] },"
     },
     {
-      "line": 23127,
+      "line": 23126,
       "text": "(imituje wode zamykajaca sie nad spławikiem) plus niski \"blup\". */"
     },
     {
-      "line": 23201,
+      "line": 23200,
       "text": "Wedkarz, wedka, splawik i haczyk wpiete w mechanike"
     },
     {
-      "line": 23205,
+      "line": 23204,
       "text": "Zylka  -> krzywa od szczytu wedki do splawika, luz maleje z naprezeniem"
     },
     {
-      "line": 23206,
+      "line": 23205,
       "text": "Splawik-> siedzi na Scene.waterAt(), nurkuje przy braniu"
     },
     {
-      "line": 23210,
+      "line": 23209,
       "text": "const A = { boat: null, rod: null, float: null, boatRys: null, ready: 0, meta: window.ANGLER_META };"
     },
     {
-      "line": 23309,
+      "line": 23308,
       "text": "for (const k of ['boat', 'rod', 'float']) {"
     },
     {
-      "line": 23316,
+      "line": 23315,
       "text": "if (k === 'float') A.floatOutline = sylObrysu(A.float);"
     },
     {
-      "line": 23338,
+      "line": 23337,
       "text": "floW: M.float.w * SC, floH: M.float.h * SC"
     },
     {
-      "line": 23349,
+      "line": 23348,
       "text": "bite: 0,               /* 0..1 zanurzenie splawika */"
     },
     {
-      "line": 23352,
+      "line": 23351,
       "text": "floatBob: 0, floatBobV: 0, rings: [],"
     },
     {
-      "line": 23541,
+      "line": 23540,
       "text": "/* Faktyczna pozycja splawika przy koncowce wedki, potrzebna mechanice,"
     },
     {
-      "line": 23542,
+      "line": 23541,
       "text": "zeby lot zaczynal sie dokladnie tam, gdzie splawik przed chwila wisial. */"
     },
     {
-      "line": 23571,
+      "line": 23570,
       "text": "sceny. Ten etap nie przerabia wedki, splawika ani linki — ich moment"
     },
     {
-      "line": 23677,
+      "line": 23676,
       "text": "Stage 7.3 zamknal spójność splawika i usunal crash przy plusku."
     },
     {
-      "line": 23678,
+      "line": 23677,
       "text": "Ten etap nie zmienia FloatFX.pose(t) ani mechaniki lowienia."
     },
     {
-      "line": 23789,
+      "line": 23788,
       "text": "let floatPose = FloatFX.pose(t);"
     },
     {
-      "line": 23790,
+      "line": 23789,
       "text": "if (floatPose.mode === 'held') floatPose = FloatFX.heldAtTip(rodTipVisual);"
     },
     {
-      "line": 23812,
+      "line": 23811,
       "text": "/* Zylka do splawika tylko wtedy, gdy splawik faktycznie jest na wodzie."
     },
     {
-      "line": 23813,
+      "line": 23812,
       "text": "Przy wylawianiu zylka biegnie do ryby, a nie do splawika, wiec rysowanie"
     },
     {
-      "line": 23821,
+      "line": 23820,
       "text": "podwodny zaczynal sie na TAFLI, a nadwodny konczyl na SPLAWIKU, wiec"
     },
     {
-      "line": 23822,
+      "line": 23821,
       "text": "gdy splawik zanurzal sie przy braniu, miedzy nimi otwierala sie szpara."
     },
     {
-      "line": 23824,
+      "line": 23823,
       "text": "splawika i razem z nim opadaja."
     },
     {
-      "line": 23827,
+      "line": 23826,
       "text": "/* Zarzut: koniec linki = gorny anchor TEGO SAMEGO floatPose,"
     },
     {
-      "line": 23829,
+      "line": 23828,
       "text": "const px2 = floatPose.upperX, py2 = floatPose.upperY;"
     },
     {
-      "line": 23847,
+      "line": 23846,
       "text": "const px2 = floatPose.upperX, py2 = floatPose.upperY;"
     },
     {
-      "line": 23919,
+      "line": 23918,
       "text": "/* Splawik korzysta z TEGO SAMEGO pose co linka nad woda. */"
     },
     {
-      "line": 23925,
+      "line": 23924,
       "text": "podwodny zaczynal sie na TAFLI, a nadwodny konczyl na SPLAWIKU, wiec"
     },
     {
-      "line": 23926,
+      "line": 23925,
       "text": "gdy splawik zanurzal sie przy braniu, miedzy nimi otwierala sie szpara."
     }
   ],
@@ -408,195 +408,195 @@
       "text": "wymuszonego atalu na strike/hooked)."
     },
     {
-      "line": 10633,
+      "line": 10632,
       "text": "if (G.hooked) { G.hooked.caught = false; G.hooked.mood = 'idle'; G.hooked = null; }"
     },
     {
-      "line": 10640,
+      "line": 10639,
       "text": "G.tension = 0; G.bite = 0; G.strike = 0; G.czerw = 0; G.zryw = 0;"
     },
     {
-      "line": 10646,
+      "line": 10645,
       "text": "if (typeof biteWait !== 'undefined') biteWait = 1.0;"
     },
     {
-      "line": 11438,
+      "line": 11437,
       "text": "if (!f || f.caught || !GATUNKI[f.gat]) continue;"
     },
     {
-      "line": 15665,
+      "line": 15664,
       "text": "else if (name === 'fish_caught') sessionStats.catches++;"
     },
     {
-      "line": 16072,
+      "line": 16071,
       "text": "} else if (ph === 'fight' && G.hooked) {"
     },
     {
-      "line": 18957,
+      "line": 18956,
       "text": "mood: 'idle',        /* idle, inspect, strike, hooked, odplywa */"
     },
     {
-      "line": 19596,
+      "line": 19595,
       "text": "if (!f || f.gat !== 'smok_zycia' || f.caught) return false;"
     },
     {
-      "line": 20195,
+      "line": 20194,
       "text": "const fightPerf = !!(window.G && G.phase === 'fight' && G.hooked);"
     },
     {
-      "line": 20208,
+      "line": 20207,
       "text": "/* Nadecie na 'strike'/'hooked' musi zadzialac PRZED wczesnymi 'continue'"
     },
     {
-      "line": 20216,
+      "line": 20215,
       "text": "if (f.caught) { f.phase += dt * (7 + Math.abs(f.thrash || 0) * 6); continue; }"
     },
     {
-      "line": 20217,
+      "line": 20216,
       "text": "if (f.mood === 'inspect' || f.mood === 'strike') { f.phase += dt * (3 + Math.abs(f.vx) * 0.2); continue; }"
     },
     {
-      "line": 20239,
+      "line": 20238,
       "text": "kat skakal w ulamku sekundy i ryba wygladala, jakby sie zacinala."
     },
     {
-      "line": 20469,
+      "line": 20468,
       "text": "if (f.caught || f.mood === 'odplywa' || f.karencja > 0) return 0;"
     },
     {
-      "line": 20617,
+      "line": 20616,
       "text": "if (f.caught) return false;"
     },
     {
-      "line": 20631,
+      "line": 20630,
       "text": "if (ofi === f || ofi.caught) return false;"
     },
     {
-      "line": 20688,
+      "line": 20687,
       "text": "const zywa = o && !o.caught && school.indexOf(o) >= 0;"
     },
     {
-      "line": 20853,
+      "line": 20852,
       "text": "2. ZACIECIE. Ryba na 'strike' i 'hooked' ma byc nadeta przez caly czas"
     },
     {
-      "line": 20892,
+      "line": 20891,
       "text": "if (f.mood === 'strike' || f.mood === 'hooked') {"
     },
     {
-      "line": 20903,
+      "line": 20902,
       "text": "nie ze mruga. Piata klatka, z jezykiem, wchodzi WYLACZNIE na 'strike'"
     },
     {
-      "line": 20904,
+      "line": 20903,
       "text": "i 'hooked': to jest klatka na atak i na caly hol, nie na spokojne"
     },
     {
-      "line": 20911,
+      "line": 20910,
       "text": "wiec widzi KAZDY tryb, wlacznie ze strike i hooked,"
     },
     {
-      "line": 20931,
+      "line": 20930,
       "text": "if (f.mood === 'strike' || f.mood === 'hooked') f.pyskKlatka = atak;"
     },
     {
-      "line": 20984,
+      "line": 20983,
       "text": "od trybu, bo atak bez obslugi to wlasnie zrodlo zacinania z powietrza. */"
     },
     {
-      "line": 20985,
+      "line": 20984,
       "text": "if (lure) { puscLure(4 + Math.random() * 4); biteWait = 1.2; }"
     },
     {
-      "line": 20987,
+      "line": 20986,
       "text": "if (f.caught || f.mood === 'strike') continue;"
     },
     {
-      "line": 20999,
+      "line": 20998,
       "text": "for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);"
     },
     {
-      "line": 21042,
+      "line": 21041,
       "text": "if (f.caught || f.mood === 'inspect' || f.mood === 'strike' || f.mood === 'odplywa') continue;"
     },
     {
-      "line": 21060,
+      "line": 21059,
       "text": "if (f.caught) continue;"
     },
     {
-      "line": 21148,
+      "line": 21147,
       "text": "let profilFali = (RP && f.mood === 'idle' && !f.caught) ? RP.wave : 1;"
     },
     {
-      "line": 21275,
+      "line": 21274,
       "text": "const idleWiz = !angle && f.mood === 'idle' && !f.caught;"
     },
     {
-      "line": 21335,
+      "line": 21334,
       "text": "przemnozone przez skale, a przy zacieciu doklada sie jeszcze obrot,"
     },
     {
-      "line": 21410,
+      "line": 21409,
       "text": "const fight = !!(window.G && G.phase === 'fight' && G.hooked);"
     },
     {
-      "line": 21426,
+      "line": 21425,
       "text": "for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);"
     },
     {
-      "line": 21437,
+      "line": 21436,
       "text": "for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);"
     },
     {
-      "line": 21545,
+      "line": 21544,
       "text": "const zywe = school.filter(f => !f.caught);"
     },
     {
-      "line": 22050,
+      "line": 22049,
       "text": "Telemetry.event('fish_caught', tp);"
     },
     {
-      "line": 22828,
+      "line": 22827,
       "text": "const gk = (typeof G !== \"undefined\" && G.hooked && G.hooked.gat) || \"ploc\";"
     },
     {
-      "line": 22896,
+      "line": 22895,
       "text": "palec i patrzy na zylke -- czyli tam, gdzie zacinanie boli najbardziej."
     },
     {
-      "line": 23348,
+      "line": 23347,
       "text": "hooked: null,"
     },
     {
-      "line": 23354,
+      "line": 23353,
       "text": "strike: 0,             /* 0..1 impuls przy ataku i zrywie */"
     },
     {
-      "line": 23364,
+      "line": 23363,
       "text": "let b = G.tension * 26 + G.bite * 6 + G.strike * 22 + (G.phase === 'fight' ? 4 : 0);"
     },
     {
-      "line": 24096,
+      "line": 24095,
       "text": "+ G.strike * 9"
     },
     {
-      "line": 24132,
+      "line": 24131,
       "text": "const calm = 1 - clamp(G.bite * 0.85 + G.strike * 0.90, 0, 1);"
     },
     {
-      "line": 24138,
+      "line": 24137,
       "text": "+ (G.bite * 0.31 + G.strike * 0.29) * Math.sin(t * 8.4);"
     },
     {
-      "line": 24310,
+      "line": 24309,
       "text": "if (G.hooked && typeof mouthOf === 'function') {"
     },
     {
-      "line": 24311,
+      "line": 24310,
       "text": "const m = mouthOf(G.hooked, (G.hooked.thrash || 0) * 0.42 - 0.55);"
     },
     {
-      "line": 24332,
+      "line": 24331,
       "text": "if (!G.hooked) {"
     }
   ]
