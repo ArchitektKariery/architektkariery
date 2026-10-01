@@ -503,9 +503,23 @@ function chmuraZGlebia(rys, c, y, w) {
 let _bufC = null;
 function bufChmur(w, h) {
   if (!_bufC) { _bufC = document.createElement('canvas').getContext('2d'); }
+  /* Plotno ma wymiary calkowite, a chmura ulamkowe (405,9 px). Porownanie
+     z ulamkiem wychodzilo zawsze "za male", wiec bufor dostawal nowa
+     szerokosc w kazdej klatce, przegladarka obcinala ja z powrotem do 405
+     i za kazdym razem zakladala plotno od nowa razem z jego pamiecia.
+     Zmierzone: nowe plotno w 7 klatkach na 10, w kazdej fazie gry.
+     Rozmiar zmienia sie teraz tylko wtedy, gdy naprawde rosnie. Tam, gdzie
+     dawniej szlo zalozenie plotna od nowa, idzie wyczyszczenie calosci:
+     plotno wychodzi z tego tak samo puste, a pamiec zostaje ta sama. */
   if (_bufC.canvas.width < w || _bufC.canvas.height < h) {
-    _bufC.canvas.width = Math.max(w, _bufC.canvas.width);
-    _bufC.canvas.height = Math.max(h, _bufC.canvas.height);
+    const cw = Math.max(Math.floor(w), _bufC.canvas.width);
+    const ch = Math.max(Math.floor(h), _bufC.canvas.height);
+    if (cw !== _bufC.canvas.width || ch !== _bufC.canvas.height) {
+      _bufC.canvas.width = cw;
+      _bufC.canvas.height = ch;
+    } else {
+      _bufC.clearRect(0, 0, cw, ch);
+    }
   }
   return _bufC;
 }
@@ -1442,9 +1456,10 @@ function drawWater(t) {
   /* Falowanie tylko w pasie odbicia. Nizej jedno przesuniecie calosci,
      bo tam i tak nie ma czego marszczyc. Wcinka zrodla zastepuje
      doklejanie krawedzi, wiec zamiast trzech wywolan na pasek jest jedno. */
-  const fightPerf = !!(window.G && G.phase === 'fight' && G.hooked);
-  const fpsWater = (window.__qrFps && Number(window.__qrFps.fps)) || 60;
-  const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2, IN = 8;
+  /* Pas 2 px zawsze. W holu odbicia szly pasami 4 px, a przy liczniku
+     ponizej 45 FPS pasami 6 px, wiec woda robila sie schodkowa akurat
+     wtedy, kiedy gracz trzyma palec i patrzy na scene. */
+  const STEP = 2, IN = 8;
   g.imageSmoothingEnabled = true;
   for (let y = SURFACE; y < REFL_END; y += STEP) {
     g.drawImage(wbuf, IN, y - SURFACE, W - IN * 2, STEP, reflDx(y, t), y, W, STEP);

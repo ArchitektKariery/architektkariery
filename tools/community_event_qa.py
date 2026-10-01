@@ -20,6 +20,7 @@ require(any(x in html for x in [
     "2026-09-26-fight-perf-v2",
     "2026-09-26-fight-perf-v3",
     "2026-09-30-lucjan-czerwony-v1",
+    "2026-10-01-hol-plynnosc-v1",
 ]), "missing supported QRyby build id")
 require(html.count("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -27,14 +28,14 @@ require("KLASA.lucjan_czerwony = 4" in html, "Lucjan must be pasmo 4")
 require("if (G2.odnowa) return 0" in html, "restoration species must start at population 0")
 require("gat && gat.odnowa && n === null" in html, "restoration species spawn gate missing")
 require("QRYBY_COMMUNITY_EKO.pokolenia()" in html, "community EKO generation bridge missing")
-require("PERFORMANCE — HOL RYBY" in html, "hooked-fish cache marker missing")
-require("rybBuf.__holFrame" in html, "hooked-fish render cache missing")
-require("holStride = fpsNow < 45 ? 3 : 2" in html, "adaptive fight render stride missing")
-require("_fightSchoolBuf" in html, "fight school layer cache missing")
-require("g.drawImage(_fightSchoolBuf, 0, 0)" in html, "fight school cache draw missing")
-require("const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2" in html, "adaptive fight water stride missing")
-require("_fightSchoolUpdateAcc" in html, "fight school simulation accumulator missing")
-require("targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" in html, "fight school simulation throttle missing")
+# Hol w pelnym tempie (X 2026): lawica, ryba na haczyku i woda w holu
+# rysuja sie i licza w kazdej klatce, tak jak w zawisie. Dawne dlawienie
+# do 30/20 Hz dawalo widoczny spadek plynnosci od chwili zaciecia.
+require("HOL W PELNYM TEMPIE" in html, "hooked fish must be composed every frame")
+require("LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE" in html, "school must be drawn every frame during the fight")
+require("const STEP = 2, IN = 8;" in html, "water reflections must keep 2 px bands during the fight")
+for dlawik in ["_fightSchoolBuf", "holStride", "rybBuf.__holFrame", "fpsWater", "_fightSchoolUpdateAcc", "targetStep = fpsNow"]:
+    require(dlawik not in html, f"fight throttle came back: {dlawik}")
 
 for marker in [
     "community_contribute",

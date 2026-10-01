@@ -222,20 +222,12 @@ const PRZYNETA_CIEKAWOSC = 220;
 const PRZYNETA_PODEJSCIE = 55;
 
 var _rozsuwCzesc = 0;    /* licznik throttlingu petli rozsuwania O(n^2), patrz nizej w funkcji */
-let _fightSchoolUpdateAcc = 0;
+/* Ruch lawicy liczy sie w kazdej klatce, takze w holu. Wczesniej hol
+   zbieral dt i liczyl lawice 30 albo 20 razy na sekunde (krok do 0,08 s),
+   wiec ryby skakaly co dwie, trzy klatki dokladnie od chwili zaciecia.
+   Cala petla kosztuje ulamek milisekundy, a ta sama lawica w zawisie
+   liczy sie co klatke bez zadnych oszczednosci. */
 function updateSchool(dt) {
-  const fightPerf = !!(window.G && G.phase === 'fight' && G.hooked);
-  if (fightPerf) {
-    _fightSchoolUpdateAcc += dt;
-    const fpsNow = (window.__qrFps && Number(window.__qrFps.fps)) || 60;
-    const targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30);
-    if (_fightSchoolUpdateAcc < targetStep) return;
-    dt = Math.min(0.08, _fightSchoolUpdateAcc);
-    _fightSchoolUpdateAcc = 0;
-  } else {
-    _fightSchoolUpdateAcc = 0;
-  }
-
   for (const f of school) {
     /* Nadecie na 'strike'/'hooked' musi zadzialac PRZED wczesnymi 'continue'
        ponizej, bo zachowanie() (inny blok skryptu) w ogole nie widzi ryby

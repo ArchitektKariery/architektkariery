@@ -134,9 +134,22 @@ const rsbg = rodSilBuf.getContext('2d');
 function drawRod(g, bx, by, bend) {
   const w = Math.round(anchor.rodW), h = Math.round(anchor.rodH);
   const extra = Math.ceil(Math.abs(bend)) + 4;
-  if (rodBuf.width !== w || rodBuf.height !== h + extra * 2) {
-    rodBuf.width = w; rodBuf.height = h + extra * 2;
-    rodSilBuf.width = w; rodSilBuf.height = h + extra * 2;
+  const bh = h + extra * 2;
+  /* ============================================================
+     BUFOR WEDKI BEZ ZMIANY ROZMIARU W KAZDEJ KLATCE (X 2026, zgloszenie
+     Andrzeja: "spadek fps plynnosci przy braniu i ciagnieciu na zylce").
+     Wysokosc bufora szla za ugieciem co do piksela, a ugiecie rusza sie
+     bez przerwy dokladnie przy braniu i w holu. Kazda zmiana wysokosci
+     plotna to nowa pamiec, skasowany stan kontekstu i nowa tekstura dla
+     karty graficznej, dla dwoch plotien naraz. Zmierzone w holu: nowy
+     rozmiar w co trzeciej klatce, w zawisie bez brania ani razu.
+     Teraz bufor rosnie skokami po 32 px i nie maleje, a na scene idzie
+     dokladnie ten sam wycinek w x bh, co wczesniej caly bufor. Wynik na
+     ekranie jest ten sam co do piksela. */
+  if (rodBuf.width !== w || rodBuf.height < bh) {
+    const nh = Math.ceil(bh / 32) * 32;
+    rodBuf.width = w; rodBuf.height = nh;
+    rodSilBuf.width = w; rodSilBuf.height = nh;
   }
   rbg.clearRect(0, 0, rodBuf.width, rodBuf.height);
   rbg.imageSmoothingEnabled = true;
@@ -159,9 +172,9 @@ function drawRod(g, bx, by, bend) {
     rsbg.fillStyle = KONTUR;
     rsbg.fillRect(0, 0, rodSilBuf.width, rodSilBuf.height);
     rsbg.globalCompositeOperation = 'source-over';
-    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) g.drawImage(rodSilBuf, bx2 + dx, by2 + dy);
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) g.drawImage(rodSilBuf, 0, 0, w, bh, bx2 + dx, by2 + dy, w, bh);
   } catch (e) {}
-  g.drawImage(rodBuf, bx2, by2);
+  g.drawImage(rodBuf, 0, 0, w, bh, bx2, by2, w, bh);
 }
 
 /* Faktyczna pozycja splawika przy koncowce wedki, potrzebna mechanice,

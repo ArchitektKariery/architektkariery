@@ -14,6 +14,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Chęć brania (`chetnaZaatakowac`, `chetnaPodejsc`, `ochota`) | `src/fish/behavior.js` |
 | Rendering ryb (`drawFish`, `drawSchool`, `paskiRyby`, dymek godowy) | `src/fish/rendering.js` |
 | Wydajność ruchu i rysowania ryb | `src/fish/movement.js`, `src/fish/rendering.js`, `src/fish/school-update.js` |
+| Płynność holu (hol rysowany i liczony co klatkę, bez trybu oszczędnego) | `src/fish/rendering.js`, `src/fish/school-update.js`, zasady w `docs/ARCHITECTURE.md` („Płynność i wydajność rysowania”) |
 | Rejestr gatunków `GATUNKI`, kontur sprite'a, częstości | `src/fish/species.js` |
 | Losowanie gatunku, długości, wagi, głębokości; potwory; pomoc geometrii (`gat`, `mouthOf`, `faceOf`) | `src/fish/fish-core.js` |
 | Tablica `school`, nowa ławica bez przeładowania, `escHTML` | `src/fish/school.js` |

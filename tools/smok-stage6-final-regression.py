@@ -122,16 +122,15 @@ checks["bite_monte_carlo_50pct"] = 0.498 <= ratio <= 0.502
 
 # 6) Hook / fight / line / bobber / performance
 checks["dragon_custom_motion_stops_when_caught"] = "if (!f || f.gat !== 'smok_zycia' || f.caught) return false;" in src
-checks["fight_render_cache"] = all(x in src for x in [
-    "PERFORMANCE — HOL RYBY",
-    "rybBuf.__holOwner",
-    "rybBuf.__holKey",
-    "rybBuf.__holFrame",
-    "holStride = fpsNow < 45 ? 3 : 2",
-])
-checks["fight_school_cache"] = "_fightSchoolBuf" in src and "g.drawImage(_fightSchoolBuf, 0, 0)" in src
-checks["fight_water_throttle"] = "const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2" in src
-checks["fight_sim_throttle"] = "_fightSchoolUpdateAcc" in src and "targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" in src
+# Hol w pelnym tempie (X 2026): bez dlawienia lawicy, ryby na haczyku,
+# ruchu i odbic wody w czasie brania i holu.
+checks["fight_hooked_fish_full_rate"] = "HOL W PELNYM TEMPIE" in src and not any(x in src for x in [
+    "rybBuf.__holOwner", "rybBuf.__holKey", "rybBuf.__holFrame", "holStride"])
+checks["fight_school_full_rate"] = "LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE" in src and "_fightSchoolBuf" not in src
+checks["fight_water_full_quality"] = "const STEP = 2, IN = 8;" in src and "fpsWater" not in src
+checks["fight_sim_full_rate"] = "_fightSchoolUpdateAcc" not in src and "targetStep = fpsNow" not in src
+checks["rod_buffer_no_per_frame_resize"] = "BUFOR WEDKI BEZ ZMIANY ROZMIARU W KAZDEJ KLATCE" in src
+checks["cloud_buffer_no_per_frame_reset"] = "const cw = Math.max(Math.floor(w), _bufC.canvas.width);" in src and "_bufC.clearRect(0, 0, cw, ch);" in src
 checks["fight_line_targets_fish"] = "if (G.hooked && typeof mouthOf === 'function')" in src and "mouthOf(G.hooked" in src
 checks["shared_float_pose"] = ("let floatPose = FloatFX.pose(t);" in src or "const floatPose = FloatFX.pose(t);" in src)
 checks["float_held_at_tip"] = "FloatFX.heldAtTip(rodTipVisual)" in src

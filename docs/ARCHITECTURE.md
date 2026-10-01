@@ -150,6 +150,15 @@ Funkcje wywoływane z HTML (`onclick="..."` w szablonach budowanych przez JS, 55
 - Po każdej zmianie dowolnego pliku `src/`, `css/` lub `assets/sprites/` podbij token we **wszystkich** tagach naraz: `python3 tools/bump_version.py` (albo `python3 tools/bump_version.py 20261001-mod2`). Wtedy gracz nigdy nie dostanie nowego `qryby.html` ze starym modułem z pamięci podręcznej.
 - `src/lucjanek/community-restoration-live.js` ma własny token (`?v=20260926-live5`), bo powstał przed podziałem; `tools/bump_version.py` go pomija. `src/smok-zycia/chain-motion.js` ma wspólny token wszystkich modułów.
 
+## Płynność i wydajność rysowania
+
+Zasady spisane po pomiarze z 1 X 2026 (zgłoszenie: „spadek płynności przy braniu i ciągnięciu na żyłce”).
+
+- **Hol rysuje się tak samo jak zawis.** Ławica, ryba na haczyku, ruch ławicy (`updateSchool`) i odbicia wody idą w każdej klatce. Wcześniej hol miał własny tryb oszczędny: ławica w osobnej warstwie 768 x 1316 przerysowywana co 2 albo 3 klatki, ruch liczony 30 albo 20 razy na sekundę, ryba na haczyku składana co 2 albo 3 klatki, odbicia pasami 4/6 px. Zmierzone w Chromium: w holu obraz ławicy zmieniał się co 100 do 117 ms (mediana), w zawisie co 34 do 42 ms, a klatki z przerysowaniem warstwy kosztowały więcej niż jakakolwiek klatka zawisu. Nie wprowadzaj osobnego trybu jakości dla fazy `fight`.
+- **Bez progów zależnych od `__qrFps`.** Licznik FPS służy do diagnostyki. Przełączanie jakości przy 45 FPS skakało w tę i z powrotem i samo psuło rytm klatek.
+- **Bufor pomocniczy nie zmienia rozmiaru co klatkę.** Ustawienie `canvas.width` albo `canvas.height` zakłada płótno od nowa, nawet przy tej samej wartości. Bufory rosną skokami i nie maleją (`drawRod` w `src/angler/angler.js`, `bufChmur` w `src/scene/makieta.js`), a na scenę idzie potrzebny wycinek.
+- Pomiar: harness Playwright z licznikiem klatek na fazę gry (`ready`, `hang`, branie, `fight`, `land`) i spisem operacji na płótnach. Porównuj fazy w tym samym przebiegu, bo skład ławicy zmienia koszt klatki bardziej niż wiele poprawek.
+
 ## Czego nie przenosić z powrotem do `qryby.html`
 
 - Kodu JS gry, CSS i sprite'ów. `qryby.html` ma zostać szkieletem.

@@ -20,16 +20,14 @@ def find_lines(patterns, limit=80):
 # Core fight/render checks
 checks={}
 checks["dragon_caught_bypasses_custom_motion"] = "if (!f || f.gat !== 'smok_zycia' || f.caught) return false;" in src
-checks["hooked_render_cache_marker"] = "PERFORMANCE — HOL RYBY" in src
-checks["hooked_render_owner_cache"] = "rybBuf.__holOwner" in src
-checks["hooked_render_key_cache"] = "rybBuf.__holKey" in src
-checks["hooked_render_frame_cache"] = "rybBuf.__holFrame" in src
-checks["adaptive_hol_stride"] = "holStride = fpsNow < 45 ? 3 : 2" in src
-checks["fight_school_cache"] = "_fightSchoolBuf" in src
-checks["fight_school_draw_cache"] = "g.drawImage(_fightSchoolBuf, 0, 0)" in src
-checks["adaptive_water_stride"] = "const STEP = fightPerf ? (fpsWater < 45 ? 6 : 4) : 2" in src
-checks["fight_sim_accumulator"] = "_fightSchoolUpdateAcc" in src
-checks["fight_sim_throttle"] = "targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" in src
+# Hol w pelnym tempie (X 2026). Wczesniej ryba na haczyku, lawica i ruch
+# lawicy szly w holu co 2 albo 3 klatki, a odbicia wody pasami 4/6 px.
+# Gracz widzial to jako spadek plynnosci od chwili zaciecia.
+checks["hooked_fish_full_rate"] = "HOL W PELNYM TEMPIE" in src and "rybBuf.__holFrame" not in src and "holStride" not in src
+checks["fight_school_full_rate"] = "LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE" in src and "_fightSchoolBuf" not in src
+checks["fight_water_full_quality"] = "const STEP = 2, IN = 8;" in src and "fpsWater" not in src
+checks["fight_sim_full_rate"] = "_fightSchoolUpdateAcc" not in src and "targetStep = fpsNow" not in src
+checks["rod_buffer_no_per_frame_resize"] = "BUFOR WEDKI BEZ ZMIANY ROZMIARU W KAZDEJ KLATCE" in src and "const nh = Math.ceil(bh / 32) * 32;" in src
 
 # Dragon visual identity must remain the same during fight.
 checks["dragon_sprite_still_registered"] = "GATUNKI.smok_zycia" in src and "data:image/png;base64" in src
@@ -58,9 +56,9 @@ checks["bobber_has_bite_state"] = "bite: 0," in src and "floatBob: 0" in src
 checks["bobber_water_pose_exists"] = "Scene.waterAt()" in src and "FloatFX.pose(t)" in src
 checks["splash_crash_fix_guard_present"] = "usunął crash przy plusku" in src or "usunal crash przy plusku" in src
 
-# Static cadence simulation for the heavy hooked-fish raster cache:
-# 60fps => redraw every 2 frames (~30Hz), low-FPS => every 3 frames (~20Hz at 60 frame clock;
-# actual game loop remains continuous for position/line).
+# Model kadencji holu: ryba na haczyku i lawica przerysowane w kazdej
+# z 60 klatek, ruch lawicy liczony w kazdej klatce. Pomiar na zywej grze
+# przed zmiana: obraz lawicy zmienial sie w 33 procentach klatek holu.
 def redraws(frames, stride):
     last=-10**9
     n=0
@@ -69,11 +67,13 @@ def redraws(frames, stride):
             n+=1; last=frame
     return n
 perf={
-    "60fps_1s_heavy_redraws": redraws(60,2),
-    "lowfps_guard_60_frames_heavy_redraws": redraws(60,3),
-    "position_updates_per_60_frames": 60
+    "hooked_fish_redraws_per_60_frames": redraws(60,1),
+    "school_redraws_per_60_frames": redraws(60,1),
+    "position_updates_per_60_frames": 60,
+    "before_fix_school_redraws_per_60_frames_at_60fps": redraws(60,2),
+    "before_fix_school_redraws_per_60_frames_below_45fps": redraws(60,3),
 }
-checks["cache_reduces_heavy_redraws"] = perf["60fps_1s_heavy_redraws"] == 30 and perf["lowfps_guard_60_frames_heavy_redraws"] == 20
+checks["fight_renders_every_frame"] = perf["hooked_fish_redraws_per_60_frames"] == 60 and perf["school_redraws_per_60_frames"] == 60
 
 report={
     "stage":"SMOK_STAGE5_FIGHT_HOOK_LINE_BOBBER",

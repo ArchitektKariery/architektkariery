@@ -254,47 +254,30 @@ function drawFish(g, f, angle) {
     const bw = (Math.ceil(w) + zapas * 2 + 5) & ~1, bh = (Math.ceil(h) + zapas * 2 + 5) & ~1;
 
     /* ============================================================
-       PERFORMANCE — HOL RYBY.
+       HOL W PELNYM TEMPIE (X 2026, zgloszenie Andrzeja: "spadek fps
+       plynnosci przy braniu i ciagnieciu na zylce").
 
-       Dotychczas paskiRyby() skladalo cala zlapana rybe do pomocniczego
-       canvasa W KAZDEJ KLATCE. To jest najdrozsza wersja renderu ryby
-       (sprite + paski + maski + bufor), a w czasie walki dochodzila jeszcze
-       do calej normalnie rysowanej sceny. Na telefonach efekt byl odwrotny
-       od zamierzonego: samo branie natychmiast zbijalo FPS.
+       Tu stal cache: ryba na haczyku skladala sie do bufora tylko co druga
+       klatke, a przy licznikach FPS ponizej 45 co trzecia. Pozycja szla
+       60 razy na sekunde, ale cialo falowalo 30 albo 20 razy, czyli ryba,
+       na ktora gracz patrzy z bliska, ruszala ogonem jak w filmie z 20 fps.
+       Pomiar na zywej grze: ksztalt ryby zmienial sie w 33 procentach
+       klatek holu.
 
-       Pozycja i obrot ryby nadal sa liczone i rysowane w kazdej klatce.
-       Ciezka rasteryzacja jej tekstury jest tylko cache'owana:
-       - przy dobrym FPS odswiezamy co 2 klatki (~30 Hz),
-       - przy spadku FPS co 3 klatki (~20 Hz).
-       Ruch pozostaje 60 Hz, wiec nie ma skokow na lince; rzadsza jest tylko
-       mikrofala ogona wewnatrz sprite'a.
-       ============================================================ */
-    const resizeBuf = rybBuf.width !== bw || rybBuf.height !== bh;
-    const fpsNow = (window.__qrFps && Number(window.__qrFps.fps)) || 60;
-    const holStride = fpsNow < 45 ? 3 : 2;
-    const holKey = String(f.gat || '') + ':' + bw + 'x' + bh + ':' +
-      Math.round(sx * 1000) + ':' + Math.round(sy * 1000);
-    const redrawBuf = resizeBuf ||
-      rybBuf.__holOwner !== f ||
-      rybBuf.__holKey !== holKey ||
-      !Number.isFinite(rybBuf.__holFrame) ||
-      (frameNo - rybBuf.__holFrame) >= holStride;
-
-    if (resizeBuf) {
+       Skladanie jednej ryby to kilkadziesiat paskow, tyle samo, ile ta
+       sama ryba kosztuje w zwyklym plywaniu, gdzie nikt tego nie oszczedza.
+       Bufor zostaje, bo obrot calej ryby wymaga gotowego obrazka, ale
+       zmienia rozmiar tylko przy zmianie ryby. */
+    if (rybBuf.width !== bw || rybBuf.height !== bh) {
       rybBuf.width = bw; rybBuf.height = bh;
       rbg2.imageSmoothingEnabled = false;
+    } else {
+      rbg2.clearRect(0, 0, bw, bh);
     }
-
-    if (redrawBuf) {
-      if (!resizeBuf) rbg2.clearRect(0, 0, bw, bh);
-      rbg2.save();
-      rbg2.translate(bw / 2, bh / 2);
-      paskiRyby(rbg2, G2, f, w, h, sx, sy);
-      rbg2.restore();
-      rybBuf.__holOwner = f;
-      rybBuf.__holKey = holKey;
-      rybBuf.__holFrame = frameNo;
-    }
+    rbg2.save();
+    rbg2.translate(bw / 2, bh / 2);
+    paskiRyby(rbg2, G2, f, w, h, sx, sy);
+    rbg2.restore();
 
     g.rotate(angle);
     g.drawImage(rybBuf, -bw / 2, -bh / 2);
@@ -310,49 +293,32 @@ function drawFish(g, f, angle) {
    nie mniej rybek na ekranie -- wynik identyczny jak wczesniej. */
 const _kolejnoscRysowania = [];
 
-/* PERFORMANCE — lawica w czasie holu.
-   Zlapana ryba, linka i wedka pozostaja w pelnym FPS. Tylko pozostale
-   ryby sa skladane do przezroczystej warstwy rzadziej, bo to kilkanascie
-   drogich drawFish() naraz i gracz podczas walki patrzy przede wszystkim
-   na rybe na haczyku. */
-const _fightSchoolBuf = document.createElement('canvas');
-const _fightSchoolCtx = _fightSchoolBuf.getContext('2d');
-_fightSchoolCtx.imageSmoothingEnabled = false;
-let _fightSchoolFrame = -999;
+/* ============================================================
+   LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE (X 2026, zgloszenie Andrzeja:
+   "spadek fps plynnosci przy braniu i ciagnieciu na zylce").
 
+   Od chwili zaciecia lawica szla do osobnej warstwy wielkosci calej sceny
+   i przerysowywala sie co druga klatke, a przy liczniku ponizej 45 FPS co
+   trzecia. Do tego updateSchool w holu liczyl ruch 30 albo 20 razy na
+   sekunde. Czyli dokladnie w chwili brania cala lawica, rozplaszona po
+   zacieciu z predkoscia 3,4 raza wieksza od zwyklej, przechodzila na
+   animacje 20 do 30 klatek, a wedka i zylka zostawaly na 60. Oko czyta to
+   jako spadek plynnosci. Pomiar na zywej grze w Chromium: w holu obraz
+   lawicy zmienial sie co 100 do 117 ms (mediana), w zawisie co 34 do 42 ms.
+
+   Warstwa nie dawala tez rownego zysku: co klatke szlo kopiowanie obrazu
+   768 x 1316 na scene, a klatka z przerysowaniem warstwy niosla cala
+   lawice, czyszczenie warstwy i rybe na haczyku naraz. Zmierzone: 19 do
+   24 ms na takiej klatce wobec 18 do 19 ms na klatce zawisu, czyli
+   najciezsze klatki calej gry wypadaly wlasnie w holu. Lawica rysuje sie
+   teraz w holu tak samo jak w zawisie, wiec hol kosztuje tyle co zawis
+   i wyglada tak samo plynnie. */
 function drawSchool(g, t) {
   if (!FishAtlas.ready) return;
-  const fight = !!(window.G && G.phase === 'fight' && G.hooked);
-
-  if (fight) {
-    const Wc = g.canvas.width, Hc = g.canvas.height;
-    if (_fightSchoolBuf.width !== Wc || _fightSchoolBuf.height !== Hc) {
-      _fightSchoolBuf.width = Wc; _fightSchoolBuf.height = Hc;
-      _fightSchoolCtx.imageSmoothingEnabled = false;
-      _fightSchoolFrame = -999;
-    }
-    const fpsNow = (window.__qrFps && Number(window.__qrFps.fps)) || 60;
-    const stride = fpsNow < 45 ? 3 : 2;
-    if ((frameNo - _fightSchoolFrame) >= stride) {
-      /* Lista i sortowanie sa potrzebne tylko wtedy, kiedy naprawde
-         przerysowujemy cache tla lawicy. W pozostalych klatkach kopiujemy
-         gotowa warstwe i nie alokujemy/sortujemy niczego. */
-      _kolejnoscRysowania.length = 0;
-      for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);
-      _kolejnoscRysowania.sort((a, b) => a.y - b.y);
-
-      _fightSchoolCtx.clearRect(0, 0, Wc, Hc);
-      for (const f of _kolejnoscRysowania) drawFish(_fightSchoolCtx, f);
-      _fightSchoolFrame = frameNo;
-    }
-    g.drawImage(_fightSchoolBuf, 0, 0);
-  } else {
-    _fightSchoolFrame = -999;
-    _kolejnoscRysowania.length = 0;
-    for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);
-    _kolejnoscRysowania.sort((a, b) => a.y - b.y);
-    for (const f of _kolejnoscRysowania) drawFish(g, f);
-  }
+  _kolejnoscRysowania.length = 0;
+  for (const f of school) if (!f.caught) _kolejnoscRysowania.push(f);
+  _kolejnoscRysowania.sort((a, b) => a.y - b.y);
+  for (const f of _kolejnoscRysowania) drawFish(g, f);
   /* SERCE NAD RYBAMI WYLACZONE (IX 2026, zgloszenie Andrzeja: "serce
      na glowach psuje imersje"). Informacja przeniosla sie do tablicy
      TARLA obok przycisku LAWICA -- ten sam komunikat, poza kadrem.
