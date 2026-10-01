@@ -285,7 +285,7 @@ const Zawody = (() => {
              nieprawidlowe dane). Nie moze ono blokowac wszystkich kolejnych
              polowow. Bledy chwilowe/serwerowe zostawiamy w kolejce do
              ponowienia. */
-          if (e && e.status >= 400 && e.status < 500) {
+          if (e && e.status === 400) {
             kolejka.shift();
             blad = e.message || 'Jedno zgłoszenie turniejowe zostało odrzucone.';
             continue;
@@ -293,7 +293,7 @@ const Zawody = (() => {
           throw e;
         }
       }
-      if (!blad) blad = '';
+      blad = '';
       await odswiez();
     } catch (e) {
       blad = e.message || 'Nie udało się zgłosić ryby.';
