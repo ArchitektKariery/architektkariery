@@ -65,7 +65,7 @@
        cały korpus nadal dostaje ją wyłącznie przez śledzenie poprzednika. */
     const pion = Math.max(-2.4, Math.min(2.4, (f.vyGladka || 0) * 0.038));
     const celGlowy =
-      Math.sin(faza * 0.86) * G2.fala * 1.55 +
+      Math.sin(faza * 0.86) * G2.fala * 2.40 +
       Math.sin(faza * 0.37 + 1.15) * G2.fala * 0.30 +
       pion;
 
