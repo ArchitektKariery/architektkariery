@@ -730,8 +730,11 @@ function drawCard(g, t) {
       g.drawImage(GS.img, 0, 0, F.w, F.h, -fw / 2, -fh / 2, fw, fh);
     }
     g.restore();
-  } else if (D.klucz === 'smok_zycia' && window.QRYBY_SMOK_CHAIN_MOTION && QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie) {
-    /* Smok Zycia na karcie: wygiete, zywe cialo z src/smok-zycia/chain-motion.js. */
+  } else if (D.klucz === 'smok_zycia' && !(tierK === 8 && ramka && ramka.ready && RS) &&
+             window.QRYBY_SMOK_CHAIN_MOTION && QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie) {
+    /* Smok Zycia na karcie. Ramka pasma 8 ma wlasna rycine Smoka w oknie
+       grafiki, wiec rysujemy go tylko wtedy, gdy tej ramki brak: wygiete,
+       zywe cialo z src/smok-zycia/chain-motion.js. */
     g.save();
     g.beginPath(); g.rect(ax, ay, aw, ah); g.clip();
     QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie(g, ax, ay, aw, ah, t);

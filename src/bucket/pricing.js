@@ -429,7 +429,8 @@ window.przeliczOferte = przeliczOferte;
    punkt startowy bez zgadywania wagi. */
 function sredniaRynkowa(slug) {
   const d = gieldaStan();
-  const klasa = (window.KLASA && KLASA[slug]) || 1;
+  /* Pasmo 8 (Smok Zycia) ma stawke mitycznego pasma 7. */
+  const klasa = Math.min(7, (window.KLASA && KLASA[slug]) || 1);
   const bazowa = (STAWKA_TIER[klasa] || STAWKA_TIER[1]) * mnoznikXScore(10);
   if (!d) return bazowa;
   const s = d.gielda.sprzedaze[slug];

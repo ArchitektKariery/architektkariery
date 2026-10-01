@@ -179,7 +179,8 @@ const Zlecenia = (() => {
   function kandydat(gk) {
     const G2 = GATUNKI[gk];
     if (!G2 || G2.zepsuty) return false;
-    if (((window.KLASA && KLASA[gk]) || 1) === 7) return false;
+    /* Pasmo 8 (Smok Zycia) jest legenda: tak samo poza zleceniami. */
+    if (((window.KLASA && KLASA[gk]) || 1) >= 7) return false;
     return true;
   }
 

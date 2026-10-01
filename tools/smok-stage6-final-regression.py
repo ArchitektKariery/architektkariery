@@ -55,6 +55,18 @@ if meta_match:
 # Rozmiar z widocznej szerokosci jeziora (jedno zrodlo prawdy) z limitem slupa wody.
 checks["screen_width_from_visible_lake"] = bool(re.search(r"const DLUGOSC_KADRU = 0\.\d+;", src)) and "function zmierzWidok()" in src and "DLUGOSC_MAX_SLUPA" in src
 
+# Pasmo 8: legenda z wlasna ramka karty (RAMKA8 musi byc poprawnym PNG),
+# ekonomia jak mityczne pasmo 7, wpis w atlasie.
+ramka8 = re.search(r'window\.RAMKA8_SRC="data:image/png;base64,([A-Za-z0-9+/=]+)"', src)
+checks["dragon_band_8"] = "KLASA.smok_zycia = 8;" in src
+checks["band8_frame_png_crc_valid"] = bool(ramka8 and png_crc_valid(ramka8.group(1)))
+checks["band8_economy_like_mythic"] = all(x in src for x in [
+    "KLASA[r.gat] >= 7",
+    "KLASA[gk]) || 1) >= 7) return false;",
+    "Math.min(7, (window.KLASA && KLASA[slug]) || 1)",
+])
+checks["dragon_atlas_entry"] = '"smok_zycia":"Pierwsza prawdziwa legenda' in src and "legenda spoza rejestru" in src
+
 # 3) Fortune Cookie -> next shoal -> exactly one dragon
 checks["fortune_has_dragon_outcome"] = "{id:'smok_zycia'" in src and "legendary:'smok_zycia'" in src
 checks["fortune_pending_promotes_next_shoal"] = (

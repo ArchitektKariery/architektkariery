@@ -103,6 +103,13 @@ const MysteryHints = (() => {
     const a = lista(gk);
     const n = a.length;
     if (!n) return 'BRAK WŁASNYCH OBSERWACJI';
+    /* Smok Zycia: pora, pogoda i ksiezyc nic tu nie mowia. Jedyny warunek
+       to spelniona wrozba z ciastka i kazdy polow go potwierdza. */
+    if (gk === 'smok_zycia') {
+      const d10 = n % 10, d100 = n % 100;
+      const polowy = n === 1 ? ' POŁÓW' : (d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14)) ? ' POŁOWY' : ' POŁOWÓW';
+      return n + polowy + ' · WARUNEK: WRÓŻBA Z CIASTKA';
+    }
     if (n < 3) return n + (n === 1 ? ' POŁÓW' : ' POŁOWY') + ' · WARUNEK NIEPOTWIERDZONY';
 
     /* Najpierw szukamy wzorcow, ktore sa najbardziej "warunkowe":
@@ -151,6 +158,13 @@ const MysteryHints = (() => {
 
   function wiedza(gk, znany, plotka) {
     if (!WL) return plotka || '';
+
+    /* Smok Zycia nie ma bramy pory, opadu ani ksiezyca. Warunkiem jest
+       spelniona wrozba z ciastka, a pierwszy polow ja potwierdza. */
+    if (gk === 'smok_zycia') {
+      return znany ? 'POTWIERDZONE · przypływa tylko po spełnionej wróżbie z ciastka'
+                   : 'PLOTKA · ' + (plotka || 'stworzenie z wróżby');
+    }
 
     /* Nieodkryty gatunek nie dostaje twardej instrukcji. Atlas moze
        podsunac plotke, ale nie zdradza warunku przed pierwszym polowem. */
@@ -495,7 +509,15 @@ const Ksiega = (() => {
          i stempel pasma. Nieodkryta rycina jest tylko lekko przygaszona,
          zeby bylo widac, ze karta nie jest jeszcze zdobyta.
          ============================================================ */
-      if (znany) g.drawImage(img, dx, dy, dw, dh);
+      if (znany && k === 'smok_zycia' && window.QRYBY_SMOK_CHAIN_MOTION && QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie) {
+        /* Smok Zycia: wygiete cialo w ksztalcie litery S, jak w jeziorze,
+           a nie prosty pasek sprite'a. */
+        g.save();
+        g.beginPath(); g.rect(L, ry, P - L, rh); g.clip();
+        QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie(g, L, ry, P - L, rh, 0, 0.5);
+        g.restore();
+      }
+      else if (znany) g.drawImage(img, dx, dy, dw, dh);
       else if ((window.KLASA && KLASA[k]) >= 7) {
         /* Pasmo 7, nieodkryte: NIC z wygladu gatunku, nawet sylwetka --
            tylko znak zapytania na pustym tle strony, tak samo jak
@@ -619,7 +641,10 @@ const Ksiega = (() => {
       ['WIEDZA', wiedzaMyst],
       ['OBSERWACJE', obserMyst],
       ['OPIS', znany ? (OPISY_ATLAS[k] || '') : '\u2014'],
-      ['REKORD POLSKI', znany ? (G2.rekordDl + ' cm \u00B7 ' + kg(G2.rekordWaga) + ' kg') : '\u2014'],
+      /* Smok Zycia nie ma rekordu Polski: dlugosc i waga dziedziczone
+         po gatunku bazowym nic o nim nie mowia. */
+      ['REKORD POLSKI', znany ? (k === 'smok_zycia' ? 'brak · legenda spoza rejestru'
+        : (G2.rekordDl + ' cm \u00B7 ' + kg(G2.rekordWaga) + ' kg')) : '\u2014'],
       ['TWÓJ REKORD', (mo && mo.n) ? (mo.cm + ' cm \u00B7 ' + kg(mo.g) + ' kg \u00B7 ' + mo.pkt + ' pkt') : 'brak'],
       ['REKORD SPOŁECZNOŚCI', (() => {
         const s = (typeof Zapis !== 'undefined' && Zapis.spoleczny) ? Zapis.spoleczny(k) : null;

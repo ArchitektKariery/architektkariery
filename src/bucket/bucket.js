@@ -144,7 +144,8 @@ window.Gielda = {
     let bonusMit = 0;
     if (window.KLASA) {
       const stawka = window.NAGRODA_MITYCZNA || 10000000;
-      for (const r of d.wiaderko) if (r && KLASA[r.gat] === 7) bonusMit += stawka;
+      /* Pasmo 8 (Smok Zycia) placi tak samo jak mityczne pasmo 7. */
+      for (const r of d.wiaderko) if (r && KLASA[r.gat] >= 7) bonusMit += stawka;
     }
     if (bonusMit) {
       d.monety = (d.monety || 0) + bonusMit;

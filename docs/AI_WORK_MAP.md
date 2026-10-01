@@ -105,9 +105,10 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 
 | Temat | Plik |
 |---|---|
-| Smok Życia: rejestracja i sprite | `src/smok-zycia/species.js` |
+| Smok Życia: rejestracja, sprite i pasmo 8 (`KLASA.smok_zycia = 8`; ekonomia jak pasmo 7: `src/bucket/bucket.js`, `orders.js`, `pricing.js`) | `src/smok-zycia/species.js` |
 | Smok Życia: wydarzenie ławicy, wejście zza kadru, 50% brania, odpływanie; sterowanie głowy (łuki z promieniem ograniczonym głębokością wody, tor Dubinsa do przynęty); rozmiar: `DLUGOSC_KADRU` (ułamek widocznej szerokości jeziora, najwyżej 0,9 słupa wody) i `GRUBOSC` | `src/smok-zycia/event.js` |
 | Smok Życia: ciało łańcuchowe (25 punktów kręgosłupa, 48 pasków sprite'a, `f.__smokCialo`; tryb ścieżki w wodzie, fizyka holu i wyciągania) oraz Smok na karcie (`QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie`, wołane z `src/card/card.js`) | `src/smok-zycia/chain-motion.js` |
+| Smok Życia: karta pasma 8 (ramka `RAMKA8_SRC` z ryciną Smoka) i strona atlasu (wiedza, obserwacje, opis, rekord) | `assets/sprites/card-frames.js`, `src/atlas/atlas.js`, `src/atlas/atlas-data.js` |
 | Lucjanek: odnowa gatunków, wpłaty społeczności | `src/lucjanek/community-restoration-live.js` |
 | Lucjan czerwony: gatunek odnowy (pasmo 4, populacja startowa 0) i jego sprite | `src/lucjanek/species.js` |
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |

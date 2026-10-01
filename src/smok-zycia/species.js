@@ -25,6 +25,10 @@
   GATUNKI.smok_zycia.fala = 4.4;
   GATUNKI.smok_zycia.ogon = 5.8;
   GATUNKI.smok_zycia.wykl = Math.min(1.02, baza.wykl || 1);
-  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 7;
-  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 7;
+  /* PASMO 8: legendarne stworzenie. Wlasna ramka karty (RAMKA8, turkus
+     i zloto, z rycina Smoka), wlasny lak w atlasie i ostatnia zakladka
+     ksiegi. Ekonomia traktuje pasmo 8 tak samo jak mityczne pasmo 7
+     (src/bucket: bonus przy sprzedazy, brak zlecen, stawka rynkowa). */
+  if (typeof KLASA !== 'undefined') KLASA.smok_zycia = 8;
+  if (typeof window !== 'undefined' && window.KLASA) window.KLASA.smok_zycia = 8;
 })();
