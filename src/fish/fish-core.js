@@ -566,7 +566,7 @@ function skalaZCm(cm, gk) {
        (src/smok-zycia/event.js). Zapas na wypadek wywolania przed nim. */
     if (window.SmokZycia && SmokZycia.skalaDocelowa) return SmokZycia.skalaDocelowa();
     const kadrW = (typeof Scene !== 'undefined' && Scene && Scene.W) ? Scene.W : 768;
-    return (kadrW * 0.225) / GATUNKI[klucz].meta.w;
+    return (kadrW * 0.675) / GATUNKI[klucz].meta.w;
   }
   return szerokoscZCm(cm) / GATUNKI[klucz].meta.w;
 }

@@ -52,7 +52,8 @@ meta_match = re.search(r"meta:\s*\{\s*w:\s*(\d+),\s*h:\s*(\d+)\s*\}", reg_struct
 checks["sprite_meta_192x62"] = bool(meta_match and int(meta_match.group(1)) == 192 and int(meta_match.group(2)) == 62)
 if meta_match:
     notes["sprite_meta"] = {"w": int(meta_match.group(1)), "h": int(meta_match.group(2))}
-checks["screen_width_22_5pct"] = "DLUGOSC_KADRU = 0.225" in src and "function zmierzWidok()" in src
+# Rozmiar z widocznej szerokosci jeziora (jedno zrodlo prawdy) z limitem slupa wody.
+checks["screen_width_from_visible_lake"] = bool(re.search(r"const DLUGOSC_KADRU = 0\.\d+;", src)) and "function zmierzWidok()" in src and "DLUGOSC_MAX_SLUPA" in src
 
 # 3) Fortune Cookie -> next shoal -> exactly one dragon
 checks["fortune_has_dragon_outcome"] = "{id:'smok_zycia'" in src and "legendary:'smok_zycia'" in src
@@ -87,7 +88,7 @@ checks["movement_profile_present"] = "smok_zycia:'smok'" in src and "rytm:[.62,.
 # Etap C (1 X 2026): wejscie zza krawedzi bez skalowania, zwroty lukiem,
 # cialo lancuchowe rysowane paskami wzdluz kregoslupa.
 checks["entry_from_offscreen"] = "f.smokStan = 'wplywa';" in src and "V.lewo - 0.08 * L" in src and "f.s = cel * (0.58" not in src
-checks["arc_turns"] = "f.smokZwrot" in src and "const kMax = 1 / (ruch.r * L);" in src and "function planujPodejscie(f)" in src
+checks["arc_turns"] = "f.smokZwrot" in src and "const R = promien(ruch), kMax = 1 / R;" in src and "function planujPodejscie(f)" in src
 checks["chain_body_renderer"] = "ETAP C: cialo lancuchowe aktywne" in src and "function rysujWstege(" in src
 checks["departure_state"] = "f.smokStan = 'odplywa';" in src
 

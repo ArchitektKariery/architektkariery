@@ -730,6 +730,12 @@ function drawCard(g, t) {
       g.drawImage(GS.img, 0, 0, F.w, F.h, -fw / 2, -fh / 2, fw, fh);
     }
     g.restore();
+  } else if (D.klucz === 'smok_zycia' && window.QRYBY_SMOK_CHAIN_MOTION && QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie) {
+    /* Smok Zycia na karcie: wygiete, zywe cialo z src/smok-zycia/chain-motion.js. */
+    g.save();
+    g.beginPath(); g.rect(ax, ay, aw, ah); g.clip();
+    QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie(g, ax, ay, aw, ah, t);
+    g.restore();
   }
 
   /* --- NAZWA GATUNKU ---

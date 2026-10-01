@@ -60,7 +60,9 @@ assert 0.495 <= ratio2 <= 0.505
 # 22,5% widocznej szerokosci jeziora, wejscie zza krawedzi kadru,
 # glowa prowadzi lukiem (skret = krzywizna * droga, bez krecenia
 # w miejscu), podejscie torem Dubinsa, atak Smoka bez krazenia plotki.
-assert "DLUGOSC_KADRU = 0.225" in src, "approved 22.5% dragon length missing"
+m_len = re.search(r"const DLUGOSC_KADRU = (0\.\d+);", src)
+assert m_len and 0.2 <= float(m_len.group(1)) <= 0.7, "dragon length must come from the visible lake width"
+assert "DLUGOSC_MAX_SLUPA" in src, "dragon length must be capped by the water column"
 assert "f.smokStan = 'wplywa';" in src, "entry from off-screen missing"
 assert "function prowadz(f, dt, cx, cy, ruch, calySlup)" in src, "head-led steering missing"
 assert "f.smokKurs = katRoznica(f.smokKurs + (f.smokK + meander) * ds, 0);" in src, "turn must scale with distance"

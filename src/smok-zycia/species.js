@@ -2,7 +2,7 @@
    SMOK ZYCIA — REWORK V2.
    Sprite: oficjalny Smok Życia — turkus / blekit / krem / zloto, epicki pixel-art.
    Glowa po LEWEJ stronie pliku, ogon po PRAWEJ, grzbiet u gory.
-   Rozmiar na scenie: SmokZycia.dlugosc() (22,5% szerokosci jeziora).
+   Rozmiar na scenie: SmokZycia.dlugosc() (67,5% szerokosci jeziora).
    Cialo rysuje src/smok-zycia/chain-motion.js (lancuch, nie sztywny sprite). */
 (function dodajSmokaZycia() {
   if (typeof GATUNKI === 'undefined' || GATUNKI.smok_zycia) return;

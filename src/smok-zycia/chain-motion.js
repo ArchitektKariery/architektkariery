@@ -157,7 +157,11 @@
     const v = Math.abs(f.smokV || 0);
     const vL = Math.min(1.5, v / L);
     const K = 6.2832 / (0.85 * L);
-    C.fala += dt * 6.2832 * (0.42 + 1.05 * vL);
+    /* Czestotliwosc fali: spoczynkowa maleje z rozmiarem (duze cialo
+       faluje wolniej), a czlon od predkosci trzyma fale ok. 1,1 raza
+       szybsza od plywania, jak u wegorza. */
+    const J = (window.SmokZycia && SmokZycia.jednostka) ? SmokZycia.jednostka() : L;
+    C.fala += dt * 6.2832 * (0.42 * Math.sqrt(Math.min(1, J / L)) + v / (1.12 * 0.85 * L));
     const amp = L * (0.038 + 0.032 * Math.min(1, vL / 0.4));
     for (let i = 1; i < N; i++) {
       const q = i / (N - 1);
@@ -233,9 +237,11 @@
       C.x[i] = C.x[i - 1] + (ax * cM - ay * sg) * seg;
       C.y[i] = C.y[i - 1] + (ay * cM + ax * sg) * seg;
     }
-    /* W wodzie cialo zostaje pod tafla i nad kamieniami. */
+    /* W wodzie cialo zostaje pod tafla i nad kamieniami, z zapasem
+       na grubosc tulowia. */
     if (woda) {
-      const gora = Scene.SURFACE + 3, dol = Scene.BED - 3;
+      const zapas = 3 + 0.08 * L;
+      const gora = Scene.SURFACE + zapas, dol = Scene.BED - zapas;
       for (let i = 1; i < N; i++) {
         if (C.y[i] < gora) C.y[i] = gora;
         else if (C.y[i] > dol) C.y[i] = dol;
@@ -275,7 +281,7 @@
     return prev || (tx >= 0 ? 1 : -1);
   }
 
-  function rysujWstege(g, f, G2, C, L, seg) {
+  function rysujWstege(g, f, G2, C, L, seg, grubosc) {
     const tex = obrazRyby(G2, f);
     if (!tex) return;
     const W = G2.meta.w, H = G2.meta.h;
@@ -314,13 +320,15 @@
     }
 
     const kn = L / W;
+    /* Grubosc ciala: jedno zrodlo prawdy w SmokZycia.grubosc(). */
+    const gr = grubosc || ((window.SmokZycia && SmokZycia.grubosc) ? SmokZycia.grubosc() : 1);
     g.save();
     if (f.alpha !== undefined && f.alpha < 1) g.globalAlpha *= Math.max(0, f.alpha);
     for (let k = 0; k < nP; k++) {
       const u0 = k * PZ, u1 = Math.min(W, u0 + PZ), du = u1 - u0;
       if (du <= 0) continue;
       const tx = sTx[k], ty = sTy[k], sg = sSg[k];
-      const ax = sLen[k] / du, an = kn * sGr[k];
+      const ax = sLen[k] / du, an = kn * sGr[k] * gr;
       const su0 = Math.max(0, u0 - 0.6), su1 = Math.min(W, u1 + 0.6);
       g.save();
       g.transform(tx * ax, ty * ax, -ty * sg * an, tx * sg * an,
@@ -413,6 +421,36 @@
     rysujWstege(g, f, G2, tymczasowy, L, seg);
   }
 
+  /* ---------- SMOK NA KARCIE ----------
+     Okno grafiki karty (src/card/card.js). Smok w ksztalcie litery S
+     plynie nad jeziorem lotosow, glowa w lewo. Kregoslup powstaje
+     z kursu, ktory faluje wzdluz ciala; fala biegnie od glowy do ogona,
+     wiec Smok na karcie tez zyje. Bez nowych canvasow i obrazkow. */
+  const naKarcie = nowyStan();
+  const atrapa = { alpha: 1 };
+  function rysujNaKarcie(g, x, y, w, h, t) {
+    const G2 = window.GATUNKI && GATUNKI.smok_zycia;
+    if (!G2 || !G2.img || !G2.img.complete || G2.zepsuty || !G2.img.naturalWidth) return;
+    const C = naKarcie;
+    const gr = (window.SmokZycia && SmokZycia.grubosc) ? SmokZycia.grubosc() : 1;
+    const L = Math.min(w * 0.94, h * 0.62 / ((G2.meta.h / G2.meta.w) * gr));
+    const seg = L / (N - 1);
+    const fala = (t || 0) * 1.3;
+    const A = 0.58;
+    let px = 0, py = 0, sx = 0, sy = 0;
+    for (let i = 0; i < N; i++) {
+      C.x[i] = px; C.y[i] = py; sx += px; sy += py;
+      const q = i / (N - 1);
+      const kat = A * (0.55 + 0.45 * q) * Math.sin(6.2832 * q * 1.05 - fala);
+      px += Math.cos(kat) * seg; py += Math.sin(kat) * seg;
+    }
+    /* Srodek ciezkosci kregoslupa w gornej czesci okna: Smok na niebie. */
+    const ox = x + w * 0.5 - sx / N, oy = y + h * 0.40 + Math.sin((t || 0) * 0.9) * h * 0.02 - sy / N;
+    for (let i = 0; i < N; i++) { C.x[i] += ox; C.y[i] += oy; }
+    C.lustro.fill(1);
+    rysujWstege(g, atrapa, G2, C, L, seg, gr);
+  }
+
   drawFish = function (g, f, angle) {
     if (!f || f.gat !== SLUG) return drawFishZwykly(g, f, angle);
     const G2 = gat(f);
@@ -444,6 +482,7 @@
     version: 'C1',
     links: N - 1,
     paski: Math.ceil(192 / PZ),
+    rysujNaKarcie: rysujNaKarcie,
     /* Podglad dla testow: tryb i punkty kregoslupa. */
     stan(f) {
       const C = f && f.__smokCialo;
