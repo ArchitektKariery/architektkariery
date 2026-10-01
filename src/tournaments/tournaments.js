@@ -499,6 +499,9 @@ window.konsolacjaTurniejowa = konsolacjaTurniejowa;
   function rybka(slug, px) {
     const g2 = window.GATUNKI && GATUNKI[slug];
     if (!g2 || !g2.src) return '';
+    /* Ryba odnowy z tajemnica (src/odnowa) nie pokazuje sie przed
+       koncem zbiorki, takze jako miniaturka na pasku. */
+    if (window.QRYBY_ODNOWA_UKRYTA && QRYBY_ODNOWA_UKRYTA(slug)) return '';
     return '<img class="rb" src="' + g2.src + '" height="' + px + '" alt="">';
   }
 

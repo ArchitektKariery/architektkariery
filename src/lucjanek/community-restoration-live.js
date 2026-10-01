@@ -322,6 +322,22 @@
     }
   }
 
+  /* TAJEMNICA (src/odnowa/odnowy.js, tajemnica: true). Do chwili sukcesu
+     karta ma znak zapytania zamiast ryby i w DOM nie ma nawet <img>, wiec
+     przegladarka nie pobiera pliku z obrazkiem. Gdy serwer powie funded
+     albo completed, znak zapytania ustepuje rybie z animacja odsloniecia
+     (css/01-hud.css, .odn-odslona). */
+  function odslon(card, C) {
+    const sekret = card.querySelector('.odn-sekret');
+    if (!sekret || !C || !C.obraz) return;
+    const img = document.createElement('img');
+    img.className = 'odn-fish odn-odslona';
+    img.alt = '';
+    img.src = C.obraz;
+    sekret.replaceWith(img);
+    card.dataset.tajemnica = 'odkryta';
+  }
+
   function renderLive(card, event, rows) {
     const C = cfgOf(cardSlug(card));
     const T = (typeof window.odnowaTeksty === 'function') ? window.odnowaTeksty(C) : null;
@@ -332,6 +348,7 @@
     card.dataset.tier = String(tierFor(pct));
     card.dataset.state = event.state === 'completed' ? 'sold' : (event.state || 'funding');
     card.style.setProperty('--odn-progress', pct + '%');
+    if (event.state === 'funded' || event.state === 'completed') odslon(card, C);
 
     const nums = card.querySelectorAll('.odn-numbers span');
     if (nums[0]) nums[0].textContent = fmt(raised) + ' QRYB';

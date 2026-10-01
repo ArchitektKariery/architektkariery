@@ -1363,6 +1363,12 @@ const Eko = (() => {
       if (GATUNKI[gk] && GATUNKI[gk].bezEko) continue;
       const r = E.gat[gk];
       if (!r || (!r.wymarly && r.n > 0)) continue;
+      /* Gatunek odnowy, ktory jeszcze NIGDY nie plywal w jeziorze (n = 0,
+         nie wymarly), czeka na zbiorke spolecznosci, a nie na Smoka.
+         Bez tej bramy Smok wpuszczal lokalnie pare Karpika Surinamskiego
+         przed koncem zbiorki i zdradzal jego wyglad. Po wypuszczeniu
+         i wymarciu (wymarly = true) Smok przywraca go jak kazdy inny. */
+      if (GATUNKI[gk] && GATUNKI[gk].odnowa && !r.wymarly && !(r.n > 0)) continue;
       r.n=2; r.m=1; r.f=1; r.wymarly=false; r.kiedyWymarl=0;
       r.max=Math.max(r.max||0,2); r.min=Math.min(r.min||0,0); r.indyw=true;
       if (E.osob) E.osob[gk]=[];

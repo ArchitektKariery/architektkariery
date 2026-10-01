@@ -11,6 +11,12 @@ root = Path(".")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from qryby_source import read_game_source  # qryby.html + moduly src/, css/
 html = read_game_source(root)
+# Tagi <script src> liczymy w surowym qryby.html. W sklejonym zrodle tag
+# modulu znika (wraca jako jego tresc), a sciezka w zwyklym komentarzu
+# psula albo udawala zgodnosc licznika.
+entry = (root / "qryby.html").read_text(encoding="utf-8")
+def tagi(path):
+    return entry.count('<script src="' + path + '?') + entry.count('<script src="' + path + '"')
 live = (root / "src/lucjanek/community-restoration-live.js").read_text(encoding="utf-8")
 doc = (root / "docs/lucjanek-community-event.md").read_text(encoding="utf-8")
 
@@ -21,8 +27,9 @@ require(any(x in html for x in [
     "2026-09-26-fight-perf-v3",
     "2026-09-30-lucjan-czerwony-v1",
     "2026-10-01-hol-plynnosc-v1",
+    "2026-10-01-karpik-tajemnica-v1",
 ]), "missing supported QRyby build id")
-require(html.count("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
+require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
 require("KLASA.lucjan_czerwony = 4" in html, "Lucjan must be pasmo 4")
 require("if (G2.odnowa) return 0" in html, "restoration species must start at population 0")
@@ -79,7 +86,7 @@ reg_path = root / "src/odnowa/odnowy.js"
 require(reg_path.exists(), "restoration registry src/odnowa/odnowy.js missing")
 reg = reg_path.read_text(encoding="utf-8") if reg_path.exists() else ""
 require("window.QRYBY_ODNOWY" in html, "restoration registry must be loaded by qryby.html")
-require(html.count("src/odnowa/odnowy.js") == 1, "restoration registry tag must exist exactly once")
+require(tagi("src/odnowa/odnowy.js") == 1, "restoration registry tag must exist exactly once")
 require("const cardSlug = (card)" in live and "p_slug: cardSlug(card)" in live, "contribution must use the card's event slug")
 require("for (const O of ODNOWY)" in live, "lifecycle must cover every restoration event")
 for gat, nagroda in _re.findall(r"gat: '([a-z0-9_]+)'[\s\S]*?nagroda: '([a-z]+)'", reg):
@@ -93,6 +100,20 @@ for gat, nagroda in _re.findall(r"gat: '([a-z0-9_]+)'[\s\S]*?nagroda: '([a-z]+)'
             require("revoke all on function private.community_reward_pair(uuid) from anon, authenticated" in t,
                     f"{p.name}: pair reward must not be callable by players")
             require("1000000000" in t and "604800" in t, f"{p.name}: target 1 000 000 000 QRYB / 7 dni expected")
+
+# Tajemnica (1 X 2026): zbiorka z "tajemnica: true" nie pokazuje wygladu
+# ryby, dopoki cel nie padnie. Kazda sciezka, ktora moglaby pokazac rybe
+# przed sukcesem, ma swoja brame.
+if "tajemnica: true" in reg:
+    require("window.QRYBY_ODNOWA_UKRYTA = function" in html, "restoration secrecy helper missing")
+    require('<span class="odn-sekret"><b>?</b></span>' in html, "restoration card must render a question mark while secret")
+    require("const ukryta = !!E.tajemnica && odnowaUkryta(E.gat)" in html, "restoration card must not render the fish image while secret")
+    require(html.count(".filter(k => !odnowaUkryta(k))") >= 4, "league species picker must hide secret restoration species")
+    require("QRYBY_ODNOWA_UKRYTA(slug)) return ''" in html, "tournament bar must not draw a secret restoration fish")
+    require("GATUNKI[k].odnowa && !(populacjaOdnowy(k) > 0)" in html, "spawn table must give unreleased restoration species a hard zero")
+    require("GATUNKI[gk].odnowa && !r.wymarly && !(r.n > 0)) continue" in html, "Smok Zycia must not release an unfunded restoration species")
+    require("function odslon(card, C)" in live and "odslon(card, C);" in live, "live client must reveal the fish after success")
+    require(".odn-odslona" in html, "reveal animation style missing")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

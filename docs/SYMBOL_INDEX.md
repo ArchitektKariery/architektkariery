@@ -4,13 +4,13 @@
 > Kazda globalna nazwa gry (funkcja, stala, zmienna, eksport `window.X`) i miejsce jej definicji.
 > Linia liczy sie od poczatku pliku modulu.
 
-Liczba wpisow: 522
+Liczba wpisow: 523
 
 | Nazwa | Rodzaj | Plik | Linia |
 |---|---|---|---|
 | `__AC` | window.__AC = | `src/audio/haptics.js` | 173 |
 | `__bookReturnMenu` | window.__bookReturnMenu = | `src/atlas/atlas.js` | 322 |
-| `__bookReturnMenu` | window.__bookReturnMenu = | `src/ui/panel.js` | 1879 |
+| `__bookReturnMenu` | window.__bookReturnMenu = | `src/ui/panel.js` | 1898 |
 | `__ekoDiag` | window.__ekoDiag = | `src/ecosystem/server.js` | 63 |
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/fish-core.js` | 252 |
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/school-update.js` | 175 |
@@ -22,7 +22,7 @@ Liczba wpisow: 522
 | `__quickNavInvoke` | window.__quickNavInvoke = | `src/ui/panel.js` | 404 |
 | `__wagiTab` | window.__wagiTab = | `src/ecosystem/population.js` | 368 |
 | `__wagiTab` | window.__wagiTab = | `src/ecosystem/server.js` | 98 |
-| `__wagiTab` | window.__wagiTab = | `src/fish/fish-core.js` | 392 |
+| `__wagiTab` | window.__wagiTab = | `src/fish/fish-core.js` | 408 |
 | `__wymusPasmoProg` | window.__wymusPasmoProg = | `src/fish/school-update.js` | 93 |
 | `_amb` | let | `src/audio/ambient.js` | 35 |
 | `_ambStart` | let | `src/audio/ambient.js` | 36 |
@@ -184,12 +184,12 @@ Liczba wpisow: 522
 | `G` | const | `src/core/state.js` | 2 |
 | `gat` | function | `src/fish/fish-core.js` | 53 |
 | `GATUNKI` | const | `src/fish/species.js` | 15 |
-| `gauss` | function | `src/fish/fish-core.js` | 410 |
+| `gauss` | function | `src/fish/fish-core.js` | 426 |
 | `Gielda` | window.Gielda = | `src/bucket/bucket.js` | 85 |
 | `gieldaStan` | function | `src/bucket/pricing.js` | 118 |
-| `glebokoscZ` | function | `src/fish/fish-core.js` | 521 |
+| `glebokoscZ` | function | `src/fish/fish-core.js` | 537 |
 | `gotowe` | let | `src/fish/fish-core.js` | 2 |
-| `Gracz` | window.Gracz = | `src/ui/panel.js` | 2165 |
+| `Gracz` | window.Gracz = | `src/ui/panel.js` | 2184 |
 | `grubosc` | function | `src/fish/school.js` | 36 |
 | `GRUBOSC` | const | `src/fish/school.js` | 17 |
 | `GRUBOSC_DOM` | const | `src/fish/school.js` | 16 |
@@ -228,11 +228,11 @@ Liczba wpisow: 522
 | `LOCK_PO` | const | `src/fish/bite.js` | 144 |
 | `lockDepth` | function | `src/fish/mechanics.js` | 327 |
 | `LodkaFX` | const | `src/angler/angler.js` | 220 |
-| `losujCm` | function | `src/fish/fish-core.js` | 469 |
+| `losujCm` | function | `src/fish/fish-core.js` | 485 |
 | `losujGatunek` | function | `src/fish/fish-core.js` | 244 |
 | `losujGatunekZOknami` | function | `src/rarity/okna.js` | 314 |
 | `losujHandlarza` | function | `src/bucket/pricing.js` | 340 |
-| `losujKond` | function | `src/fish/fish-core.js` | 495 |
+| `losujKond` | function | `src/fish/fish-core.js` | 511 |
 | `losujZPaczki` | function | `src/market/bait-effects.js` | 9 |
 | `lure` | let | `src/fish/bite.js` | 7 |
 | `lureFish` | function | `src/fish/hook.js` | 77 |
@@ -275,12 +275,12 @@ Liczba wpisow: 522
 | `nowaLawica` | function | `src/fish/school.js` | 68 |
 | `nowaOferta` | function | `src/bucket/pricing.js` | 360 |
 | `obrazRyby` | function | `src/fish/species.js` | 1643 |
-| `OBROT_CZAS` | const | `src/fish/fish-core.js` | 576 |
+| `OBROT_CZAS` | const | `src/fish/fish-core.js` | 592 |
 | `ochota` | function | `src/fish/behavior.js` | 44 |
 | `odbicieBrzegu` | function | `src/scene/makieta.js` | 1360 |
 | `oddech` | function | `src/fish/behavior.js` | 400 |
 | `ODDYCHA` | var | `src/fish/behavior.js` | 399 |
-| `odnowaTeksty` | window.odnowaTeksty = | `src/ui/panel.js` | 823 |
+| `odnowaTeksty` | window.odnowaTeksty = | `src/ui/panel.js` | 824 |
 | `ofertaZaRybe` | function | `src/bucket/pricing.js` | 320 |
 | `OKNA` | const | `src/rarity/okna.js` | 30 |
 | `OKNO_GODZIN` | const | `src/fish/fish-core.js` | 165 |
@@ -305,17 +305,17 @@ Liczba wpisow: 522
 | `ploszWokolHaczyka` | function | `src/fish/bite.js` | 146 |
 | `ploszWokolRyby` | function | `src/fish/charge.js` | 45 |
 | `plusk` | function | `src/audio/ambient.js` | 180 |
-| `PODLOGA_SYLWETKI` | const | `src/fish/fish-core.js` | 556 |
+| `PODLOGA_SYLWETKI` | const | `src/fish/fish-core.js` | 572 |
 | `Pogoda` | const | `src/world/pogoda.js` | 26 |
 | `pokazPanel` | window.pokazPanel = | `src/ui/panel.js` | 93 |
-| `pokazPytanieWymiany` | window.pokazPytanieWymiany = | `src/ui/panel.js` | 1369 |
-| `pokazWynikTurnieju` | window.pokazWynikTurnieju = | `src/ui/panel.js` | 2694 |
+| `pokazPytanieWymiany` | window.pokazPytanieWymiany = | `src/ui/panel.js` | 1388 |
+| `pokazWynikTurnieju` | window.pokazWynikTurnieju = | `src/ui/panel.js` | 2715 |
 | `polowanie` | function | `src/fish/behavior.js` | 257 |
 | `POMOC` | const | `src/atlas/atlas-data.js` | 27 |
 | `POP` | const | `src/fish/fish-core.js` | 114 |
 | `PORA` | const | `src/world/pora.js` | 40 |
-| `PortretHandlarza` | window.PortretHandlarza = | `src/ui/panel.js` | 1581 |
-| `POTWOR` | const | `src/fish/fish-core.js` | 466 |
+| `PortretHandlarza` | window.PortretHandlarza = | `src/ui/panel.js` | 1600 |
+| `POTWOR` | const | `src/fish/fish-core.js` | 482 |
 | `POWTORKA` | const | `src/fish/bite.js` | 115 |
 | `PREDKOSC` | var | `src/fish/behavior.js` | 125 |
 | `predkoscGat` | function | `src/fish/spawning.js` | 20 |
@@ -342,11 +342,12 @@ Liczba wpisow: 522
 | `QDiag` | const | `src/core/qdiag.js` | 5 |
 | `QRYBY_BUILD` | window.QRYBY_BUILD = | `src/core/config.js` | 13 |
 | `QRYBY_CHMURA` | window.QRYBY_CHMURA = | `src/core/config.js` | 2 |
-| `QRYBY_COMMUNITY_EKO` | window.QRYBY_COMMUNITY_EKO = | `src/lucjanek/community-restoration-live.js` | 447 |
-| `QRYBY_COMMUNITY_READ` | window.QRYBY_COMMUNITY_READ = | `src/lucjanek/community-restoration-live.js` | 454 |
+| `QRYBY_COMMUNITY_EKO` | window.QRYBY_COMMUNITY_EKO = | `src/lucjanek/community-restoration-live.js` | 464 |
+| `QRYBY_COMMUNITY_READ` | window.QRYBY_COMMUNITY_READ = | `src/lucjanek/community-restoration-live.js` | 471 |
 | `QRYBY_FEATURES` | window.QRYBY_FEATURES = | `src/core/config.js` | 14 |
 | `QRYBY_MIX` | window.QRYBY_MIX = | `src/tasks/tasks.js` | 170 |
-| `QRYBY_ODNOWY` | window.QRYBY_ODNOWY = | `src/odnowa/odnowy.js` | 22 |
+| `QRYBY_ODNOWA_UKRYTA` | window.QRYBY_ODNOWA_UKRYTA = | `src/odnowa/odnowy.js` | 53 |
+| `QRYBY_ODNOWY` | window.QRYBY_ODNOWY = | `src/odnowa/odnowy.js` | 32 |
 | `QRYBY_TEST` | window.QRYBY_TEST = | `src/fish/school-update.js` | 167 |
 | `QRYBY_TEST` | window.QRYBY_TEST = | `src/rarity/rejestr.js` | 82 |
 | `QRYBY_TEST` | window.QRYBY_TEST = | `src/smok-zycia/event.js` | 403 |
@@ -404,11 +405,11 @@ Liczba wpisow: 522
 | `ShareCatch` | const | `src/product/engagement.js` | 155 |
 | `Siec` | const | `src/ecosystem/net-catch.js` | 33 |
 | `SIEC_ANIM` | const | `src/ecosystem/net-anim.js` | 17 |
-| `SiecUI` | window.SiecUI = | `src/ui/panel.js` | 1379 |
+| `SiecUI` | window.SiecUI = | `src/ui/panel.js` | 1398 |
 | `siecZarzuc` | function | `src/ecosystem/net-anim.js` | 19 |
 | `SKALA` | const | `src/rarity/skala-beta.js` | 31 |
-| `SKALA_WIDOCZNOSCI` | const | `src/fish/fish-core.js` | 557 |
-| `skalaZCm` | function | `src/fish/fish-core.js` | 562 |
+| `SKALA_WIDOCZNOSCI` | const | `src/fish/fish-core.js` | 573 |
+| `skalaZCm` | function | `src/fish/fish-core.js` | 578 |
 | `SKLEP_ZAMKNIETY` | window.SKLEP_ZAMKNIETY = | `src/ui/panel.js` | 777 |
 | `SLAD_BARWY` | var | `src/fx/water-traces.js` | 21 |
 | `SLAD_BUDZET` | var | `src/fx/water-traces.js` | 17 |
@@ -445,7 +446,7 @@ Liczba wpisow: 522
 | `szarzaGat` | function | `src/fish/charge.js` | 38 |
 | `szarzuj` | function | `src/fish/charge.js` | 69 |
 | `szarzuje` | function | `src/fish/charge.js` | 43 |
-| `szerokoscZCm` | function | `src/fish/fish-core.js` | 558 |
+| `szerokoscZCm` | function | `src/fish/fish-core.js` | 574 |
 | `TAU` | const | `src/scene/makieta.js` | 31 |
 | `Telemetry` | const | `src/product/telemetry.js` | 12 |
 | `TierArt` | const | `src/card/card.js` | 17 |
@@ -454,7 +455,7 @@ Liczba wpisow: 522
 | `tikNowejLawicy` | function | `src/fish/school.js` | 150 |
 | `touch` | const | `src/core/input-loop.js` | 2 |
 | `trofeumWiaderka` | function | `src/bucket/pricing.js` | 330 |
-| `Turniej` | window.Turniej = | `src/ui/panel.js` | 2714 |
+| `Turniej` | window.Turniej = | `src/ui/panel.js` | 2735 |
 | `typowaWagaGatunku` | function | `src/bucket/pricing.js` | 258 |
 | `uderzenie` | function | `src/fish/behavior.js` | 513 |
 | `UDZIAL_DOCELOWY` | const | `src/fish/species.js` | 1762 |
@@ -468,7 +469,7 @@ Liczba wpisow: 522
 | `w2` | const | `src/scene/makieta.js` | 143 |
 | `wagaGatunku` | function | `src/rarity/okna.js` | 305 |
 | `wagaKandydata` | function | `src/fish/bite.js` | 88 |
-| `wagaZ` | function | `src/fish/fish-core.js` | 502 |
+| `wagaZ` | function | `src/fish/fish-core.js` | 518 |
 | `walka` | function | `src/fish/mechanics.js` | 133 |
 | `WALKA` | const | `src/fish/mechanics.js` | 70 |
 | `WALKA_DOM` | const | `src/fish/mechanics.js` | 69 |
@@ -481,7 +482,7 @@ Liczba wpisow: 522
 | `wg` | const | `src/scene/makieta.js` | 63 |
 | `Wiaderko` | window.Wiaderko = | `src/bucket/bucket.js` | 6 |
 | `WIADERKO_MAX` | const | `src/bucket/pricing.js` | 42 |
-| `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 1873 |
+| `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 1892 |
 | `widocznoscChmury` | function | `src/scene/makieta.js` | 176 |
 | `WodaFX` | const | `src/scene/makieta.js` | 960 |
 | `wOknieZegara` | function | `src/fish/fish-core.js` | 205 |

@@ -816,23 +816,42 @@
         ? [[0,'ZBIÓRKA'],[25,'TROP'],[50,'SAMIEC'],[75,'SAMICA'],[100,'POWRÓT']]
         : [[0,'IKRA'],[25,'PULS'],[50,'ROZWÓJ'],[75,'MŁODA RYBA'],[100,'POWRÓT']],
       przed: para
-        ? 'Po osiągnięciu celu samiec i samica ' + E.dopelniacz + ' wrócą do jeziora.'
+        ? 'Po osiągnięciu celu samiec i samica ' + E.dopelniacz + ' wrócą do jeziora.' +
+          (E.tajemnica ? ' Do tego czasu ich wygląd zostaje tajemnicą.' : '')
         : 'Po osiągnięciu celu ikra ' + E.dopelniacz + ' zostanie wpuszczona do jeziora.'
     };
   }
   window.odnowaTeksty = odnowaTeksty;
+
+  /* TAJEMNICA ODNOWY (1 X 2026): gatunek ze zbiorki z tajemnica: true
+     nie pokazuje wygladu, dopoki cel nie padnie (src/odnowa/odnowy.js).
+     Bez funkcji sprawdzajacej gatunek zostaje zakryty, bo tajemnica jest
+     stanem domyslnym. Gatunki spoza listy odnow zawsze widac. */
+  function odnowaUkryta(gat) {
+    const L = window.QRYBY_ODNOWY || [];
+    if (!L.some(O => O && O.gat === gat && O.tajemnica)) return false;
+    return (typeof window.QRYBY_ODNOWA_UKRYTA !== 'function') || !!window.QRYBY_ODNOWA_UKRYTA(gat);
+  }
 
   function odnowaKafel() {
     const E = odnowaBiezaca();
     const T = odnowaTeksty(E);
     const ms = T.etapy.map(x => '<span class="' + (x[0] === 0 ? 'akt' : '') + '"><b>' + x[0] +
       '%</b>' + x[1] + '</span>').join('');
+    /* Zakryta ryba nie trafia do DOM nawet jako <img>: przegladarka
+       pobralaby plik takze przy display:none. Obrazek wstawia dopiero
+       klient zbiorki, gdy serwer powie funded/completed. */
+    const ukryta = !!E.tajemnica && odnowaUkryta(E.gat);
     return '<div class="odn-card" data-tier="0" data-state="preview" data-slug="' + escHTML(E.slug) +
-      '" data-nagroda="' + escHTML(E.nagroda) + '" style="--odn-progress:0%">' +
+      '" data-nagroda="' + escHTML(E.nagroda) + '"' +
+      (E.tajemnica ? ' data-tajemnica="' + (ukryta ? 'zakryta' : 'odkryta') + '"' : '') +
+      ' style="--odn-progress:0%">' +
       '<div class="odn-stamp">URATOWANE<small>' + T.stempel + '</small></div>' +
       '<div class="odn-head"><div class="odn-hero" aria-hidden="true"><div class="odn-tank">' +
       '<span class="odn-water"></span><span class="odn-bubbles"><i></i><i></i><i></i><i></i></span>' +
-      '<img class="odn-fish" src="' + escHTML(E.obraz) + '" alt="">' +
+      (ukryta
+        ? '<span class="odn-sekret"><b>?</b></span>'
+        : '<img class="odn-fish" src="' + escHTML(E.obraz) + '" alt="">') +
       '<span class="odn-roe"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>' +
       '</div></div><div class="odn-title"><b>' + escHTML(T.tytul) + '</b>' +
       '<small>' + escHTML(E.podtytul) + '</small></div></div>' +
@@ -2477,8 +2496,10 @@
            calego panelu. Teraz jest lista do stukania: kazde stukniecie
            dopisuje rybe na koniec kolejki rund i pokazuje jej numer,
            powtorne zdejmuje. Nad lista filtr po pasmie i po nazwie,
-           bo siedemdziesiat jeden pozycji to za duzo na jeden ekran. */
-        const wszystkie = Object.keys(window.GATUNKI || {});
+           bo siedemdziesiat jeden pozycji to za duzo na jeden ekran.
+           Ryba odnowy z tajemnica nie wchodzi na liste, dopoki zbiorka
+           nie uzbiera celu: lista pokazuje sprite kazdego gatunku. */
+        const wszystkie = Object.keys(window.GATUNKI || {}).filter(k => !odnowaUkryta(k));
         const bez = s => String(s).toLowerCase()
           .replace(/[ąĄ]/g, 'a').replace(/[ćĆ]/g, 'c').replace(/[ęĘ]/g, 'e')
           .replace(/[łŁ]/g, 'l').replace(/[ńŃ]/g, 'n').replace(/[óÓ]/g, 'o')
@@ -2767,6 +2788,7 @@
        od najlatwiejszych ryb i konczy na mitycznych. */
     wszystkie() {
       ligaGatunki = Object.keys(window.GATUNKI || {})
+        .filter(k => !odnowaUkryta(k))
         .sort((a, b) => ((window.KLASA[a] || 1) - (window.KLASA[b] || 1)) ||
                         GATUNKI[a].nazwa.localeCompare(GATUNKI[b].nazwa, 'pl'))
         .slice(0, LIGA_MAX_RUND);
@@ -2781,6 +2803,7 @@
         .replace(/[śŚ]/g, 's').replace(/[źŹżŻ]/g, 'z');
       const ff = bez(ligaFiltr.trim());
       const dodaj = Object.keys(window.GATUNKI || {})
+        .filter(k => !odnowaUkryta(k))
         .filter(k => !ligaPasmo || (window.KLASA[k] || 1) === ligaPasmo)
         .filter(k => !ff || bez(GATUNKI[k].nazwa).includes(ff) || bez(k).includes(ff))
         .filter(k => ligaGatunki.indexOf(k) < 0)
@@ -2922,6 +2945,7 @@
         .replace(/[śŚ]/g, 's').replace(/[źŹżŻ]/g, 'z');
       const ff = bez(f);
       const tr = Object.keys(window.GATUNKI || {})
+        .filter(k => !odnowaUkryta(k))
         .filter(k => bez(GATUNKI[k].nazwa).includes(ff) || bez(k).includes(ff))
         .slice(0, 8);
       el.innerHTML = tr.length

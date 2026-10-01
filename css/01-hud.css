@@ -308,6 +308,26 @@ body.ksiega-otwarta #reset{
 #panelTresc .odn-prev{margin-top:6px;padding:6px 8px;border-radius:7px;
   background:rgba(181,61,53,.08);border:1px solid rgba(135,47,42,.22);
   font-size:9px;line-height:1.4;font-weight:800;color:#6c201f}
+/* ODNOWA Z TAJEMNICA (src/odnowa, tajemnica: true): do konca zbiorki
+   w akwarium stoi sam znak zapytania, bez ani jednego piksela ryby.
+   Poswiata rosnie z postepem zbiorki, wiec napiecie tez rosnie.
+   Po sukcesie klient zbiorki wstawia obrazek z klasa .odn-odslona:
+   ryba wychodzi z czarnego cienia w pelny kolor i dalej plywa. */
+#panelTresc .odn-sekret{position:absolute;z-index:2;inset:0;display:grid;place-items:center;pointer-events:none}
+#panelTresc .odn-sekret b{display:block;font-size:46px;line-height:1;font-weight:900;
+  color:rgba(233,220,190,.92);text-shadow:0 0 6px rgba(151,227,235,.35),0 2px 0 rgba(0,0,0,.6);
+  animation:odn-oddech 3.2s ease-in-out infinite}
+#panelTresc .odn-card[data-tier="25"] .odn-sekret b{text-shadow:0 0 9px rgba(151,227,235,.5),0 2px 0 rgba(0,0,0,.6)}
+#panelTresc .odn-card[data-tier="50"] .odn-sekret b{text-shadow:0 0 12px rgba(151,227,235,.65),0 2px 0 rgba(0,0,0,.6)}
+#panelTresc .odn-card[data-tier="75"] .odn-sekret b{text-shadow:0 0 16px rgba(151,227,235,.85),0 2px 0 rgba(0,0,0,.6)}
+#panelTresc .odn-card .odn-fish.odn-odslona{opacity:.96;transform:none;filter:none;
+  animation:odn-odslona 1.6s cubic-bezier(.2,.8,.2,1) both,odn-ryba 2.8s ease-in-out 1.6s infinite}
+@keyframes odn-odslona{0%{opacity:0;transform:scale(.55);filter:brightness(0) blur(2px)}
+  55%{opacity:.92;transform:scale(1.06);filter:brightness(0)}
+  100%{opacity:.96;transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){
+  #panelTresc .odn-sekret b,#panelTresc .odn-card .odn-fish.odn-odslona{animation:none!important}
+}
 
 /* IKONA I PANEL WIADERKA. */
 .ik-wiadro .palak,.ik-wiadro .korpus,.ik-wiadro .woda{fill:none;stroke:currentColor;

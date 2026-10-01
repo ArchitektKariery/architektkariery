@@ -359,8 +359,24 @@ function losujGatunek(r) {
       * 1;
     const klucze = [], kum = [], wag = {};
     let sm = 0;
+    const populacjaOdnowy = (k) => {
+      try { return window.liczbaPopulacjiSpawn ? (+liczbaPopulacjiSpawn(k) || 0) : 0; }
+      catch (e) { return 0; }
+    };
     for (const k in GATUNKI) {
       if (GATUNKI[k].zepsuty) continue;
+      /* ============================================================
+         ODNOWA: TWARDE ZERO BEZ POPULACJI (1 X 2026).
+         Gatunek odnowy (odnowa: true) wraca do jeziora wylacznie z serwera,
+         po sukcesie zbiorki. `waga` przepuszcza populacje przez `bezp`,
+         a `bezp` zamienia zero na `udzial` z rejestru. Zmierzone przed ta
+         poprawka: Karpik Surinamski z populacja 0 mial w tabeli wage
+         0,00013 przy sumie 97 566 i stal w puli losowania, czyli realna,
+         choc znikoma szanse wyplynac przed koncem zbiorki. Tutaj zero
+         zostaje zerem: bez dodatniej populacji gatunek odnowy nie wchodzi
+         do puli, a jego wyglad nie wyplywa przed odslonieciem.
+         ============================================================ */
+      if (GATUNKI[k].odnowa && !(populacjaOdnowy(k) > 0)) { wag[k] = 0; continue; }
       const w = waga(k); wag[k] = w;
       /* Pula zamknieta przez zanete wypada z tabeli, wiec nie ma czego
          odrzucac: kotlety zostawiaja w wodzie same drapiezniki. */

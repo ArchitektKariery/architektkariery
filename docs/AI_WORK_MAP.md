@@ -112,7 +112,8 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Smok Życia: karta pasma 8 (ramka `RAMKA8_SRC` z ryciną Smoka) i strona atlasu (wiedza, obserwacje, opis, rekord) | `assets/sprites/card-frames.js`, `src/atlas/atlas.js`, `src/atlas/atlas-data.js` |
 | Odnowa gatunków (zakładka ODNOWA), wpłaty społeczności, nagrody dla EKO; wiele zbiórek po slugu | `src/lucjanek/community-restoration-live.js` |
 | Lucjan czerwony: gatunek odnowy (pasmo 4, populacja startowa 0) i jego sprite | `src/lucjanek/species.js` |
-| Lista zbiórek ODNOWY (która zbiórka w zakładce, nazwa, obrazek, rodzaj nagrody) | `src/odnowa/odnowy.js` |
+| Lista zbiórek ODNOWY (która zbiórka w zakładce, nazwa, obrazek, rodzaj nagrody, `tajemnica`) | `src/odnowa/odnowy.js` |
+| Tajemnica wyglądu ryby odnowy do końca zbiórki (`QRYBY_ODNOWA_UKRYTA`): znak zapytania na karcie, odsłonięcie po sukcesie, liga i pasek turnieju bez ryby, twarde zero w losowaniu, Smok Życia jej nie przywraca | `src/odnowa/odnowy.js`, `src/ui/panel.js` (`odnowaKafel`, `odnowaUkryta`), `src/lucjanek/community-restoration-live.js` (`odslon`), `src/fish/fish-core.js` (`losujGatunek`), `src/ecosystem/population.js` (`odrodzWymarle`), `src/tournaments/tournaments.js` (`rybka`), opis `docs/odnowa-karpik.md` |
 | Karpik Surinamski: gatunek drugiej odnowy (pasmo 7, mityczny, populacja startowa 0) i jego sprite | `src/odnowa/karpik_surinamski.js`, opis `docs/odnowa-karpik.md` |
 | Nagroda odnowy „para” (1 samiec + 1 samica od razu), zamknięcie Lucjanka, start zbiórki Karpika | `supabase/migrations/20261001_odnowa_karpik.sql` |
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |
