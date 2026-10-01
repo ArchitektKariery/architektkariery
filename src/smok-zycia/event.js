@@ -168,28 +168,24 @@ const SmokZycia = (() => {
     f.smokOdpStartS = f.s;
     f.smokOdpStartAlpha = (f.alpha === undefined ? 1 : f.alpha);
     f.smokOdpStartY = f.y;
-    f.home = Math.min(Scene.BED - 70,
-      f.y + (Scene.BED - Scene.SURFACE) * 0.16);
+    f.home = f.y;
     f.turn = 999; f.hover = 0; f.karencja = 999;
   }
 
-  /* Odejscie Smoka jest czescia animacji, nie teleportem poza kadr:
-     jednoczesnie przyspiesza, schodzi w glebie, lekko maleje i zanika.
-     Nie rusza x bezposrednio — poziomy ruch nadal prowadzi wspolny silnik,
-     dzieki czemu zachowujemy fizyke, obrot i limity FPS calej gry. */
+  /* Po odmowie Smok odplywa poza kadr, ale nie "ucieka w dal":
+     zachowuje rozmiar, pelna widocznosc i aktualna glebokosc.
+     Poziomy ruch nadal prowadzi wspolny silnik gry. */
   function odplywanie(f, dt) {
     if (!f || f.gat !== 'smok_zycia' || f.mood !== 'odplywa') return false;
     f.smokOdpT = (f.smokOdpT || 0) + dt;
     const u = smooth(f.smokOdpT / 2.8);
-    const kol = Scene.BED - Scene.SURFACE;
     const s0 = f.smokOdpStartS || f.smokSkala || skalaDocelowa();
-    const a0 = (f.smokOdpStartAlpha === undefined ? 1 : f.smokOdpStartAlpha);
     const y0 = (f.smokOdpStartY === undefined ? f.y : f.smokOdpStartY);
 
-    f.s = s0 * (1 - 0.22 * u);
-    f.sy = f.s;
-    f.alpha = Math.max(0.06, a0 * (1 - 0.94 * u));
-    f.home = Math.min(Scene.BED - 55, y0 + kol * 0.20 * u);
+    f.s = s0;
+    f.sy = s0;
+    f.alpha = 1;
+    f.home = y0;
     f.machnij = 0.76 + 0.14 * u;
     return true;
   }
