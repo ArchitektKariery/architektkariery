@@ -56,10 +56,19 @@ for d in decisions:
 ratio2 = sum(decisions) / N2
 assert 0.495 <= ratio2 <= 0.505
 
-# --- 6. Stage 4 must not disturb approved visuals/movement ---
-assert "Scene.W * 0.225" in src, "approved 22.5% dragon scale missing"
-assert "f.smokStan === 'zawraca'" in src, "stage 3 turn movement missing"
-assert "f.smokT / 2.20" in src, "stage 3 reveal timing missing"
+# --- 6. Approved visuals/movement (etap C, 1 X 2026) ---
+# 22,5% widocznej szerokosci jeziora, wejscie zza krawedzi kadru,
+# glowa prowadzi lukiem (skret = krzywizna * droga, bez krecenia
+# w miejscu), podejscie torem Dubinsa, atak Smoka bez krazenia plotki.
+assert "DLUGOSC_KADRU = 0.225" in src, "approved 22.5% dragon length missing"
+assert "f.smokStan = 'wplywa';" in src, "entry from off-screen missing"
+assert "function prowadz(f, dt, cx, cy, ruch, calySlup)" in src, "head-led steering missing"
+assert "f.smokKurs = katRoznica(f.smokKurs + (f.smokK + meander) * ds, 0);" in src, "turn must scale with distance"
+assert "function planujPodejscie(f)" in src, "dragon approach path planner missing"
+assert "SmokZycia.lureRuch(f, dt, 'inspect');" in src, "dragon approach movement missing"
+assert "SmokZycia.lureRuch(f, dt, 'strike');" in src, "dragon strike movement missing"
+assert "SmokZycia.zegarOgladania(f, dt)" in src, "dragon inspection clock missing"
+assert "f.s = cel * (0.58" not in src, "dragon must not grow from depth"
 
 print(
     "SMOK_STAGE4_BITE_OK",

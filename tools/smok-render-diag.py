@@ -25,6 +25,13 @@ setTimeout(() => {
       try {
         const f = school[0] || null;
         const G2 = f ? gat(f) : null;
+        /* Etap C: Smok wplywa zza krawedzi kadru, wiec po 3,5 s czasu
+           wirtualnego moze byc jeszcze w polowie za kadrem. Do pomiaru
+           pikseli stawiamy glowe na srodku jeziora i budujemy cialo od nowa. */
+        if (f && f.gat === 'smok_zycia') {
+          f.x = Scene.W * 0.5; f.y = (Scene.SURFACE + Scene.BED) * 0.5;
+          delete f.__smokCialo;
+        }
         function alphaStats(canvas) {
           const dat = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
           let pixels = 0, sum = 0;

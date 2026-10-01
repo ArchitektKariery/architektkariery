@@ -104,7 +104,10 @@ function lureFish(dt) {
   const dist = Math.hypot(dx, dy);
 
   if (f.mood === 'inspect') {
-    f.moodT -= dt;
+    /* Smok doplywa do przynety duzym lukiem, wiec jego zegar ogladania
+       plynie dopiero, gdy pysk stoi przed przyneta. */
+    if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.zegarOgladania) f.moodT -= SmokZycia.zegarOgladania(f, dt);
+    else f.moodT -= dt;
     /* Okno podmiany, potem lock i ploszenie reszty lawicy. */
     if (!f.zablokowany) {
       f.doLocka = (f.doLocka === undefined ? LOCK_PO : f.doLocka) - dt;
@@ -125,6 +128,13 @@ function lureFish(dt) {
        wyraznie z boku: histereza 34 px nie pozwala migac sprite'em, gdy
        ryba koleba sie wokol swojego miejsca. */
     if (f.strona === undefined) f.strona = (f.x <= G.hookX) ? -1 : 1;
+    if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.lureRuch) {
+      /* Smok ma 22,5% szerokosci kadru: krazenie +/-26 px kazaloby mu
+         cofac sie ogonem. Ruch idzie przez Smoka (tor Dubinsa do pyska
+         przed przyneta); podmiana, lock, trzesienie splawika i rzut 50%
+         zostaja ponizej bez zmian. */
+      SmokZycia.lureRuch(f, dt, 'inspect');
+    } else {
     f.circle += dt * 1.5;
     const want = 46 + Math.sin(f.circle) * 26;
     const tx = G.hookX + f.strona * want;
@@ -139,6 +149,7 @@ function lureFish(dt) {
     const ty = G.hookY + Math.sin(f.circle * 0.8) * 10;
     f.home += (ty - f.home) * Math.min(1, dt * 2.2);
     f.y += (f.home - f.y) * Math.min(1, dt * 3);
+    }
 
     f.nudge -= dt;
     if (dist < 70 && f.nudge <= 0) {
@@ -171,6 +182,10 @@ function lureFish(dt) {
 
   if (f.mood === 'strike') {
     f.moodT -= dt;
+    if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.lureRuch) {
+      /* Atak Smoka: krotki wypad pyskiem na haczyk, cialo za glowa. */
+      SmokZycia.lureRuch(f, dt, 'strike');
+    } else {
     /* Kierunek zamrozony na czas ataku, zeby ryba nie obrocila sie w locie. */
     const face = faceTowards(f, G.hookX, 14);
     /* Celem jest takie polozenie ciala, przy ktorym PASZCZA lezy na haczyku. */
@@ -182,6 +197,7 @@ function lureFish(dt) {
     f.x += f.vx * dt;
     f.home += (ty - f.home) * Math.min(1, dt * 9);
     f.y += (f.home - f.y) * Math.min(1, dt * 10);
+    }
 
     const m = mouthOf(f);
     /* Trafienie liczone eliptycznie: w poziomie ciasno, w pionie odrobine luzniej,

@@ -52,7 +52,7 @@ meta_match = re.search(r"meta:\s*\{\s*w:\s*(\d+),\s*h:\s*(\d+)\s*\}", reg_struct
 checks["sprite_meta_192x62"] = bool(meta_match and int(meta_match.group(1)) == 192 and int(meta_match.group(2)) == 62)
 if meta_match:
     notes["sprite_meta"] = {"w": int(meta_match.group(1)), "h": int(meta_match.group(2))}
-checks["screen_width_22_5pct"] = "Scene.W * 0.225" in src
+checks["screen_width_22_5pct"] = "DLUGOSC_KADRU = 0.225" in src and "function zmierzWidok()" in src
 
 # 3) Fortune Cookie -> next shoal -> exactly one dragon
 checks["fortune_has_dragon_outcome"] = "{id:'smok_zycia'" in src and "legendary:'smok_zycia'" in src
@@ -84,9 +84,11 @@ checks["active_dragon_blocks_population_refill"] = "SmokZycia.aktywnaLawica()) r
 
 # 4) Movement contract
 checks["movement_profile_present"] = "smok_zycia:'smok'" in src and "rytm:[.62,.84]" in src and "zwoj:2.35" in src
-checks["reveal_from_depth"] = "f.smokT / 2.20" in src and "f.smokStan === 'wynurza'" in src
-checks["smooth_turn_state"] = "f.smokStan === 'zawraca'" in src and "1 - 2 * u" in src
-checks["two_wave_cruise"] = "0.040 * glowna + 0.014 * wtora" in src
+# Etap C (1 X 2026): wejscie zza krawedzi bez skalowania, zwroty lukiem,
+# cialo lancuchowe rysowane paskami wzdluz kregoslupa.
+checks["entry_from_offscreen"] = "f.smokStan = 'wplywa';" in src and "V.lewo - 0.08 * L" in src and "f.s = cel * (0.58" not in src
+checks["arc_turns"] = "f.smokZwrot" in src and "const kMax = 1 / (ruch.r * L);" in src and "function planujPodejscie(f)" in src
+checks["chain_body_renderer"] = "ETAP C: cialo lancuchowe aktywne" in src and "function rysujWstege(" in src
 checks["departure_state"] = "f.smokStan = 'odplywa';" in src
 
 # 5) Exact 50% bite, once per appearance

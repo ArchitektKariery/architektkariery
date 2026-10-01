@@ -562,10 +562,11 @@ function szerokoscZCm(cm) {
 function skalaZCm(cm, gk) {
   const klucz = gk || 'ploc';
   if (klucz === 'smok_zycia') {
-    const kadrW = (typeof Scene !== 'undefined' && Scene && Scene.W)
-      ? Scene.W
-      : Math.max(320, window.innerWidth || 768);
-    return (kadrW * 0.23) / GATUNKI[klucz].meta.w;
+    /* Jedno zrodlo prawdy dla rozmiaru Smoka: SmokZycia.skalaDocelowa()
+       (src/smok-zycia/event.js). Zapas na wypadek wywolania przed nim. */
+    if (window.SmokZycia && SmokZycia.skalaDocelowa) return SmokZycia.skalaDocelowa();
+    const kadrW = (typeof Scene !== 'undefined' && Scene && Scene.W) ? Scene.W : 768;
+    return (kadrW * 0.225) / GATUNKI[klucz].meta.w;
   }
   return szerokoscZCm(cm) / GATUNKI[klucz].meta.w;
 }
