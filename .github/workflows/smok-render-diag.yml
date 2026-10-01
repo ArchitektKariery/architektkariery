@@ -11,6 +11,7 @@ on:
       - 'assets/sprites/**'
       - 'tools/qryby_source.py'
       - 'tools/smok-render-diag.py'
+      - 'tools/smok-render-diag-run.js'
       - '.github/workflows/smok-render-diag.yml'
 
 permissions:
@@ -30,14 +31,12 @@ jobs:
           sleep 1
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           echo "chrome=$CHROME"
-          # Gra probuje laczyc sie z Supabase. Wirtualny czas Chrome stoi,
-          # dopoki trwa jakiekolwiek zapytanie sieciowe, wiec z dostepem do
-          # internetu strona potrafila wisiec do limitu joba. Diagnoza ma byc
-          # offline: kazdy host poza 127.0.0.1 od razu nie istnieje.
-          timeout 300 "$CHROME" --headless --no-sandbox --disable-gpu --no-proxy-server \
-            --host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE 127.0.0.1" \
-            --virtual-time-budget=10000 \
-            --dump-dom http://127.0.0.1:8765/tests/smok-render-diag.html > /tmp/smok-dom.txt
+          # Prawdziwy czas zamiast --virtual-time-budget: wirtualny czas kazal
+          # przeliczyc kazda klatke gry i na wolnym runnerze job trwal od 80 s
+          # do ponad 5 minut. Opis w tools/smok-render-diag-run.js.
+          npm install --prefix /tmp/pw --no-audit --no-fund --silent playwright-core@1.56.0
+          CHROME="$CHROME" NODE_PATH=/tmp/pw/node_modules timeout 300 \
+            node tools/smok-render-diag-run.js http://127.0.0.1:8765/tests/smok-render-diag.html > /tmp/smok-dom.txt
           python3 - <<'PY'
           from pathlib import Path
           import re
