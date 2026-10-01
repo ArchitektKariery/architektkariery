@@ -511,10 +511,10 @@ const Ksiega = (() => {
          ============================================================ */
       if (znany && k === 'smok_zycia' && window.QRYBY_SMOK_CHAIN_MOTION && QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie) {
         /* Smok Zycia: wygiete cialo w ksztalcie litery S, jak w jeziorze,
-           a nie prosty pasek sprite'a. */
+           a nie prosty pasek sprite'a. Glowa w prawo (prosba gracza). */
         g.save();
         g.beginPath(); g.rect(L, ry, P - L, rh); g.clip();
-        QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie(g, L, ry, P - L, rh, 0, 0.5);
+        QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie(g, L, ry, P - L, rh, 0, 0.5, true);
         g.restore();
       }
       else if (znany) g.drawImage(img, dx, dy, dw, dh);

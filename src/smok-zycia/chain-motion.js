@@ -428,7 +428,9 @@
      wiec Smok na karcie tez zyje. Bez nowych canvasow i obrazkow. */
   const naKarcie = nowyStan();
   const atrapa = { alpha: 1 };
-  function rysujNaKarcie(g, x, y, w, h, t, srodekY) {
+  /* glowaWPrawo: lustro calego Smoka; grzbiet zostaje u gory, bo kazdy
+     pasek wybiera lustro ze swojej stycznej (rysujWstege). */
+  function rysujNaKarcie(g, x, y, w, h, t, srodekY, glowaWPrawo) {
     const G2 = window.GATUNKI && GATUNKI.smok_zycia;
     if (!G2 || !G2.img || !G2.img.complete || G2.zepsuty || !G2.img.naturalWidth) return;
     const C = naKarcie;
@@ -437,18 +439,19 @@
     const seg = L / (N - 1);
     const fala = (t || 0) * 1.3;
     const A = 0.58;
+    const kier = glowaWPrawo ? -1 : 1;
     let px = 0, py = 0, sx = 0, sy = 0;
     for (let i = 0; i < N; i++) {
       C.x[i] = px; C.y[i] = py; sx += px; sy += py;
       const q = i / (N - 1);
       const kat = A * (0.55 + 0.45 * q) * Math.sin(6.2832 * q * 1.05 - fala);
-      px += Math.cos(kat) * seg; py += Math.sin(kat) * seg;
+      px += kier * Math.cos(kat) * seg; py += Math.sin(kat) * seg;
     }
     /* Srodek ciezkosci kregoslupa w gornej czesci okna: Smok na niebie. */
     const oy0 = y + h * (srodekY === undefined ? 0.40 : srodekY);
     const ox = x + w * 0.5 - sx / N, oy = oy0 + Math.sin((t || 0) * 0.9) * h * 0.02 - sy / N;
     for (let i = 0; i < N; i++) { C.x[i] += ox; C.y[i] += oy; }
-    C.lustro.fill(1);
+    C.lustro.fill(kier);
     rysujWstege(g, atrapa, G2, C, L, seg, gr);
   }
 
