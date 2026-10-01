@@ -72,6 +72,28 @@ require("observer.observe(panelRoot" in live, "Lucjan observer must be scoped to
 require("observer.observe(document.documentElement" not in live, "Lucjan observer must not watch the whole document")
 require("setInterval(refresh, REFRESH_MS)" not in live, "Lucjan UI polling must not run globally during gameplay")
 
+# Wiele zbiorek (1 X 2026): lista w src/odnowa/odnowy.js, karta i wplata
+# po slugu karty, nagroda "para" (EKO_PARA) dla nowych zbiorek.
+import re as _re
+reg_path = root / "src/odnowa/odnowy.js"
+require(reg_path.exists(), "restoration registry src/odnowa/odnowy.js missing")
+reg = reg_path.read_text(encoding="utf-8") if reg_path.exists() else ""
+require("window.QRYBY_ODNOWY" in html, "restoration registry must be loaded by qryby.html")
+require(html.count("src/odnowa/odnowy.js") == 1, "restoration registry tag must exist exactly once")
+require("const cardSlug = (card)" in live and "p_slug: cardSlug(card)" in live, "contribution must use the card's event slug")
+require("for (const O of ODNOWY)" in live, "lifecycle must cover every restoration event")
+for gat, nagroda in _re.findall(r"gat: '([a-z0-9_]+)'[\s\S]*?nagroda: '([a-z]+)'", reg):
+    require(f"GATUNKI.{gat}" in html, f"restoration species {gat} missing from the game")
+    if nagroda == "para":
+        mig = [p for p in (root / "supabase/migrations").glob("*.sql") if "EKO_PARA" in p.read_text(encoding="utf-8")]
+        require(len(mig) >= 1, "EKO_PARA reward migration missing")
+        for p in mig:
+            t = p.read_text(encoding="utf-8")
+            require("private.community_reward_pair" in t, f"{p.name}: pair reward function missing")
+            require("revoke all on function private.community_reward_pair(uuid) from anon, authenticated" in t,
+                    f"{p.name}: pair reward must not be callable by players")
+            require("1000000000" in t and "604800" in t, f"{p.name}: target 1 000 000 000 QRYB / 7 dni expected")
+
 if errors:
     print("COMMUNITY EVENT QA FAILED")
     for e in errors:

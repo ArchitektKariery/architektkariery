@@ -788,42 +788,63 @@
   /* Waska spacja co trzy cyfry. Przy cenach szescio- i siedmiocyfrowych bez
      tego nie da sie odczytac, czy to sto tysiecy czy milion. */
   const qryb = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
-  const ODNOWA_PREVIEW = Object.freeze({
-    id: 'lucjanek',
-    nazwa: 'LUCJANEK',
-    cel: 500000000,
-    czasDni: 7,
-    zebrano: 0,
-    darczyncy: 0,
-    stan: 'preview'
-  });
   const zanGraf = Z => (window.ZANETA_GRAF && window.ZANETA_GRAF[Z.graf]) || '';
 
+  /* ============================================================
+     KARTA ODNOWY. Dane zbiorki ida z listy QRYBY_ODNOWY
+     (src/odnowa/odnowy.js), zakladka pokazuje jej pierwsza pozycje,
+     czyli biezaca zbiorke. Stan na zywo (kwota, czas, darczyncy,
+     wplaty) dokleja klient zbiorki (lucjanek, community-restoration-live).
+     Dwa rodzaje nagrody maja inne kamienie milowe i inne napisy:
+     tarlo (ikra, Lucjanek) i para (1 samiec + 1 samica od razu).
+     ============================================================ */
+  const ODNOWA_DOMYSLNA = Object.freeze({
+    slug: 'lucjanek', gat: 'lucjan_czerwony', nazwa: 'LUCJANEK', dopelniacz: 'Lucjanka',
+    nagroda: 'tarlo', obraz: 'assets/lucjanek/lucjanek-128.png',
+    podtytul: 'PIERWSZA SPOŁECZNOŚCIOWA ODNOWA GATUNKU', cel: 500000000, czasDni: 7
+  });
+  function odnowaBiezaca() {
+    const L = window.QRYBY_ODNOWY;
+    return (L && L.length) ? L[0] : ODNOWA_DOMYSLNA;
+  }
+  function odnowaTeksty(E) {
+    const para = E.nagroda === 'para';
+    return {
+      tytul: (para ? 'ODNOWA · ' : 'IKRA · ') + E.nazwa,
+      stempel: para ? 'PARA W JEZIORZE' : 'IKRA WYPRZEDANA',
+      etapy: para
+        ? [[0,'ZBIÓRKA'],[25,'TROP'],[50,'SAMIEC'],[75,'SAMICA'],[100,'POWRÓT']]
+        : [[0,'IKRA'],[25,'PULS'],[50,'ROZWÓJ'],[75,'MŁODA RYBA'],[100,'POWRÓT']],
+      przed: para
+        ? 'Po osiągnięciu celu samiec i samica ' + E.dopelniacz + ' wrócą do jeziora.'
+        : 'Po osiągnięciu celu ikra ' + E.dopelniacz + ' zostanie wpuszczona do jeziora.'
+    };
+  }
+  window.odnowaTeksty = odnowaTeksty;
+
   function odnowaKafel() {
-    const E = ODNOWA_PREVIEW;
-    const pct = Math.max(0, Math.min(100, Math.round((E.zebrano / E.cel) * 100)));
-    const tier = pct >= 100 ? 100 : pct >= 75 ? 75 : pct >= 50 ? 50 : pct >= 25 ? 25 : 0;
-    const ms = [
-      [0,'IKRA'],[25,'PULS'],[50,'ROZWÓJ'],[75,'MŁODA RYBA'],[100,'POWRÓT']
-    ].map(x => '<span class="' + (pct >= x[0] ? 'akt' : '') + '"><b>' + x[0] +
+    const E = odnowaBiezaca();
+    const T = odnowaTeksty(E);
+    const ms = T.etapy.map(x => '<span class="' + (x[0] === 0 ? 'akt' : '') + '"><b>' + x[0] +
       '%</b>' + x[1] + '</span>').join('');
-    return '<div class="odn-card" data-tier="' + tier + '" data-state="' + E.stan +
-      '" style="--odn-progress:' + pct + '%">' +
-      '<div class="odn-stamp">URATOWANE<small>IKRA WYPRZEDANA</small></div>' +
+    return '<div class="odn-card" data-tier="0" data-state="preview" data-slug="' + escHTML(E.slug) +
+      '" data-nagroda="' + escHTML(E.nagroda) + '" style="--odn-progress:0%">' +
+      '<div class="odn-stamp">URATOWANE<small>' + T.stempel + '</small></div>' +
       '<div class="odn-head"><div class="odn-hero" aria-hidden="true"><div class="odn-tank">' +
       '<span class="odn-water"></span><span class="odn-bubbles"><i></i><i></i><i></i><i></i></span>' +
-      '<img class="odn-fish" src="assets/lucjanek/lucjanek-128.png" alt="">' +
+      '<img class="odn-fish" src="' + escHTML(E.obraz) + '" alt="">' +
       '<span class="odn-roe"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>' +
-      '</div></div><div class="odn-title"><b>IKRA · ' + E.nazwa + '</b>' +
-      '<small>PIERWSZA SPOŁECZNOŚCIOWA ODNOWA GATUNKU</small></div></div>' +
-      '<div class="odn-progress"><div class="odn-numbers"><span>' + qryb(E.zebrano) +
-      ' QRYB</span><span>' + qryb(E.cel) + ' QRYB</span></div>' +
+      '</div></div><div class="odn-title"><b>' + escHTML(T.tytul) + '</b>' +
+      '<small>' + escHTML(E.podtytul) + '</small></div></div>' +
+      '<div class="odn-progress"><div class="odn-numbers"><span>0 QRYB</span><span>' + qryb(E.cel) +
+      ' QRYB</span></div>' +
       '<div class="odn-meter" aria-label="Postęp zbiórki"><i></i></div>' +
       '<div class="odn-milestones">' + ms + '</div></div>' +
       '<div class="odn-meta"><div class="odn-chip"><b>' + E.czasDni +
-      ' DNI</b>od uruchomienia zbiórki</div><div class="odn-chip"><b>' + E.darczyncy +
+      ' DNI</b>od uruchomienia zbiórki</div><div class="odn-chip"><b>0' +
       ' DARCZYŃCÓW</b>wspólny cel całej społeczności</div></div>' +
-      '<div class="odn-story">Po osiągnięciu celu ikra Lucjanka zostanie wpuszczona do jeziora.</div>' +
+      '<div class="odn-story">' + escHTML(T.przed) + '</div>' +
+      (E.historia ? '<div class="odn-prev">' + escHTML(E.historia) + '</div>' : '') +
       '<div class="odn-history"><b>HISTORIA WPŁAT</b><span>Jeszcze nikt nie wpłacił QRYB.</span></div>' +
       '<div class="odn-stage-note" style="display:none"></div>' +
       '<button class="odb odn-disabled" disabled style="display:none">WPŁAĆ</button></div>';

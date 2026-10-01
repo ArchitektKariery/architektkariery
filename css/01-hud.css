@@ -302,6 +302,12 @@ body.ksiega-otwarta #reset{
 @media (prefers-reduced-motion:reduce){
   #panelTresc .odn-water::before,#panelTresc .odn-bubbles i,#panelTresc .odn-fish,#panelTresc .odn-roe{animation:none!important}
 }
+/* ODNOWA z nagroda "para" (1 samiec + 1 samica): bez ikry w akwarium,
+   za to linijka o poprzedniej uratowanej rybie pod opisem. */
+#panelTresc .odn-card[data-nagroda="para"] .odn-roe{display:none}
+#panelTresc .odn-prev{margin-top:6px;padding:6px 8px;border-radius:7px;
+  background:rgba(181,61,53,.08);border:1px solid rgba(135,47,42,.22);
+  font-size:9px;line-height:1.4;font-weight:800;color:#6c201f}
 
 /* IKONA I PANEL WIADERKA. */
 .ik-wiadro .palak,.ik-wiadro .korpus,.ik-wiadro .woda{fill:none;stroke:currentColor;

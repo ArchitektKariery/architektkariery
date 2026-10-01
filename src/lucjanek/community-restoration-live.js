@@ -1,19 +1,33 @@
 /* QRyby — Community Restoration Engine
    LIVE: public read transport + authenticated atomic contribution controls.
    Public event state is readable without login; mutations use Chmura.wolajRpc.
-   Wallet mutation happens only in the server-side community_contribute() transaction. */
+   Wallet mutation happens only in the server-side community_contribute() transaction.
+
+   WIELE ZBIOREK (1 X 2026). Lista zbiorek przychodzi z src/odnowa/odnowy.js
+   (window.QRYBY_ODNOWY, najnowsza pierwsza). Karta w zakladce ODNOWA niesie
+   slug w data-slug i wszystko, co dotyczy karty (odczyt, wplata, napisy),
+   idzie dla tego sluga. Nagrody (tarlo Lucjanka) i pokolenia dla EKO
+   obsluguje petla cyklu zycia dla KAZDEJ zbiorki z listy, wiec starsza
+   zbiorka domyka sie w tle, choc zakladka pokazuje juz nowa. */
 (() => {
   'use strict';
 
-  const SLUG = 'lucjanek';
+  const ODNOWY = (window.QRYBY_ODNOWY && window.QRYBY_ODNOWY.length)
+    ? window.QRYBY_ODNOWY
+    : [{ slug: 'lucjanek', gat: 'lucjan_czerwony', nazwa: 'LUCJANEK', dopelniacz: 'Lucjanka',
+         nagroda: 'tarlo', czasDni: 7, cel: 500000000 }];
+  const SLUG = ODNOWY[0].slug;          /* biezaca zbiorka, karta w zakladce */
   const REFRESH_MS = 20000;
   let busy = false;
   let lastEventId = null;
   let lastCard = null;
-  let rewardState = null;
-  let eventState = null;
-  let finalizeBusy = false;
+  const rewards = {};                   /* slug -> wiersz nagrody z serwera */
+  const events = {};                    /* slug -> wiersz eventu z serwera */
+  const finalizeBusy = {};
   let lifecycleBusy = false;
+
+  const cfgOf = (slug) => ODNOWY.find((o) => o.slug === slug) || ODNOWY[0];
+  const cardSlug = (card) => (card && card.dataset && card.dataset.slug) || SLUG;
 
   const fmt = n => String(Math.max(0, Number(n) || 0))
     .replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
@@ -156,7 +170,7 @@
           const requestId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() :
             '00000000-0000-4000-8000-' + Date.now().toString().padStart(12,'0').slice(-12);
           const result = await callRpc('community_contribute', {
-            p_slug: SLUG,
+            p_slug: cardSlug(card),
             p_amount: amount,
             p_request_id: requestId,
             p_anonymous: false
@@ -222,12 +236,14 @@
     { name: 'narybek', ms: 240000, survive: 0.055 }
   ];
 
-  function communityGeneration() {
-    const r = rewardState;
+  /* Pokolenie z tarla jednej zbiorki (tylko nagroda 'tarlo' w trakcie). */
+  function communityGeneration(slug) {
+    const r = rewards[slug];
     if (!r || r.state !== 'executing' || !r.payload) return [];
     const p = r.payload;
     const started = new Date(p.started_at).getTime();
     if (!Number.isFinite(started)) return [];
+    const gat = p.species_slug || cfgOf(slug).gat;
     const elapsed = Math.max(0, Date.now() - started);
     const mn = Math.max(0, Number(p.scenario_multiplier) || 1);
     let n = Math.max(0, Math.trunc(Number(p.eggs) || 0));
@@ -237,7 +253,7 @@
       const st = COMMUNITY_STAGES[idx];
       if (elapsed < used + st.ms) {
         return [{
-          gat: 'lucjan_czerwony',
+          gat,
           etap: st.name,
           etapNr: idx + 1,
           etapow: COMMUNITY_STAGES.length,
@@ -254,7 +270,7 @@
       if (n <= 0) break;
     }
     return [{
-      gat: 'lucjan_czerwony',
+      gat,
       etap: 'finalizacja',
       etapNr: COMMUNITY_STAGES.length,
       etapow: COMMUNITY_STAGES.length,
@@ -267,38 +283,50 @@
     }];
   }
 
-  async function refreshReward(event) {
+  async function refreshReward(event, slug) {
     if (!event || (event.state !== 'funded' && event.state !== 'completed')) {
-      rewardState = null;
+      rewards[slug] = null;
       return;
     }
-    const rows = await callRpc('community_public_reward', { p_slug: SLUG });
-    rewardState = Array.isArray(rows) ? rows[0] || null : null;
-    if (!rewardState || rewardState.state !== 'executing' || !rewardState.payload) return;
+    const przed = rewards[slug] ? rewards[slug].state : null;
+    const rows = await callRpc('community_public_reward', { p_slug: slug });
+    rewards[slug] = Array.isArray(rows) ? rows[0] || null : null;
+    const r = rewards[slug];
+    /* Para (EKO_PARA) wpada do jeziora w transakcji ostatniej wplaty.
+       Klient tylko odswieza populacje, gdy zobaczy nagrode po raz pierwszy
+       jako wykonana, zeby EKO pokazalo nowy gatunek bez czekania. */
+    if (r && r.state === 'executed' && przed !== 'executed' && cfgOf(slug).nagroda === 'para') {
+      try {
+        if (window.Eko && Eko.Serwer && Eko.Serwer.pobierz) await Eko.Serwer.pobierz();
+      } catch (e) {}
+    }
+    if (!r || r.state !== 'executing' || !r.payload) return;
 
-    const p = rewardState.payload;
+    const p = r.payload;
     const started = new Date(p.started_at).getTime();
     const total = Number(p.total_duration_ms) || 600000;
-    if (!Number.isFinite(started) || Date.now() < started + total || finalizeBusy) return;
+    if (!Number.isFinite(started) || Date.now() < started + total || finalizeBusy[slug]) return;
 
-    finalizeBusy = true;
+    finalizeBusy[slug] = true;
     try {
-      await callRpc('community_finalize_reward', { p_slug: SLUG });
-      const again = await callRpc('community_public_reward', { p_slug: SLUG });
-      rewardState = Array.isArray(again) ? again[0] || null : rewardState;
+      await callRpc('community_finalize_reward', { p_slug: slug });
+      const again = await callRpc('community_public_reward', { p_slug: slug });
+      rewards[slug] = Array.isArray(again) ? again[0] || null : rewards[slug];
       try {
         if (window.Eko && Eko.Serwer && Eko.Serwer.pobierz) await Eko.Serwer.pobierz();
       } catch (e) {}
     } catch (err) {
       console.warn('[QRyby][Odnowa] finalizacja tarła nieudana', err);
     } finally {
-      finalizeBusy = false;
+      finalizeBusy[slug] = false;
     }
   }
 
   function renderLive(card, event, rows) {
+    const C = cfgOf(cardSlug(card));
+    const T = (typeof window.odnowaTeksty === 'function') ? window.odnowaTeksty(C) : null;
     const raised = Number(event.raised_qryb) || 0;
-    const target = Math.max(1, Number(event.target_qryb) || 500000000);
+    const target = Math.max(1, Number(event.target_qryb) || C.cel || 500000000);
     const pct = Math.max(0, Math.min(100, Math.round((raised / target) * 100)));
 
     card.dataset.tier = String(tierFor(pct));
@@ -310,20 +338,26 @@
     if (nums[1]) nums[1].textContent = fmt(target) + ' QRYB';
     setMilestones(card, pct);
 
+    const dni = Math.round((Number(event.duration_seconds) || (C.czasDni || 7) * 86400) / 86400);
     const chips = card.querySelectorAll('.odn-chip');
     if (chips[0]) chips[0].innerHTML = event.state === 'failed'
-      ? '<b>KONIEC</b>7 dni minęło · cel nieosiągnięty'
-      : '<b>' + countdown(event.ends_at) + '</b>do końca zbiórki';
+      ? '<b>KONIEC</b>' + dni + ' dni minęło · cel nieosiągnięty'
+      : (event.state === 'funded' || event.state === 'completed')
+        ? '<b>CEL OSIĄGNIĘTY</b>zbiórka zamknięta'
+        : '<b>' + countdown(event.ends_at) + '</b>do końca zbiórki';
     if (chips[1]) chips[1].innerHTML = '<b>' + fmt(event.donor_count) +
       ' DARCZYŃCÓW</b>wspólny cel całej społeczności';
 
+    const para = C.nagroda === 'para';
     const story = card.querySelector('.odn-story');
     if (story) {
       story.textContent = event.state === 'failed'
         ? 'Zbiórka zakończyła się bez osiągnięcia celu.'
         : (event.state === 'funded' || event.state === 'completed')
-          ? 'Cel osiągnięty. Ikra Lucjanka została przekazana do jeziora.'
-          : 'Po osiągnięciu celu ikra Lucjanka zostanie wpuszczona do jeziora.';
+          ? (para
+              ? 'Cel osiągnięty. Samiec i samica ' + C.dopelniacz + ' wrócili do jeziora.'
+              : 'Cel osiągnięty. Ikra ' + C.dopelniacz + ' została przekazana do jeziora.')
+          : (T ? T.przed : 'Po osiągnięciu celu ikra ' + C.dopelniacz + ' zostanie wpuszczona do jeziora.');
     }
 
     const note = card.querySelector('.odn-stage-note');
@@ -333,16 +367,23 @@
     ensureContributionControls(card, event);
   }
 
+  /* Cykl zycia KAZDEJ zbiorki z listy: stan eventu i nagrody, domkniecie
+     tarla po 10 minutach. Zbiorka zakonczona dawno (nagroda wykonana) tez
+     przechodzi przez petle, ale to dwa lekkie odczyty co 20 s. */
   async function refreshLifecycle() {
     if (lifecycleBusy || document.hidden) return;
     lifecycleBusy = true;
     try {
-      const events = await callRpc('community_public_event', { p_slug: SLUG });
-      eventState = Array.isArray(events) ? events[0] || null : null;
-      if (eventState) await refreshReward(eventState);
-      else rewardState = null;
-    } catch (err) {
-      console.warn('[QRyby][Odnowa] lifecycle refresh failed', err);
+      for (const O of ODNOWY) {
+        try {
+          const rows = await callRpc('community_public_event', { p_slug: O.slug });
+          events[O.slug] = Array.isArray(rows) ? rows[0] || null : null;
+          if (events[O.slug]) await refreshReward(events[O.slug], O.slug);
+          else rewards[O.slug] = null;
+        } catch (err) {
+          console.warn('[QRyby][Odnowa] lifecycle refresh failed', O.slug, err);
+        }
+      }
     } finally {
       lifecycleBusy = false;
     }
@@ -352,10 +393,11 @@
     const card = document.querySelector('#panelTresc .odn-card');
     if (!card || busy || document.hidden) return;
     busy = true;
+    const slug = cardSlug(card);
     try {
-      const events = await callRpc('community_public_event', { p_slug: SLUG });
-      const event = Array.isArray(events) ? events[0] : null;
-      eventState = event;
+      const rowsE = await callRpc('community_public_event', { p_slug: slug });
+      const event = Array.isArray(rowsE) ? rowsE[0] : null;
+      events[slug] = event || null;
       if (!event) {
         const note = card.querySelector('.odn-stage-note');
         if (note) note.textContent = 'EVENT JESZCZE NIEAKTYWNY · PODGLĄD GOTOWY';
@@ -369,7 +411,7 @@
         p_event_id: event.id,
         p_limit: 10
       });
-      await refreshReward(event);
+      await refreshReward(event, slug);
       renderLive(card, event, Array.isArray(rows) ? rows : []);
     } catch (err) {
       console.warn('[QRyby][Odnowa] odczyt live nieudany', err);
@@ -403,10 +445,10 @@
   setTimeout(refresh, 0);
 
   window.QRYBY_COMMUNITY_EKO = Object.freeze({
-    aktywna() { return !!(rewardState && rewardState.state === 'executing'); },
-    pokolenia() { return communityGeneration(); },
-    reward() { return rewardState; },
-    event() { return eventState; }
+    aktywna() { return ODNOWY.some((O) => rewards[O.slug] && rewards[O.slug].state === 'executing'); },
+    pokolenia() { return ODNOWY.reduce((acc, O) => acc.concat(communityGeneration(O.slug)), []); },
+    reward(slug) { return rewards[slug || SLUG] || null; },
+    event(slug) { return events[slug || SLUG] || null; }
   });
 
   window.QRYBY_COMMUNITY_READ = Object.freeze({
