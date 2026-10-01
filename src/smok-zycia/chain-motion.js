@@ -137,11 +137,11 @@
 
     for (let x = 0; x < M.w; x += krok) {
       const sw = Math.min(krok, M.w - x);
-      /* W sprite'cie Smoka pysk jest po prawej stronie źródła.
-         q=0 = głowa, q=1 = sam koniec ogona. Odbicie kierunku odbywa się
-         później w drawFish(), więc kolejność ogniw pozostaje poprawna. */
+      /* Oficjalny sprite Smoka ma pysk po lewej stronie źródła.
+         q=0 = głowa po lewej, q=1 = sam koniec ogona po prawej.
+         Odbicie kierunku w drawFish() nie zmienia kolejności ogniw ciała. */
       const q = Math.max(0, Math.min(1,
-        1 - (x + sw / 2) / Math.max(1, M.w - 1)
+        (x + sw / 2) / Math.max(1, M.w - 1)
       ));
       const dy = Math.round(yLancucha(f, G2, q) * amp * kr);
 
