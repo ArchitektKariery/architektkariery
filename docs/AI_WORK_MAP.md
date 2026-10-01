@@ -106,8 +106,8 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Temat | Plik |
 |---|---|
 | Smok Życia: rejestracja i sprite | `src/smok-zycia/species.js` |
-| Smok Życia: wydarzenie ławicy, pojawienie, 50% brania, odpływanie | `src/smok-zycia/event.js` |
-| Smok Życia: ruch łańcuchowy ciała (16 ogniw, `f.__smokLancuch`) | `src/smok-zycia/chain-motion.js` |
+| Smok Życia: wydarzenie ławicy, wejście zza kadru, 50% brania, odpływanie; sterowanie głowy (łuki z promieniem ograniczonym głębokością wody, tor Dubinsa do przynęty); rozmiar: `DLUGOSC_KADRU` (ułamek widocznej szerokości jeziora, najwyżej 0,9 słupa wody) i `GRUBOSC` | `src/smok-zycia/event.js` |
+| Smok Życia: ciało łańcuchowe (25 punktów kręgosłupa, 48 pasków sprite'a, `f.__smokCialo`; tryb ścieżki w wodzie, fizyka holu i wyciągania) oraz Smok na karcie (`QRYBY_SMOK_CHAIN_MOTION.rysujNaKarcie`, wołane z `src/card/card.js`) | `src/smok-zycia/chain-motion.js` |
 | Lucjanek: odnowa gatunków, wpłaty społeczności | `src/lucjanek/community-restoration-live.js` |
 | Lucjan czerwony: gatunek odnowy (pasmo 4, populacja startowa 0) i jego sprite | `src/lucjanek/species.js` |
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |

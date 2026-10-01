@@ -92,7 +92,9 @@ Przeglądarka wykonuje skrypty dokładnie w kolejności tagów w `qryby.html`. *
 1. `<head>`: `src/core/load-gate.js`, `src/core/config.js`, potem `css/01-hud.css` … `css/05-product.css`.
 2. Na początku `<body>` szkielet DOM (`#app`, `#scene`, `#hold`, HUD, `#panel`...).
 3. Sprite'y i moduły w kolejności dawnych bloków: `assets/sprites/scene-angler.js` → `tier6-bottom.js` → `species.js` → grupa pory i rzadkości (`src/world/pora.js` … `src/card/xscore.js`) → `card-frames.js` → grupa pogody (`pogoda.js` … `zegar.js`) → `rejestr.js` → `shore.js` → `src/scene/makieta.js` → sprite'y zanęt → główna grupa gry (`src/fish/species.js` … `src/ecosystem/net-anim.js`) → `src/card/card.js` → grupa dźwięku → grupa wędkarza (`avatar.js`, `state.js`, `angler.js`) → grupa mechaniki i ekonomii (`src/fish/mechanics.js` … `src/ui/zoom-guard.js`) → `src/ui/rhythm.js`.
-4. Na końcu `<body>`: dwa małe bloki `<style id="stage14-final-immersion">` i `<style id="stage15-final-consistency">` oraz `src/lucjanek/community-restoration-live.js` (ten doładowuje `src/smok-zycia/chain-motion.js`).
+4. Na końcu `<body>`: dwa małe bloki `<style id="stage14-final-immersion">` i `<style id="stage15-final-consistency">` oraz `src/lucjanek/community-restoration-live.js`.
+
+`src/smok-zycia/chain-motion.js` stoi w głównej grupie gry zaraz po `src/fish/rendering.js` i ma atrybut `data-qryby-smok-chain`. Dawny loader w `community-restoration-live.js` widzi ten atrybut i niczego nie doładowuje, a sam plik ma strażnika (`window.QRYBY_SMOK_CHAIN_MOTION`), więc renderer Smoka nigdy nie owija `drawFish` dwa razy.
 
 Dokładną listę pokazuje sam `qryby.html`, a plik po pliku z zakresami linii oryginału: `tools/modularize/manifest.json`.
 
@@ -146,7 +148,7 @@ Funkcje wywoływane z HTML (`onclick="..."` w szablonach budowanych przez JS, 55
 
 - Każdy tag ma token wersji, np. `src/fish/movement.js?v=20260930-mod1`. Wszystkie moduły mają **ten sam** token.
 - Po każdej zmianie dowolnego pliku `src/`, `css/` lub `assets/sprites/` podbij token we **wszystkich** tagach naraz: `python3 tools/bump_version.py` (albo `python3 tools/bump_version.py 20261001-mod2`). Wtedy gracz nigdy nie dostanie nowego `qryby.html` ze starym modułem z pamięci podręcznej.
-- `src/lucjanek/community-restoration-live.js` i `src/smok-zycia/chain-motion.js` mają własne tokeny (`?v=20260926-live5`, `?v=20260928-b2`), bo powstały przed podziałem.
+- `src/lucjanek/community-restoration-live.js` ma własny token (`?v=20260926-live5`), bo powstał przed podziałem; `tools/bump_version.py` go pomija. `src/smok-zycia/chain-motion.js` ma wspólny token wszystkich modułów.
 
 ## Czego nie przenosić z powrotem do `qryby.html`
 

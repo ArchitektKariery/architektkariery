@@ -147,10 +147,9 @@ rbg2.imageSmoothingEnabled = false;
 function drawFish(g, f, angle) {
   const G2 = gat(f), M = G2.meta;
   if (!G2.img || !G2.img.complete || G2.zepsuty || !G2.img.naturalWidth) return;
-  /* Oficjalny sprite Smoka ma glowe po lewej stronie pliku.
-     Zwykle sprite'y maja pysk po prawej, wiec tylko dla Smoka odwracamy
-     lustro renderera wzgledem kierunku ruchu. f.face nadal opisuje ruch. */
-  const dir = faceOf(f) * (f.gat === 'smok_zycia' ? -1 : 1);
+  /* Smok Zycia tu nie trafia: ma wlasny renderer ciala
+     (src/smok-zycia/chain-motion.js podmienia drawFish dla smok_zycia). */
+  const dir = faceOf(f);
   /* OBROT ZAMIAST LUSTRA.
      Zmiana kierunku byla dotad jednoklatkowym przerzuceniem sprite'a: ryba
      plynela w lewo, a w nastepnej klatce w prawo, bez niczego pomiedzy.

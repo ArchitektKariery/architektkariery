@@ -29,8 +29,9 @@ GATE_SCRIPT = "src/core/load-gate.js"
 
 _GATE_TAG = re.compile(r'<script src="' + re.escape(GATE_SCRIPT) + r'(?:\?[^"]*)?"></script>\n')
 _GATE_GROUP = re.compile(r'<script>QRybyGate\.open\(\)</script>\n(.*?)\n<script>QRybyGate\.close\(\)</script>', re.S)
-_PART = re.compile(r'<script src="([^"?#]+)(?:\?[^"]*)?"></script>|<script>(.*?)</script>', re.S)
-_SCRIPT = re.compile(r'<script src="([^"?#]+)(?:\?[^"]*)?"></script>')
+# Tag moze miec dodatkowe atrybuty data-* (np. data-qryby-smok-chain).
+_PART = re.compile(r'<script src="([^"?#]+)(?:\?[^"]*)?"(?: [\w-]+="[^"]*")*></script>|<script>(.*?)</script>', re.S)
+_SCRIPT = re.compile(r'<script src="([^"?#]+)(?:\?[^"]*)?"(?: [\w-]+="[^"]*")*></script>')
 _LINKS = re.compile(r'<link rel="stylesheet" href="[^"]+">(?:\n<link rel="stylesheet" href="[^"]+">)*')
 _LINK = re.compile(r'<link rel="stylesheet" href="([^"?#]+)(?:\?[^"]*)?">')
 

@@ -10,8 +10,8 @@ Użycie:
     python3 tools/bump_version.py 20261001-mod2   # własny token
     python3 tools/bump_version.py --check         # tylko pokaż, ile tagów i jakie tokeny
 
-Nie rusza src/lucjanek/community-restoration-live.js ani src/smok-zycia/chain-motion.js:
-mają własne tokeny i własny sposób ładowania.
+Nie rusza src/lucjanek/community-restoration-live.js: ma własny token
+i własny sposób ładowania.
 """
 from datetime import datetime
 from pathlib import Path
@@ -19,7 +19,7 @@ import re
 import sys
 
 ENTRY = Path(__file__).resolve().parents[1] / "qryby.html"
-SKIP = ("src/lucjanek/community-restoration-live.js", "src/smok-zycia/chain-motion.js")
+SKIP = ("src/lucjanek/community-restoration-live.js",)
 TAG = re.compile(r'(<script src="|<link rel="stylesheet" href=")((?:src|css|assets)/[^"?#]+)\?v=([^"]*)(")')
 
 

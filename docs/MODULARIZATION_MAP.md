@@ -172,7 +172,7 @@ Kluczowe węzły, od których zależy najwięcej kodu:
 
 ### 4.4 Łatka Smoka Życia
 
-`src/smok-zycia/chain-motion.js` (etap B2) owija globalną funkcję `paskiRyby` z `src/fish/rendering.js`: zapamiętuje oryginał i przypisuje nową funkcję pod tą samą nazwą. Działa, bo `paskiRyby` jest deklaracją funkcji najwyższego poziomu w klasycznym skrypcie. Plik ładuje dynamicznie `src/lucjanek/community-restoration-live.js` (`async = false`). Nie wolno zamieniać tych plików na moduły ES ani zamykać `paskiRyby` w IIFE.
+`src/smok-zycia/chain-motion.js` (etap C) owija globalne funkcje `drawFish` i `paskiRyby` z `src/fish/rendering.js`: zapamiętuje oryginały i przypisuje nowe funkcje pod tymi samymi nazwami, a dla innych gatunków woła oryginał. Działa, bo obie są deklaracjami funkcji najwyższego poziomu w klasycznym skrypcie. Plik stoi w `qryby.html` zaraz po `src/fish/rendering.js` z atrybutem `data-qryby-smok-chain`, więc dawny loader w `src/lucjanek/community-restoration-live.js` go nie doładowuje. Nie wolno zamieniać tych plików na moduły ES ani zamykać `drawFish` i `paskiRyby` w IIFE.
 
 ## 5. Globalne zmienne i funkcje
 

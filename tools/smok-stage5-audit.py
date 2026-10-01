@@ -33,7 +33,7 @@ checks["fight_sim_throttle"] = "targetStep = fpsNow < 45 ? (1 / 20) : (1 / 30)" 
 
 # Dragon visual identity must remain the same during fight.
 checks["dragon_sprite_still_registered"] = "GATUNKI.smok_zycia" in src and "data:image/png;base64" in src
-checks["dragon_scale_anchor"] = "Scene.W * 0.225" in src
+checks["dragon_scale_anchor"] = "const DLUGOSC_KADRU = " in src and "function skalaDocelowa()" in src
 checks["dragon_single_bite_roll"] = src.count("f.smokBierze = Math.random() < 0.50;") == 1
 checks["dragon_no_reroll_in_attack_gate"] = "return f.smokBierze ? 1 : 0;" in src
 
