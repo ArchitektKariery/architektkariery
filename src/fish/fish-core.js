@@ -559,7 +559,16 @@ function szerokoscZCm(cm) {
   const w = cm * 1.3176 * SKALA_WIDOCZNOSCI;
   return w + PODLOGA_SYLWETKI * Math.exp(-w / PODLOGA_SYLWETKI);
 }
-function skalaZCm(cm, gk) { return szerokoscZCm(cm) / GATUNKI[gk || 'ploc'].meta.w; }
+function skalaZCm(cm, gk) {
+  const klucz = gk || 'ploc';
+  if (klucz === 'smok_zycia') {
+    const kadrW = (typeof Scene !== 'undefined' && Scene && Scene.W)
+      ? Scene.W
+      : Math.max(320, window.innerWidth || 768);
+    return (kadrW * 0.23) / GATUNKI[klucz].meta.w;
+  }
+  return szerokoscZCm(cm) / GATUNKI[klucz].meta.w;
+}
 window.szerokoscZCm = szerokoscZCm;
 
 /* Czas obrotu sylwetki przy zmianie kierunku i rytm zrywow. */
