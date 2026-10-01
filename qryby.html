@@ -44,18 +44,10 @@
     <div id="hold"></div>
     <div id="onbGuide" aria-live="polite" aria-hidden="true"></div>
     <div id="onbKarta" aria-live="polite" aria-hidden="true"></div>
-    <!-- PASEK BRAKU KONTA. Stoi nad wszystkim, bo to nie jest ozdoba
-         tylko wyjasnienie, czemu polowa gry nie reaguje. -->
     <div id="pasekKonta" role="status"><b>ŁOWIENIE ZABLOKOWANE</b> &middot; <u>potwierdź mail</u>, żeby łowić i wpływać na wspólne jezioro</div>
     <button id="reset" type="button" aria-label="Nowa lawica"><span class="ik">&#10227;</span><span class="et">&#321;AWICA</span></button>
-    <!-- TABLICA TARLA. Male okno pod przyciskiem LAWICA: ktory gatunek
-         wlasnie sie trze. Ikonka gatunku plus serce, bez napisow --
-         ma byc czytelne katem oka, a nie do czytania. -->
     <div id="tarla" aria-hidden="true"></div>
     <div id="lakeClock" aria-live="off" aria-hidden="true"><b>--:--</b><span>JEZIORO</span></div>
-    <!-- KOLUMNA IKON. Kolejnosc w DOM = kolejnosc na ekranie; odstepy
-         daje flex, nie wpisane piksele. Odznaki siedza W SRODKU swoich
-         przyciskow, wiec jada razem z nimi. -->
     <button id="menuMaster" type="button" aria-label="Otwórz menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" class="menuGlyph menuGlyph--master" aria-hidden="true">
         <path d="M6 7.25h12M6 12h12M6 16.75h12"/>
@@ -115,10 +107,9 @@
           </svg><span>WIADRO</span><i id="wiadLicz"></i><i id="wiadZeg"></i><i id="wiadSerce"></i><i id="wiadHandel" class="miniPowiad miniPowiad--trade" aria-hidden="true">$</i><i id="wiadSiec" class="miniPowiad miniPowiad--net" aria-hidden="true">▦</i></button>
         </div>
       </div>
-
       <div class="ik-grupa nav-karta" id="grupaMenu">
         <button id="menuToggle" class="ikonka nav-glowna" type="button" aria-label="Gra" aria-expanded="false">
-          <svg viewBox="0 0 24 24" class="ik-sv"><path d="M7 4.5h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.6v1.5A3 3 0 0 0 7.4 10M17 6h2.4v1.5a3 3.35 3.35 0 0 1-2.8 2.5" fill="none"/><path d="M11 14h2v3h-2zM8 17h8v2.5H8z"/></svg>
+          <svg viewBox="0 0 24 24" class="ik-sv"><path d="M7 4.5h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.6v1.5A3 3 0 0 0 7.4 10M17 6h2.4v1.5a3 3 0 0 1-2.8 2.5" fill="none"/><path d="M11 14h2v3h-2zM8 17h8v2.5H8z"/></svg>
           <span class="navLabel">GRA</span><small class="navSub">Gracz · Liga · Pomoc</small>
         </button>
         <div class="miniZakladki premiumDrop" id="menuMenu">
@@ -143,7 +134,6 @@
           </svg><span>POMOC</span></button>
         </div>
       </div>
-
       <div class="ik-grupa nav-karta" id="grupaKompendium">
         <button id="kompendiumToggle" class="ikonka nav-glowna" type="button" aria-label="Świat gry" aria-expanded="false">
           <svg viewBox="0 0 24 24" class="ik-sv"><path d="M5 16.5c2.4-2.7 4.7-2.7 7 0s4.6 2.7 7 0" fill="none"/><path d="M12 6.2v7.4M12 6.2c-2-1.3-4.3-1.7-6.6-1.4v7.7c2.3-.2 4.6.2 6.6 1.5M12 6.2c2-1.3 4.3-1.7 6.6-1.4v7.7c-2.3-.2-4.6.2-6.6 1.5"/></svg>
@@ -166,7 +156,6 @@
           </svg><span>ATLAS</span><i id="atlasNoweIk" class="miniPowiad miniPowiad--book" aria-hidden="true">📘</i></button>
         </div>
       </div>
-
       <button id="zleceniaTablica" class="zakMini" type="button" aria-label="Tablica ogłoszeń">
         <svg viewBox="0 0 24 24" class="menuGlyph" aria-hidden="true">
           <path d="M6 5.2h12v14H6z"/>
@@ -208,7 +197,6 @@
     </button>
     <section id="returnDigest" aria-live="polite" aria-hidden="true"></section>
     <section id="raptorLove" aria-live="polite" aria-hidden="true"></section>
-
     <div id="pytanieWymiany">
       <div class="tr" id="pytWymTekst"></div>
       <div class="wyb"><button id="pytWymTak">TAK</button><button id="pytWymNie">NIE</button></div>
@@ -219,7 +207,6 @@
       <div class="wyb"><button id="zlecTak">PRZYJMIJ</button><button id="zlecNie">ODMÓW</button></div>
     </div>
     <div id="zlecPasek"></div>
-    <!-- czysta gra: zero paneli i napisow -->
   </div>
 </div>
 <script src="assets/sprites/scene-angler.js?v=20260930-lucjan1"></script>
@@ -308,9 +295,7 @@
 <script src="src/core/qdiag.js?v=20260930-lucjan1"></script>
 <script src="src/ui/zoom-guard.js?v=20260930-lucjan1"></script>
 <script>QRybyGate.close()</script>
-
 <script src="src/ui/rhythm.js?v=20260930-lucjan1"></script>
-
 
 <style id="stage14-final-immersion">
 body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster{
@@ -320,7 +305,6 @@ body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #me
 body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster>svg{opacity:.18 !important}
 body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) #menuMaster>span{opacity:0 !important}
 body.ui-idle #masterAlerts{opacity:1 !important}
-
 body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) .quickBtn{
   color:rgba(243,217,133,.14) !important;background:transparent !important;
   border-color:rgba(214,174,86,.025) !important;box-shadow:none !important;backdrop-filter:none !important
@@ -328,12 +312,10 @@ body.ui-idle:not(.menu-master-open):not(.karta-otwarta):not(.ksiega-otwarta) .qu
 body.ui-idle .quickBtn .menuGlyph{opacity:.14 !important}
 body.ui-idle .quickBtn>span{opacity:0 !important}
 body.ui-idle .quickBtn i.on{opacity:1 !important}
-
 body.ui-idle:not(:has(#panel.on)) #hud{opacity:.045 !important;transform:translateY(-2px)}
 body.ui-idle:not(:has(#panel.on)) #reset{
   opacity:.065 !important;filter:saturate(.25) !important;box-shadow:none !important
 }
-
 body.ui-idle #baitRoundsHud.on{
   background:transparent !important;border-color:transparent !important;box-shadow:none !important;
   backdrop-filter:none !important;color:rgba(236,214,156,.42) !important;
@@ -341,7 +323,6 @@ body.ui-idle #baitRoundsHud.on{
 }
 body.ui-idle #baitRoundsHud.on>span{display:none !important}
 body.ui-idle #baitRoundsHud.on>b{opacity:.76}
-
 body.ui-idle.z-paskiem #pasekTV:not(.rozwiniety){
   background:rgba(10,7,22,.025) !important;border-bottom-color:rgba(212,168,64,.09) !important;box-shadow:none !important
 }
@@ -352,7 +333,6 @@ body.ui-idle.z-paskiem #pasekTV:not(.rozwiniety) #pasekTVetyk{
 body.ui-idle.z-paskiem #pasekTV:not(.rozwiniety)::after{opacity:.18 !important}
 body #pasekTV.rozwiniety,body #pasekTV.rozwiniety #pasekTVokno,
 body #pasekTV.rozwiniety #pasekTVetyk{opacity:1 !important}
-
 #quickAccess .quickBtn,#baitRoundsHud,#pasekTV,#pasekTVokno,#pasekTVetyk{
   transition:opacity .34s ease,background .38s ease,border-color .38s ease,
              box-shadow .38s ease,color .38s ease,filter .38s ease !important
@@ -360,9 +340,6 @@ body #pasekTV.rozwiniety #pasekTVetyk{opacity:1 !important}
 @media(prefers-reduced-motion:reduce){
   #quickAccess .quickBtn,#baitRoundsHud,#pasekTV,#pasekTVokno,#pasekTVetyk{transition:none !important}
 }
-
-/* STAGE 15.7 — persistent HUD. Nawet gdy stary kod przypadkiem doda ui-idle,
-   wszystkie elementy zachowuja normalna czytelnosc. */
 body.ui-idle #menuMaster,
 body.ui-idle #menuMaster>svg,
 body.ui-idle #menuMaster>span,
@@ -382,16 +359,6 @@ body.ui-idle #pasekTVetyk{
 </style>
 
 <style id="stage15-final-consistency">
-/* ============================================================
-   VISUAL AUDIT — STAGE 15 / FINAL CONSISTENCY
-
-   Tylko korekty wykrytych odstepstw od jezyka Stage 0–14.
-   Bez zmian mechaniki, ekonomii, ekologii, auth i rendererow swiata.
-   ============================================================ */
-
-/* Papierowe panele nie powinny konczyc sie przyciskiem z dawnego
-   fioletowego "glass UI". ZAMKNIJ jest teraz ciemna, fizyczna zakladka
-   z tuszu/papieru — ta sama materialowosc co przyciski wewnatrz kartki. */
 #panelX{
   padding:10px 24px !important;
   border-radius:3px !important;
@@ -410,25 +377,15 @@ body.ui-idle #pasekTVetyk{
   outline:2px solid rgba(244,214,132,.82);
   outline-offset:2px;
 }
-
-/* Stage 1 zablokowal stale "oddychanie" UI. Słonecznik jest znakiem
-   materialu panelu, nie wiatrakiem — zostaje w kadrze, ale nieruchomy. */
 #panelTresc::before{animation:none !important;transform:none !important}
-
-/* Licznik waluty ma reagowac na zdobycie monet (.bije/.brzek), a nie
-   wykonywac autonomiczny pokaz co kilka sekund. */
 #monety::after{animation:none !important;opacity:0 !important}
 #monety .ik-moneta{animation:none !important;transform:none !important}
-
-/* Martwy legacy: `polysk` nie ma zadnych @keyframes w production buildzie.
-   Jawnie neutralizujemy deklaracje, zamiast zostawiac pozorna animacje. */
 #panelTresc .pas i::after{animation:none !important;display:none !important}
-
 @media(prefers-reduced-motion:reduce){
   #panelX{transition:none !important}
 }
 </style>
 
-  <script src="src/lucjanek/community-restoration-live.js?v=20260926-live5"></script>
+<script src="src/lucjanek/community-restoration-live.js?v=20260926-live5"></script>
 </body>
 </html>
