@@ -275,11 +275,25 @@ const Zawody = (() => {
     try {
       while (kolejka.length) {
         const r = kolejka[0];
-        await Chmura.wolajRpc('zawody_zglos', { zaw: r.zaw, pkt: r.pkt, gat: r.gat,
-                                                waga: r.waga || 0, cm: r.cm || 0 });
-        kolejka.shift();
+        try {
+          await Chmura.wolajRpc('zawody_zglos', { zaw: r.zaw, pkt: r.pkt, gat: r.gat,
+                                                  waga: r.waga || 0, cm: r.cm || 0 });
+          kolejka.shift();
+        } catch (e) {
+          /* Blad 4xx oznacza, ze TO konkretne zgloszenie jest trwale
+             nieakceptowalne (np. zly gatunek rundy albo stary klient wyslal
+             nieprawidlowe dane). Nie moze ono blokowac wszystkich kolejnych
+             polowow. Bledy chwilowe/serwerowe zostawiamy w kolejce do
+             ponowienia. */
+          if (e && e.status >= 400 && e.status < 500) {
+            kolejka.shift();
+            blad = e.message || 'Jedno zgłoszenie turniejowe zostało odrzucone.';
+            continue;
+          }
+          throw e;
+        }
       }
-      blad = '';
+      if (!blad) blad = '';
       await odswiez();
     } catch (e) {
       blad = e.message || 'Nie udało się zgłosić ryby.';
