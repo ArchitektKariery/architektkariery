@@ -162,16 +162,89 @@ const Zlecenia = (() => {
     if (_probki[gk]) return _probki[gk];
     return (_probki[gk] = probkaPunktowLiczona(gk, ile));
   }
+  /* ============================================================
+     ROZGRZEWKA PROBEK W CZASIE BEZCZYNNOSCI (X 2026, zgloszenie Andrzeja:
+     "nadal pojawia sie spadek plynnosci przy braniu i wyciaganiu").
+     Cache wyzej liczyl probke dopiero przy pierwszym zleceniu, a zlecenie
+     losuje sie co 0,7 s po kazdej zlowionej rybie (25 % szans). Pierwsze
+     zbudowanie zlecenia dotykalo kilkudziesieciu gatunkow naraz: 71
+     gatunkow po 400 losowan to w Chromium 54 ms, razem z sortowaniem
+     okolo 100 ms w jednym kawalku, dokladnie w chwili, gdy na ekranie
+     otwiera sie karta zlowionej ryby. Szarpniecie po wyciagnieciu.
+     Teraz probki licza sie zawczasu, po 8 s od startu, po kilka gatunkow
+     w kazdej przerwie przegladarki (requestIdleCallback, a w Safari
+     setTimeout co 200 ms), nigdy w trakcie holu. Jeden gatunek to okolo
+     1 ms. Gatunek pod aktywna zaneta czeka, az zaneta zejdzie: zaneta
+     podnosi rozmiar w losowaniu, a probka ma opisywac zwykly rozklad.
+     Losowania probki ida z wlasnego generatora (ziarno z
+     crypto.getRandomValues raz na sesje i nazwa gatunku), a nie
+     z Math.random: rozgrzewka w przypadkowych chwilach nie przestawia
+     wtedy kolejnosci losowan reszty gry.
+     ============================================================ */
+  let _ziarnoSesji = 0;
+  try { _ziarnoSesji = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0; }
+  catch (e) { _ziarnoSesji = (Date.now() >>> 0); }
+  function losowanieProbki(gk) {
+    let h = (2166136261 ^ _ziarnoSesji) >>> 0;
+    for (let i = 0; i < gk.length; i++) { h ^= gk.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    let a = h || 1;
+    return function () {                     /* mulberry32 */
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   function probkaPunktowLiczona(gk, ile) {
     const G2 = GATUNKI[gk]; const out = [];
+    const r = losowanieProbki(gk);
     for (let i = 0; i < ile; i++) {
-      const cm = losujCm(Math.random, gk);
-      const kLog = losujKond(Math.random, gk);
+      const cm = losujCm(r, gk);
+      const kLog = losujKond(r, gk);
       const waga = wagaZ(cm, kLog, gk);
       out.push({ pkt: XScore.punkty(gk, G2, cm, waga), waga: waga });
     }
+    /* Posortowane punkty raz na gatunek: zbudujZlecenie robi do 160
+       podejsc i dawniej sortowalo 400 liczb w kazdym. */
+    out.pkty = out.map(x => x.pkt).sort((a, b) => a - b);
     return out;
   }
+  function podZaneta(gk) {
+    try {
+      return (window.zanetaRozmiar && window.zanetaRozmiar(gk) !== 1) ||
+             (window.zanetaPotwor && window.zanetaPotwor(gk) !== 1);
+    } catch (e) { return true; }
+  }
+  function rozgrzejProbki() {
+    if (typeof GATUNKI === 'undefined' || typeof XScore === 'undefined' ||
+        typeof losujCm !== 'function') return;
+    const zostalo = Object.keys(GATUNKI).filter(gk => kandydat(gk) && !_probki[gk]);
+    if (!zostalo.length) return;
+    const dalej = (ms) => {
+      if (typeof requestIdleCallback === 'function') {
+        /* Termin 0,2 s: na wolnym telefonie przerw moze nie byc wcale.
+           Wymuszone wywolanie ma timeRemaining() rowne 0, wiec liczy
+           wtedy jeden gatunek: okolo 1 ms co 0,2 s, calosc w 15 s. */
+        setTimeout(() => requestIdleCallback(krok, { timeout: 200 }), ms);
+      } else setTimeout(krok, Math.max(200, ms));
+    };
+    const krok = (termin) => {
+      if (window.G && G.phase === 'fight') { dalej(1500); return; }
+      let zrobione = 0, odlozone = 0;
+      while (zostalo.length && zrobione < 4) {
+        if (termin && termin.timeRemaining && termin.timeRemaining() < 3 && zrobione > 0) break;
+        const gk = zostalo.shift();
+        if (_probki[gk]) continue;
+        if (podZaneta(gk)) { zostalo.push(gk); if (++odlozone >= zostalo.length) break; continue; }
+        try { _probki[gk] = probkaPunktowLiczona(gk, PROBKA); } catch (e) {}
+        zrobione++;
+      }
+      if (zostalo.length) dalej(odlozone && !zrobione ? 20000 : 0);
+    };
+    dalej(0);
+  }
+  setTimeout(rozgrzejProbki, 8000);
 
   /* Czy z tego gatunku da sie w ogole zlozyc sensowne zlecenie.
      Mityczne (pasmo 7) odpadaja: placa od razu, nie ida do wiaderka,
@@ -220,7 +293,7 @@ const Zlecenia = (() => {
       if (!lawic) continue;
 
       const pr = probkaPunktow(gk, PROBKA);
-      const pkty = pr.map(x => x.pkt).sort((a, b) => a - b);
+      const pkty = pr.pkty;
       /* Prog: percentyl trudnosci, ale NIGDY ponizej PROG_MIN. */
       const zPct = pkty[Math.min(PROBKA - 1, Math.floor(PROBKA * P.pct))];
       const prog = Math.max(PROG_MIN, zPct);

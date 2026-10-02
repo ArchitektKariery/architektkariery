@@ -15,6 +15,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Rendering ryb (`drawFish`, `drawSchool`, `paskiRyby`, dymek godowy) | `src/fish/rendering.js` |
 | Wydajność ruchu i rysowania ryb | `src/fish/movement.js`, `src/fish/rendering.js`, `src/fish/school-update.js` |
 | Płynność holu (hol rysowany i liczony co klatkę, bez trybu oszczędnego) | `src/fish/rendering.js`, `src/fish/school-update.js`, zasady w `docs/ARCHITECTURE.md` („Płynność i wydajność rysowania”) |
+| Ciepło telefonu i tempo klatek: 60 kl./s na ekranach 120 i 144 Hz (`zmierzOdstep`, `minOdstep`), scena pod otwartym panelem 15 kl./s, HUD bez `backdrop-filter`, dwa bufory składania ryb (`falBuf`, `falBufDuzy`), gotowe zabarwione chmury | `src/scene/makieta.js` (`frame`, `chmuraZGlebia`), `src/fish/rendering.js` (`paskiRyby`), `css/05-product.css` (blok „CIEPLO TELEFONU”), zasady w `docs/ARCHITECTURE.md` („Płynność i wydajność rysowania”) |
 | Rejestr gatunków `GATUNKI`, kontur sprite'a, częstości | `src/fish/species.js` |
 | Losowanie gatunku, długości, wagi, głębokości; potwory; pomoc geometrii (`gat`, `mouthOf`, `faceOf`) | `src/fish/fish-core.js` |
 | Tablica `school`, nowa ławica bez przeładowania, `escHTML` | `src/fish/school.js` |
@@ -61,7 +62,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Wiaderko i giełda (oferty handlarzy) | `src/bucket/bucket.js` |
 | Zakładka TARLISKO w panelu wiaderka, ikonka stawu obok krzyżyka w wierszu ryby | `src/ui/panel.js` (`tarliskoHTML`, `stawSVG`, sekcja `PANEL WIADERKA`), style `css/03-eko-icons.css` |
 | Wycena ryb, handlarze, średnia rynkowa, tempo połowu | `src/bucket/pricing.js` |
-| Zlecenia handlarzy, tablica ogłoszeń | `src/bucket/orders.js` |
+| Zlecenia handlarzy, tablica ogłoszeń; próbki punktów liczone zawczasu w bezczynności (`rozgrzejProbki`) | `src/bucket/orders.js` |
 | Widok straganu i panelu wiaderka w menu | `src/ui/panel.js` (sekcje `SKLEP`, `STRAGAN`, `PANEL WIADERKA`) |
 
 ## Gracz, konto, serwer
@@ -83,7 +84,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Menu, HUD, panele, stragan, wiaderko, konto (jeden duży panel UI) | `src/ui/panel.js` |
 | Mikroanimacje otoczki (`Ruch`, komunikaty `Ruch.powiedz`) | `src/ui/ruch.js` |
 | Zegar w grze | `src/ui/zegar.js` |
-| Scena: niebo, chmury, woda, dno, brzeg, światło, pętla klatek | `src/scene/makieta.js` |
+| Scena: niebo, chmury, woda, dno, brzeg, światło, pętla klatek (tempo klatek, scena pod panelem) | `src/scene/makieta.js` |
 | Pora dnia i roku, opad | `src/world/pora.js` |
 | Pogoda na scenie (paleta pory na kadrze) | `src/world/pogoda.js` |
 | Wędkarz, wędka, spławik, żyłka, łódka | `src/angler/angler.js` |

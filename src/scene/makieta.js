@@ -439,7 +439,7 @@ function bakeSlowSky() {
     if (w <= 0.01) continue;
     const y = c.y + Math.sin(c.bob) * c.bam;
     chmuraZGlebia(sprS, c, y, w);
-    if (c.x + c.w > W) chmuraZGlebia(sprS, { name: c.name, x: c.x - W - 8, w: c.w, h: c.h, a: c.a, layer: c.layer }, y, w);
+    if (c.x + c.w > W) chmuraZGlebia(sprS, c, y, w, c.x - W - 8);
   }
 }
 /* ============================================================
@@ -465,7 +465,7 @@ function barwaNieba() {
   const p = PORA.teraz().paleta;
   return p && p.nieboD ? p.nieboD : [120, 120, 160];
 }
-function chmuraZGlebia(rys, c, y, w) {
+function chmuraZGlebia(rys, c, y, w, xNadpis) {
   /* ============================================================
      KIERUNEK KONTRASTU ZALEZY OD NIEBA.
      Pierwsza wersja przyciemniala plan bliski na sztywno, bo tak jest
@@ -477,51 +477,54 @@ function chmuraZGlebia(rys, c, y, w) {
      Regula musi byc jedna dla calej doby: plan daleki idzie KU jasnosci
      nieba, plan bliski OD niej, w te strone, w ktora jest dalej.
      ============================================================ */
+  const x = (xNadpis !== undefined) ? xNadpis : c.x;
   const nb = barwaNieba();
   const jasNieba = 0.299 * nb[0] + 0.587 * nb[1] + 0.114 * nb[2];
   const mgla = c.layer === 0 ? MGLA_DALEKA : 0;
   const cien = c.layer === 2 ? CIEN_BLISKI : 0;
-  if (!mgla && !cien) { rys(c.name, c.x, y, c.w, c.h, c.a * w); return; }
-  /* Rysuje do bufora, tam naklada warstwe, dopiero potem na scene:
-     source-atop na glownej kanwie zjadlby wszystko, co juz na niej lezy. */
-  const b = bufChmur(c.w, c.h);
-  b.clearRect(0, 0, c.w, c.h);
-  const f = F[c.name];
-  b.drawImage(atlas, f.x, f.y, f.w, f.h, 0, 0, c.w, c.h);
-  b.globalCompositeOperation = 'source-atop';
-  if (mgla) {
-    b.globalAlpha = mgla; b.fillStyle = 'rgb(' + nb.map(v => Math.round(v)).join(',') + ')';
-  } else {
-    /* Ciemne niebo: rozjasniamy. Jasne niebo: przyciemniamy. */
-    b.globalAlpha = cien;
-    b.fillStyle = jasNieba < 110 ? 'rgba(255,246,226,1)' : 'rgba(18,12,30,1)';
-  }
-  b.fillRect(0, 0, c.w, c.h);
-  b.globalAlpha = 1; b.globalCompositeOperation = 'source-over';
-  rys.buforem(b.canvas, c.x, y, c.w, c.h, c.a * w);
-}
-let _bufC = null;
-function bufChmur(w, h) {
-  if (!_bufC) { _bufC = document.createElement('canvas').getContext('2d'); }
-  /* Plotno ma wymiary calkowite, a chmura ulamkowe (405,9 px). Porownanie
-     z ulamkiem wychodzilo zawsze "za male", wiec bufor dostawal nowa
-     szerokosc w kazdej klatce, przegladarka obcinala ja z powrotem do 405
-     i za kazdym razem zakladala plotno od nowa razem z jego pamiecia.
-     Zmierzone: nowe plotno w 7 klatkach na 10, w kazdej fazie gry.
-     Rozmiar zmienia sie teraz tylko wtedy, gdy naprawde rosnie. Tam, gdzie
-     dawniej szlo zalozenie plotna od nowa, idzie wyczyszczenie calosci:
-     plotno wychodzi z tego tak samo puste, a pamiec zostaje ta sama. */
-  if (_bufC.canvas.width < w || _bufC.canvas.height < h) {
-    const cw = Math.max(Math.floor(w), _bufC.canvas.width);
-    const ch = Math.max(Math.floor(h), _bufC.canvas.height);
-    if (cw !== _bufC.canvas.width || ch !== _bufC.canvas.height) {
-      _bufC.canvas.width = cw;
-      _bufC.canvas.height = ch;
+  if (!mgla && !cien) { rys(c.name, x, y, c.w, c.h, c.a * w); return; }
+  /* ============================================================
+     GOTOWA, ZABARWIONA CHMURA (X 2026, "zeby telefony nie grzaly sie
+     podczas gry").
+     Kazda chmura planu bliskiego skladala sie od nowa W KAZDEJ KLATCE:
+     czyszczenie wspolnego bufora, wycinek z arkusza, barwa przez
+     source-atop i dopiero kopia na scene. Przy zachmurzeniu to dziesiec
+     duzych chmur, czyli kilkadziesiat operacji na klatke, a wspolny
+     bufor zmienial sie przed kazda kolejna chmura, wiec przegladarka na
+     telefonie kopiowala go w calosci. W Chromium chmury z tym skladaniem
+     zajmowaly okolo jednej piatej czasu klatki.
+     Barwa zalezy od niewielu rzeczy: planu, rozmiaru chmury i jasnosci
+     nieba (plan bliski: niebo jasne albo ciemne; plan daleki: barwa nieba
+     zaokraglona do 3 stopni na kanal). Kazda chmura trzyma wiec gotowy,
+     zabarwiony obrazek i sklada go od nowa tylko po zmianie klucza.
+     Na scene idzie jedno wywolanie, tak jak dla chmury bez barwy.
+     ============================================================ */
+  const kw = Math.max(1, Math.ceil(c.w)), kh = Math.max(1, Math.ceil(c.h));
+  const klucz = mgla
+    ? 'm' + Math.round(nb[0] / 3) + ',' + Math.round(nb[1] / 3) + ',' + Math.round(nb[2] / 3)
+    : (jasNieba < 110 ? 'jasna' : 'ciemna');
+  let k = c.__kan;
+  if (!k || c.__klucz !== klucz || k.canvas.width !== kw || k.canvas.height !== kh) {
+    if (!k) k = c.__kan = document.createElement('canvas').getContext('2d');
+    if (k.canvas.width !== kw || k.canvas.height !== kh) { k.canvas.width = kw; k.canvas.height = kh; }
+    else k.clearRect(0, 0, kw, kh);
+    const f = F[c.name];
+    k.drawImage(atlas, f.x, f.y, f.w, f.h, 0, 0, c.w, c.h);
+    k.globalCompositeOperation = 'source-atop';
+    if (mgla) {
+      k.globalAlpha = mgla; k.fillStyle = 'rgb(' + nb.map(v => Math.round(v)).join(',') + ')';
     } else {
-      _bufC.clearRect(0, 0, cw, ch);
+      /* Ciemne niebo: rozjasniamy. Jasne niebo: przyciemniamy. */
+      k.globalAlpha = cien;
+      k.fillStyle = jasNieba < 110 ? 'rgba(255,246,226,1)' : 'rgba(18,12,30,1)';
     }
+    /* Ulamkowy prostokat jak w dawnym buforze: ostatnia kolumna i wiersz
+       chmury sa pokryte czesciowo i dostaja barwe tak samo czesciowo. */
+    k.fillRect(0, 0, c.w, c.h);
+    k.globalAlpha = 1; k.globalCompositeOperation = 'source-over';
+    c.__klucz = klucz;
   }
-  return _bufC;
+  rys.buforem(k.canvas, x, y, c.w, c.h, c.a * w);
 }
 function drawSky(t) {
   /* Co osma klatka zamiast co szesnastej: zachmurzenie i tarcze plyna,
@@ -535,7 +538,7 @@ function drawSky(t) {
     if (w <= 0.01) continue;
     const y = c.y + Math.sin(c.bob) * c.bam;
     chmuraZGlebia(spr, c, y, w);
-    if (c.x + c.w > W) chmuraZGlebia(spr, { name: c.name, x: c.x - W - 8, w: c.w, h: c.h, a: c.a, layer: c.layer }, y, w);
+    if (c.x + c.w > W) chmuraZGlebia(spr, c, y, w, c.x - W - 8);
   }
 }
 
@@ -1938,12 +1941,71 @@ let last = 0, frozen = false, freezeT = 0, fps = 0, acc = 0, cnt = 0;
    sa widoczne dla gracza. */
 let accReal = 0, najdluzszaKlatka = 0;
 
+/* ============================================================
+   TEMPO KLATEK A CIEPLO TELEFONU (X 2026, pytania Andrzeja: "nadal
+   pojawia sie spadek plynnosci przy braniu i wyciaganiu" oraz
+   "Potrafisz cos zrobic, zeby telefony nie grzaly sie podczas gry?").
+
+   1. EKRANY 120 i 144 Hz. Chrome na Androidzie wola requestAnimationFrame
+      tak czesto, jak odswieza sie ekran, wiec na telefonie 120 Hz gra
+      liczyla i rysowala wszystko 120 razy na sekunde: dwa razy wiecej
+      pracy niz na 60 Hz, przy 8,3 ms na klatke. Przy braniu i holu
+      (zylka, chlapanie, wiecej efektow) klatki przestawaly sie miescic
+      i tempo skakalo miedzy 120 a 60 na sekunde, co oko widzi jako
+      szarpniecie. Petla mierzy teraz odstep miedzy wywolaniami (mediana
+      z 30 ostatnich) i przy odstepie ponizej 10,5 ms pomija wywolania,
+      ktore przyszly wczesniej niz 16,7 ms minus pol odstepu od ostatniej
+      przetworzonej klatki. Wychodzi rowne 60 na sekunde przy 120 Hz
+      i 240 Hz oraz 72 przy 144 Hz. Ekrany 60 i 90 Hz bez zmian.
+      Licznik nie liczy "co druga klatke", tylko czas: gdy klatka trwa
+      dluzej niz 8,3 ms, Chrome sam opuszcza wywolanie, a licznik
+      zrobilby z tego 40 na sekunde.
+   2. OTWARTY PANEL. Scena lezy pod nim przyciemniona do 28 % i rozmyta,
+      a rysowala sie pelne 60 razy na sekunde. Symulacja (update) idzie
+      dalej w kazdej klatce, a scena rysuje sie 15 razy na sekunde, od
+      0,35 s po otwarciu, czyli po wygasnieciu przejscia panelu. Zegary
+      w gniezdzie 'overlay' licza czas z roznicy t, wiec nic nie zwalnia.
+      Opad dostaje czas zebrany od ostatniego rysowania (dtRys).
+   ============================================================ */
+const ODST_N = 30;
+const odstepy = new Float32Array(ODST_N);
+let odstI = 0, odstPelne = false, ostRaf = 0, minOdstep = 0;
+let panelEl = null, panelOdT = -1, ostRysT = -1e9, dtRys = 0;
+function zmierzOdstep(ts) {
+  const d = ts - ostRaf;
+  ostRaf = ts;
+  if (!(d > 0 && d < 100)) return;          // powrot z tla, pierwsza klatka
+  odstepy[odstI] = d;
+  odstI = (odstI + 1) % ODST_N;
+  if (odstI !== 0) return;
+  odstPelne = true;
+  const s = Array.prototype.slice.call(odstepy).sort((a, b) => a - b);
+  const vs = s[ODST_N >> 1];
+  minOdstep = (vs < 10.5) ? (1000 / 60 - vs / 2) : 0;
+}
+/* Pracownie (?krajobrazlab=1 i reszta) czytane raz, a nie siedem razy
+   w kazdej klatce. */
+const LAB = (function () {
+  const q = location.search;
+  return {
+    krajobraz: /[?&]krajobrazlab=1\b/.test(q), woda: /[?&]wodalab=1\b/.test(q),
+    swiatlo: /[?&]lightlab=1\b/.test(q), fx: /[?&]fxlab=1\b/.test(q),
+    glebia: /[?&]depthlab=1\b/.test(q), lodka: /[?&]lodkalab=1\b/.test(q),
+    wedka: /[?&]rodlab=1\b/.test(q)
+  };
+})();
+
 function frame(ts) {
+  zmierzOdstep(ts);
+  if (odstPelne && minOdstep > 0 && ts - last < minOdstep) {
+    requestAnimationFrame(frame);
+    return;
+  }
   const surowy = (ts - last) / 1000;
   const dt = clamp(surowy, 0, 0.05);
   const dtReal = clamp(surowy, 0, 1);      // 1 s = powrot z tla, nie mierzymy
   last = ts;
-  acc += dt; accReal += dtReal; cnt++; frameNo++;
+  acc += dt; accReal += dtReal; cnt++;
   if (dtReal > najdluzszaKlatka) najdluzszaKlatka = dtReal;
   if (accReal > 0.5) {
     fps = Math.round(cnt / accReal);
@@ -1960,22 +2022,40 @@ function frame(ts) {
   const kartaOtwarta = !!(window.Card && window.Card.open);
   if (!frozen && !kartaOtwarta) { update(dt, t); updateSwietliki(dt); sbufAge++; wbufAge++; }
   else if (frozen) { sbufAge = 9; wbufAge = 9; }
+  dtRys += dt;
+  if (!panelEl) panelEl = document.getElementById('panel');
+  const panelOn = !!(panelEl && panelEl.classList.contains('on'));
+  if (!panelOn) panelOdT = -1;
+  else if (panelOdT < 0) panelOdT = ts;
 
   if (ready) {
     /* Stojaca karta nie potrzebuje 60 identycznych repaintow. */
     if (kartaOtwarta && window.CardPerf && !window.CardPerf.shouldPaint(ts)) {
+      dtRys = 0;
       requestAnimationFrame(frame);
       return;
     }
 
     /* Po pierwszej pelnej klatce karta dostaje gotowy snapshot tla. */
     if (kartaOtwarta && window.CardPerf && window.CardPerf.maTlo()) {
+      dtRys = 0;
       g.setTransform(1, 0, 0, 1, 0, 0);
       window.CardPerf.draw(g);
       callSlot('overlay', t);
       requestAnimationFrame(frame);
       return;
     }
+    /* Pod otwartym panelem 15 rysowan na sekunde (opis przy ODST_N). */
+    if (panelOn && !kartaOtwarta && ts - panelOdT > 350 && ts - ostRysT < 62) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    ostRysT = ts;
+    /* frameNo liczy klatki RYSOWANE, nie przetworzone: wypieki nieba,
+       brzegu i wody czekaja na (frameNo & 7) albo (frameNo & 15), a pod
+       panelem rysowana jest co czwarta klatka i licznik przetworzonych
+       moglby nigdy nie trafic w ich reszte. */
+    frameNo++;
     /* wstrzas kadru przy chwycie i zerwaniu */
     const sh = Scene.shake;
     if (sh > 0) {
@@ -2025,18 +2105,19 @@ function frame(ts) {
     if (typeof ContextFX !== 'undefined') ContextFX.drawSurface(g,t);
     SwiatloFX.spojScene(t);
     /* Deszcz i snieg na samym wierzchu, zeby padaly przed lodka. */
-    if (typeof Pogoda !== 'undefined') Pogoda.opad(g, Scene.W, Scene.SURFACE, dt);
+    if (typeof Pogoda !== 'undefined') Pogoda.opad(g, Scene.W, Scene.SURFACE, Math.min(0.12, dtRys));
+    dtRys = 0;
     drawGuides(t);
-    if (/[?&]krajobrazlab=1\b/.test(location.search)) Krajobraz.auditOverlay();
-    if (/[?&]wodalab=1\b/.test(location.search)) WodaFX.auditOverlay();
-    if (/[?&]lightlab=1\b/.test(location.search)) SwiatloFX.auditOverlay();
-    if (/[?&]fxlab=1\b/.test(location.search) && typeof ContextFX !== 'undefined') ContextFX.audit(g);
-    if (/[?&]depthlab=1\b/.test(location.search)) {
+    if (LAB.krajobraz) Krajobraz.auditOverlay();
+    if (LAB.woda) WodaFX.auditOverlay();
+    if (LAB.swiatlo) SwiatloFX.auditOverlay();
+    if (LAB.fx && typeof ContextFX !== 'undefined') ContextFX.audit(g);
+    if (LAB.glebia) {
       drawDepthLab();
       DepthFX.audit();
     }
-    if (/[?&]lodkalab=1\b/.test(location.search)) LodkaFX.auditOverlay(g, t);
-    if (/[?&]rodlab=1\b/.test(location.search) && typeof A !== 'undefined' && A.ready >= 3) {
+    if (LAB.lodka) LodkaFX.auditOverlay(g, t);
+    if (LAB.wedka && typeof A !== 'undefined' && A.ready >= 3) {
       const mm = Scene.motion(t);
       const ss = LodkaFX.state(t, mm);
       const bbx = BOAT_X + ss.driftX - anchor.boatW/2;

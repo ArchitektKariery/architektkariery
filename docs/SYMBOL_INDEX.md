@@ -4,7 +4,7 @@
 > Kazda globalna nazwa gry (funkcja, stala, zmienna, eksport `window.X`) i miejsce jej definicji.
 > Linia liczy sie od poczatku pliku modulu.
 
-Liczba wpisow: 524
+Liczba wpisow: 536
 
 | Nazwa | Rodzaj | Plik | Linia |
 |---|---|---|---|
@@ -15,10 +15,10 @@ Liczba wpisow: 524
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/fish-core.js` | 252 |
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/school-update.js` | 175 |
 | `__MASTER` | window.__MASTER = | `src/audio/haptics.js` | 173 |
-| `__odswiezPasekZlecen` | window.__odswiezPasekZlecen = | `src/bucket/orders.js` | 431 |
-| `__pokazOferteZlecenia` | window.__pokazOferteZlecenia = | `src/bucket/orders.js` | 432 |
+| `__odswiezPasekZlecen` | window.__odswiezPasekZlecen = | `src/bucket/orders.js` | 504 |
+| `__pokazOferteZlecenia` | window.__pokazOferteZlecenia = | `src/bucket/orders.js` | 505 |
 | `__pytajOLawice` | window.__pytajOLawice = | `src/ui/panel.js` | 519 |
-| `__qrFps` | window.__qrFps = | `src/scene/makieta.js` | 1951 |
+| `__qrFps` | window.__qrFps = | `src/scene/makieta.js` | 2013 |
 | `__quickNavInvoke` | window.__quickNavInvoke = | `src/ui/panel.js` | 405 |
 | `__wagiTab` | window.__wagiTab = | `src/ecosystem/population.js` | 368 |
 | `__wagiTab` | window.__wagiTab = | `src/ecosystem/server.js` | 98 |
@@ -26,10 +26,9 @@ Liczba wpisow: 524
 | `__wymusPasmoProg` | window.__wymusPasmoProg = | `src/fish/school-update.js` | 93 |
 | `_amb` | let | `src/audio/ambient.js` | 35 |
 | `_ambStart` | let | `src/audio/ambient.js` | 36 |
-| `_bufC` | let | `src/scene/makieta.js` | 503 |
 | `_bufSzumu` | function | `src/audio/ambient.js` | 41 |
 | `_czasSceny` | var | `src/fish/behavior.js` | 118 |
-| `_kolejnoscRysowania` | const | `src/fish/rendering.js` | 294 |
+| `_kolejnoscRysowania` | const | `src/fish/rendering.js` | 319 |
 | `_lfo` | function | `src/audio/ambient.js` | 57 |
 | `_lowow` | var | `src/fish/behavior.js` | 118 |
 | `_ostatnieZjedzenie` | var | `src/fish/behavior.js` | 118 |
@@ -49,8 +48,8 @@ Liczba wpisow: 524
 | `$` | const | `src/scene/makieta.js` | 27 |
 | `A` | const | `src/angler/avatar.js` | 12 |
 | `AC` | let | `src/audio/haptics.js` | 156 |
-| `acc` | let | `src/scene/makieta.js` | 1927 |
-| `accReal` | let | `src/scene/makieta.js` | 1939 |
+| `acc` | let | `src/scene/makieta.js` | 1930 |
+| `accReal` | let | `src/scene/makieta.js` | 1942 |
 | `addCloud` | function | `src/scene/makieta.js` | 159 |
 | `addRefl` | function | `src/scene/makieta.js` | 207 |
 | `aktualizujSlady` | function | `src/fx/water-traces.js` | 91 |
@@ -62,39 +61,38 @@ Liczba wpisow: 524
 | `Atlas` | const | `src/rarity/okna.js` | 339 |
 | `audioOn` | function | `src/audio/haptics.js` | 158 |
 | `awaryjna` | function | `src/fish/school-update.js` | 124 |
-| `bakeBrzeg` | function | `src/scene/makieta.js` | 649 |
-| `bakeRays` | function | `src/scene/makieta.js` | 1778 |
+| `bakeBrzeg` | function | `src/scene/makieta.js` | 652 |
+| `bakeRays` | function | `src/scene/makieta.js` | 1781 |
 | `bakeSlowSky` | function | `src/scene/makieta.js` | 426 |
-| `bakeWater` | function | `src/scene/makieta.js` | 1388 |
+| `bakeWater` | function | `src/scene/makieta.js` | 1391 |
 | `bakeWeeds` | function | `src/scene/makieta.js` | 287 |
 | `barwaNieba` | function | `src/scene/makieta.js` | 463 |
 | `BARWY` | const | `src/tournaments/tournaments.js` | 69 |
 | `BAZA_WYCENY` | const | `src/bucket/pricing.js` | 233 |
 | `bed` | const | `src/scene/makieta.js` | 224 |
 | `BED` | const | `src/scene/makieta.js` | 41 |
-| `bedForeground` | function | `src/scene/makieta.js` | 1524 |
+| `bedForeground` | function | `src/scene/makieta.js` | 1527 |
 | `beepHap` | function | `src/audio/haptics.js` | 207 |
 | `beginFight` | function | `src/fish/mechanics.js` | 334 |
 | `biteWait` | let | `src/fish/mechanics.js` | 158 |
 | `bladWczytania` | let | `src/scene/makieta.js` | 74 |
 | `BOAT_X` | const | `src/angler/avatar.js` | 125 |
-| `BRZEG_CIEN` | const | `src/scene/makieta.js` | 592 |
-| `BRZEG_KLUCZE` | const | `src/scene/makieta.js` | 589 |
-| `BRZEG_MGLA` | const | `src/scene/makieta.js` | 591 |
-| `BRZEG_ODBICIE` | const | `src/scene/makieta.js` | 593 |
-| `BRZEG_SPLASZCZ` | const | `src/scene/makieta.js` | 594 |
-| `BRZEG_V` | const | `src/scene/makieta.js` | 590 |
-| `brzegBufy` | const | `src/scene/makieta.js` | 597 |
-| `brzegGotowy` | let | `src/scene/makieta.js` | 598 |
-| `brzegObrazy` | const | `src/scene/makieta.js` | 596 |
-| `brzegPas` | let | `src/scene/makieta.js` | 619 |
-| `brzegPasY` | let | `src/scene/makieta.js` | 620 |
-| `brzegT` | let | `src/scene/makieta.js` | 599 |
+| `BRZEG_CIEN` | const | `src/scene/makieta.js` | 595 |
+| `BRZEG_KLUCZE` | const | `src/scene/makieta.js` | 592 |
+| `BRZEG_MGLA` | const | `src/scene/makieta.js` | 594 |
+| `BRZEG_ODBICIE` | const | `src/scene/makieta.js` | 596 |
+| `BRZEG_SPLASZCZ` | const | `src/scene/makieta.js` | 597 |
+| `BRZEG_V` | const | `src/scene/makieta.js` | 593 |
+| `brzegBufy` | const | `src/scene/makieta.js` | 600 |
+| `brzegGotowy` | let | `src/scene/makieta.js` | 601 |
+| `brzegObrazy` | const | `src/scene/makieta.js` | 599 |
+| `brzegPas` | let | `src/scene/makieta.js` | 622 |
+| `brzegPasY` | let | `src/scene/makieta.js` | 623 |
+| `brzegT` | let | `src/scene/makieta.js` | 602 |
 | `bubbles` | const | `src/scene/makieta.js` | 326 |
-| `bufBrzegu` | function | `src/scene/makieta.js` | 631 |
-| `bufChmur` | function | `src/scene/makieta.js` | 504 |
+| `bufBrzegu` | function | `src/scene/makieta.js` | 634 |
 | `buildBed` | function | `src/scene/makieta.js` | 225 |
-| `callSlot` | function | `src/scene/makieta.js` | 1892 |
+| `callSlot` | function | `src/scene/makieta.js` | 1895 |
 | `Card` | const | `src/card/card.js` | 77 |
 | `CardArt` | const | `src/card/card.js` | 13 |
 | `CardPerf` | const | `src/card/card.js` | 111 |
@@ -115,7 +113,7 @@ Liczba wpisow: 524
 | `clickSound` | function | `src/audio/haptics.js` | 178 |
 | `closeCard` | function | `src/card/card.js` | 557 |
 | `clouds` | const | `src/scene/makieta.js` | 148 |
-| `cnt` | let | `src/scene/makieta.js` | 1927 |
+| `cnt` | let | `src/scene/makieta.js` | 1930 |
 | `COL` | const | `src/fish/mechanics.js` | 9 |
 | `ContextFX` | const | `src/fx/context-fx.js` | 28 |
 | `ctext` | function | `src/card/card.js` | 59 |
@@ -127,36 +125,37 @@ Liczba wpisow: 524
 | `cyklLawicy` | function | `src/fish/behavior.js` | 551 |
 | `czystyNick` | window.czystyNick = | `src/player/save.js` | 433 |
 | `decyzjaKarty` | function | `src/card/card.js` | 466 |
-| `DepthFX` | const | `src/scene/makieta.js` | 1648 |
-| `dnoGotowe` | function | `src/scene/makieta.js` | 1504 |
-| `dnoImg` | const | `src/scene/makieta.js` | 1490 |
-| `dnoTeraz` | function | `src/scene/makieta.js` | 1495 |
+| `DepthFX` | const | `src/scene/makieta.js` | 1651 |
+| `dnoGotowe` | function | `src/scene/makieta.js` | 1507 |
+| `dnoImg` | const | `src/scene/makieta.js` | 1493 |
+| `dnoTeraz` | function | `src/scene/makieta.js` | 1498 |
 | `dobraOfiara` | function | `src/fish/behavior.js` | 206 |
 | `dodajSlad` | function | `src/fx/water-traces.js` | 26 |
 | `dopasowanieGlebokosci` | function | `src/fish/behavior.js` | 36 |
 | `dosadzPartnerow` | function | `src/fish/school-update.js` | 161 |
 | `DRAPIEZNIK` | var | `src/fish/behavior.js` | 148 |
-| `drawBed` | function | `src/scene/makieta.js` | 1550 |
-| `drawBedForeground` | function | `src/scene/makieta.js` | 1580 |
-| `drawBedItem` | function | `src/scene/makieta.js` | 1530 |
-| `drawBrzeg` | function | `src/scene/makieta.js` | 711 |
+| `drawBed` | function | `src/scene/makieta.js` | 1553 |
+| `drawBedForeground` | function | `src/scene/makieta.js` | 1583 |
+| `drawBedItem` | function | `src/scene/makieta.js` | 1533 |
+| `drawBrzeg` | function | `src/scene/makieta.js` | 714 |
 | `drawCard` | function | `src/card/card.js` | 578 |
-| `drawDepthLab` | function | `src/scene/makieta.js` | 1606 |
-| `drawFish` | function | `src/fish/rendering.js` | 147 |
-| `drawGodRays` | function | `src/scene/makieta.js` | 1811 |
-| `drawGuides` | function | `src/scene/makieta.js` | 1898 |
+| `drawDepthLab` | function | `src/scene/makieta.js` | 1609 |
+| `drawFish` | function | `src/fish/rendering.js` | 172 |
+| `drawGodRays` | function | `src/scene/makieta.js` | 1814 |
+| `drawGuides` | function | `src/scene/makieta.js` | 1901 |
 | `drawHapPanel` | function | `src/angler/angler.js` | 907 |
-| `drawLightBreath` | function | `src/scene/makieta.js` | 1719 |
-| `drawParticles` | function | `src/scene/makieta.js` | 1849 |
+| `drawLightBreath` | function | `src/scene/makieta.js` | 1722 |
+| `drawParticles` | function | `src/scene/makieta.js` | 1852 |
 | `drawRod` | function | `src/angler/angler.js` | 134 |
-| `drawSchool` | function | `src/fish/rendering.js` | 316 |
-| `drawSky` | function | `src/scene/makieta.js` | 526 |
-| `drawSurfaceLine` | function | `src/scene/makieta.js` | 1708 |
-| `drawSwietliki` | function | `src/scene/makieta.js` | 1328 |
-| `drawTreeline` | function | `src/scene/makieta.js` | 542 |
-| `drawVignette` | function | `src/scene/makieta.js` | 1837 |
-| `drawWater` | function | `src/scene/makieta.js` | 1441 |
+| `drawSchool` | function | `src/fish/rendering.js` | 341 |
+| `drawSky` | function | `src/scene/makieta.js` | 529 |
+| `drawSurfaceLine` | function | `src/scene/makieta.js` | 1711 |
+| `drawSwietliki` | function | `src/scene/makieta.js` | 1331 |
+| `drawTreeline` | function | `src/scene/makieta.js` | 545 |
+| `drawVignette` | function | `src/scene/makieta.js` | 1840 |
+| `drawWater` | function | `src/scene/makieta.js` | 1444 |
 | `drops` | const | `src/fish/mechanics.js` | 161 |
+| `dtRys` | let | `src/scene/makieta.js` | 1973 |
 | `dzwiekWl` | function | `src/audio/ambient.js` | 234 |
 | `dzwonek` | function | `src/audio/ambient.js` | 212 |
 | `Eko` | const | `src/ecosystem/population.js` | 30 |
@@ -168,18 +167,20 @@ Liczba wpisow: 524
 | `faceTowards` | function | `src/fish/fish-core.js` | 80 |
 | `falaY` | function | `src/fish/rendering.js` | 16 |
 | `falBuf` | const | `src/fish/rendering.js` | 50 |
+| `falBufDuzy` | const | `src/fish/rendering.js` | 74 |
 | `fbg` | const | `src/fish/rendering.js` | 51 |
+| `fbgDuzy` | const | `src/fish/rendering.js` | 75 |
 | `Features` | window.Features = | `src/core/config.js` | 28 |
 | `finishLanding` | function | `src/fish/catching.js` | 223 |
 | `FishAtlas` | const | `src/fish/fish-core.js` | 47 |
 | `fishCm` | function | `src/fish/fish-core.js` | 70 |
 | `FloatFX` | const | `src/angler/angler.js` | 724 |
 | `FortuneCookie` | const | `src/market/baits.js` | 309 |
-| `fps` | let | `src/scene/makieta.js` | 1927 |
-| `frame` | function | `src/scene/makieta.js` | 1941 |
+| `fps` | let | `src/scene/makieta.js` | 1930 |
+| `frame` | function | `src/scene/makieta.js` | 1998 |
 | `frameNo` | let | `src/scene/makieta.js` | 59 |
-| `freezeT` | let | `src/scene/makieta.js` | 1927 |
-| `frozen` | let | `src/scene/makieta.js` | 1927 |
+| `freezeT` | let | `src/scene/makieta.js` | 1930 |
+| `frozen` | let | `src/scene/makieta.js` | 1930 |
 | `g` | const | `src/scene/makieta.js` | 45 |
 | `G` | const | `src/core/state.js` | 2 |
 | `gat` | function | `src/fish/fish-core.js` | 53 |
@@ -208,17 +209,18 @@ Liczba wpisow: 524
 | `ileWWarstwie` | let | `src/scene/makieta.js` | 158 |
 | `ileWypuszczonych` | function | `src/card/card.js` | 166 |
 | `jasnoscHex` | function | `src/tournaments/tournaments.js` | 90 |
-| `kafleBrzegu` | function | `src/scene/makieta.js` | 703 |
+| `kafleBrzegu` | function | `src/scene/makieta.js` | 706 |
 | `kandydatRyby` | function | `src/fish/movement.js` | 315 |
 | `KLASA` | const | `src/rarity/pasma.js` | 46 |
 | `koniecLowow` | function | `src/fish/behavior.js` | 366 |
-| `KONSOLACJA_MIN` | const | `src/tournaments/tournaments.js` | 372 |
-| `konsolacjaTurniejowa` | function | `src/tournaments/tournaments.js` | 373 |
+| `KONSOLACJA_MIN` | const | `src/tournaments/tournaments.js` | 386 |
+| `konsolacjaTurniejowa` | function | `src/tournaments/tournaments.js` | 387 |
 | `KONTUR` | const | `src/fish/species.js` | 1613 |
-| `Krajobraz` | const | `src/scene/makieta.js` | 734 |
+| `Krajobraz` | const | `src/scene/makieta.js` | 737 |
 | `Ksiega` | const | `src/atlas/atlas.js` | 213 |
+| `LAB` | const | `src/scene/makieta.js` | 1988 |
 | `LAK` | const | `src/atlas/atlas-data.js` | 164 |
-| `last` | let | `src/scene/makieta.js` | 1927 |
+| `last` | let | `src/scene/makieta.js` | 1930 |
 | `lerp` | const | `src/scene/makieta.js` | 29 |
 | `liczbaPopulacjiSpawn` | function | `src/rarity/okna.js` | 288 |
 | `LIMIT_KADRU` | const | `src/fish/spawning.js` | 75 |
@@ -243,18 +245,19 @@ Liczba wpisow: 524
 | `makeFishZLimitemSurowy` | function | `src/fish/school-update.js` | 55 |
 | `master` | let | `src/audio/haptics.js` | 156 |
 | `MGLA_DALEKA` | const | `src/scene/makieta.js` | 462 |
+| `minOdstep` | let | `src/scene/makieta.js` | 1972 |
 | `MIX` | const | `src/fish/school.js` | 42 |
 | `MIX_PANEL` | const | `src/audio/haptics.js` | 45 |
 | `mnoznikTempa` | function | `src/bucket/pricing.js` | 311 |
 | `mnoznikXScore` | function | `src/bucket/pricing.js` | 273 |
-| `mnoznikZwycTurniej` | function | `src/tournaments/tournaments.js` | 380 |
+| `mnoznikZwycTurniej` | function | `src/tournaments/tournaments.js` | 394 |
 | `Monetization` | window.Monetization = | `src/ui/panel.js` | 734 |
 | `motes` | const | `src/scene/makieta.js` | 326 |
 | `MOUTH` | const | `src/fish/fish-core.js` | 58 |
 | `mouthDX` | function | `src/fish/fish-core.js` | 90 |
 | `mouthOf` | function | `src/fish/fish-core.js` | 98 |
 | `mouthR` | function | `src/fish/fish-core.js` | 63 |
-| `mulGrad` | let | `src/scene/makieta.js` | 1506 |
+| `mulGrad` | let | `src/scene/makieta.js` | 1509 |
 | `MysteryHints` | const | `src/atlas/atlas.js` | 11 |
 | `nadajRangi` | function | `src/scene/makieta.js` | 169 |
 | `nadajTozsamosc` | function | `src/fish/school-update.js` | 10 |
@@ -267,20 +270,24 @@ Liczba wpisow: 524
 | `NAGRODA_ODKRYCIA` | const | `src/market/baits.js` | 30 |
 | `NAGRODA_PASMA` | const | `src/market/baits.js` | 31 |
 | `NAGRODA_PASMA7` | const | `src/bucket/pricing.js` | 43 |
-| `NAGRODA_WZORCE` | const | `src/tournaments/tournaments.js` | 387 |
+| `NAGRODA_WZORCE` | const | `src/tournaments/tournaments.js` | 401 |
 | `NAGRODA_ZA_WYPUSZCZENIE` | const | `src/card/card.js` | 149 |
-| `nagrodaTurnieju` | function | `src/tournaments/tournaments.js` | 392 |
-| `najdluzszaKlatka` | let | `src/scene/makieta.js` | 1939 |
+| `nagrodaTurnieju` | function | `src/tournaments/tournaments.js` | 406 |
+| `najdluzszaKlatka` | let | `src/scene/makieta.js` | 1942 |
 | `NOWA` | const | `src/fish/school.js` | 67 |
 | `nowaLawica` | function | `src/fish/school.js` | 68 |
 | `nowaOferta` | function | `src/bucket/pricing.js` | 360 |
 | `obrazRyby` | function | `src/fish/species.js` | 1643 |
 | `OBROT_CZAS` | const | `src/fish/fish-core.js` | 592 |
 | `ochota` | function | `src/fish/behavior.js` | 44 |
-| `odbicieBrzegu` | function | `src/scene/makieta.js` | 1360 |
+| `odbicieBrzegu` | function | `src/scene/makieta.js` | 1363 |
 | `oddech` | function | `src/fish/behavior.js` | 400 |
 | `ODDYCHA` | var | `src/fish/behavior.js` | 399 |
 | `odnowaTeksty` | window.odnowaTeksty = | `src/ui/panel.js` | 825 |
+| `ODST_N` | const | `src/scene/makieta.js` | 1970 |
+| `odstepy` | const | `src/scene/makieta.js` | 1971 |
+| `odstI` | let | `src/scene/makieta.js` | 1972 |
+| `odstPelne` | let | `src/scene/makieta.js` | 1972 |
 | `ofertaZaRybe` | function | `src/bucket/pricing.js` | 320 |
 | `OKNA` | const | `src/rarity/okna.js` | 30 |
 | `OKNO_GODZIN` | const | `src/fish/fish-core.js` | 165 |
@@ -291,12 +298,16 @@ Liczba wpisow: 524
 | `Opad` | const | `src/world/pora.js` | 279 |
 | `openCard` | function | `src/card/card.js` | 192 |
 | `OPISY_ATLAS` | const | `src/atlas/atlas-data.js` | 1 |
+| `ostRaf` | let | `src/scene/makieta.js` | 1972 |
+| `ostRysT` | let | `src/scene/makieta.js` | 1973 |
 | `otworzMasterMenu` | window.otworzMasterMenu = | `src/ui/panel.js` | 430 |
 | `P` | const | `src/scene/makieta.js` | 142 |
 | `PACZKI` | const | `src/market/baits.js` | 292 |
 | `PALETA_RYB` | const | `src/atlas/atlas-data.js` | 161 |
+| `panelEl` | let | `src/scene/makieta.js` | 1973 |
+| `panelOdT` | let | `src/scene/makieta.js` | 1973 |
 | `PASEK` | const | `src/fish/rendering.js` | 13 |
-| `paskiRyby` | function | `src/fish/rendering.js` | 55 |
+| `paskiRyby` | function | `src/fish/rendering.js` | 79 |
 | `pasmoKartyGatunku` | window.pasmoKartyGatunku = | `src/rarity/pasma.js` | 163 |
 | `pickLure` | function | `src/fish/hook.js` | 26 |
 | `Pierwszenstwo` | const | `src/rarity/pierwszenstwo.js` | 38 |
@@ -328,7 +339,7 @@ Liczba wpisow: 524
 | `pryskZjedzenia` | function | `src/fish/behavior.js` | 229 |
 | `przeliczOferte` | function | `src/bucket/pricing.js` | 389 |
 | `przemalujLodke` | function | `src/angler/avatar.js` | 55 |
-| `przesuwBrzegu` | function | `src/scene/makieta.js` | 643 |
+| `przesuwBrzegu` | function | `src/scene/makieta.js` | 646 |
 | `PRZEWAGA_PODMIANY` | const | `src/fish/bite.js` | 115 |
 | `PRZYNETA_CIEKAWOSC` | const | `src/fish/school-update.js` | 221 |
 | `PRZYNETA_PODEJSCIE` | const | `src/fish/school-update.js` | 222 |
@@ -355,14 +366,14 @@ Liczba wpisow: 524
 | `ramkaGatunku` | function | `src/rarity/pasma.js` | 159 |
 | `RAMKI` | const | `src/rarity/pasma.js` | 31 |
 | `RaptorLove` | const | `src/events/raptor-love.js` | 11 |
-| `rayeGotowe` | let | `src/scene/makieta.js` | 1776 |
+| `rayeGotowe` | let | `src/scene/makieta.js` | 1779 |
 | `rbg` | const | `src/angler/angler.js` | 125 |
-| `rbg2` | const | `src/fish/rendering.js` | 144 |
+| `rbg2` | const | `src/fish/rendering.js` | 169 |
 | `rbuf` | const | `src/scene/makieta.js` | 68 |
-| `rbufP` | const | `src/scene/makieta.js` | 1773 |
+| `rbufP` | const | `src/scene/makieta.js` | 1776 |
 | `ready` | let | `src/scene/makieta.js` | 74 |
 | `REFL_END` | const | `src/scene/makieta.js` | 42 |
-| `reflDx` | function | `src/scene/makieta.js` | 1378 |
+| `reflDx` | function | `src/scene/makieta.js` | 1381 |
 | `refls` | const | `src/scene/makieta.js` | 206 |
 | `REKOMPENSATA_OKNA` | const | `src/fish/fish-core.js` | 241 |
 | `Rekord` | const | `src/card/rekord.js` | 25 |
@@ -371,7 +382,7 @@ Liczba wpisow: 524
 | `RF` | const | `src/scene/makieta.js` | 212 |
 | `rg` | const | `src/scene/makieta.js` | 70 |
 | `rgbZHsl` | function | `src/angler/avatar.js` | 43 |
-| `rgP` | const | `src/scene/makieta.js` | 1775 |
+| `rgP` | const | `src/scene/makieta.js` | 1778 |
 | `rnd` | const | `src/scene/makieta.js` | 30 |
 | `rodBend` | function | `src/core/state.js` | 21 |
 | `rodBuf` | const | `src/angler/angler.js` | 124 |
@@ -383,11 +394,11 @@ Liczba wpisow: 524
 | `rsbg` | const | `src/angler/angler.js` | 133 |
 | `Ruch` | const | `src/ui/ruch.js` | 6 |
 | `RuchRyby` | const | `src/fish/movement.js` | 22 |
-| `rybBuf` | const | `src/fish/rendering.js` | 143 |
+| `rybBuf` | const | `src/fish/rendering.js` | 168 |
 | `RYJE` | var | `src/fish/behavior.js` | 374 |
 | `ryjenie` | function | `src/fish/behavior.js` | 376 |
 | `rysujCiala` | function | `src/scene/makieta.js` | 368 |
-| `rysujGody` | function | `src/fish/rendering.js` | 340 |
+| `rysujGody` | function | `src/fish/rendering.js` | 365 |
 | `rysujSiec` | function | `src/ecosystem/net-anim.js` | 45 |
 | `rysujSlady` | function | `src/fx/water-traces.js` | 107 |
 | `rysujZObrysem` | function | `src/angler/avatar.js` | 106 |
@@ -398,7 +409,7 @@ Liczba wpisow: 524
 | `sbufAge` | let | `src/scene/makieta.js` | 58 |
 | `SC` | const | `src/angler/avatar.js` | 124 |
 | `scenaZX` | function | `src/core/input-loop.js` | 12 |
-| `Scene` | const | `src/scene/makieta.js` | 1866 |
+| `Scene` | const | `src/scene/makieta.js` | 1869 |
 | `school` | const | `src/fish/school.js` | 38 |
 | `seriaGatunku` | function | `src/market/bait-effects.js` | 196 |
 | `sg` | const | `src/scene/makieta.js` | 56 |
@@ -435,9 +446,9 @@ Liczba wpisow: 524
 | `stepLanding` | function | `src/fish/catching.js` | 205 |
 | `STROJE` | const | `src/player/save.js` | 90 |
 | `SURFACE` | const | `src/scene/makieta.js` | 34 |
-| `SwiatloFX` | const | `src/scene/makieta.js` | 1151 |
-| `swietliki` | const | `src/scene/makieta.js` | 1301 |
-| `SWIETLIKI_ILE` | const | `src/scene/makieta.js` | 1300 |
+| `SwiatloFX` | const | `src/scene/makieta.js` | 1154 |
+| `swietliki` | const | `src/scene/makieta.js` | 1304 |
+| `SWIETLIKI_ILE` | const | `src/scene/makieta.js` | 1303 |
 | `SWIPE_PROG` | const | `src/card/card.js` | 148 |
 | `swipeAktywny` | let | `src/core/input-loop.js` | 11 |
 | `swipeStartX` | let | `src/core/input-loop.js` | 11 |
@@ -463,9 +474,9 @@ Liczba wpisow: 524
 | `up` | const | `src/core/input-loop.js` | 46 |
 | `update` | function | `src/scene/makieta.js` | 339 |
 | `updateSchool` | function | `src/fish/school-update.js` | 230 |
-| `updateSwietliki` | function | `src/scene/makieta.js` | 1319 |
+| `updateSwietliki` | function | `src/scene/makieta.js` | 1322 |
 | `ustawDzwiek` | function | `src/audio/ambient.js` | 237 |
-| `vgGrad` | let | `src/scene/makieta.js` | 1836 |
+| `vgGrad` | let | `src/scene/makieta.js` | 1839 |
 | `W` | const | `src/scene/makieta.js` | 33 |
 | `w2` | const | `src/scene/makieta.js` | 143 |
 | `wagaGatunku` | function | `src/rarity/okna.js` | 305 |
@@ -476,7 +487,7 @@ Liczba wpisow: 524
 | `WALKA_DOM` | const | `src/fish/mechanics.js` | 69 |
 | `wartoscRyby` | function | `src/bucket/pricing.js` | 284 |
 | `wbuf` | const | `src/scene/makieta.js` | 61 |
-| `wbufAge` | let | `src/scene/makieta.js` | 1387 |
+| `wbufAge` | let | `src/scene/makieta.js` | 1390 |
 | `WEED_FRAMES` | const | `src/scene/makieta.js` | 285 |
 | `WEED_PAD` | const | `src/scene/makieta.js` | 285 |
 | `weedFrames` | const | `src/scene/makieta.js` | 286 |
@@ -485,7 +496,7 @@ Liczba wpisow: 524
 | `WIADERKO_MAX` | const | `src/bucket/pricing.js` | 42 |
 | `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 2108 |
 | `widocznoscChmury` | function | `src/scene/makieta.js` | 176 |
-| `WodaFX` | const | `src/scene/makieta.js` | 960 |
+| `WodaFX` | const | `src/scene/makieta.js` | 963 |
 | `wOknieZegara` | function | `src/fish/fish-core.js` | 205 |
 | `WorldPulse` | const | `src/product/engagement.js` | 672 |
 | `wplyw` | function | `src/fish/school-update.js` | 132 |
@@ -529,6 +540,7 @@ Liczba wpisow: 524
 | `Zegar` | const | `src/ui/zegar.js` | 15 |
 | `zKonturem` | function | `src/fish/species.js` | 1614 |
 | `Zlecenia` | const | `src/bucket/orders.js` | 47 |
+| `zmierzOdstep` | function | `src/scene/makieta.js` | 1974 |
 | `ZYLKA_GRUB` | const | `src/fish/mechanics.js` | 138 |
 | `ZYLKA_KOLOR` | const | `src/fish/mechanics.js` | 138 |
 | `ZYLKA_OD` | const | `src/fish/mechanics.js` | 138 |

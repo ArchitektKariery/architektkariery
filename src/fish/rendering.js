@@ -51,6 +51,30 @@ const falBuf = document.createElement('canvas');
 const fbg = falBuf.getContext('2d');
 falBuf.width = 8; falBuf.height = 8;
 fbg.imageSmoothingEnabled = false;
+/* ============================================================
+   DRUGI BUFOR NA DUZE SKLADANIE (X 2026, zgloszenie Andrzeja: "nadal
+   pojawia sie spadek plynnosci przy braniu i wyciaganiu" oraz "zeby
+   telefony nie grzaly sie podczas gry").
+
+   Bufor rosl do najwiekszej ryby, jaka sie w nim kiedykolwiek skladala,
+   i juz nie malal. Karta trofeum sklada rybe z mnoznikiem rozdzielczosci
+   do 4 (kr ponizej), wiec po PIERWSZYM polowie bufor puchl z ok. 12 tys.
+   do ok. 150 tys. pikseli. Od tej chwili kazda ryba lawicy czyscila
+   i barwila mgla CALY ten bufor, a na telefonie przegladarka kopiowala
+   go w calosci przy kazdej rybie (bufor zmienia sie, gdy scena jeszcze
+   z niego czyta). Zmierzone w Chromium: paskiRyby 4,8 ms na klatke przed
+   pierwszym polowem i 26,5 ms po nim, cala klatka 19 ms wobec 42 ms,
+   przy tej samej liczbie ryb (18 do 22).
+
+   Teraz skladanie z mnoznikiem (kr > 1: karta, ryby powiekszone na
+   scenie) idzie do osobnego bufora, a lawica zostaje w malym. Czyszczenie
+   i mgla obejmuja tylko obszar tej ryby z marginesem 2 px: skalowanie
+   najblizszym sasiadem siega najwyzej o piksel poza obszar, wiec stare
+   piksele wiekszej ryby nigdy nie trafiaja na scene. */
+const falBufDuzy = document.createElement('canvas');
+const fbgDuzy = falBufDuzy.getContext('2d');
+falBufDuzy.width = 8; falBufDuzy.height = 8;
+fbgDuzy.imageSmoothingEnabled = false;
 
 function paskiRyby(g, G2, f, w, h, sx, sy, mgla) {
   const M = G2.meta;
@@ -74,25 +98,26 @@ function paskiRyby(g, G2, f, w, h, sx, sy, mgla) {
      zamiast powielac ostatnia kolumne sprite'a. */
   const zapas = Math.ceil((G2.fala + G2.ogon) * kr) + 2;
   const bw = M.w * kr + 2, bh = M.h * kr + zapas * 2 + 2;
-  if (falBuf.width < bw || falBuf.height < bh) {
-    falBuf.width = Math.max(falBuf.width, bw);
-    falBuf.height = Math.max(falBuf.height, bh);
+  const B = (kr > 1) ? falBufDuzy : falBuf;
+  const bx = (kr > 1) ? fbgDuzy : fbg;
+  if (B.width < bw || B.height < bh) {
+    B.width = Math.max(B.width, bw);
+    B.height = Math.max(B.height, bh);
     /* Zmiana rozmiaru plotna kasuje stan kontekstu. */
-    fbg.imageSmoothingEnabled = false;
+    bx.imageSmoothingEnabled = false;
   }
-  /* RAMKI WOKOL RYB.
-     Czyscilem tylko obszar biezacej ryby, a bufor rosnie do najwiekszej,
-     jaka sie w nim skladala. Po makairze zostawal w nim jej obrys, a maly
-     okon rysowal sie w rogu tego smiecia. Skalowanie najblizszym sasiadem
-     przy niecalkowitej skali siega o piksel dalej niz kazano, wiec wyjmowalo
-     stamtad kolumne i wiersz i doklejalo je rybie jako kreski dookola.
-     Czyszczenie calego plotna kosztuje tyle co nic i zamyka to na amen. */
-  fbg.clearRect(0, 0, falBuf.width, falBuf.height);
+  /* RAMKI WOKOL RYB (stary blad, wciaz zamkniety): po wiekszej rybie
+     zostawal w buforze jej obrys, a skalowanie najblizszym sasiadem przy
+     niecalkowitej skali siega o piksel poza obszar i doklejalo z niego
+     kreski. Czyscimy wiec obszar tej ryby z zapasem 2 px w obu osiach,
+     a nie caly bufor (patrz DRUGI BUFOR wyzej). */
+  const cw = Math.min(B.width, bw + 2), ch = Math.min(B.height, bh + 2);
+  bx.clearRect(0, 0, cw, ch);
   for (let x = 0; x < M.w; x += krok) {
     const sw = Math.min(krok, M.w - x);
     const dy = Math.round(falaY(G2, x + sw / 2, faza, RP) * amp * kr);
-    fbg.drawImage(obrazRyby(G2, f), x, 0, sw, M.h,
-                  1 + x * kr, 1 + zapas + dy, sw * kr, M.h * kr);
+    bx.drawImage(obrazRyby(G2, f), x, 0, sw, M.h,
+                 1 + x * kr, 1 + zapas + dy, sw * kr, M.h * kr);
   }
   /* Jedno przeskalowanie calej ryby zamiast skalowania kazdego paska
      osobno. Tu siedzial blad, ktory bylo widac na ploci: pasek szedl na
@@ -128,13 +153,13 @@ function paskiRyby(g, G2, f, w, h, sx, sy, mgla) {
      trofeum ma byc w pelnych barwach niezaleznie od tego, z jakiej
      glebokosci wyszlo. */
   if (mgla > 0.02) {
-    fbg.globalCompositeOperation = 'source-atop';
-    fbg.fillStyle = 'rgba(88,105,176,' + Math.min(0.55, mgla).toFixed(3) + ')';
-    fbg.fillRect(0, 0, falBuf.width, falBuf.height);
-    fbg.globalCompositeOperation = 'source-over';
+    bx.globalCompositeOperation = 'source-atop';
+    bx.fillStyle = 'rgba(88,105,176,' + Math.min(0.55, mgla).toFixed(3) + ')';
+    bx.fillRect(0, 0, cw, ch);
+    bx.globalCompositeOperation = 'source-over';
   }
   const jedX = sx / kr, jedY = sy / kr;      /* piksel bufora na piksel ekranu */
-  g.drawImage(falBuf, 0, 0, bw, bh,
+  g.drawImage(B, 0, 0, bw, bh,
               -w / 2 - jedX, -h / 2 - (zapas + 1) * jedY, bw * jedX, bh * jedY);
 }
 

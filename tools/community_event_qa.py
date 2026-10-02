@@ -29,6 +29,7 @@ require(any(x in html for x in [
     "2026-10-01-hol-plynnosc-v1",
     "2026-10-01-karpik-tajemnica-v1",
     "2026-10-02-tarlisko-v1",
+    "2026-10-02-cieplo-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -44,6 +45,13 @@ require("LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE" in html, "school must be draw
 require("const STEP = 2, IN = 8;" in html, "water reflections must keep 2 px bands during the fight")
 for dlawik in ["_fightSchoolBuf", "holStride", "rybBuf.__holFrame", "fpsWater", "_fightSchoolUpdateAcc", "targetStep = fpsNow"]:
     require(dlawik not in html, f"fight throttle came back: {dlawik}")
+# Cieplo telefonu (2 X 2026): lawica nie sklada sie w buforze, ktory
+# urosl do ryby z karty; HUD nad scena bez rozmycia tla; ekrany 120 Hz
+# dostaja 60 klatek na sekunde zamiast 120.
+require("const B = (kr > 1) ? falBufDuzy : falBuf;" in html, "school fish must not share the enlarged card buffer")
+require("bx.clearRect(0, 0, cw, ch);" in html, "fish buffer must clear only the area of the fish")
+require("#panel:not(.on){-webkit-backdrop-filter:none;backdrop-filter:none}" in html and "#returnDigest,#raptorLove,#pasekTVlista," in html, "gameplay HUD must not use backdrop-filter")
+require("minOdstep = (vs < 10.5)" in html, "frame loop must cap high refresh displays at about 60 fps")
 
 for marker in [
     "community_contribute",

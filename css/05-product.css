@@ -679,3 +679,55 @@ body.menu-master-open #pomoc{animation-delay:162ms !important}
   }
 }
 
+
+/* ============================================================
+   CIEPLO TELEFONU (X 2026, pytanie Andrzeja: "Potrafisz cos zrobic,
+   zeby telefony nie grzaly sie podczas gry?").
+
+   Kazdy element z backdrop-filter to osobny przebieg renderowania:
+   kompozytor kopiuje to, co lezy pod elementem, rozmywa kopie i dopiero
+   na nia kladzie element. Pod HUD-em lezy plotno gry, ktore zmienia sie
+   w kazdej klatce, wiec kazde rozmycie liczy sie od nowa 60 razy na
+   sekunde. Chrome robi to nawet dla elementu z opacity 0, bo warstwa
+   z filtrem tla zawsze idzie do rysowania. Takich niewidocznych bylo
+   piec, w tym pelnoekranowy #panel z blur(0px).
+   Zmierzone w Chromium nad woda, bez dotykania ekranu: 13 przebiegow
+   na klatke (scena + 12 filtrow tla), kompozytor 263 ms pracy na
+   sekunde. Bez filtrow tla: 1 przebieg na klatke, 73 ms na sekunde.
+   Na telefonie z GPU kafelkowym kazdy dodatkowy przebieg zapisuje
+   i wczytuje caly obraz z pamieci, a to wlasnie grzeje.
+
+   Rozmycie zostaje tylko tam, gdzie gracz i tak nie lowi: otwarty
+   panel (scena pod nim rysuje sie wtedy rzadziej, patrz frame()
+   w src/scene/makieta.js) i rozwiniete MENU. Okna z tlem 0,93 i wiecej
+   traca rozmycie bez widocznej roznicy. Elementy HUD-u dostaja tlo
+   ciemniejsze o 5 do 8 punktow, ktore przejmuje role rozmycia: liczby
+   i podpisy zostaja czytelne na jasnej wodzie.
+   ============================================================ */
+/* Zamkniety panel bez !important: wartosc z !important stoi w kaskadzie
+   nad przejsciem CSS, wiec rozmycie znikaloby skokiem. Tak gasnie razem
+   z panelem, a po przejsciu nie zostaje po nim przebieg. */
+#panel:not(.on){-webkit-backdrop-filter:none;backdrop-filter:none}
+#returnDigest,#raptorLove,#pasekTVlista,
+#onbGuide,#onbKarta,#reset,#lakeClock,#menuMaster,.quickBtn,#monety,
+#shareCatch,#tarla,#baitRoundsHud,body:not(.menu-master-open) #ikony{
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important
+}
+#monety{background:rgba(15,12,28,.40)}
+#lakeClock{background:linear-gradient(180deg,rgba(17,13,34,.72),rgba(12,10,24,.50))}
+#menuMaster{background:linear-gradient(180deg,rgba(28,21,45,.54),rgba(15,12,28,.33))}
+.quickBtn{background:linear-gradient(180deg,rgba(28,21,45,.50),rgba(15,12,28,.31))}
+#shareCatch{background:rgba(12,10,22,.72)}
+#onbGuide{background:rgba(11,10,22,.55)}
+#onbKarta{background:rgba(10,8,20,.76)}
+#tarla{background:rgba(20,15,39,.33)}
+#baitRoundsHud{background:rgba(23,17,36,.68)}
+#reset{background:radial-gradient(circle at 50% 40%,rgba(35,27,58,.23),rgba(20,15,39,.08) 66%,transparent 78%)}
+/* Oddech obwodki ŁAWICY animuje box-shadow, a tego kompozytor nie umie:
+   kazda klatka animacji to przeliczenie stylu, malowanie i rastrowanie
+   przycisku na watku glownym, tym samym, ktory liczy gre. Kroki zamiast
+   ciaglej krzywej: funkcja czasu dziala na kazdy odcinek miedzy
+   klatkami kluczowymi osobno, wiec 18 krokow na wdech (2,25 s) i 18 na
+   wydech daje 8 malowan na sekunde zamiast 60. Przy tak wolnym oddechu
+   skoki okolo 0,02 w jasnosci obwodki sa niewidoczne. */
+#reset{animation-timing-function:steps(18,end)}

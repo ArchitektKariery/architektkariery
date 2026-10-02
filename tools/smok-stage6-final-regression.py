@@ -130,7 +130,13 @@ checks["fight_school_full_rate"] = "LAWICA W CZASIE HOLU RYSOWANA JAK ZAWSZE" in
 checks["fight_water_full_quality"] = "const STEP = 2, IN = 8;" in src and "fpsWater" not in src
 checks["fight_sim_full_rate"] = "_fightSchoolUpdateAcc" not in src and "targetStep = fpsNow" not in src
 checks["rod_buffer_no_per_frame_resize"] = "BUFOR WEDKI BEZ ZMIANY ROZMIARU W KAZDEJ KLATCE" in src
-checks["cloud_buffer_no_per_frame_reset"] = "const cw = Math.max(Math.floor(w), _bufC.canvas.width);" in src and "_bufC.clearRect(0, 0, cw, ch);" in src
+# Chmury (2 X 2026): kazda chmura trzyma gotowy, zabarwiony obrazek i sklada
+# go od nowa tylko po zmianie barwy nieba albo rozmiaru, wiec w zwyklej
+# klatce nie ma ani zmiany rozmiaru plotna, ani czyszczenia bufora.
+checks["cloud_buffer_no_per_frame_reset"] = ("GOTOWA, ZABARWIONA CHMURA" in src
+    and "if (!k || c.__klucz !== klucz || k.canvas.width !== kw || k.canvas.height !== kh) {" in src
+    and "rys.buforem(k.canvas, x, y, c.w, c.h, c.a * w);" in src
+    and "function bufChmur" not in src)
 checks["fight_line_targets_fish"] = "if (G.hooked && typeof mouthOf === 'function')" in src and "mouthOf(G.hooked" in src
 checks["shared_float_pose"] = ("let floatPose = FloatFX.pose(t);" in src or "const floatPose = FloatFX.pose(t);" in src)
 checks["float_held_at_tip"] = "FloatFX.heldAtTip(rodTipVisual)" in src
