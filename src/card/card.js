@@ -513,6 +513,13 @@ function decyzjaKarty(kier) {
     if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
       Ruch.zaRekord(nagroda, ['MITYCZNA ZABRANA']);
     if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(20);
+  } else if (kier === 'wiaderko' && C.gk === 'smok_zycia') {
+    /* PRZYNETA (2 X 2026, decyzja Andrzeja: "wiaderko to tylko clickbait
+       dla gracza. Smok nigdy ma do niego nie trafiac"). Gracz dwa razy
+       potwierdzil, ze bierze Smoka, ale Smok do wiaderka nie trafia:
+       karta odlatuje w strone wiaderka, a dalej dzieje sie juz tylko
+       furia (SmokZycia.poDecyzji na koncu tej funkcji). */
+    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(14);
   } else if (kier === 'wiaderko') {
     /* EKOSYSTEM: zatrzymana ryba UBYWA z populacji serwera. Wypuszczona
        nie -- to jest cala roznica miedzy dwoma stronami swipe'a i jedyne

@@ -17,7 +17,7 @@ Prośba Andrzeja (1 X 2026): „Dodaj zakładkę w wiadrze tarlisko, gdzie z wia
   - `TARŁO WSTRZYMANE`: w jeziorze brakuje samca albo samicy tego gatunku albo gatunek wymarł (`Eko.moznaRozmnazac`).
 - Po udanym tarle panel pokazuje linijkę „ostatnie tarło: GATUNEK · N ziaren ikry · kiedy”, a HUD mówi „GATUNEK: TARŁO W TARLISKU”.
 - Tryb wymiany przy pełnym wiaderku zawsze otwiera listę TOWAR.
-- Smok Życia (gatunek `bezEko`) nie wchodzi do tarliska: ikonka stawu w jego wierszu blednie, a stuknięcie mówi „Smok Życia NIE ODBYWA TARŁA” (`Tarlisko.zWiaderka` zwraca `'LEGENDA'`). Wypuszczony z wiaderka wraca do legendy, nie do jeziora: `Eko.zmien` pomija gatunki `bezEko` (od 2 X 2026, wcześniej wypuszczony Smok dostawał populację i wypływał w zwykłych ławicach).
+- Smok Życia (gatunek `bezEko`) nie wchodzi do tarliska: ikonka stawu w jego wierszu blednie, a stuknięcie mówi „Smok Życia NIE ODBYWA TARŁA” (`Tarlisko.zWiaderka` zwraca `'LEGENDA'`). Od 2 X 2026 Smok nie trafia też do wiaderka (wiaderko jest dla niego tylko przynętą, `docs/smok-zycia-wyrok.md`), a `Eko.zmien` pomija gatunki `bezEko`, więc nawet stary zapis nie doda go do jeziora.
 
 ## Zapis gracza
 - `tarlisko`: tablica ryb w tym samym kształcie co `wiaderko` (`gat`, `cm`, `waga`, `pkt`, `plec`), sanowana do 2 sztuk w `sanujZapis`.

@@ -112,7 +112,7 @@ Liczba wpisow: 537
 | `CL` | const | `src/scene/makieta.js` | 181 |
 | `clamp` | const | `src/scene/makieta.js` | 28 |
 | `clickSound` | function | `src/audio/haptics.js` | 178 |
-| `closeCard` | function | `src/card/card.js` | 578 |
+| `closeCard` | function | `src/card/card.js` | 585 |
 | `clouds` | const | `src/scene/makieta.js` | 148 |
 | `cnt` | let | `src/scene/makieta.js` | 1930 |
 | `COL` | const | `src/fish/mechanics.js` | 9 |
@@ -124,7 +124,7 @@ Liczba wpisow: 537
 | `CYKL` | const | `src/fish/behavior.js` | 83 |
 | `CYKL_HANDLARZA` | const | `src/bucket/pricing.js` | 49 |
 | `cyklLawicy` | function | `src/fish/behavior.js` | 551 |
-| `czystyNick` | window.czystyNick = | `src/player/save.js` | 433 |
+| `czystyNick` | window.czystyNick = | `src/player/save.js` | 437 |
 | `decyzjaKarty` | function | `src/card/card.js` | 467 |
 | `DepthFX` | const | `src/scene/makieta.js` | 1651 |
 | `dnoGotowe` | function | `src/scene/makieta.js` | 1507 |
@@ -139,7 +139,7 @@ Liczba wpisow: 537
 | `drawBedForeground` | function | `src/scene/makieta.js` | 1583 |
 | `drawBedItem` | function | `src/scene/makieta.js` | 1533 |
 | `drawBrzeg` | function | `src/scene/makieta.js` | 714 |
-| `drawCard` | function | `src/card/card.js` | 599 |
+| `drawCard` | function | `src/card/card.js` | 606 |
 | `drawDepthLab` | function | `src/scene/makieta.js` | 1609 |
 | `drawFish` | function | `src/fish/rendering.js` | 172 |
 | `drawGodRays` | function | `src/scene/makieta.js` | 1814 |
@@ -187,7 +187,7 @@ Liczba wpisow: 537
 | `gat` | function | `src/fish/fish-core.js` | 53 |
 | `GATUNKI` | const | `src/fish/species.js` | 15 |
 | `gauss` | function | `src/fish/fish-core.js` | 432 |
-| `Gielda` | window.Gielda = | `src/bucket/bucket.js` | 97 |
+| `Gielda` | window.Gielda = | `src/bucket/bucket.js` | 96 |
 | `gieldaStan` | function | `src/bucket/pricing.js` | 118 |
 | `glebokoscZ` | function | `src/fish/fish-core.js` | 543 |
 | `gotowe` | let | `src/fish/fish-core.js` | 2 |

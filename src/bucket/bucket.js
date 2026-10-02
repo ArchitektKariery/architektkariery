@@ -1,8 +1,8 @@
 /* ============================================================
    WIADERKO.
-   Mityczne (pasmo 7) i Smok Zycia (pasmo 8) trafiaja tu jak kazda ryba
-   (zmiana z IX 2026, patrz karta polowu). Legenda miesci sie ponad
-   limitem miejsc (opis w dodaj()).
+   Mityczne (pasmo 7) trafiaja tu jak kazda ryba (zmiana z IX 2026, patrz
+   karta polowu). Smok Zycia (pasmo 8) nie trafia tu nigdy: wiaderko jest
+   dla niego tylko przyneta (opis w dodaj()).
    ============================================================ */
 window.Wiaderko = {
   max: WIADERKO_MAX,
@@ -12,17 +12,16 @@ window.Wiaderko = {
   dodaj(gat, cm, waga, pkt, plec) {
     const d = gieldaStan(); if (!d) return false;
     /* ============================================================
-       LEGENDA ZAWSZE SIE MIESCI (2 X 2026, zgloszenie Andrzeja: "Nawet
-       jak wrzucam do wiaderka to i tak odplywa. Nie ma go w wiaderku").
-       Przy pelnym wiaderku Smok Zycia szedl zwykla sciezka wymiany:
-       pytanie "wymienic rybe w wiaderku?" lezalo pod zaslona i napisem
-       furii, a NIE albo zamkniecie zabieralo Smoka bezpowrotnie. Furia
-       juz sie wtedy wydarzyla, wiec gracz tracil 75% jeziora i Smoka.
-       Gatunek legendy (bezEko) wchodzi do wiaderka ponad limit: gracz
-       dwa razy potwierdzil, ze go bierze, i ma go dostac.
+       WIADERKO TO PRZYNETA DLA SMOKA (2 X 2026, decyzja Andrzeja:
+       "wiaderko to tylko clickbait dla gracza. Smok nigdy ma do niego
+       nie trafiac").
+       Swipe Smoka Zycia w strone wiaderka po dwoch pytaniach konczy sie
+       furia (SmokZycia.poDecyzji), a nie ryba w wiaderku: karta w ogole
+       nie wola dodaj() dla Smoka. Ta brama jest druga linia obrony:
+       zaden gatunek legendy (bezEko) nie wejdzie tu inna droga.
        ============================================================ */
-    const legenda = !!(typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko);
-    if (d.wiaderko.length >= WIADERKO_MAX && !legenda) return false;
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return false;
+    if (d.wiaderko.length >= WIADERKO_MAX) return false;
     /* PLEC ZAPAMIETANA RAZEM Z RYBA. Potrzebna przy wypuszczeniu:
        ryba wraca do populacji jako TA SAMA sztuka, wiec musi oddac
        swoja plec, a nie losowa. Stare zapisy nie maja tego pola --

@@ -276,12 +276,16 @@ const Zapis = (() => {
     }
 
     out.monety = liczba(out.monety, 0, 0, Number.MAX_SAFE_INTEGER);
+    /* Smok Zycia (legenda, bezEko) nie ma prawa lezec w wiaderku ani
+       w tarlisku (decyzja z 2 X 2026: wiaderko to dla niego tylko
+       przyneta). Zapisy sprzed tej decyzji traca go przy wczytaniu. */
+    const legenda = (r) => !!(window.GATUNKI && window.GATUNKI[r.gat] && window.GATUNKI[r.gat].bezEko);
     if (!Array.isArray(out.wiaderko)) out.wiaderko = [];
     else out.wiaderko = out.wiaderko.filter(r => r && typeof r === 'object' &&
-                          (!window.GATUNKI || window.GATUNKI[r.gat])).slice(0, 32);
+                          (!window.GATUNKI || window.GATUNKI[r.gat]) && !legenda(r)).slice(0, 32);
     if (!Array.isArray(out.tarlisko)) out.tarlisko = [];
     else out.tarlisko = out.tarlisko.filter(r => r && typeof r === 'object' &&
-                          (!window.GATUNKI || window.GATUNKI[r.gat]))
+                          (!window.GATUNKI || window.GATUNKI[r.gat]) && !legenda(r))
                           .slice(0, (window.Tarlisko && Tarlisko.MAX) || 2);
     if (!out.zanetyMam || typeof out.zanetyMam !== 'object' || Array.isArray(out.zanetyMam)) out.zanetyMam = {};
     else for (const k in out.zanetyMam) {
