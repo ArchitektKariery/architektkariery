@@ -1,4 +1,4 @@
--- QRyby — Smok Życia: odrodzenie wymarłych gatunków po wypuszczeniu Smoka.
+-- QRyby, Smok Życia: odrodzenie wymarłych gatunków po wypuszczeniu Smoka.
 -- Uruchomienie: Supabase SQL Editor, CAŁY plik naraz.
 -- Ponowne uruchomienie niczego nie psuje: plik podmienia funkcję na tę
 -- samą wersję i sam z siebie nikogo nie wskrzesza.
