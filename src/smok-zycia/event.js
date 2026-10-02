@@ -594,6 +594,23 @@ const SmokZycia = (() => {
 
   function aktywnaLawica(){ return aktywna; }
   function koniecLawicy(){ aktywna=false; }
+  /* ============================================================
+     HOL SMOKA TRZYMA JEGO LAWICE (2 X 2026).
+     Zegar lawic (CYKL w src/fish/behavior.js) tykal takze w trakcie holu.
+     Gdy 60 sekund lawicy Smoka mijalo z Smokiem na haczyku, cykl konczyl
+     lawice: Smok zostawal (jest na haczyku), a obok niego wplywalo 12 do
+     15 zwyklych ryb. Zmierzone: 13 ryb w kadrze po 0,5 s od konca cyklu.
+     Po zerwaniu Smok plywal potem wsrod nich az do nastepnej wymiany.
+     Teraz, dopoki Smok jest na haczyku albo wisi przy wyciaganiu, zegar
+     jego lawicy stoi. Zerwany Smok odplywa w swojej lawicy, a ta konczy
+     sie zwyklym trybem.
+     ============================================================ */
+  function trzymaLawice(){
+    if (!aktywna) return false;
+    const H = window.G; if (!H) return false;
+    const smok = (f) => !!(f && f.gat === 'smok_zycia');
+    return smok(H.hooked) || (H.phase === 'land' && !!H.land && smok(H.land.fish));
+  }
 
   function poZlowieniu() {
     let ile=0;
@@ -606,7 +623,7 @@ const SmokZycia = (() => {
   }
 
   return {
-    zastapLawiceJesliCzeka, aktywnaLawica, koniecLawicy, poZlowieniu,
+    zastapLawiceJesliCzeka, aktywnaLawica, koniecLawicy, trzymaLawice, poZlowieniu,
     zachowanie, poOdmowie, odplywanie, lureRuch, zegarOgladania,
     dlugosc, jednostka, grubosc, skalaDocelowa
   };

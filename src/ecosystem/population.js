@@ -192,7 +192,26 @@ const Eko = (() => {
         wymarly: false, kiedyWymarl: 0
       };
     }
-    return E.gat[gk];
+    const r = E.gat[gk];
+    /* ============================================================
+       LEGENDA POZA POPULACJA (2 X 2026, zgloszenie Andrzeja: "Smok
+       pojawil sie w lawicy", zrzut: Smok wsrod zwyklych ryb).
+       Smok Zycia (bezEko) przyplywa wylacznie z wrozby z ciastka i nie
+       ma populacji. Dziura byla w wypuszczaniu: Smok trafia do wiaderka
+       jak kazda ryba pasma 7, a krzyzyk w wiaderku (albo w tarlisku)
+       wolal Eko.zmien(+1). Smok dostawal n = 1, czyli wage 1 w tabeli
+       losowania (suma ok. 97 500), i od tej pory wyplywal w zwyklych
+       lawicach, prosty, bez wrozby. Przy wlaczonym serwerze to samo +1
+       szlo do wspolnej tabeli eko_populacja, wiec dotykalo wszystkich.
+       Rekord legendy zawsze ma zero: naprawia tez zapisy, w ktorych
+       Smok zdazyl juz dostac populacje.
+       ============================================================ */
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko && (r.n || r.m || r.f)) {
+      r.n = 0; r.m = 0; r.f = 0; r.max = 0; r.min = 0;
+      r.indyw = true; r.wymarly = false;
+      window.__wagiTab = null;
+    }
+    return r;
   }
 
   function populacja(gk) { const r = rekord(gk); return r ? r.n : 0; }
@@ -299,6 +318,10 @@ const Eko = (() => {
 
   function zmien(gk, delta, plec, powod) {
     if (!maPrawoDoSwiata()) return 0;
+    /* Legenda (bezEko) nigdy nie wchodzi do populacji, takze na serwerze:
+       wypuszczony Smok wraca do legendy, a nie do jeziora (opis przy
+       rekord()). */
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) return 0;
     const r = rekord(gk); if (!r) return 0;
     /* ============================================================
        SERWER MA PIERWSZENSTWO. Gdy wspolna populacja jest wlaczona,

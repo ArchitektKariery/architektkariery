@@ -57,6 +57,10 @@ const Tarlisko = (() => {
     if (T.length >= MAX) return 'PELNE';
     const ryba = D.wiaderko[i];
     if (!ryba || !ryba.gat) return 'BRAK_RYBY';
+    /* Legenda (Smok Zycia, bezEko) nie ma plci ani populacji, wiec nie
+       ma tu czego szukac, a wypuszczona z tarliska nie moze wrocic do
+       jeziora (opis przy Eko.rekord). */
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[ryba.gat] && GATUNKI[ryba.gat].bezEko) return 'LEGENDA';
     D.wiaderko.splice(i, 1);
     T.push(ryba);
     poOdejsciuZWiaderka(D);

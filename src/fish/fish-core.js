@@ -377,6 +377,12 @@ function losujGatunek(r) {
          do puli, a jego wyglad nie wyplywa przed odslonieciem.
          ============================================================ */
       if (GATUNKI[k].odnowa && !(populacjaOdnowy(k) > 0)) { wag[k] = 0; continue; }
+      /* LEGENDA: TWARDE ZERO (2 X 2026). Smok Zycia (bezEko) wplywa
+         wylacznie przez SmokZycia.zastapLawiceJesliCzeka, czyli z wrozby,
+         z wymuszonym gatunkiem (QRYBY_TEST.wymus), ktory omija te tabele.
+         W zwyklej lawicy nie ma go nigdy, bez wzgledu na to, co zapis
+         albo serwer mowi o jego populacji. */
+      if (GATUNKI[k].bezEko) { wag[k] = 0; continue; }
       const w = waga(k); wag[k] = w;
       /* Pula zamknieta przez zanete wypada z tabeli, wiec nie ma czego
          odrzucac: kotlety zostawiaja w wodzie same drapiezniki. */

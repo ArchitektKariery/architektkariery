@@ -88,6 +88,10 @@ Eko.Serwer = (function () {
      zawsze -- takze gdy mowi cos gorszego, niz gracz widzial. */
   function wpiszStan(gat, w) {
     if (!w) return;
+    /* Wiersz legendy (Smok Zycia) mogl trafic do wspolnej tabeli przez
+       wypuszczenie z wiaderka przed poprawka z 2 X 2026. Gra go pomija:
+       legenda nie ma populacji (opis przy Eko.rekord). */
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return;
     const r = Eko.rekord(gat); if (!r) return;
     r.n = w.n; r.m = w.samcow; r.f = w.samic;
     r.wymarly = !!w.wymarly;

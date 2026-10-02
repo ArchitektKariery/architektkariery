@@ -30,6 +30,7 @@ require(any(x in html for x in [
     "2026-10-01-karpik-tajemnica-v1",
     "2026-10-02-tarlisko-v1",
     "2026-10-02-cieplo-v1",
+    "2026-10-02-smok-legenda-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -52,6 +53,15 @@ require("const B = (kr > 1) ? falBufDuzy : falBuf;" in html, "school fish must n
 require("bx.clearRect(0, 0, cw, ch);" in html, "fish buffer must clear only the area of the fish")
 require("#panel:not(.on){-webkit-backdrop-filter:none;backdrop-filter:none}" in html and "#returnDigest,#raptorLove,#pasekTVlista," in html, "gameplay HUD must not use backdrop-filter")
 require("minOdstep = (vs < 10.5)" in html, "frame loop must cap high refresh displays at about 60 fps")
+# Smok Zycia poza populacja (2 X 2026): wypuszczony z wiaderka albo
+# z tarliska dostawal n = 1 i wyplywal w zwyklych lawicach, a serwer
+# rozsylal te populacje wszystkim graczom. Hol Smoka konczyl jego lawice
+# i wpuszczal obok niego zwykle ryby.
+require("if (GATUNKI[k].bezEko) { wag[k] = 0; continue; }" in html, "legend species must have a hard zero in the spawn table")
+require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) return 0;" in html, "legend species must never enter the population")
+require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return;" in html, "server rows of a legend species must be ignored")
+require("return 'LEGENDA';" in html, "legend species must not enter the tarlisko")
+require("if (window.SmokZycia && SmokZycia.trzymaLawice && SmokZycia.trzymaLawice()) return;" in html, "dragon fight must hold the dragon shoal")
 
 for marker in [
     "community_contribute",

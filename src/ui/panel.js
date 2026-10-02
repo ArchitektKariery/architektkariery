@@ -1856,6 +1856,9 @@
                   (roz >= 0 ? '+' : '\u2212') + qrybG(Math.abs(roz)) +
                   ' (' + (proc >= 0 ? '+' : '\u2212') + Math.abs(proc) + '%)</i>';
       h += '</div>';
+      /* Smok Zycia (bezEko) nie odbywa tarla: staw przygaszony jak przy
+         pelnym tarlisku, a klikniecie mowi dlaczego. */
+      const legendaR = !!(GATUNKI[r.gat] && GATUNKI[r.gat].bezEko);
       /* Normalnie dwa male przyciski obok siebie: ikonka stawu (do
          tarliska) i krzyzyk (wypusc). W trybie wymiany jeden szerszy
          "WYMIEN", bo caly wiersz jest wtedy celem i musi to mowic wprost.
@@ -1863,8 +1866,8 @@
          tarlisko jest pelne -- martwy przycisk niczego by nie tlumaczyl. */
       h += ocz
         ? '<button class="wym" data-i="' + i + '">WYMIEŃ</button>'
-        : '<span class="wr-akcje"><button class="do-tarla' + (pelneT ? ' pelne' : '') + '" data-i="' + i +
-          '" title="' + (pelneT ? 'tarlisko pełne' : 'do tarliska') + '" aria-label="Przesuń do tarliska">' + stawSVG() + '</button>' +
+        : '<span class="wr-akcje"><button class="do-tarla' + ((pelneT || legendaR) ? ' pelne' : '') + '" data-i="' + i +
+          '" title="' + (legendaR ? 'legenda nie odbywa tarła' : (pelneT ? 'tarlisko pełne' : 'do tarliska')) + '" aria-label="Przesuń do tarliska">' + stawSVG() + '</button>' +
           '<button class="wyp" data-i="' + i + '" title="wypuść">✕</button></span>';
       h += '</div>';
     }
@@ -2048,6 +2051,9 @@
         } else if (wynik === 'PELNE') {
           if (navigator.vibrate) { try { navigator.vibrate(30); } catch (err) {} }
           Ruch.powiedz('TARLISKO PEŁNE: ' + Tarlisko.MAX + ' / ' + Tarlisko.MAX, true);
+        } else if (wynik === 'LEGENDA') {
+          if (navigator.vibrate) { try { navigator.vibrate(30); } catch (err) {} }
+          Ruch.powiedz(nazwaZ(ryba) + ' NIE ODBYWA TARŁA', true);
         }
       });
     }

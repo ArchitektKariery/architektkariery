@@ -549,6 +549,9 @@ function zachowanie(f, dt) {
 window.ZACH = ZACH; window.DRAPIEZNIK = DRAPIEZNIK;
 
 function cyklLawicy(dt) {
+  /* Hol Smoka trzyma jego lawice: zegar stoi (opis przy
+     SmokZycia.trzymaLawice w src/smok-zycia/event.js). */
+  if (window.SmokZycia && SmokZycia.trzymaLawice && SmokZycia.trzymaLawice()) return;
   CYKL.t += dt;
   if (CYKL.faza === 'zyje' && CYKL.t >= CYKL.ucieczka) {
     CYKL.faza = 'ucieka';
