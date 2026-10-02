@@ -1,7 +1,8 @@
 /* ============================================================
    WIADERKO.
-   Pasmo 7 nigdy tu nie trafia: mityczne nie maja ceny rynkowej, wiec
-   place od razu i nie zajmuja miejsca (patrz hak w karcie polowu).
+   Mityczne (pasmo 7) i Smok Zycia (pasmo 8) trafiaja tu jak kazda ryba
+   (zmiana z IX 2026, patrz karta polowu). Legenda miesci sie ponad
+   limitem miejsc (opis w dodaj()).
    ============================================================ */
 window.Wiaderko = {
   max: WIADERKO_MAX,
@@ -10,7 +11,18 @@ window.Wiaderko = {
   pelne() { return this.ile() >= WIADERKO_MAX; },
   dodaj(gat, cm, waga, pkt, plec) {
     const d = gieldaStan(); if (!d) return false;
-    if (d.wiaderko.length >= WIADERKO_MAX) return false;
+    /* ============================================================
+       LEGENDA ZAWSZE SIE MIESCI (2 X 2026, zgloszenie Andrzeja: "Nawet
+       jak wrzucam do wiaderka to i tak odplywa. Nie ma go w wiaderku").
+       Przy pelnym wiaderku Smok Zycia szedl zwykla sciezka wymiany:
+       pytanie "wymienic rybe w wiaderku?" lezalo pod zaslona i napisem
+       furii, a NIE albo zamkniecie zabieralo Smoka bezpowrotnie. Furia
+       juz sie wtedy wydarzyla, wiec gracz tracil 75% jeziora i Smoka.
+       Gatunek legendy (bezEko) wchodzi do wiaderka ponad limit: gracz
+       dwa razy potwierdzil, ze go bierze, i ma go dostac.
+       ============================================================ */
+    const legenda = !!(typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko);
+    if (d.wiaderko.length >= WIADERKO_MAX && !legenda) return false;
     /* PLEC ZAPAMIETANA RAZEM Z RYBA. Potrzebna przy wypuszczeniu:
        ryba wraca do populacji jako TA SAMA sztuka, wiec musi oddac
        swoja plec, a nie losowa. Stare zapisy nie maja tego pola --

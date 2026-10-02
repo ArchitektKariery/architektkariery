@@ -32,6 +32,7 @@ require(any(x in html for x in [
     "2026-10-02-cieplo-v1",
     "2026-10-02-smok-legenda-v1",
     "2026-10-02-smok-wyrok-v1",
+    "2026-10-02-smok-wiadro-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -75,6 +76,7 @@ for tekst in [
 require("window.__pytajOSmoka = function (dalej) {" in html and "window.__pytajOSmoka(() => {" in html, "keeping the dragon must ask twice")
 require("SmokZycia.poDecyzji(kier);" in html, "card decision must hand the dragon verdict to SmokZycia")
 require("CFG.FURIA_UDZIAL = 0.75;" in html and "const T = Math.round(doCelu);" in html, "fury must remove exactly 75% of the lake")
+require("if (d.wiaderko.length >= WIADERKO_MAX && !legenda) return false;" in html, "a kept dragon must fit even into a full bucket")
 
 for marker in [
     "community_contribute",

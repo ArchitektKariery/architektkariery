@@ -187,7 +187,7 @@ Liczba wpisow: 537
 | `gat` | function | `src/fish/fish-core.js` | 53 |
 | `GATUNKI` | const | `src/fish/species.js` | 15 |
 | `gauss` | function | `src/fish/fish-core.js` | 432 |
-| `Gielda` | window.Gielda = | `src/bucket/bucket.js` | 85 |
+| `Gielda` | window.Gielda = | `src/bucket/bucket.js` | 97 |
 | `gieldaStan` | function | `src/bucket/pricing.js` | 118 |
 | `glebokoscZ` | function | `src/fish/fish-core.js` | 543 |
 | `gotowe` | let | `src/fish/fish-core.js` | 2 |
@@ -493,7 +493,7 @@ Liczba wpisow: 537
 | `WEED_PAD` | const | `src/scene/makieta.js` | 285 |
 | `weedFrames` | const | `src/scene/makieta.js` | 286 |
 | `wg` | const | `src/scene/makieta.js` | 63 |
-| `Wiaderko` | window.Wiaderko = | `src/bucket/bucket.js` | 6 |
+| `Wiaderko` | window.Wiaderko = | `src/bucket/bucket.js` | 7 |
 | `WIADERKO_MAX` | const | `src/bucket/pricing.js` | 42 |
 | `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 2143 |
 | `widocznoscChmury` | function | `src/scene/makieta.js` | 176 |

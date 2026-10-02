@@ -1,6 +1,6 @@
 # QRyby — wyrok Smoka Życia
 
-STATUS: W GRZE (2 X 2026, build `2026-10-02-smok-wyrok-v1`)
+STATUS: W GRZE (2 X 2026, build `2026-10-02-smok-wiadro-v1`)
 
 Projekt Andrzeja (2 X 2026): po złowieniu Smoka Życia gracz decyduje o losie jeziora. Wiaderko oznacza niewolę i furię, wypuszczenie oznacza dar.
 
@@ -10,7 +10,7 @@ Projekt Andrzeja (2 X 2026): po złowieniu Smoka Życia gracz decyduje o losie j
    - „NIEWOLA”: „Czy na pewno chcesz wrzucić Stworzenie Życia do niewoli? Będzie to niosło nieodwracalne konsekwencje.”
    - po TAK drugie, „OSTATNIE SŁOWO”: „Upewnij się, że chcesz Stworzenie Życia złapać dla siebie, będzie to miało ogromne konsekwencje.”
    - NIE, ZAMKNIJ albo stuknięcie w tło zamykają panel. Karta wraca na środek i dalej czeka na decyzję. Wyróżniony przycisk to NIE.
-3. Po drugim TAK Smok trafia do wiaderka zwykłą ścieżką (przy pełnym wiaderku pojawia się pytanie o wymianę), a `SmokZycia.poDecyzji('wiaderko')` uruchamia furię:
+3. Po drugim TAK Smok trafia do wiaderka, także pełnego: legenda mieści się ponad limitem i wiaderko pokazuje wtedy np. 11 / 10 (`Wiaderko.dodaj`, od 2 X 2026; wcześniej pełne wiaderko otwierało pytanie o wymianę pod zasłoną furii i NIE zabierało Smoka po furii). Potem `SmokZycia.poDecyzji('wiaderko')` uruchamia furię:
    - ekran ciemnieje do czerni z czerwienią w 0,9 s,
    - w ciemności `Eko.furiaSmoka()` zabiera 75% ryb jeziora i wpływa nowa ławica (`nowaLawica`),
    - po 0,7 s ekran wraca w 1,3 s,
