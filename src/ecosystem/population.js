@@ -946,6 +946,11 @@ const Eko = (() => {
     zakonczGody(gk, { a: { gen: genA }, b: { gen: genB } });
     return { gat: gk, ikra: ikra(gk) - przed };
   }
+  /* Do kiedy gatunek odpoczywa po tarle (ms od epoki, 0 = nie odpoczywa).
+     Czyta to tarlisko (src/ecosystem/reproduction.js), zeby pokazac
+     graczowi powod czekania zamiast paska, ktory dochodzi do konca
+     i zaczyna od nowa bez skutku. */
+  function poTarle(gk) { return PO_TARLE[gk] || 0; }
 
   /* ============================================================
      CYKL POKOLEN (faza 9). Ikra NIE zamienia sie w dorosle ryby.
@@ -1391,7 +1396,7 @@ const Eko = (() => {
            mnoznikLosowania, losujPlec, moznaRozmnazac,
            karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
            szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
-           tarloPary, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
+           tarloPary, poTarle, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
            sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
            meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
            podsumowanie, kronika, zapisz, popStartowa };

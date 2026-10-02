@@ -184,14 +184,15 @@
        ============================================================ */
     if (typeof Gielda !== 'undefined') {
       const nowy = Gielda.tik();
-      /* Rozrod w wiaderku jedzie na TYM SAMYM tiku, co gielda. Wlasny
+      /* Tarlo w tarlisku jedzie na TYM SAMYM tiku, co gielda. Wlasny
          setInterval bylby drugim zegarem, ktory moglby sie rozjechac
-         z pierwszym -- ta gra ma juz za soba jeden taki blad. */
+         z pierwszym -- ta gra ma juz za soba jeden taki blad.
+         Od 1 X 2026 trą sie wylacznie ryby w tarlisku, nie w wiaderku. */
       let wyklute = null;
       if (window.Rozrod) { try { wyklute = Rozrod.tik(); } catch (e) {} }
       if (wyklute) {
         const GW = GATUNKI[wyklute.gat];
-        Ruch.powiedz((GW ? GW.nazwa : wyklute.gat.toUpperCase()) + ': TARŁO W WIADERKU', true);
+        Ruch.powiedz((GW ? GW.nazwa : wyklute.gat.toUpperCase()) + ': TARŁO W TARLISKU', true);
         if (navigator.vibrate) { try { navigator.vibrate([12, 40, 12, 40, 12]); } catch (err) {} }
       }
       const bw = document.getElementById('wiaderko');
@@ -206,7 +207,7 @@
          Oferta handlarza ma pierwszenstwo: jest ograniczona czasem,
          a siec czeka w nieskonczonosc. */
       const wSieci = (window.Siec && Siec.sztuk()) || 0;
-      /* SERCE: para trze sie w wiaderku. Osobna odznaka, nie wykrzyknik,
+      /* SERCE: para trze sie w tarlisku. Osobna odznaka, nie wykrzyknik,
          bo to nie jest "cos na ciebie czeka" tylko "cos sie dzieje" --
          gracz nie ma tu nic do zrobienia poza niewypuszczaniem pary. */
       /* ============================================================
@@ -1396,7 +1397,8 @@
      `onclick` jest tu istniejaca konwencja (patrz Gracz.*). */
   let dzialWiadra = 'towar';
   window.SiecUI = {
-    dzial(id) { dzialWiadra = (id === 'siec') ? 'siec' : 'towar'; odswiezWiadro(); },
+    /* Trzecia zakladka: TARLISKO (1 X 2026). */
+    dzial(id) { dzialWiadra = (id === 'siec' || id === 'tarlisko') ? id : 'towar'; odswiezWiadro(); },
     zarzuc() {
       const w = (typeof siecZarzuc === 'function') ? siecZarzuc() : null;
       /* Po zarzuceniu panel schodzi z drogi: animacja ciagniecia sieci
@@ -1415,31 +1417,153 @@
     podepnijWiaderko();
   }
 
-  /* Serce z pierscieniem odliczajacym -- to samo, co dymek godowy w toni,
-     zeby gracz rozpoznal zjawisko bez tlumaczenia. SVG inline, bo panel
-     sklada sie z innerHTML i osobny plik bylby tu tylko kosztem. */
-  function serceSVG(post) {
-    const r = 6.2, obw = 2 * Math.PI * r;
-    return '<span class="rozr-serce"><svg viewBox="0 0 16 16">' +
-      '<circle cx="8" cy="8" r="' + r + '" fill="none" stroke="rgba(255,233,174,.30)" stroke-width="1.6"/>' +
-      '<circle cx="8" cy="8" r="' + r + '" fill="none" stroke="#FFE9AE" stroke-width="1.6" ' +
-        'stroke-dasharray="' + (obw * post).toFixed(2) + ' ' + obw.toFixed(2) + '" ' +
-        'transform="rotate(-90 8 8)" stroke-linecap="round"/>' +
-      '<path d="M8 11.2C5.1 9.3 4 8.2 4 6.9 4 5.8 4.9 5 6 5c.8 0 1.5.4 2 1.1C8.5 5.4 9.2 5 10 5c1.1 0 2 .8 2 1.9 0 1.3-1.1 2.4-4 4.3z" fill="#C4344A"/>' +
-      '</svg></span>';
+
+  /* ============================================================
+     TARLISKO (1 X 2026, prosba Andrzeja): zakladka w wiaderku, do
+     ktorej gracz przesuwa najwyzej 2 ryby ikonka stawu obok krzyzyka.
+     Tarlo w samym wiaderku jest wylaczone: pare tworza wylacznie ryby
+     w tarlisku (logika w src/ecosystem/reproduction.js, Tarlisko
+     i Rozrod). Panel pokazuje stan pary, powod czekania i wynik
+     ostatniego tarla. Co dzieje sie z ikra DALEJ, pokazuje zakladka
+     EKOSYSTEM w sekcji ROZWIJAJACE SIE POKOLENIA.
+     ============================================================ */
+  /* Ikonka stawu: trzciny i tafla z fala. currentColor, wiec bierze
+     kolor tuszu z przycisku, tak jak krzyzyk obok. */
+  function stawSVG() {
+    return '<svg class="staw-ik" viewBox="0 0 20 20" aria-hidden="true">' +
+      '<path d="M3.6 4.6V11.2M6.6 3.2V10.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>' +
+      '<rect x="2.6" y="3.4" width="2" height="4.2" rx="1" fill="currentColor"/>' +
+      '<rect x="5.6" y="2" width="2" height="4.2" rx="1" fill="currentColor"/>' +
+      '<ellipse cx="11" cy="13.7" rx="7.9" ry="4.4" fill="rgba(63,132,160,.38)" stroke="currentColor" stroke-width="1.4"/>' +
+      '<path d="M7.3 13.9c1-.8 2-.8 3 0s2 .8 3 0" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>' +
+      '</svg>';
+  }
+  /* Duzy staw na karcie tarliska: przekroj brzegu i wody, trzciny,
+     lisc grzybienia. Ryby z tarliska plywaja w nim jako sprite'y. */
+  const STAW_DUZY =
+    '<svg viewBox="0 0 96 96" aria-hidden="true">' +
+    '<defs><linearGradient id="tarlWoda" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#63A6BA"/><stop offset="1" stop-color="#1D4C66"/></linearGradient></defs>' +
+    '<path d="M2 47Q48 37 94 47L94 53Q48 45 2 53Z" fill="#8A6A3E"/>' +
+    '<path d="M6 49Q48 41 90 49Q88 89 48 91Q8 89 6 49Z" fill="url(#tarlWoda)" stroke="#141210" stroke-width="2"/>' +
+    '<path d="M14 52q6-3 12 0t12 0t12 0t12 0t12 0" fill="none" stroke="rgba(230,248,250,.75)" stroke-width="1.6" stroke-linecap="round"/>' +
+    '<path d="M12 48V15M18 47V23M84 48V19" stroke="#3E5A2A" stroke-width="2" stroke-linecap="round"/>' +
+    '<rect x="9.5" y="13" width="5" height="12" rx="2.5" fill="#7A4B2A"/>' +
+    '<rect x="15.5" y="21" width="5" height="11" rx="2.5" fill="#7A4B2A"/>' +
+    '<rect x="81.5" y="17" width="5" height="12" rx="2.5" fill="#7A4B2A"/>' +
+    '<ellipse cx="68" cy="49.6" rx="7" ry="2.4" fill="#4C7A3A" stroke="#141210" stroke-width="1"/>' +
+    '</svg>';
+  const SERCE_SVG = '<span class="rozr-serce"><svg viewBox="0 0 16 16">' +
+    '<path d="M8 11.2C5.1 9.3 4 8.2 4 6.9 4 5.8 4.9 5 6 5c.8 0 1.5.4 2 1.1C8.5 5.4 9.2 5 10 5c1.1 0 2 .8 2 1.9 0 1.3-1.1 2.4-4 4.3z" fill="#C4344A"/>' +
+    '</svg></span>';
+
+  function tarliskoStan() {
+    const T = window.Tarlisko ? Tarlisko.lista() : [];
+    const st = { lista: T, para: null, post: 0, blok: null };
+    if (!window.Rozrod) return st;
+    try {
+      const pary = Rozrod.zdolne();
+      if (pary.length) {
+        st.para = pary[0];
+        st.blok = Rozrod.blokada(st.para);
+        st.post = st.blok ? 0 : Rozrod.postep(st.para);
+      }
+    } catch (e) {}
+    return st;
+  }
+  /* Klucz stanu: zmiana skladu, pary, blokady albo nowe tarlo
+     przerysowuje panel. Sam postep pary plynie bez przebudowy. */
+  function tarliskoKlucz() {
+    const st = tarliskoStan();
+    const ost = (window.Rozrod && Rozrod.ostatnie()) || null;
+    const pelneW = (typeof Wiaderko !== 'undefined') && Wiaderko.pelne();
+    return [st.lista.map(r => r.gat + ':' + (r.plec || '')).join(','), st.para || '-',
+            st.blok ? st.blok.typ : 'ok', ost ? ost.kiedy : 0, pelneW ? 'W' : 'w'].join('|');
+  }
+  const minutDo = t => Math.max(1, Math.ceil((t - Date.now()) / 60000));
+  function tarliskoKto(st) {
+    const n = st.lista.length;
+    if (!n) return 'PUSTE';
+    if (st.para && st.blok && st.blok.typ === 'karencja') return 'ODPOCZYWA PO TARLE';
+    if (st.para && st.blok) return 'TARŁO WSTRZYMANE';
+    if (st.para) return 'PARA TRZE SIĘ';
+    if (n === 1) return 'CZEKA NA PARĘ';
+    return 'TO NIE JEST PARA';
+  }
+  function tarliskoOpis(st) {
+    const max = window.Tarlisko ? Tarlisko.MAX : 2;
+    const n = st.lista.length;
+    const nazwa = gk => (GATUNKI[gk] ? GATUNKI[gk].nazwa : String(gk).toUpperCase());
+    if (!n) return 'Tarlisko mieści ' + max + ' ryby. Przesuń z wiaderka samca i samicę tego samego gatunku ' +
+      'ikonką stawu obok krzyżyka. Para trze się tu 30 sekund, a ikra trafia do jeziora. ' +
+      'Ryby w tarlisku nie idą na sprzedaż.';
+    if (st.para && st.blok && st.blok.typ === 'karencja')
+      return 'Gatunek ' + nazwa(st.para) + ' odpoczywa po tarle jeszcze <b id="tarlMin">' + minutDo(st.blok.do) +
+             ' min</b>. Potem para zacznie od nowa.';
+    if (st.para && st.blok) {
+      let wym = false;
+      try { wym = !!(window.Eko && Eko.wymarly && Eko.wymarly(st.para)); } catch (e) {}
+      return wym
+        ? 'Gatunek ' + nazwa(st.para) + ' wymarł w jeziorze, więc ekosystem nie przyjmie ikry.'
+        : 'W jeziorze nie pływa teraz samiec albo samica gatunku ' + nazwa(st.para) +
+          ', więc ekosystem wstrzymuje tarło. Ruszy samo, gdy para znów pojawi się w jeziorze.';
+    }
+    if (st.para) return 'Para trze się 30 sekund. Ikra trafi do jeziora i urośnie w zakładce EKO.';
+    if (n === 1) {
+      const r = st.lista[0];
+      const kogo = r.plec === 'm' ? 'samicę' : r.plec === 'f' ? 'samca' : 'drugą rybę';
+      return 'Dołóż ' + kogo + ' gatunku ' + nazwa(r.gat) + ' z wiaderka. Ryby w tarlisku nie idą na sprzedaż.';
+    }
+    return 'Tarło wymaga samca i samicy tego samego gatunku. Odeślij jedną rybę do wiaderka albo ją wypuść.';
   }
 
-  function rozrodHTML(gk, pierwszy) {
-    if (!pierwszy || !window.Rozrod) return '';
-    const post = Rozrod.postep(gk);
-    if (!(post > 0 && post < 1)) return '';
-    /* Tylko pasek trwania pary. Co bedzie DALEJ, pokazuje zakladka
-       EKOSYSTEM w sekcji ROZWIJAJACE SIE POKOLENIA -- ta sama, w ktorej
-       laduja kohorty z lawicy. Wiaderko nie ma wlasnego wyniku do
-       pokazania, bo nie ma wlasnej mechaniki. */
-    return '<div class="rozr-info">' + serceSVG(post) +
-           '<span class="rozr-pas"><i style="width:' + Math.round(post * 100) + '%"></i></span>' +
-           '<span class="rozr-et">TRĄ SIĘ ' + Math.round(post * 100) + '%</span></div>';
+  function tarliskoHTML() {
+    const st = tarliskoStan();
+    const T = st.lista;
+    const max = window.Tarlisko ? Tarlisko.MAX : 2;
+    const pelneW = (typeof Wiaderko !== 'undefined') && Wiaderko.pelne();
+    let h = '<div class="zad wiad-kar tarl-kar" id="tarlStan"><div class="portbox"><div class="tarl-staw' +
+            (st.para && !st.blok ? ' trze' : '') + '">' + STAW_DUZY;
+    T.forEach((r, j) => {
+      const G2 = GATUNKI[r.gat];
+      if (G2 && G2.src) h += '<img class="tarl-r tarl-r' + j + '" src="' + G2.src + '" alt="">';
+    });
+    if (st.para && !st.blok) h += '<span class="tarl-serca">' + SERCE_SVG + '</span>';
+    h += '</div></div><div class="zin"><div class="kwota">' + T.length + ' / ' + max + '</div>' +
+         '<div class="kto" id="tarlKto">' + tarliskoKto(st) + '</div></div>';
+    h += '<div class="tr">' + tarliskoOpis(st) + '</div>';
+    if (st.para && !st.blok) {
+      const p = Math.round(st.post * 100);
+      h += '<div class="rozr-info tarl-postep">' + SERCE_SVG +
+           '<span class="rozr-pas"><i id="tarlPas" style="width:' + p + '%"></i></span>' +
+           '<span class="rozr-et" id="tarlProc">TRĄ SIĘ ' + p + '%</span></div>';
+    }
+    const ost = (window.Rozrod && Rozrod.ostatnie()) || null;
+    if (ost && GATUNKI[ost.gat]) {
+      const min = Math.max(0, Math.round((Date.now() - ost.kiedy) / 60000));
+      h += '<div class="zlaw">ostatnie tarło: ' + GATUNKI[ost.gat].nazwa + ' · ' + qrybG(ost.ikra || 0) +
+           ' ziaren ikry · ' + (min < 1 ? 'przed chwilą' : min + ' min temu') + '</div>';
+    }
+    h += '</div>';
+
+    T.forEach((r, j) => {
+      const G2 = GATUNKI[r.gat];
+      if (!G2) return;
+      const kg = Math.max(0.001, (r.waga || 0) / 1000);
+      const pl = (r.plec === 'm' || r.plec === 'f') ? r.plec : '';
+      const plUI = pl ? (' <span class="pl ' + pl + '" title="' + (pl === 'm' ? 'samiec' : 'samica') + '">' + (pl === 'm' ? '♂' : '♀') + '</span>') : '';
+      h += '<div class="wr tarl-wr' + (st.para === r.gat ? ' para-tarl' : '') + '"><img src="' + (G2.src || '') + '" alt="">' +
+           '<div><div class="nz">' + G2.nazwa + plUI + '</div>' +
+           '<div class="mt">' + (r.pkt || 0) + ' pkt · ' + (r.cm / 100).toFixed(2).replace('.', ',') + ' m · ' +
+           kg.toFixed(2).replace('.', ',') + ' kg</div></div>' +
+           '<span class="wr-akcje"><button class="tarl-wroc" data-j="' + j + '"' + (pelneW ? ' disabled title="wiaderko pełne"' : '') +
+           '>DO WIADERKA</button>' +
+           '<button class="tarl-wyp" data-j="' + j + '" title="wypuść" aria-label="Wypuść do jeziora">✕</button></span></div>';
+    });
+    for (let k = T.length; k < max; k++)
+      h += '<div class="wr tarl-wolne"><span class="tarl-slot">' + stawSVG() + '</span>' +
+           '<div class="mt">wolne miejsce · przesuń rybę z wiaderka</div></div>';
+    return h;
   }
 
   function siecHTML() {
@@ -1607,14 +1731,24 @@
     const kupon = (typeof Zapis !== 'undefined' && Zapis.dane().kupon) || null;
     const S = window.Siec;
     const wSieci = S ? S.sztuk() : 0;
-    let h = '<h3>' + (dzialWiadra === 'siec' ? 'SIEĆ' : 'WIADERKO') + '<em>\u30d0\u30b1\u30c4</em></h3>';
-    /* Dwie zakladki: TOWAR (wiaderko i gielda) oraz SIEC. Licznik przy
-       SIEC pokazuje sztuki, zeby gracz widzial zaleglosc bez wchodzenia. */
+    /* Wymiana przy pelnym wiaderku dzieje sie na liscie TOWAR. Gracz,
+       ktory zostawil panel na SIECI albo TARLISKU, inaczej nie zobaczylby
+       przyciskow WYMIEN. */
+    if (ocz) dzialWiadra = 'towar';
+    const ileT = window.Tarlisko ? Tarlisko.ile() : 0;
+    const maxT = window.Tarlisko ? Tarlisko.MAX : 2;
+    let h = '<h3>' + (dzialWiadra === 'siec' ? 'SIEĆ' : dzialWiadra === 'tarlisko' ? 'TARLISKO' : 'WIADERKO') +
+            '<em>' + (dzialWiadra === 'tarlisko' ? '産卵場' : 'バケツ') + '</em></h3>';
+    /* Trzy zakladki: TOWAR (wiaderko i gielda), SIEC i TARLISKO. Licznik
+       przy SIEC pokazuje sztuki, przy TARLISKU zajete miejsca, zeby gracz
+       widzial stan bez wchodzenia. */
     h += '<div class="zakladki">' +
-         '<button class="zak' + (dzialWiadra !== 'siec' ? ' akt' : '') + '" onclick="SiecUI.dzial(\'towar\')">TOWAR (' + lista.length + ')</button>' +
+         '<button class="zak' + (dzialWiadra === 'towar' ? ' akt' : '') + '" onclick="SiecUI.dzial(\'towar\')">TOWAR (' + lista.length + ')</button>' +
          '<button class="zak' + (dzialWiadra === 'siec' ? ' akt' : '') + '" onclick="SiecUI.dzial(\'siec\')">SIEĆ' + (wSieci ? ' (' + wSieci + ')' : '') + '</button>' +
+         '<button class="zak' + (dzialWiadra === 'tarlisko' ? ' akt' : '') + '" onclick="SiecUI.dzial(\'tarlisko\')">TARLISKO ' + ileT + '/' + maxT + '</button>' +
          '</div>';
     if (dzialWiadra === 'siec') return h + siecHTML();
+    if (dzialWiadra === 'tarlisko') return h + tarliskoHTML();
 
     /* Portret handlarza zamiast ikony wiaderka, kiedy ktos stoi przy wodzie
        -- trzy klatki do zapetlenia w miejscu (patrz odtworzHandlarza w
@@ -1683,20 +1817,20 @@
            '<button id="wAnuluj">ANULUJ</button></div>';
     }
 
-    /* Serce nalezy do GATUNKU, nie do pojedynczej ryby, wiec rysujemy je
-       przy pierwszej sztuce danego gatunku w liscie. Bez tego para
-       pokazywalaby dwa serca zamiast jednego. */
-    const pierwszyZGat = {};
-    for (let i = 0; i < lista.length; i++)
-      if (pierwszyZGat[lista[i].gat] === undefined) pierwszyZGat[lista[i].gat] = i;
-
-    /* Gatunki majace w wiaderku jednoczesnie samca i samice.
-       Uzywamy tej samej definicji co modul rozrodu, wiec UI nie tworzy
-       wlasnej, rozjezdzajacej sie logiki pary. */
-    let paryWiadra = new Set();
-    try {
-      if (window.Rozrod && Rozrod.zdolne) paryWiadra = new Set(Rozrod.zdolne());
-    } catch (e) {}
+    /* TARLISKO (1 X 2026): samiec i samica w wiaderku juz sie nie trą.
+       Pare liczymy ta sama funkcja co modul rozrodu (Rozrod.paryW...),
+       wiec UI nie tworzy wlasnej, rozjezdzajacej sie definicji pary,
+       i podpowiadamy, zeby przesunac ja do tarliska. */
+    let paryWiadra = [];
+    try { if (window.Rozrod && Rozrod.paryWWiaderku) paryWiadra = Rozrod.paryWWiaderku(); } catch (e) {}
+    const pelneT = window.Tarlisko ? Tarlisko.pelne() : true;
+    if (paryWiadra.length && !ocz) {
+      const GP = GATUNKI[paryWiadra[0]];
+      h += '<div class="tarl-podp">' + stawSVG() + '<span>Para ' + (GP ? GP.nazwa : String(paryWiadra[0]).toUpperCase()) +
+           ' w wiaderku się nie trze. ' + (pelneT
+             ? 'Zwolnij tarlisko i przesuń ją tam ikonką stawu.'
+             : 'Przesuń samca i samicę do tarliska ikonką stawu.') + '</span></div>';
+    }
 
     for (let i = 0; i < lista.length; i++) {
       const r = lista[i], G2 = GATUNKI[r.gat];
@@ -1711,8 +1845,7 @@
       const proc = sred > 0 ? Math.round(roz / sred * 100) : 0;
       const pl = (r.plec === 'm' || r.plec === 'f') ? r.plec : '';
       const plUI = pl ? (' <span class="pl ' + pl + '" title="' + (pl === 'm' ? 'samiec' : 'samica') + '">' + (pl === 'm' ? '♂' : '♀') + '</span>') : '';
-      const paraKlasa = paryWiadra.has(r.gat) ? ' para-wiadra' : '';
-      h += '<div class="wr' + (ocz ? ' cel' : '') + paraKlasa + '"><img src="' + (G2.src || '') + '" alt="">';
+      h += '<div class="wr' + (ocz ? ' cel' : '') + '"><img src="' + (G2.src || '') + '" alt="">';
       h += '<div><div class="nz">' + G2.nazwa + plUI +
            (CHRONIONE.indexOf(r.gat) >= 0 ? ' <span class="chr">CHRONIONA</span>' : '') + '</div>' +
            '<div class="mt">' + (r.pkt || 0) + ' pkt \u00B7 ' +
@@ -1723,13 +1856,16 @@
                   (roz >= 0 ? '+' : '\u2212') + qrybG(Math.abs(roz)) +
                   ' (' + (proc >= 0 ? '+' : '\u2212') + Math.abs(proc) + '%)</i>';
       h += '</div>';
-      /* Dwa rozne przyciski w tym samym slocie: normalnie male "wypusc",
-         w trybie wymiany szersze "WYMIEN", bo caly wiersz jest wtedy celem
-         i musi to mowic wprost, nie samym krzyzykiem. */
+      /* Normalnie dwa male przyciski obok siebie: ikonka stawu (do
+         tarliska) i krzyzyk (wypusc). W trybie wymiany jeden szerszy
+         "WYMIEN", bo caly wiersz jest wtedy celem i musi to mowic wprost.
+         Ikonka stawu przy pelnym tarlisku zostaje klikalna i mowi, ze
+         tarlisko jest pelne -- martwy przycisk niczego by nie tlumaczyl. */
       h += ocz
         ? '<button class="wym" data-i="' + i + '">WYMIEŃ</button>'
-        : '<button class="wyp" data-i="' + i + '" title="wypuść">\u2715</button>';
-      h += rozrodHTML(r.gat, pierwszyZGat[r.gat] === i);
+        : '<span class="wr-akcje"><button class="do-tarla' + (pelneT ? ' pelne' : '') + '" data-i="' + i +
+          '" title="' + (pelneT ? 'tarlisko pełne' : 'do tarliska') + '" aria-label="Przesuń do tarliska">' + stawSVG() + '</button>' +
+          '<button class="wyp" data-i="' + i + '" title="wypuść">✕</button></span>';
       h += '</div>';
     }
 
@@ -1757,6 +1893,7 @@
      i tykal do konca sesji.
      ============================================================ */
   let zegarWiad = 0;
+  let zegarTarl = 0;
   let portretTimer = null;
   function podepnijWiaderko() {
     /* Petla portretu: jedna na caly panel, nie jedna na klatke -- kazde
@@ -1888,6 +2025,85 @@
       Ruch.powiedz('WYMIANA ANULOWANA', true);
       setTimeout(odswiez, 180);
     });
+
+    /* ============================================================
+       TARLISKO: trzy akcje i zywy pasek pary.
+       Klasy przyciskow tarliska sa WLASNE (tarl-wroc, tarl-wyp), a nie
+       .wyp z wiaderka: obsluga .wyp wola Wiaderko.wyrzuc(i), a wiersz
+       tarliska nie ma indeksu wiaderka. Splice z NaN zdejmowal by
+       pierwsza rybe wiaderka.
+       ============================================================ */
+    const nazwaZ = r => (r && GATUNKI[r.gat]) ? GATUNKI[r.gat].nazwa : 'RYBA';
+    for (const btn of document.querySelectorAll('#panelTresc .do-tarla')) {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!window.Tarlisko) return;
+        const i = Number(btn.dataset.i);
+        const ryba = Wiaderko.lista()[i];
+        const wynik = Tarlisko.zWiaderka(i);
+        if (wynik === true) {
+          if (navigator.vibrate) { try { navigator.vibrate([10, 30, 10]); } catch (err) {} }
+          Ruch.powiedz(nazwaZ(ryba) + ' W TARLISKU', true);
+          setTimeout(odswiez, 180);
+        } else if (wynik === 'PELNE') {
+          if (navigator.vibrate) { try { navigator.vibrate(30); } catch (err) {} }
+          Ruch.powiedz('TARLISKO PEŁNE: ' + Tarlisko.MAX + ' / ' + Tarlisko.MAX, true);
+        }
+      });
+    }
+    for (const btn of document.querySelectorAll('#panelTresc .tarl-wroc')) {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!window.Tarlisko) return;
+        const j = Number(btn.dataset.j);
+        const ryba = Tarlisko.lista()[j];
+        const wynik = Tarlisko.doWiaderka(j);
+        if (wynik === true) {
+          if (navigator.vibrate) { try { navigator.vibrate(14); } catch (err) {} }
+          Ruch.powiedz(nazwaZ(ryba) + ' Z POWROTEM W WIADERKU', true);
+          setTimeout(odswiez, 180);
+        } else if (wynik === 'WIADERKO_PELNE') {
+          Ruch.powiedz('WIADERKO PEŁNE', true);
+        }
+      });
+    }
+    for (const btn of document.querySelectorAll('#panelTresc .tarl-wyp')) {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!window.Tarlisko) return;
+        const j = Number(btn.dataset.j);
+        if (!Tarlisko.wypusc(j)) return;
+        if (navigator.vibrate) { try { navigator.vibrate(14); } catch (err) {} }
+        Ruch.powiedz('WYPUSZCZONO', true);
+        setTimeout(odswiez, 180);
+      });
+    }
+    /* Pasek pary plynie co pol sekundy w miejscu. Gdy zmieni sie stan
+       (sklad, para, blokada, nowe tarlo, miejsce w wiaderku), panel
+       przerysowuje sie w calosci. Uchwyt kasuje sie sam po zamknieciu
+       panelu albo przejsciu na inna zakladke. */
+    if (zegarTarl) { clearInterval(zegarTarl); zegarTarl = 0; }
+    if (document.getElementById('tarlStan')) {
+      const klucz0 = tarliskoKlucz();
+      zegarTarl = setInterval(() => {
+        const el = document.getElementById('tarlStan');
+        if (!el || !panel.classList.contains('on')) { clearInterval(zegarTarl); zegarTarl = 0; return; }
+        if (tarliskoKlucz() !== klucz0) { odswiez(); return; }
+        const st = tarliskoStan();
+        const kto = document.getElementById('tarlKto');
+        if (kto) { const t2 = tarliskoKto(st); if (kto.textContent !== t2) kto.textContent = t2; }
+        if (st.para && !st.blok) {
+          const pr = Math.round(st.post * 100);
+          const pas = document.getElementById('tarlPas'), proc = document.getElementById('tarlProc');
+          if (pas) pas.style.width = pr + '%';
+          if (proc) proc.textContent = 'TRĄ SIĘ ' + pr + '%';
+        }
+        if (st.blok && st.blok.typ === 'karencja') {
+          const mi = document.getElementById('tarlMin');
+          if (mi) mi.textContent = minutDo(st.blok.do) + ' min';
+        }
+      }, 500);
+    }
   }
   window.wiaderkoHTML = wiaderkoHTML;
 

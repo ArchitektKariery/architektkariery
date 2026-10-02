@@ -45,7 +45,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Temat | Plik |
 |---|---|
 | Populacje (żywa populacja gatunków, `Eko`) | `src/ecosystem/population.js` |
-| Tarło w wiaderku (`Rozrod`) | `src/ecosystem/reproduction.js` |
+| Tarlisko (najwyżej 2 ryby z wiaderka, `Tarlisko`) i tarło w tarlisku (`Rozrod`); tarło w samym wiaderku wyłączone od 1 X 2026 | `src/ecosystem/reproduction.js`, opis `docs/tarlisko.md` |
 | Płeć ławicy, dosadzanie partnera samotnemu gatunkowi | `src/fish/school-update.js` |
 | Wspólna populacja na serwerze (`Eko.Serwer`) | `src/ecosystem/server.js` |
 | EKO: zakładka ekosystemu i zegar pokoleń | `src/ecosystem/eko-tab.js` |
@@ -59,6 +59,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Stragan: zanęty, paczki, ciastko z wróżbą, nagrody za kolekcje | `src/market/baits.js` |
 | Działanie zanęt, zanęta gwarantująca, posążek | `src/market/bait-effects.js` |
 | Wiaderko i giełda (oferty handlarzy) | `src/bucket/bucket.js` |
+| Zakładka TARLISKO w panelu wiaderka, ikonka stawu obok krzyżyka w wierszu ryby | `src/ui/panel.js` (`tarliskoHTML`, `stawSVG`, sekcja `PANEL WIADERKA`), style `css/03-eko-icons.css` |
 | Wycena ryb, handlarze, średnia rynkowa, tempo połowu | `src/bucket/pricing.js` |
 | Zlecenia handlarzy, tablica ogłoszeń | `src/bucket/orders.js` |
 | Widok straganu i panelu wiaderka w menu | `src/ui/panel.js` (sekcje `SKLEP`, `STRAGAN`, `PANEL WIADERKA`) |

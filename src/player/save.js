@@ -142,6 +142,10 @@ const Zapis = (() => {
                             targu, biezaca oferta, zegar nastepnego handlarza
                             i srednie cen ze sprzedazy. */
                          wiaderko: [],
+                         /* Tarlisko: najwyzej 2 ryby przesuniete z wiaderka
+                            do tarla (src/ecosystem/reproduction.js). Nie ida
+                            na sprzedaz; od 1 X 2026 tylko tu ryby sie trą. */
+                         tarlisko: [],
                          gielda: { swiezosc: 1, rozglos: 0, oferta: null, nastepny: 0, sprzedaze: {}, polow: 0 },
                          seria: { gat: '', ile: 0 },
                          /* Podsumowanie ZAKONCZONYCH turniejow (IX 2026). Zywa tablica
@@ -275,6 +279,10 @@ const Zapis = (() => {
     if (!Array.isArray(out.wiaderko)) out.wiaderko = [];
     else out.wiaderko = out.wiaderko.filter(r => r && typeof r === 'object' &&
                           (!window.GATUNKI || window.GATUNKI[r.gat])).slice(0, 32);
+    if (!Array.isArray(out.tarlisko)) out.tarlisko = [];
+    else out.tarlisko = out.tarlisko.filter(r => r && typeof r === 'object' &&
+                          (!window.GATUNKI || window.GATUNKI[r.gat]))
+                          .slice(0, (window.Tarlisko && Tarlisko.MAX) || 2);
     if (!out.zanetyMam || typeof out.zanetyMam !== 'object' || Array.isArray(out.zanetyMam)) out.zanetyMam = {};
     else for (const k in out.zanetyMam) {
       if (window.ZANETY && !window.ZANETY[k]) { delete out.zanetyMam[k]; continue; }

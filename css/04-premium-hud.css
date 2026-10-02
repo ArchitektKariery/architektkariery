@@ -431,25 +431,6 @@ body.panel-otwarty #tarla{
 
 
 /* ============================================================
-   ETAP 3/6 — PARA W WIADERKU.
-   Obie ryby tego samego gatunku dostaja ledwie widoczny wspolny akcent.
-   Bez animacji i bez dodatkowego serca w liscie.
-   ============================================================ */
-#panelTresc .wr.para-wiadra{
-  position:relative;
-  background:linear-gradient(90deg,rgba(156,72,102,.055),transparent 48%);
-}
-#panelTresc .wr.para-wiadra::before{
-  content:'';position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;
-  background:rgba(156,72,102,.34);
-}
-#panelTresc .wr.para-wiadra .pl{
-  border-color:rgba(156,72,102,.26);
-  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset;
-}
-
-
-/* ============================================================
    ETAP 5/6 — UKRYTY PANEL DIAGNOSTYCZNY.
    Normalny gracz go nie widzi. Wlacza sie przez #diag w adresie
    albo QDiag.toggle() z konsoli.

@@ -319,3 +319,52 @@ body.bez-konta #reset{top:calc(78px + env(safe-area-inset-top))}
 body.bez-konta #tarla{top:calc(207px + env(safe-area-inset-top))}
 body.karta-otwarta #pasekKonta,body.ksiega-otwarta #pasekKonta{opacity:0;pointer-events:none}
 
+
+/* ============================================================
+   TARLISKO (1 X 2026). Ikonka stawu obok krzyzyka w wierszu ryby
+   przesuwa rybe do tarliska. Zakladka TARLISKO: duzy staw z rybami,
+   dwa miejsca, pasek pary i powod czekania. Tarlo w samym wiaderku
+   jest wylaczone (src/ecosystem/reproduction.js).
+   ============================================================ */
+#panelTresc .wr .wr-akcje{display:flex;align-items:center;gap:6px}
+#panelTresc .wr .do-tarla{width:26px;height:26px;padding:0;border-radius:2px;border:1.4px solid var(--tusz);
+  background:rgba(63,132,160,.12);color:var(--tusz);display:grid;place-items:center;cursor:pointer;
+  position:relative;opacity:.82;-webkit-tap-highlight-color:transparent;transition:transform .2s var(--spr)}
+#panelTresc .wr .do-tarla::before{content:'';position:absolute;inset:-3px}
+#panelTresc .wr .do-tarla .staw-ik{width:18px;height:18px;display:block}
+#panelTresc .wr .do-tarla.pelne{opacity:.3;background:transparent}
+#panelTresc .wr .do-tarla:active{transform:scale(.9)}
+#panelTresc .tarl-podp{display:flex;align-items:center;gap:8px;margin:8px 0 2px;padding:7px 9px;
+  border:1.4px dashed rgba(29,76,102,.55);border-radius:3px;background:rgba(99,166,186,.12);
+  font-size:10.5px;font-weight:700;line-height:1.4}
+#panelTresc .tarl-podp .staw-ik{width:20px;height:20px;flex:0 0 20px;color:var(--tusz)}
+#panelTresc .tarl-kar{background:rgba(99,166,186,.16)}
+#panelTresc .tarl-staw{position:relative;width:96px;height:96px}
+/* Tylko staw (bezposrednie dziecko). Bez > reguła łapała tez serce
+   pary i rysowala je jako wielka, blada plame na pol stawu. */
+#panelTresc .tarl-staw > svg{position:absolute;inset:0;width:96px;height:96px;display:block}
+#panelTresc .wiad-kar .tarl-staw img.tarl-r{position:absolute;width:auto;height:auto;max-width:34px;max-height:20px;
+  object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 1px 0 rgba(10,30,40,.35));
+  animation:tarl-plyw 3.6s ease-in-out infinite}
+#panelTresc .wiad-kar .tarl-staw img.tarl-r0{left:14px;top:56px}
+#panelTresc .wiad-kar .tarl-staw img.tarl-r1{left:42px;top:70px;animation-delay:-1.8s}
+#panelTresc .wiad-kar .tarl-staw.trze img.tarl-r{animation-duration:2.2s}
+@keyframes tarl-plyw{0%,100%{transform:translate(-3px,0)}50%{transform:translate(4px,-2px)}}
+#panelTresc .tarl-serca{position:absolute;left:40px;top:30px;animation:tarl-serce 2.2s ease-in-out infinite}
+@keyframes tarl-serce{0%{transform:translateY(8px);opacity:0}25%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
+#panelTresc .tarl-kar .tarl-postep{grid-column:1/-1;margin-top:6px}
+#panelTresc .tarl-kar .zlaw{grid-column:1/-1;margin-top:6px;font-size:10px;opacity:.75;letter-spacing:.04em}
+#panelTresc .wr.tarl-wr.para-tarl{background:rgba(196,52,74,.06);border-radius:3px}
+#panelTresc .wr .tarl-wroc{padding:6px 8px;border-radius:2px;border:1.4px solid var(--tusz);background:transparent;
+  color:var(--tusz);font:inherit;font-size:9.5px;font-weight:800;letter-spacing:.06em;cursor:pointer;white-space:nowrap}
+#panelTresc .wr .tarl-wroc[disabled]{opacity:.32;cursor:default}
+#panelTresc .wr .tarl-wyp{width:26px;height:26px;border-radius:2px;border:1.4px solid var(--tusz);
+  background:transparent;color:var(--tusz);font-size:13px;line-height:1;opacity:.55;cursor:pointer;position:relative}
+#panelTresc .wr .tarl-wyp::before{content:'';position:absolute;inset:-3px}
+#panelTresc .wr.tarl-wolne{grid-template-columns:36px 1fr;opacity:.62}
+#panelTresc .tarl-slot{width:36px;height:26px;display:grid;place-items:center;
+  border:1.4px dashed rgba(20,18,16,.35);border-radius:3px}
+#panelTresc .tarl-slot .staw-ik{width:18px;height:18px;color:rgba(20,18,16,.55)}
+@media (prefers-reduced-motion:reduce){
+  #panelTresc .wiad-kar .tarl-staw img.tarl-r,#panelTresc .tarl-serca{animation:none!important}
+}
