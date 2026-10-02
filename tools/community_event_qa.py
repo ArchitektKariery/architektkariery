@@ -82,6 +82,16 @@ require("CFG.FURIA_UDZIAL = 0.75;" in html and "const T = Math.round(doCelu);" i
 require("} else if (kier === 'wiaderko' && C.gk === 'smok_zycia') {" in html, "keeping the dragon must not put it in the bucket")
 require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return false;" in html, "bucket must refuse a legend species")
 require("(!window.GATUNKI || window.GATUNKI[r.gat]) && !legenda(r)).slice(0, 32);" in html, "save sanitizer must drop the dragon from the bucket")
+# Odrodzenie na wspolnym serwerze (2 X 2026): eko_zmien nie wskrzesza
+# wymarlych, wiec wypuszczony Smok potrzebuje wlasnej funkcji SQL.
+smok_sql_path = root / "supabase/migrations/20261002_smok_odrodzenie.sql"
+require(smok_sql_path.exists(), "missing migration: 20261002_smok_odrodzenie.sql")
+smok_sql = smok_sql_path.read_text(encoding="utf-8") if smok_sql_path.exists() else ""
+require("create function public.eko_odrodz_wymarle()" in smok_sql, "server revival function missing")
+require("if not ma_mail() then" in smok_sql, "server revival must require a confirmed mail")
+require("and e.gat <> 'smok_zycia'" in smok_sql, "server revival must never bring back the legend")
+require("n = 2,\n      samcow = 1,\n      samic = 1," in smok_sql, "server revival must return 1 male + 1 female")
+require("rpc('eko_odrodz_wymarle', {})" in html, "client must call the server revival without parameters")
 
 for marker in [
     "community_contribute",

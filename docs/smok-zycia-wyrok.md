@@ -37,8 +37,18 @@ Projekt Andrzeja (2 X 2026): po złowieniu Smoka Życia gracz decyduje o losie j
 - Bez wyjątków poza legendą (`bezEko`). Gatunki ze zbiórek społeczności też tracą.
 - Pomiar w Chromium na populacji 97 582 ryb: 73 187 ofiar (75,001%), 3–6 wymarłych gatunków na próbę, 9–12 ms obliczeń.
 
-## Wspólne jezioro
-Populacja jest wspólna dla zalogowanych graczy (`eko_populacja`). Furia wysyła stratę każdego gatunku i płci jako osobne `eko_zmien` (ok. 160 wywołań) i po 5 s czyta całą tabelę z serwera. Furia jednego gracza zabiera więc 75% ryb wszystkim. Odrodzenie idzie przez `eko_odrodz_wymarle` i też jest wspólne. Bez konta z potwierdzonym mailem nic się nie zmienia, a napis mówi to wprost.
+## Wspólne jezioro (serwer)
+Populacja jest wspólna dla zalogowanych graczy (`eko_populacja`). Bez konta z potwierdzonym mailem nic się nie zmienia, a napis mówi to wprost.
+
+**Furia** wysyła stratę każdego gatunku i płci jako osobne `eko_zmien` (ok. 160 wywołań) i po 5 s czyta całą tabelę z serwera. Furia jednego gracza zabiera więc 75% ryb wszystkim. `eko_zmien` (definicja z Supabase, odczyt 2 X 2026) przyjmuje taką stratę bez zmian w SQL:
+- ujemna zmiana schodzi najwyżej do liczby ryb danej płci (`least(-p_delta, samcow albo samic, n)`), więc nic nie spada poniżej zera,
+- każde wywołanie blokuje swój wiersz (`for update`), więc równoległe połowy innych graczy nie gubią odejmowania,
+- `n = 0` ustawia `wymarly = true` i dopisuje `wymarcie` do `eko_kronika`,
+- dodatnia zmiana przy `wymarly = true` nic nie robi: tarło nie wskrzesza wymarłych.
+
+**Odrodzenie** idzie przez `eko_odrodz_wymarle()` z `supabase/migrations/20261002_smok_odrodzenie.sql` (do uruchomienia w Supabase SQL Editor): każdy wiersz z `wymarly = true` i `n = 0` wraca jako 1 samiec + 1 samica, bez `smok_zycia`. Gatunek odnowy, który jeszcze nie pływał, nie ma wiersza albo ma `wymarly = false`, więc nie wraca. Bez tej funkcji odrodzenie żyje tylko lokalnie i znika przy następnym odczycie tabeli, najpóźniej po 25 s.
+
+Test na PostgreSQL 16 z prawdziwą definicją `eko_zmien`: 157 wywołań furii, suma po furii równa sumie przed minus straty co do sztuki, `n = samcow + samic` w każdym wierszu, wymarcia zgodne z wpisami kroniki. Odrodzenie przywraca tylko wymarłe (bez legendy i odnowy), drugie wywołanie zwraca pustą listę, dwie sesje naraz: pierwsza przywraca, druga czeka na blokadę i dostaje pustą listę. Gość i rola `anon` nic nie zmieniają. Kronika z ograniczeniem typów odrzuca wpis `odrodzenie`, a odrodzenie i tak przechodzi.
 
 ## Pliki
 - `src/smok-zycia/event.js` — `poDecyzji` (zasłona, kolejność, napisy), `poZlowieniu`
@@ -49,4 +59,4 @@ Populacja jest wspólna dla zalogowanych graczy (`eko_populacja`). Furia wysyła
 - `src/atlas/atlas-data.js` — opis w atlasie: „Kto go złowi, trzyma w rękach los całego jeziora.”
 
 ## Testy
-Przeglądarka na atrapie serwera: karta Smoka, pierwsze pytanie, drugie pytanie, NIE zostawia kartę, TAK + TAK, ciemny ekran, dokładnie -75% populacji, Smok w wiaderku, nowa ławica bez Smoka, napis furii, ekran wraca; ścieżka wypuszczenia: bez pytań, jasny ekran, 3 wymarłe gatunki wracają jako 2/1/1, napis odrodzenia, nowa ławica. Strażniki w `tools/community_event_qa.py` i `tools/smok-stage6-final-regression.py`.
+Przeglądarka na atrapie serwera: karta Smoka, pierwsze pytanie, drugie pytanie, NIE zostawia kartę, TAK + TAK, ciemny ekran, dokładnie -75% populacji, Smok poza wiaderkiem (także przy pełnym), nowa ławica bez Smoka, napis furii, ekran wraca; ścieżka wypuszczenia: bez pytań, jasny ekran, 3 wymarłe gatunki wracają jako 2/1/1, napis odrodzenia, nowa ławica. Strażniki w `tools/community_event_qa.py` i `tools/smok-stage6-final-regression.py`.
