@@ -1410,12 +1410,172 @@ const Eko = (() => {
     return out;
   }
 
+  /* ============================================================
+     FURIA SMOKA ZYCIA (2 X 2026, projekt Andrzeja: "W tej sytuacji cale
+     eko jeziora losowo zmniejsza sie o -75% (zaprojektuj to)").
+     Wolana raz, gdy gracz dwa razy potwierdzi, ze bierze Smoka Zycia
+     do wiaderka (SmokZycia.poDecyzji w src/smok-zycia/event.js).
+
+     PROJEKT:
+     1. Kazdy gatunek z populacja dostaje wlasny udzial ofiar z rozkladu
+        Beta(6, 2): srednia 0,75, typowo od 0,55 do 0,92, przyciete do
+        0,40..0,98. Furia nie tnie wszystkiego rowno: jeden gatunek traci
+        polowe, inny prawie wszystko. To jest to "losowo".
+     2. Jeden wspolny mnoznik (szukany polowieniem, z sufitem 0,98 na
+        gatunek) ustawia udzialy tak, zeby oczekiwana liczba ofiar byla
+        rowna 75% wszystkich ryb jeziora, nawet gdy jeden liczny gatunek
+        wylosuje maly udzial.
+     3. Kazda ryba ginie osobno (osobne losowanie dla kazdej sztuki),
+        samce i samice z tym samym udzialem, wiec proporcja plci zostaje.
+        Male populacje sa najbardziej narazone: przy udziale 0,75 gatunek
+        z 4 sztukami traci wszystkie z szansa okolo 32%, gatunek z 2
+        sztukami okolo 56%. Wymarly gatunek wraca tylko przez Smoka
+        wypuszczonego do jeziora (odrodzWymarle). To sa te
+        "nieodwracalne konsekwencje".
+     4. Na koniec liczba ofiar dochodzi DOKLADNIE do 75% (zaokraglone do
+        sztuki): brakujace albo nadmiarowe pojedyncze ryby losuja sie
+        z wagami gatunkow i plci. Komunikat "75% stworzen jeziora" jest
+        wiec dokladny przy kazdej liczebnosci.
+     5. Bez wyjatkow poza legenda (bezEko). Gatunki ze zbiorek tez traca:
+        furia nie pyta, kto placil.
+     6. Gdy dziala wspolna populacja, kazda strata idzie na serwer jako
+        osobne eko_zmien na gatunek i plec: jezioro jest wspolne, wiec
+        furia dotyka wszystkich graczy. Lokalny podglad zmienia sie od
+        razu, a pelny odczyt z serwera 5 s pozniej prostuje kolejnosc
+        odpowiedzi.
+     Zwraca { przed, zginelo, wymarle } albo null, gdy gracz nie ma prawa
+     zmieniac swiata (gosc albo konto bez potwierdzonego maila).
+     ============================================================ */
+  CFG.FURIA_UDZIAL = 0.75;
+  CFG.FURIA_BETA = [6, 2];
+  CFG.FURIA_PRZEDZIAL = [0.40, 0.98];
+  /* Sufit na gatunek rowny gornej granicy udzialu: 200-sztukowy gatunek
+     przy 0,98 ginie w calosci z szansa 1,8%, przy 0,995 bylo to 37%. */
+  CFG.FURIA_SUFIT = 0.98;
+  function losujBeta(a, b, rnd) {
+    /* Calkowite ksztalty: suma logarytmow daje rozklad gamma. */
+    let x = 0, y = 0;
+    for (let i = 0; i < a; i++) x -= Math.log(1 - rnd());
+    for (let i = 0; i < b; i++) y -= Math.log(1 - rnd());
+    return (x + y) > 0 ? x / (x + y) : 0.5;
+  }
+  function ofiaryZ(ile, q, rnd) {
+    let d = 0;
+    for (let i = 0; i < ile; i++) if (rnd() < q) d++;
+    return d;
+  }
+  /* Usuwa z listy osobnikow `ile` losowych sztuk danej plci, najpierw
+     tych, ktorych akurat nie ma w kadrze. */
+  function usunLosowych(gk, plec, ile) {
+    if (ile <= 0) return;
+    const lista = listaOsobnikow(gk);
+    const kand = [];
+    for (let i = 0; i < lista.length; i++) if (lista[i].plec === plec) kand.push({ i: i, l: Math.random() });
+    kand.sort((x, y) => ((lista[x.i].naEkranie ? 1 : 0) - (lista[y.i].naEkranie ? 1 : 0)) || (x.l - y.l));
+    const doUsuniecia = kand.slice(0, ile).map(x => x.i).sort((x, y) => y - x);
+    for (const i of doUsuniecia) lista.splice(i, 1);
+  }
+  function furiaSmoka(udzial, rnd) {
+    if (!maPrawoDoSwiata()) return null;
+    const E = stan(); if (!E) return null;
+    const R = rnd || Math.random;
+    const cel = Math.max(0, Math.min(1, (udzial === undefined || udzial === null) ? CFG.FURIA_UDZIAL : udzial));
+    const lista = [];
+    let przed = 0;
+    for (const gk in GATUNKI) {
+      if (GATUNKI[gk].bezEko || GATUNKI[gk].zepsuty) continue;
+      const r = rekord(gk);
+      if (!r || !(r.n > 0)) continue;
+      /* Zapisy sprzed licznikow plci: m + f musi rownac sie n. */
+      if ((r.m || 0) + (r.f || 0) !== r.n) {
+        const sm = (r.m || 0) + (r.f || 0);
+        const udzM = sm > 0 ? (r.m || 0) / sm : 0.5;
+        r.m = Math.round(r.n * udzM); r.f = r.n - r.m;
+      }
+      lista.push(gk); przed += r.n;
+    }
+    if (!przed) return { przed: 0, zginelo: 0, wymarle: [] };
+
+    /* 1-2. Udzialy gatunkow i wspolny mnoznik. */
+    const [a, b] = CFG.FURIA_BETA, [pmin, pmax] = CFG.FURIA_PRZEDZIAL, SUF = CFG.FURIA_SUFIT;
+    const p = {};
+    for (const gk of lista) p[gk] = Math.max(pmin, Math.min(pmax, losujBeta(a, b, R)));
+    const oczek = (k) => { let s2 = 0; for (const gk of lista) s2 += Math.min(SUF, p[gk] * k) * E.gat[gk].n; return s2; };
+    const doCelu = cel * przed;
+    let lo = 0, hi = 1 / pmin;
+    for (let i = 0; i < 50; i++) { const sr = (lo + hi) / 2; if (oczek(sr) < doCelu) lo = sr; else hi = sr; }
+    const k = (lo + hi) / 2;
+
+    /* 3. Kazda sztuka osobno. */
+    const kub = [];
+    let razem = 0;
+    for (const gk of lista) {
+      const r = E.gat[gk];
+      const q = Math.min(SUF, p[gk] * k);
+      const dm = ofiaryZ(r.m, q, R), df = ofiaryZ(r.f, q, R);
+      kub.push({ gk: gk, pl: 'm', ile: r.m, d: dm }, { gk: gk, pl: 'f', ile: r.f, d: df });
+      razem += dm + df;
+    }
+    /* 4. Dokladnie 75%: pojedyncze sztuki dobierane albo oszczedzane
+       z wagami kubelkow (gatunek i plec). */
+    const T = Math.round(doCelu);
+    while (razem !== T) {
+      const wiecej = razem < T;
+      let suma = 0;
+      for (const x of kub) suma += wiecej ? (x.ile - x.d) : x.d;
+      if (suma <= 0) break;
+      let u = R() * suma, wyb = null;
+      for (const x of kub) {
+        u -= wiecej ? (x.ile - x.d) : x.d;
+        if (u < 0) { wyb = x; break; }
+      }
+      if (!wyb) { for (let i = kub.length - 1; i >= 0; i--) { const x = kub[i]; if (wiecej ? x.ile > x.d : x.d > 0) { wyb = x; break; } } }
+      if (!wyb) break;
+      if (wiecej) { wyb.d++; razem++; } else { wyb.d--; razem--; }
+    }
+
+    /* 5-6. Zastosowanie: serwer, osobniki, liczniki, wymarcia. */
+    const serwer = !!(window.Eko && Eko.Serwer && Eko.Serwer.dostepny && Eko.Serwer.dostepny());
+    let zginelo = 0;
+    const wymarle = [];
+    for (let i = 0; i < kub.length; i += 2) {
+      const gk = kub[i].gk, dm = kub[i].d, df = kub[i + 1].d;
+      if (!dm && !df) continue;
+      const r = E.gat[gk];
+      if (serwer) {
+        try { if (dm) Eko.Serwer.zmien(gk, -dm, 'm'); } catch (e) {}
+        try { if (df) Eko.Serwer.zmien(gk, -df, 'f'); } catch (e) {}
+      }
+      if (r.indyw) { usunLosowych(gk, 'm', dm); usunLosowych(gk, 'f', df); }
+      r.m -= dm; r.f -= df; r.n = r.m + r.f;
+      zginelo += dm + df;
+      if (r.n < r.min) r.min = r.n;
+      /* Te same progi co w zmien(): ponizej stu sztuk kazda ryba dostaje
+         numer (materializuj tworzy rekordy dla tych, ktore przezyly). */
+      if (!r.indyw && r.n < CFG.PROG_INDYWIDUALNY) {
+        r.indyw = true;
+        try { materializuj(gk); } catch (e) {}
+      }
+      if (r.n === 0 && !r.wymarly) {
+        r.wymarly = true; r.kiedyWymarl = Date.now(); r.m = 0; r.f = 0;
+        if (E.osob) E.osob[gk] = [];
+        wymarle.push(gk);
+        zapisz('wymarcie', gk, 'gatunek wymarł w furii Smoka Życia', 0);
+      }
+    }
+    zapisz('furia', 'smok_zycia', 'furia: zginęło ' + Math.round(100 * zginelo / przed) + '% ryb jeziora', zginelo);
+    window.__wagiTab = null;
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    if (serwer && Eko.Serwer.pobierz) setTimeout(() => { try { Eko.Serwer.pobierz(); } catch (e) {} }, 5000);
+    return { przed: przed, zginelo: zginelo, wymarle: wymarle };
+  }
+
   return { CFG, stan, rekord, populacja, wymarly, trybIndywidualny,
            tikGodow, parujeSie, paraGodowa, ikra, zakonczGody,
            tikKohort, pokolenia, nowaKohorta, losujScenariusz,
            genSrednia, genZPopulacji, zmieszajGeny, przesunSrednia, odejmijZeSredniej,
            materializuj, wezOsobnika, zwolnij, usunOsobnika, osobniki,
-           zmien, zatrzymano, wypuszczono, drapieznikZjadl, odrodzWymarle,
+           zmien, zatrzymano, wypuszczono, drapieznikZjadl, odrodzWymarle, furiaSmoka,
            mnoznikLosowania, losujPlec, moznaRozmnazac,
            karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
            szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,

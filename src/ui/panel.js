@@ -530,6 +530,35 @@
     if (nn) nn.addEventListener('click', e => { e.stopPropagation(); schowaj(); });
   };
 
+  /* ============================================================
+     SMOK ZYCIA DO WIADERKA: DWA PYTANIA (2 X 2026, projekt Andrzeja).
+     Swipe Smoka w strone wiaderka nie zabiera go od razu. Najpierw dwa
+     pytania z bezpieczna odpowiedzia NIE jako wyrozniona. NIE, ZAMKNIJ
+     albo stukniecie w tlo zamykaja panel, a karta wraca na srodek
+     i dalej czeka na decyzje. Dopiero drugie TAK wola dalej(), czyli
+     decyzjaKarty('wiaderko') z potwierdzeniem, a za nia furie Smoka
+     (SmokZycia.poDecyzji w src/smok-zycia/event.js).
+     ============================================================ */
+  window.__pytajOSmoka = function (dalej) {
+    const przyciski = (t, n) => '<div class="wybor"><button id="' + t + '" class="mini">TAK</button>' +
+      '<button id="' + n + '" class="mini mocny">NIE</button></div>';
+    const podepnij = (t, n, naTak) => {
+      const bt = document.getElementById(t), bn = document.getElementById(n);
+      if (bt) bt.addEventListener('click', e => { e.stopPropagation(); naTak(); });
+      if (bn) bn.addEventListener('click', e => { e.stopPropagation(); schowaj(); });
+    };
+    const drugie = () => {
+      pokaz('<h3>OSTATNIE SŁOWO<em>\u6700\u5f8c\u306e\u8a00\u8449</em></h3>' +
+        '<p class="smok-pyt">Upewnij się, że chcesz Stworzenie Życia złapać dla siebie, będzie to miało ogromne konsekwencje.</p>' +
+        przyciski('smokTak2', 'smokNie2'));
+      podepnij('smokTak2', 'smokNie2', () => { schowaj(); dalej(); });
+    };
+    pokaz('<h3>NIEWOLA<em>\u56da\u308f\u308c</em></h3>' +
+      '<p class="smok-pyt">Czy na pewno chcesz wrzucić Stworzenie Życia do niewoli? Będzie to niosło nieodwracalne konsekwencje.</p>' +
+      przyciski('smokTak1', 'smokNie1'));
+    podepnij('smokTak1', 'smokNie1', drugie);
+  };
+
 
   /* ============================================================
      PRODUCT STAGE 8 — KOSMETYCZNA MONETYZACJA.

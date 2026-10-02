@@ -144,8 +144,16 @@ checks["bobber_bite_state"] = "bite: 0," in src and "floatBob: 0" in src
 checks["splash_crash_guard"] = "usunal crash przy plusku" in src or "usunął crash przy plusku" in src
 
 # 7) Catch -> EKO resurrection path
-checks["dragon_catch_calls_resurrection"] = "if(gk==='smok_zycia' && window.SmokZycia) SmokZycia.poZlowieniu();" in src
-checks["dragon_po_zlowieniu_calls_eko"] = "Eko.odrodzWymarle" in smok_mod
+# Od 2 X 2026 los jeziora zapada przy decyzji na karcie: wypuszczony Smok
+# przywraca wymarle gatunki (1 samiec + 1 samica), zatrzymany po dwoch
+# pytaniach wpada w furie (-75% ryb jeziora). Samo zlowienie nic nie zmienia.
+checks["dragon_catch_hook_present"] = "if(gk==='smok_zycia' && window.SmokZycia) SmokZycia.poZlowieniu();" in src
+checks["dragon_catch_does_not_resurrect"] = "function poZlowieniu() {\n    try { if (navigator.vibrate)" in smok_mod
+checks["dragon_release_calls_resurrection"] = "else wynik = (window.Eko && Eko.odrodzWymarle) ? Eko.odrodzWymarle() : [];" in smok_mod
+checks["dragon_keep_calls_fury"] = "if (furia) wynik = (window.Eko && Eko.furiaSmoka) ? Eko.furiaSmoka() : null;" in smok_mod
+checks["dragon_keep_asks_twice"] = "window.__pytajOSmoka(() => {" in src and "window.__pytajOSmoka = function (dalej) {" in src
+checks["dragon_decision_hook"] = "SmokZycia.poDecyzji(kier);" in src
+checks["eko_fury_exact_share"] = "const T = Math.round(doCelu);" in src and "CFG.FURIA_UDZIAL = 0.75;" in src
 checks["eko_resurrection_two_fish"] = "r.n=2; r.m=1; r.f=1; r.wymarly=false" in src
 checks["eko_resurrection_skips_noeko"] = "if (GATUNKI[gk] && GATUNKI[gk].bezEko) continue;" in src
 checks["eko_ui_hides_noeko"] = src.count("GATUNKI[gk].bezEko") >= 3

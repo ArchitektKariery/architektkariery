@@ -31,6 +31,7 @@ require(any(x in html for x in [
     "2026-10-02-tarlisko-v1",
     "2026-10-02-cieplo-v1",
     "2026-10-02-smok-legenda-v1",
+    "2026-10-02-smok-wyrok-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -62,6 +63,18 @@ require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko
 require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return;" in html, "server rows of a legend species must be ignored")
 require("return 'LEGENDA';" in html, "legend species must not enter the tarlisko")
 require("if (window.SmokZycia && SmokZycia.trzymaLawice && SmokZycia.trzymaLawice()) return;" in html, "dragon fight must hold the dragon shoal")
+# Wyrok Smoka (2 X 2026, projekt Andrzeja): dwa pytania przed wiaderkiem,
+# furia -75% ryb jeziora po zatrzymaniu, odrodzenie wymarlych po wypuszczeniu.
+for tekst in [
+    "Czy na pewno chcesz wrzucić Stworzenie Życia do niewoli? Będzie to niosło nieodwracalne konsekwencje.",
+    "Upewnij się, że chcesz Stworzenie Życia złapać dla siebie, będzie to miało ogromne konsekwencje.",
+    "75% stworzeń jeziora zostało zlikwidowanych w furii Smoka Życia.",
+    "Do życia wróciły gatunki, których już nie powinno tu być.",
+]:
+    require(tekst in html, "dragon verdict text missing: " + tekst[:40])
+require("window.__pytajOSmoka = function (dalej) {" in html and "window.__pytajOSmoka(() => {" in html, "keeping the dragon must ask twice")
+require("SmokZycia.poDecyzji(kier);" in html, "card decision must hand the dragon verdict to SmokZycia")
+require("CFG.FURIA_UDZIAL = 0.75;" in html and "const T = Math.round(doCelu);" in html, "fury must remove exactly 75% of the lake")
 
 for marker in [
     "community_contribute",

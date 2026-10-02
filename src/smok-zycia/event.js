@@ -612,18 +612,115 @@ const SmokZycia = (() => {
     return smok(H.hooked) || (H.phase === 'land' && !!H.land && smok(H.land.fish));
   }
 
+  /* Zlowienie samo nic juz nie zmienia w jeziorze. Od 2 X 2026 los
+     jeziora zapada przy decyzji na karcie (poDecyzji nizej): wypuszczony
+     Smok przywraca wymarle gatunki, zatrzymany wpada w furie. */
   function poZlowieniu() {
-    let ile=0;
-    try {
-      if (window.Eko && Eko.odrodzWymarle) ile=(Eko.odrodzWymarle()||[]).length;
-      if (typeof Ruch !== 'undefined' && Ruch.powiedz)
-        Ruch.powiedz(ile ? ('SMOK ŻYCIA · ODRODZIŁ ' + ile + ' GAT.') : 'SMOK ŻYCIA · ŻYCIE WRACA DO JEZIORA');
-      if (navigator.vibrate) navigator.vibrate([60,60,100,90,160]);
-    } catch(e) {}
+    try { if (navigator.vibrate) navigator.vibrate([60,60,100,90,160]); } catch(e) {}
+  }
+
+  /* ============================================================
+     WYROK: LOS JEZIORA PO DECYZJI NA KARCIE (2 X 2026, projekt Andrzeja).
+
+     WIADERKO (po dwoch potwierdzeniach w __pytajOSmoka, src/ui/panel.js):
+     ekran ciemnieje do czerni z czerwienia, w ciemnosci Eko.furiaSmoka()
+     zabiera dokladnie 75% ryb jeziora i wplywa nowa lawica, potem ekran
+     wraca, a napis mowi: "75% stworzen jeziora zostalo zlikwidowanych
+     w furii Smoka Zycia." z liczbami pod spodem.
+     WYPUSZCZENIE: ekran jasnieje do cieplej bieli, Eko.odrodzWymarle()
+     przywraca kazdy gatunek z zerowa populacja jako 1 samca i 1 samice
+     (z ta sama brama odnowy co dotad), wplywa nowa lawica i napis:
+     "Do zycia wrocily gatunki, ktorych juz nie powinno tu byc."
+     Czasy zaslony (wejscie 0,9 s, trzymanie 0,7 s, wyjscie 1,3 s) musza
+     zgadzac sie z przejsciami #smokZaslona w css/05-product.css.
+     Zaslona przechwytuje dotyk, dopoki trwa. Napis zamyka stukniecie
+     albo zegar po 6,5 s.
+     ============================================================ */
+  const WYROK = { wejscie: 900, trzymanie: 700, wyjscie: 1300, napis: 6500 };
+  let wyrokTrwa = false;
+  function warstwa(id) {
+    let e = document.getElementById(id);
+    if (!e) { e = document.createElement('div'); e.id = id; document.body.appendChild(e); }
+    return e;
+  }
+  function odmiana(n, jeden, kilka, wiele) {
+    const n10 = n % 10, n100 = n % 100;
+    if (n === 1) return jeden;
+    if (n10 >= 2 && n10 <= 4 && !(n100 >= 12 && n100 <= 14)) return kilka;
+    return wiele;
+  }
+  function liczba(n) { return Number(n || 0).toLocaleString('pl-PL'); }
+  function nazwy(lista) {
+    const N = lista.map(gk => (window.GATUNKI && GATUNKI[gk] && GATUNKI[gk].nazwa) || gk);
+    if (N.length <= 3) return N.join(', ');
+    const reszta = N.length - 3;
+    return N.slice(0, 3).join(', ') + ' i ' + reszta + ' ' + odmiana(reszta, 'inny', 'inne', 'innych');
+  }
+  function tekstFurii(w) {
+    if (!w) return ['Smok Życia jest twój.',
+      'Bez konta z potwierdzonym mailem jezioro nie czuje jego furii.'];
+    if (!w.przed) return ['Smok Życia jest twój.', 'Jezioro było już puste.'];
+    const wym = w.wymarle || [];
+    return ['75% stworzeń jeziora zostało zlikwidowanych w furii Smoka Życia.',
+      odmiana(w.zginelo, 'Zginęła', 'Zginęły', 'Zginęło') + ' ' + liczba(w.zginelo) + ' z ' + liczba(w.przed) + ' ' +
+      odmiana(w.przed, 'ryby', 'ryb', 'ryb') + '. ' +
+      (wym.length ? (odmiana(wym.length, 'Wymarł', 'Wymarły', 'Wymarło') + ' ' + wym.length + ' ' +
+        odmiana(wym.length, 'gatunek', 'gatunki', 'gatunków') + ': ' + nazwy(wym) + '.')
+        : 'Żaden gatunek nie wymarł.')];
+  }
+  function tekstOdrodzenia(w, prawo) {
+    if (!prawo) return ['Smok Życia odpłynął.',
+      'Bez konta z potwierdzonym mailem jezioro nie czuje jego daru.'];
+    if (!w || !w.length) return ['Smok Życia odpłynął.',
+      'W jeziorze nie brakowało żadnego gatunku, więc nic nie musiało wracać.'];
+    return ['Do życia wróciły gatunki, których już nie powinno tu być.',
+      odmiana(w.length, 'Wrócił', 'Wróciły', 'Wróciło') + ' ' + w.length + ' ' + odmiana(w.length, 'gatunek', 'gatunki', 'gatunków') +
+      ', każdy jako 1 samiec i 1 samica: ' + nazwy(w) + '.'];
+  }
+  function pokazNapis(furia, tekst) {
+    const b = warstwa('smokWyrok');
+    b.className = furia ? 'furia' : 'odrodzenie';
+    b.innerHTML = '<b></b><span></span>';
+    b.querySelector('b').textContent = tekst[0];
+    b.querySelector('span').textContent = tekst[1] || '';
+    void b.offsetWidth;
+    b.classList.add('on');
+    let t = 0;
+    const zamknij = () => { clearTimeout(t); b.classList.remove('on'); b.removeEventListener('click', zamknij); };
+    t = setTimeout(zamknij, WYROK.napis);
+    b.addEventListener('click', zamknij);
+  }
+  function poDecyzji(kier) {
+    if (wyrokTrwa) return false;
+    wyrokTrwa = true;
+    const furia = (kier === 'wiaderko');
+    const z = warstwa('smokZaslona');
+    z.className = furia ? 'furia' : 'odrodzenie';
+    void z.offsetWidth;
+    z.classList.add('on');
+    try { if (navigator.vibrate) navigator.vibrate(furia ? [90,70,140,70,260] : [24,40,24,40,60]); } catch (e) {}
+    setTimeout(() => {
+      let wynik = null, prawo = false;
+      try { prawo = !!(window.Eko && Eko.maPrawoDoSwiata && Eko.maPrawoDoSwiata()); } catch (e) {}
+      try {
+        if (furia) wynik = (window.Eko && Eko.furiaSmoka) ? Eko.furiaSmoka() : null;
+        else wynik = (window.Eko && Eko.odrodzWymarle) ? Eko.odrodzWymarle() : [];
+      } catch (e) { wynik = furia ? null : []; }
+      koniecLawicy();
+      try { if (typeof nowaLawica === 'function') nowaLawica(); } catch (e) {}
+      setTimeout(() => {
+        z.classList.remove('on');
+        setTimeout(() => {
+          wyrokTrwa = false;
+          pokazNapis(furia, furia ? tekstFurii(wynik) : tekstOdrodzenia(wynik, prawo));
+        }, WYROK.wyjscie);
+      }, WYROK.trzymanie);
+    }, WYROK.wejscie);
+    return true;
   }
 
   return {
-    zastapLawiceJesliCzeka, aktywnaLawica, koniecLawicy, trzymaLawice, poZlowieniu,
+    zastapLawiceJesliCzeka, aktywnaLawica, koniecLawicy, trzymaLawice, poZlowieniu, poDecyzji,
     zachowanie, poOdmowie, odplywanie, lureRuch, zegarOgladania,
     dlugosc, jednostka, grubosc, skalaDocelowa
   };

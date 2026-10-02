@@ -4,13 +4,13 @@
 > Kazda globalna nazwa gry (funkcja, stala, zmienna, eksport `window.X`) i miejsce jej definicji.
 > Linia liczy sie od poczatku pliku modulu.
 
-Liczba wpisow: 536
+Liczba wpisow: 537
 
 | Nazwa | Rodzaj | Plik | Linia |
 |---|---|---|---|
 | `__AC` | window.__AC = | `src/audio/haptics.js` | 173 |
 | `__bookReturnMenu` | window.__bookReturnMenu = | `src/atlas/atlas.js` | 322 |
-| `__bookReturnMenu` | window.__bookReturnMenu = | `src/ui/panel.js` | 2120 |
+| `__bookReturnMenu` | window.__bookReturnMenu = | `src/ui/panel.js` | 2149 |
 | `__ekoDiag` | window.__ekoDiag = | `src/ecosystem/server.js` | 63 |
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/fish-core.js` | 252 |
 | `__kuponOdkrywcy` | window.__kuponOdkrywcy = | `src/fish/school-update.js` | 175 |
@@ -18,6 +18,7 @@ Liczba wpisow: 536
 | `__odswiezPasekZlecen` | window.__odswiezPasekZlecen = | `src/bucket/orders.js` | 504 |
 | `__pokazOferteZlecenia` | window.__pokazOferteZlecenia = | `src/bucket/orders.js` | 505 |
 | `__pytajOLawice` | window.__pytajOLawice = | `src/ui/panel.js` | 519 |
+| `__pytajOSmoka` | window.__pytajOSmoka = | `src/ui/panel.js` | 542 |
 | `__qrFps` | window.__qrFps = | `src/scene/makieta.js` | 2013 |
 | `__quickNavInvoke` | window.__quickNavInvoke = | `src/ui/panel.js` | 405 |
 | `__wagiTab` | window.__wagiTab = | `src/ecosystem/population.js` | 212 |
@@ -111,7 +112,7 @@ Liczba wpisow: 536
 | `CL` | const | `src/scene/makieta.js` | 181 |
 | `clamp` | const | `src/scene/makieta.js` | 28 |
 | `clickSound` | function | `src/audio/haptics.js` | 178 |
-| `closeCard` | function | `src/card/card.js` | 557 |
+| `closeCard` | function | `src/card/card.js` | 578 |
 | `clouds` | const | `src/scene/makieta.js` | 148 |
 | `cnt` | let | `src/scene/makieta.js` | 1930 |
 | `COL` | const | `src/fish/mechanics.js` | 9 |
@@ -124,7 +125,7 @@ Liczba wpisow: 536
 | `CYKL_HANDLARZA` | const | `src/bucket/pricing.js` | 49 |
 | `cyklLawicy` | function | `src/fish/behavior.js` | 551 |
 | `czystyNick` | window.czystyNick = | `src/player/save.js` | 433 |
-| `decyzjaKarty` | function | `src/card/card.js` | 466 |
+| `decyzjaKarty` | function | `src/card/card.js` | 467 |
 | `DepthFX` | const | `src/scene/makieta.js` | 1651 |
 | `dnoGotowe` | function | `src/scene/makieta.js` | 1507 |
 | `dnoImg` | const | `src/scene/makieta.js` | 1493 |
@@ -138,7 +139,7 @@ Liczba wpisow: 536
 | `drawBedForeground` | function | `src/scene/makieta.js` | 1583 |
 | `drawBedItem` | function | `src/scene/makieta.js` | 1533 |
 | `drawBrzeg` | function | `src/scene/makieta.js` | 714 |
-| `drawCard` | function | `src/card/card.js` | 578 |
+| `drawCard` | function | `src/card/card.js` | 599 |
 | `drawDepthLab` | function | `src/scene/makieta.js` | 1609 |
 | `drawFish` | function | `src/fish/rendering.js` | 172 |
 | `drawGodRays` | function | `src/scene/makieta.js` | 1814 |
@@ -190,7 +191,7 @@ Liczba wpisow: 536
 | `gieldaStan` | function | `src/bucket/pricing.js` | 118 |
 | `glebokoscZ` | function | `src/fish/fish-core.js` | 543 |
 | `gotowe` | let | `src/fish/fish-core.js` | 2 |
-| `Gracz` | window.Gracz = | `src/ui/panel.js` | 2406 |
+| `Gracz` | window.Gracz = | `src/ui/panel.js` | 2435 |
 | `grubosc` | function | `src/fish/school.js` | 36 |
 | `GRUBOSC` | const | `src/fish/school.js` | 17 |
 | `GRUBOSC_DOM` | const | `src/fish/school.js` | 16 |
@@ -251,7 +252,7 @@ Liczba wpisow: 536
 | `mnoznikTempa` | function | `src/bucket/pricing.js` | 311 |
 | `mnoznikXScore` | function | `src/bucket/pricing.js` | 273 |
 | `mnoznikZwycTurniej` | function | `src/tournaments/tournaments.js` | 394 |
-| `Monetization` | window.Monetization = | `src/ui/panel.js` | 734 |
+| `Monetization` | window.Monetization = | `src/ui/panel.js` | 763 |
 | `motes` | const | `src/scene/makieta.js` | 326 |
 | `MOUTH` | const | `src/fish/fish-core.js` | 58 |
 | `mouthDX` | function | `src/fish/fish-core.js` | 90 |
@@ -283,7 +284,7 @@ Liczba wpisow: 536
 | `odbicieBrzegu` | function | `src/scene/makieta.js` | 1363 |
 | `oddech` | function | `src/fish/behavior.js` | 400 |
 | `ODDYCHA` | var | `src/fish/behavior.js` | 399 |
-| `odnowaTeksty` | window.odnowaTeksty = | `src/ui/panel.js` | 825 |
+| `odnowaTeksty` | window.odnowaTeksty = | `src/ui/panel.js` | 854 |
 | `ODST_N` | const | `src/scene/makieta.js` | 1970 |
 | `odstepy` | const | `src/scene/makieta.js` | 1971 |
 | `odstI` | let | `src/scene/makieta.js` | 1972 |
@@ -319,13 +320,13 @@ Liczba wpisow: 536
 | `PODLOGA_SYLWETKI` | const | `src/fish/fish-core.js` | 578 |
 | `Pogoda` | const | `src/world/pogoda.js` | 26 |
 | `pokazPanel` | window.pokazPanel = | `src/ui/panel.js` | 93 |
-| `pokazPytanieWymiany` | window.pokazPytanieWymiany = | `src/ui/panel.js` | 1389 |
-| `pokazWynikTurnieju` | window.pokazWynikTurnieju = | `src/ui/panel.js` | 2937 |
+| `pokazPytanieWymiany` | window.pokazPytanieWymiany = | `src/ui/panel.js` | 1418 |
+| `pokazWynikTurnieju` | window.pokazWynikTurnieju = | `src/ui/panel.js` | 2966 |
 | `polowanie` | function | `src/fish/behavior.js` | 257 |
 | `POMOC` | const | `src/atlas/atlas-data.js` | 27 |
 | `POP` | const | `src/fish/fish-core.js` | 114 |
 | `PORA` | const | `src/world/pora.js` | 40 |
-| `PortretHandlarza` | window.PortretHandlarza = | `src/ui/panel.js` | 1724 |
+| `PortretHandlarza` | window.PortretHandlarza = | `src/ui/panel.js` | 1753 |
 | `POTWOR` | const | `src/fish/fish-core.js` | 488 |
 | `POWTORKA` | const | `src/fish/bite.js` | 115 |
 | `PREDKOSC` | var | `src/fish/behavior.js` | 125 |
@@ -416,12 +417,12 @@ Liczba wpisow: 536
 | `ShareCatch` | const | `src/product/engagement.js` | 155 |
 | `Siec` | const | `src/ecosystem/net-catch.js` | 33 |
 | `SIEC_ANIM` | const | `src/ecosystem/net-anim.js` | 17 |
-| `SiecUI` | window.SiecUI = | `src/ui/panel.js` | 1399 |
+| `SiecUI` | window.SiecUI = | `src/ui/panel.js` | 1428 |
 | `siecZarzuc` | function | `src/ecosystem/net-anim.js` | 19 |
 | `SKALA` | const | `src/rarity/skala-beta.js` | 31 |
 | `SKALA_WIDOCZNOSCI` | const | `src/fish/fish-core.js` | 579 |
 | `skalaZCm` | function | `src/fish/fish-core.js` | 584 |
-| `SKLEP_ZAMKNIETY` | window.SKLEP_ZAMKNIETY = | `src/ui/panel.js` | 778 |
+| `SKLEP_ZAMKNIETY` | window.SKLEP_ZAMKNIETY = | `src/ui/panel.js` | 807 |
 | `SLAD_BARWY` | var | `src/fx/water-traces.js` | 21 |
 | `SLAD_BUDZET` | var | `src/fx/water-traces.js` | 17 |
 | `sladSzarzy` | function | `src/fx/water-traces.js` | 61 |
@@ -467,7 +468,7 @@ Liczba wpisow: 536
 | `tikNowejLawicy` | function | `src/fish/school.js` | 150 |
 | `touch` | const | `src/core/input-loop.js` | 2 |
 | `trofeumWiaderka` | function | `src/bucket/pricing.js` | 330 |
-| `Turniej` | window.Turniej = | `src/ui/panel.js` | 2957 |
+| `Turniej` | window.Turniej = | `src/ui/panel.js` | 2986 |
 | `typowaWagaGatunku` | function | `src/bucket/pricing.js` | 258 |
 | `uderzenie` | function | `src/fish/behavior.js` | 513 |
 | `UDZIAL_DOCELOWY` | const | `src/fish/species.js` | 1762 |
@@ -494,7 +495,7 @@ Liczba wpisow: 536
 | `wg` | const | `src/scene/makieta.js` | 63 |
 | `Wiaderko` | window.Wiaderko = | `src/bucket/bucket.js` | 6 |
 | `WIADERKO_MAX` | const | `src/bucket/pricing.js` | 42 |
-| `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 2114 |
+| `wiaderkoHTML` | window.wiaderkoHTML = | `src/ui/panel.js` | 2143 |
 | `widocznoscChmury` | function | `src/scene/makieta.js` | 176 |
 | `WodaFX` | const | `src/scene/makieta.js` | 963 |
 | `wOknieZegara` | function | `src/fish/fish-core.js` | 205 |

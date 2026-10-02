@@ -449,6 +449,7 @@ function openCard(fish, lenCm, fromX, fromY) {
      wyzej sama logika wiaderka -- tu tylko czyscimy resztki po poprzedniej
      karcie, zeby niedokonczony gest nie przeciekl na nastepna rybe. */
   Card.dx = 0; Card.ciagniemy = false; Card.decyzja = null; Card.wylot = 0;
+  Card.smokZgoda = false;
   /* Karta jest bohaterem kadru, wiec HUD na czas jej trwania znika.
      Wczesniej okragly przycisk lawicy stal nad nia i zaslanial rog ramki. */
   if (document.body && document.body.classList) document.body.classList.add('karta-otwarta');
@@ -466,6 +467,23 @@ function openCard(fish, lenCm, fromX, fromY) {
 function decyzjaKarty(kier) {
   if (!Card.swipe || !Card.czeka || Card.decyzja) return;
   const C = Card.czeka;
+  /* ============================================================
+     SMOK ZYCIA: DECYZJA Z KONSEKWENCJAMI (2 X 2026, projekt Andrzeja).
+     Swipe Smoka do wiaderka najpierw pyta dwa razy (__pytajOSmoka
+     w src/ui/panel.js). Do tego czasu karta nie odlatuje: wraca na
+     srodek i czeka. Zgoda wola te funkcje jeszcze raz, juz z flaga.
+     Wynik obu stron swipe'a (furia albo odrodzenie) rysuje
+     SmokZycia.poDecyzji na samym koncu tej funkcji.
+     ============================================================ */
+  if (C.gk === 'smok_zycia' && kier === 'wiaderko' && !Card.smokZgoda &&
+      typeof window.__pytajOSmoka === 'function') {
+    window.__pytajOSmoka(() => {
+      if (!Card.open || Card.czeka !== C || Card.decyzja) return;
+      Card.smokZgoda = true;
+      decyzjaKarty('wiaderko');
+    });
+    return;
+  }
   Card.decyzja = kier;
   try {
     if (window.Telemetry) {
@@ -550,6 +568,9 @@ function decyzjaKarty(kier) {
     if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(8);
   }
   try { if (window.Onboarding) Onboarding.poDecyzji(kier, C); } catch (e) {}
+  if (C.gk === 'smok_zycia' && window.SmokZycia && SmokZycia.poDecyzji) {
+    try { SmokZycia.poDecyzji(kier); } catch (e) {}
+  }
   Card.swipe = false; Card.czeka = null;
 }
 window.decyzjaKarty = decyzjaKarty;
