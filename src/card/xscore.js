@@ -117,7 +117,19 @@ const XScore = (() => {
     rozdymka:              36.5,
     minog_ukrainski:       41.8964,
     minog_rzeczny:         47.8013,
-    jesiotr:               50.0
+    jesiotr:               50.0,
+    /* ============================================================
+       LUCJAN CZERWONY (6 X 2026, zgloszenie graczy: "Lucjan nie dziala").
+       Gatunek z odnowy nie mial tu wpisu, wiec liczyl sie jak ploc
+       (GAT[slug] || 1). Zmierzone na zywym silniku, 2000 okazow:
+       mediana 2 punkty (pasmo 4 ma 34-42), a pierwszenstwo przy haczyku
+       z tych punktow dawalo mu 1,5% szansy na branie wsrod 11 innych ryb
+       (troc 24%, lipien 26%). Ryba plywala, ale prawie nigdy nie brala,
+       a zlowiona dawala karte pasma 4 z jednocyfrowym wynikiem.
+       Czynnik z tego samego wzoru co caly rejestr wyzej:
+       (udzial ploci / udzial gatunku) ^ ALFA = (2 / 0,0002) ^ 0,29172.
+       Po wpisie: mediana 37-38 punktow, branie ok. 26%. */
+    lucjan_czerwony:       14.6852
   };
 
   const CYFRY = {
