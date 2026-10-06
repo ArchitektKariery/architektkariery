@@ -121,7 +121,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Karpik Surinamski: gatunek drugiej odnowy (pasmo 7, mityczny, populacja startowa 0) i jego sprite | `src/odnowa/karpik_surinamski.js`, opis `docs/odnowa-karpik.md` |
 | Nagroda odnowy „para” (1 samiec + 1 samica od razu), zamknięcie Lucjanka, start zbiórki Karpika | `supabase/migrations/20261001_odnowa_karpik.sql` |
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |
-| Event ZARAZA (6-9 X 2026): zegar etapów, chip w lewym dolnym rogu, panel LABORATORIUM, oddawanie zanęt i wpłata qryb; opis `docs/zaraza.md` | `src/events/zaraza.js`, SQL `supabase/migrations/20261006_zaraza.sql`, style `css/05-product.css` (blok ZARAZA) |
+| Event ZARAZA (6-9 X 2026): zegar etapów, chip pod MENU, panel LABORATORIUM, oddawanie zanęt i wpłata qryb; opis `docs/zaraza.md` | `src/events/zaraza.js`, SQL `supabase/migrations/20261006_zaraza.sql`, style `css/05-product.css` (blok ZARAZA) |
 
 ## Dane graficzne
 

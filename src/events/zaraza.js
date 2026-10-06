@@ -21,7 +21,7 @@
    trafia na compare-and-swap i pobiera serwerowa wersje zapisu, wiec
    oddane zanety nie wroca do torby z lokalnej kopii.
 
-   Interfejs: chip ZARAZA w lewym dolnym rogu (zegar do szczytu i stan
+   Interfejs: chip ZARAZA pod przyciskiem MENU (zegar do szczytu i stan
    etapu) oraz panel LABORATORIUM w zwyklym panelu gry (pokazPanel).
    ============================================================ */
 const Zaraza = (() => {
@@ -209,6 +209,28 @@ const Zaraza = (() => {
     else if (e === 2) linia = 'QRYBY ' + skrotQryb(stan ? stan.qryby_zebrane : 0) + ' / 2 MLD';
     else if (e === 3) linia = 'PODEJŚCIA ' + fmt(stan ? stan.podejscia : 0);
     hud.innerHTML = '<span>ZARAZA · ETAP ' + e + '</span><b>' + zegar(T.final - teraz()) + '</b><i>' + linia + '</i>';
+    ulozHud();
+  }
+
+  /* Chip stoi pod MENU, wiec jego gorna krawedz idzie z prawdziwego
+     polozenia przycisku: MENU zmienia wysokosc z paskiem turnieju,
+     z paskiem konta i na waskich ekranach. Gdy pod MENU swieci #tarla,
+     chip schodzi pod niego, zamiast go przykrywac. */
+  function ulozHud() {
+    const scena = document.getElementById('stage');
+    const menu = document.getElementById('menuMaster');
+    if (!hud || !scena || !menu) return;
+    const s = scena.getBoundingClientRect();
+    const m = menu.getBoundingClientRect();
+    if (!(m.height > 0)) return;
+    let dol = m.bottom;
+    const tarla = document.getElementById('tarla');
+    if (tarla && tarla.classList.contains('on')) {
+      const r = tarla.getBoundingClientRect();
+      if (r.height > 0 && r.top < dol + 60) dol = Math.max(dol, r.bottom);
+    }
+    hud.style.top = Math.round(dol - s.top + 7) + 'px';
+    hud.style.left = Math.round(m.left - s.left) + 'px';
   }
 
   /* ---------- panel LABORATORIUM ---------- */

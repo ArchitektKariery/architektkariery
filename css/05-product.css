@@ -764,18 +764,22 @@ body.menu-master-open #pomoc{animation-delay:162ms !important}
 
 /* ============================================================
    ZARAZA (event 6-9 X 2026, src/events/zaraza.js).
-   Chip w lewym dolnym rogu, lustro zegara z prawego dolnego rogu.
+   Chip pod przyciskiem MENU, poza woda, zeby nie zaslanial ryb
+   (zgloszenie Andrzeja 6 X 2026: w lewym dolnym rogu przykrywal lawice).
+   Gorna krawedz liczy zaraza.js z polozenia MENU, a gdy swieci #tarla,
+   to z jego dolnej krawedzi; ponizszy top to tylko wartosc na start.
    Bez backdrop-filter i bez animacji wlasciwosci malowanych (zasady
    z docs/ARCHITECTURE.md, "Plynnosc i wydajnosc rysowania"). */
-#zarazaHud{position:absolute;z-index:6;left:calc(10px + env(safe-area-inset-left));
-  bottom:calc(14px + env(safe-area-inset-bottom));display:none;flex-direction:column;
-  align-items:flex-start;gap:2px;padding:6px 10px 7px;min-width:104px;
-  background:rgba(24,8,14,.80);border:1.4px solid rgba(214,64,82,.72);border-radius:8px;
-  color:#F4DCCB;font:800 10px/1.15 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  letter-spacing:.08em;text-align:left;cursor:pointer}
+#zarazaHud{position:absolute;z-index:8;left:calc(10px + env(safe-area-inset-left));
+  top:calc(89px + env(safe-area-inset-top));display:none;flex-direction:column;
+  align-items:flex-start;gap:1px;padding:4px 7px 5px;
+  background:rgba(24,8,14,.74);border:1.2px solid rgba(214,64,82,.62);border-radius:9px;
+  color:#F4DCCB;font:800 7.5px/1.15 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;text-align:left;cursor:pointer;transition:opacity .38s ease}
 #zarazaHud.on{display:flex}
-#zarazaHud b{font-size:14px;letter-spacing:.04em;color:#FFD9A0;font-variant-numeric:tabular-nums}
-#zarazaHud i{font-style:normal;font-size:9px;color:rgba(244,220,203,.78)}
+#zarazaHud b{font-size:11px;letter-spacing:.04em;color:#FFD9A0;font-variant-numeric:tabular-nums}
+#zarazaHud i{font-style:normal;font-size:7px;color:rgba(244,220,203,.78)}
+body.ui-idle:not(.menu-master-open) #zarazaHud{opacity:.55}
 body.ksiega-otwarta #zarazaHud,body.karta-otwarta #zarazaHud,
 body.menu-master-open #zarazaHud,body.panel-otwarty #zarazaHud{opacity:0;pointer-events:none}
 #panelTresc .zr-fab{margin:0 0 8px}

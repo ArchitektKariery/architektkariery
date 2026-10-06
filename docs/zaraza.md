@@ -22,7 +22,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 - jeśli ktoś go złowi, cięcie przepada.
 
 ## Pliki
-- `src/events/zaraza.js` — zegar etapów, chip ZARAZA w lewym dolnym rogu, panel LABORATORIUM (`pokazPanel`), oddawanie zanęt i wpłata qryb
+- `src/events/zaraza.js` — zegar etapów, chip ZARAZA pod MENU, panel LABORATORIUM (`pokazPanel`), oddawanie zanęt i wpłata qryb
 - `css/05-product.css` — blok „ZARAZA”
 - `supabase/migrations/20261006_zaraza.sql` — stan, wpłaty, okna czasowe, funkcje: `zaraza_stan_publiczny`, `zaraza_moj_wklad`, `zaraza_oddaj_zanety`, `zaraza_wplac_qryby`, `zaraza_podejscie`, `zaraza_zlowiony`
 
