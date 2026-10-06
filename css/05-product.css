@@ -761,3 +761,40 @@ body.menu-master-open #pomoc{animation-delay:162ms !important}
 @media(prefers-reduced-motion:reduce){
   #smokZaslona,#smokZaslona.on,#smokWyrok{transition-duration:.25s}
 }
+
+/* ============================================================
+   ZARAZA (event 6-9 X 2026, src/events/zaraza.js).
+   Chip w lewym dolnym rogu, lustro zegara z prawego dolnego rogu.
+   Bez backdrop-filter i bez animacji wlasciwosci malowanych (zasady
+   z docs/ARCHITECTURE.md, "Plynnosc i wydajnosc rysowania"). */
+#zarazaHud{position:absolute;z-index:6;left:calc(10px + env(safe-area-inset-left));
+  bottom:calc(14px + env(safe-area-inset-bottom));display:none;flex-direction:column;
+  align-items:flex-start;gap:2px;padding:6px 10px 7px;min-width:104px;
+  background:rgba(24,8,14,.80);border:1.4px solid rgba(214,64,82,.72);border-radius:8px;
+  color:#F4DCCB;font:800 10px/1.15 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;text-align:left;cursor:pointer}
+#zarazaHud.on{display:flex}
+#zarazaHud b{font-size:14px;letter-spacing:.04em;color:#FFD9A0;font-variant-numeric:tabular-nums}
+#zarazaHud i{font-style:normal;font-size:9px;color:rgba(244,220,203,.78)}
+body.ksiega-otwarta #zarazaHud,body.karta-otwarta #zarazaHud,
+body.menu-master-open #zarazaHud,body.panel-otwarty #zarazaHud{opacity:0;pointer-events:none}
+#panelTresc .zr-fab{margin:0 0 8px}
+#panelTresc .zr-szczyt{margin:6px 0 4px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.1em}
+#panelTresc .zr-szczyt b{display:block;font-size:22px;letter-spacing:.04em;color:var(--rdza);
+  font-variant-numeric:tabular-nums;margin:2px 0}
+#panelTresc .zr-szczyt span{font-size:10px;opacity:.7;letter-spacing:.06em}
+#panelTresc .zr-etap .tr{margin:6px 0 4px}
+#panelTresc .zr-etap .pas{margin-top:6px}
+#panelTresc .zr-linia{margin-top:6px;font-size:10px;font-weight:800;letter-spacing:.05em;opacity:.78}
+#panelTresc .zad.zr-zamk{opacity:.5}
+#panelTresc .zr-msg{margin:10px 0;font-size:11px;font-weight:800;line-height:1.45;text-align:center}
+#panelTresc .zr-zan{grid-template-columns:56px 1fr}
+#panelTresc .zr-zan .zsp{width:56px;height:56px}
+#panelTresc .zr-przyc{grid-column:1/-1;display:flex;gap:6px}
+#panelTresc .zr-przyc .odb{margin-top:8px;padding:9px 4px;font-size:10px;letter-spacing:.1em}
+#panelTresc .zr-przyc .odb[disabled]{opacity:.5;animation:none}
+#panelTresc .zr-wplata{display:flex;gap:6px;align-items:stretch}
+#panelTresc .zr-wplata input{flex:1;min-width:0;margin-top:10px;padding:9px 10px;font:inherit;font-size:13px;
+  font-weight:800;border:2px solid var(--tusz);border-radius:2px;background:rgba(255,250,236,.85);color:var(--tusz)}
+#panelTresc .zr-wplata .odb{width:auto;padding:10px 16px}
+#panelTresc .zr-bez-anim .zad{animation:none;opacity:1;transform:none}
