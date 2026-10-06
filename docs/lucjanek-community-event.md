@@ -117,4 +117,4 @@ Poprawki w kodzie:
 - Hol jak sandacz (`WALKA`), grubość 0,42 (`GRUBOSC`), ruch z zasadzki (`src/fish/movement.js`), opis w atlasie (`OPISY_ATLAS`), Lucjan na liście drapieżników zanęty KOTLETY (`ZAN_DRAPIEZNE`).
 - Build `2026-10-06-lucjan-v1`, token modułów `20261006-lucjan1`.
 
-Populacja: `supabase/migrations/20261006_lucjan_doplyw.sql` (ręcznie, SQL Editor) dosadza Lucjana do 30 sztuk (15 + 15), tylko gdy jest ich mniej. Przy 30 sztukach gracz spotyka go średnio raz na 4,6 godziny gry. Plik sprawdzony na PostgreSQL 16: brak wiersza, para, 40 sztuk (bez zmian), wymarły po furii Smoka, drugie uruchomienie.
+Populacja: decyzja Andrzeja (6 X 2026): Lucjan zostaje w obecnej liczbie, bez dosadzania. Plik dosadzenia do 30 sztuk wypadł z repo, żeby nikt go nie uruchomił przypadkiem.

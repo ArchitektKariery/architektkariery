@@ -468,9 +468,26 @@ const Ksiega = (() => {
     g.fillText(String(idx + 1).padStart(2,'0') + ' / ' + String(klucze().length).padStart(2,'0'),
       P, y + h * 0.047);
 
+    /* ============================================================
+       NAZWA MIESCI SIE W SZEROKOSCI STRONY (6 X 2026).
+       Staly rozmiar 0,070 szerokosci wypychal piec nazw poza tekst strony
+       (GLOWACZ PREGOPLETWY o 99 px na stronie 707 px, GLOWACZ BIALOPLETWY,
+       MINOG STRUMIENIOWY, DZOLEJ RUDOGRZYWY, STRZEBLA POTOKOWA). Dluga
+       nazwa zmniejsza teraz czcionke tak, zeby zmiescila sie miedzy L i P,
+       a krotka zostaje bez zmian. maxWidth w fillText to druga warstwa:
+       gdyby nawet podloga 0,042 nie wystarczyla, tekst sie scisnie,
+       zamiast wyjsc poza strone. */
     g.textAlign = 'center';
-    g.fillStyle = '#2A2018'; g.font = F(w * 0.070, 1);
-    g.fillText(znany ? G2.nazwa : (k === 'smok_zycia' ? '???' : '? ? ?'), SR, y + h * 0.103);
+    g.fillStyle = '#2A2018';
+    const tytul = znany ? G2.nazwa : (k === 'smok_zycia' ? '???' : '? ? ?');
+    let fsTytul = w * 0.070;
+    g.font = F(fsTytul, 1);
+    const szerTytul = g.measureText(tytul).width;
+    if (szerTytul > P - L) {
+      fsTytul = Math.max(w * 0.042, fsTytul * (P - L) / szerTytul);
+      g.font = F(fsTytul, 1);
+    }
+    g.fillText(tytul, SR, y + h * 0.103, P - L);
 
     g.strokeStyle = 'rgba(42,32,24,.38)'; g.lineWidth = Math.max(1, w * 0.004);
     g.beginPath(); g.moveTo(L, y + h * 0.136); g.lineTo(P, y + h * 0.136); g.stroke();
@@ -544,16 +561,23 @@ const Ksiega = (() => {
 
     /* ============================================================
        STEMPEL WOSKOWY PASMA.
-       Lak odbity w prawym gornym rogu strony, w barwie pasma. Krawedz jest
+       Lak odbity na prawym gornym rogu ryciny, w barwie pasma. Krawedz jest
        nierowna, bo wosk nigdy nie zastyga w kolo: promien chodzi sinusem
        o kilka procent, a ziarno bierze sie z numeru gatunku, wiec kazdy
        stempel wyglada troche inaczej, ale zawsze tak samo dla tej samej ryby.
        Na stronie nieodkrytej stempla nie ma, bo pasma jeszcze nie znasz.
-       ============================================================ */
+
+       NOWE MIEJSCE (6 X 2026, zgloszenie Andrzeja). Stary stempel siedzial
+       w naglowku (0,845 szerokosci, 0,088 wysokosci, promien 0,072) i zakrywal
+       numer strony oraz koniec 25 nazw, np. LUCJAN CZERWON(Y) i STRZEBLA
+       POTOKO(WA). Teraz srodek lezy na rogu ramy ryciny, promien 0,060.
+       Sprawdzone pikselami na wszystkich gatunkach i obu skrajnych ksztaltach
+       strony (h/w 1,375 i 1,42): wosk nie dotyka ani jednego piksela ryby,
+       a od linii nazwy dzieli go co najmniej 13 px. */
     if (znany) {
       const t = pasmoAtlasu(k);
       const B = LAK[t] || LAK[1];
-      const sx2 = x + w * 0.845, sy2 = y + h * 0.088, r0 = w * 0.072;
+      const sx2 = P, sy2 = ry + w * 0.006, r0 = w * 0.060;
       g.save();
       /* cien pod lakiem */
       g.fillStyle = 'rgba(40,28,14,.28)';
