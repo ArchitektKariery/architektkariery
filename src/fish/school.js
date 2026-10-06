@@ -25,6 +25,8 @@ const GRUBOSC = {
   kielb: 0.72, kielb_bialopletwy: 0.72, kielb_kesslera: 0.72, glowacz_bialopletwy: 0.80,
   glowacz_pregopletwy: 0.80, piekielnica: 0.70, trawianka: 0.70, babka: 0.75,
   barakuda: 0.50, szczupak: 0.55, sandacz: 0.55, boleń: 0.48, bolen: 0.48, jazgarz: 0.44,
+  /* Lucjan czerwony: wysoki, bocznie splaszczony korpus, odrobine ciensze niz domyslne 0,45. */
+  lucjan_czerwony: 0.42,
   zagielnica: 0.30, zabnica: 0.95, morswin: 0.92, tyrios_morski: 0.92, zolw_blotny: 0.78, konik_krysztalowy: 0.55,
   blazenek: 0.38, muskellunge: 0.55, minog_majlowy: 0.45,
   /* Grubszy od minoga: welonowaty korpus i futrzana glowa daja sylwetke

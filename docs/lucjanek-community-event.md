@@ -105,3 +105,16 @@ Grafika Lucjanka pochodzi z przekazanego pixel-artu i została technicznie zmnie
 - decyzja Andrzeja: zbiórkę Lucjanka zamknąć i zastąpić nową
 - `supabase/migrations/20261001_odnowa_karpik.sql` ustawia Lucjankowi `state=completed`, `is_visible=false`, `closed_at`; historia wpłat zostaje w bazie
 - zakładka ODNOWA pokazuje odtąd zbiórkę Karpika Surinamskiego, opis w `docs/odnowa-karpik.md`
+
+## Naprawa 2026-10-06 („Lucjan nie działa”)
+Zgłoszenie graczy sprawdzone na żywym silniku. Trzy nakładające się przyczyny:
+- **Punkty jak płoć.** `lucjan_czerwony` nie miał wpisu w `XScore.GAT` (`src/card/xscore.js`), więc czynnik gatunku wynosił 1. Mediana punktów: 2 na karcie pasma 4 (reszta pasma: 34-42).
+- **Prawie nie brał.** Pierwszeństwo przy haczyku idzie z punktów (`Pierwszenstwo.przewagaRyby`). Wśród 11 innych ryb w tej samej odległości Lucjan brał w 1,5% przypadków (troć 24%, lipień 26%).
+- **Prawie go nie było.** Nagroda zbiórki losowała 1 z 10 scenariuszy tarła; 6 z nich daje zero młodych. Bez młodych pływa tylko para z 30 IX: jeden Lucjan na około 70 godzin gry jednego gracza.
+
+Poprawki w kodzie:
+- `XScore.GAT.lucjan_czerwony = 14.6852`, z tego samego wzoru co cały rejestr: (2 / 0,0002) ^ 0,29172. Po poprawce mediana 37-38 pkt, branie ok. 26%.
+- Hol jak sandacz (`WALKA`), grubość 0,42 (`GRUBOSC`), ruch z zasadzki (`src/fish/movement.js`), opis w atlasie (`OPISY_ATLAS`), Lucjan na liście drapieżników zanęty KOTLETY (`ZAN_DRAPIEZNE`).
+- Build `2026-10-06-lucjan-v1`, token modułów `20261006-lucjan1`.
+
+Populacja: `supabase/migrations/20261006_lucjan_doplyw.sql` (ręcznie, SQL Editor) dosadza Lucjana do 30 sztuk (15 + 15), tylko gdy jest ich mniej. Przy 30 sztukach gracz spotyka go średnio raz na 4,6 godziny gry. Plik sprawdzony na PostgreSQL 16: brak wiersza, para, 40 sztuk (bez zmian), wymarły po furii Smoka, drugie uruchomienie.

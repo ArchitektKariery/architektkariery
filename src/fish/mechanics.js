@@ -72,6 +72,10 @@ const WALKA = {
   barakuda:      { ucieczki: 1.25, zasieg: 0.30, szarpanie: 1.7, upor: 1.0 },
   szczupak:      { ucieczki: 0.95, zasieg: 0.14, szarpanie: 1.8, upor: 0.9 },
   sandacz:       { ucieczki: 0.75, zasieg: 0.15, szarpanie: 1.5, upor: 1.05 },
+  /* Lucjan czerwony (odnowa, pasmo 4): drapieznik o sile 3,4, tuz obok
+     sandacza (3,2), wiec hol jak sandacz co do liczby. Do 6 X 2026 nie mial
+     wpisu i walczyl domyslnym WALKA_DOM. */
+  lucjan_czerwony: { ucieczki: 0.75, zasieg: 0.15, szarpanie: 1.5, upor: 1.05 },
   boleń:         { ucieczki: 1.05, zasieg: 0.20, szarpanie: 1.2, upor: 0.95 },
   bolen:         { ucieczki: 1.05, zasieg: 0.20, szarpanie: 1.2, upor: 0.95 },
   karp:          { ucieczki: 0.80, zasieg: 0.30, szarpanie: 0.6, upor: 1.45 },

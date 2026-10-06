@@ -185,7 +185,7 @@ const RuchRyby = (() => {
     glowacz_pregopletwy:'denna', koza_zlotawa:'denna',
 
     /* zasadzka / drapiezniki */
-    okon:'zasadzka', sandacz:'zasadzka', szczupak:'zasadzka',
+    okon:'zasadzka', sandacz:'zasadzka', szczupak:'zasadzka', lucjan_czerwony:'zasadzka',
     trawianka:'zasadzka', muskellunge:'zasadzka', krukkomrukko:'zasadzka',
 
     /* wezowate */

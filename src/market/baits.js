@@ -93,7 +93,7 @@ const ZAN_DRAPIEZNE = ['szczupak', 'sandacz', 'okon', 'bolen', 'klen', 'sum',
   'wegorz', 'mietus', 'losos', 'troc', 'glowacica', 'muskellunge', 'barakuda',
   'zagielnica', 'zabnica', 'morswin', 'jazgarz', 'pstrag', 'pstrag_teczowy',
   'pstrag_zrodlany', 'sumik', 'stynka', 'tyrios_morski', 'dzolej_rudogrzywy',
-  'smokosz', 'krukkomrukko'];
+  'smokosz', 'krukkomrukko', 'lucjan_czerwony'];
 
 /* Najcenniejsze handlowo ryby pasm 1-3, wprost z CENNIK (modul 38).
    Lista jest STATYCZNA (przeliczona raz, recznie), nie liczona w locie
