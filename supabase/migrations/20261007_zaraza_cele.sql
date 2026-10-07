@@ -6,16 +6,16 @@
 -- je czytają. Gra pobiera cele z serwera, więc zmiana celu to jedna linijka
 -- SQL, bez wdrażania gry.
 --
--- Cel etapu 2: 500 000 000 qryb (salda graczy 7 X 2026, 11:08, bez konta
--- twórcy: razem 588 841 406, najwięcej Babcia 429 220 066). Cel stoi ponad
--- saldem najbogatszego gracza, więc nikt nie domknie etapu sam, ale grupa
--- razem go uniesie.
+-- Cel etapu 2: 600 000 000 qryb (decyzja Andrzeja 7 X 2026). Salda graczy
+-- 7 X 2026, 11:08, bez konta twórcy: razem 588 841 406, najwięcej Babcia
+-- 429 220 066. Cel przewyższa wszystkie obecne salda o 11 158 594, więc
+-- grupa musi oddać wszystko i dorobić resztę w czasie etapu.
 
 alter table public.zaraza_stan add column if not exists zanety_cel integer not null default 1000;
 alter table public.zaraza_stan add column if not exists qryby_cel bigint not null default 2000000000;
 
 -- TU ZMIENIASZ CEL ETAPU 2:
-update public.zaraza_stan set qryby_cel = 500000000 where id = 1;
+update public.zaraza_stan set qryby_cel = 600000000 where id = 1;
 
 create or replace function public.zaraza_stan_publiczny()
 returns jsonb

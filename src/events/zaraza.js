@@ -6,7 +6,7 @@
    przychodzi w piatek o 23:00.
 
      etap 1  wt 6 X 23:15 -> sr 7 X 23:00   spolecznosc oddaje 1 000 zanet
-     etap 2  sr 7 X 23:00 -> czw 8 X 23:00  zbiorka 500 000 000 qryb
+     etap 2  sr 7 X 23:00 -> czw 8 X 23:00  zbiorka 600 000 000 qryb
      etap 3  czw 8 X 23:00 -> pt 9 X 23:00  Lucjanek Zero (osobny modul)
      final   pt 9 X 23:00
 
@@ -34,7 +34,7 @@ const Zaraza = (() => {
   /* Cele etapow przychodza z serwera (zaraza_stan_publiczny: zanety_cel,
      qryby_cel). Zmiana celu to wiec jedna zmiana w SQL, bez wdrazania gry.
      Liczby nizej to tylko wartosc na czas pierwszego odczytu. */
-  const CEL_ZANET_DOM = 1000, CEL_QRYB_DOM = 500000000;
+  const CEL_ZANET_DOM = 1000, CEL_QRYB_DOM = 600000000;
   const celZanet = () => (stan && +stan.zanety_cel > 0) ? +stan.zanety_cel : CEL_ZANET_DOM;
   const celQryb = () => (stan && +stan.qryby_cel > 0) ? +stan.qryby_cel : CEL_QRYB_DOM;
   const ODSWIEZ_MS = 30000;

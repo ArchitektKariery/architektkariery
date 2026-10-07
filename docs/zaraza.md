@@ -8,7 +8,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | Etap | Od | Do | Zadanie |
 |---|---|---|---|
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
-| 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 500 000 000 qryb (było 2 mld, zmiana 7 X po saldach graczy) |
+| 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 600 000 000 qryb (było 2 mld; 7 X po saldach graczy 500 mln, potem decyzja Andrzeja: 600 mln) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero (moduł w budowie) |
 | finał | pt 9 X 23:00 | | cięcie populacji i nowe tarło (osobny plik SQL) |
 
@@ -40,7 +40,7 @@ Adres gry z `?zaraza=2` albo `?zaraza=3` przestawia zegar tej karty na środek e
 - punkty zaczepienia: `obrazRyby` (`src/fish/species.js`), `chetnaZaatakowac` i `dobraOfiara` (`src/fish/behavior.js`), decyzja przy przynęcie (`src/fish/hook.js`), wymiana ławicy (`nowaLawica` w `src/fish/school.js`, `cyklLawicy` w `src/fish/behavior.js`), `siecZarzuc` (`src/ecosystem/net-anim.js`), `Siec.zarzuc` (`src/ecosystem/net-catch.js`), zakładka SIEĆ (`src/ui/panel.js`), `openCard` (`src/card/card.js`)
 - `css/05-product.css` — blok „ZARAZA”
 - `supabase/migrations/20261006_zaraza.sql` — stan, wpłaty, okna czasowe, funkcje: `zaraza_stan_publiczny`, `zaraza_moj_wklad`, `zaraza_oddaj_zanety`, `zaraza_wplac_qryby`, `zaraza_podejscie`, `zaraza_zlowiony`
-- `supabase/migrations/20261007_zaraza_cele.sql` — cele etapów w kolumnach `zaraza_stan.zanety_cel` i `qryby_cel`, funkcje czytają kolumny; cel etapu 2 = 500 000 000. Salda graczy 7 X 11:08 bez konta twórcy: razem 588 841 406, najwięcej Babcia 429 220 066, więc 2 mld było nieosiągalne nawet przy oddaniu wszystkiego. Zmiana celu: `update public.zaraza_stan set qryby_cel = … where id = 1;`
+- `supabase/migrations/20261007_zaraza_cele.sql` — cele etapów w kolumnach `zaraza_stan.zanety_cel` i `qryby_cel`, funkcje czytają kolumny; cel etapu 2 = 600 000 000 (decyzja Andrzeja). Salda graczy 7 X 11:08 bez konta twórcy: razem 588 841 406, najwięcej Babcia 429 220 066; 600 mln przewyższa wszystkie salda o 11 158 594, więc grupa musi oddać wszystko i dorobić resztę w czasie etapu. Zmiana celu: `update public.zaraza_stan set qryby_cel = … where id = 1;`
 
 ## Zasady serwera
 - torba (`zapis->zanetyMam`) i portfel (`zapis->monety`) gracza schodzą w tej samej transakcji co wpis do licznika, jak w `community_contribute`,

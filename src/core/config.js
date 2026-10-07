@@ -10,7 +10,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-10-07-lucjanek-zero-v4';
+window.QRYBY_BUILD = '2026-10-07-zaraza-cel600-v1';
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,
