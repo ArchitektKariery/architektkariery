@@ -25,6 +25,17 @@
 --   select private.zaraza_final_cofnij();       -- przywraca kopię, zdejmuje sufity
 --   update public.eko_pasma set sufit = 6 where pasmo = 7;  -- inny sufit pasma
 
+-- Bez podglądu (tabela eko_pasma i funkcja zaraza_final_plan) finał nie
+-- ma z czego liczyć. Wtedy plik kończy się tym błędem i niczego nie zmienia.
+do $$
+begin
+  if to_regclass('public.eko_pasma') is null
+     or to_regprocedure('public.zaraza_final_plan(numeric)') is null then
+    raise exception 'NAJPIERW URUCHOM PODGLĄD: plik 20261007_zaraza_final_podglad.sql';
+  end if;
+end;
+$$;
+
 create schema if not exists private;
 
 -- 1. Wynik finału w stanie eventu.
@@ -83,7 +94,12 @@ begin
     return new;
   end if;
 
-  select p.sufit into v_sufit from public.eko_pasma p where p.gat = new.gat;
+  -- Bez tabeli pasm gra ma działać dalej, więc brak tabeli = brak sufitu.
+  begin
+    select p.sufit into v_sufit from public.eko_pasma p where p.gat = new.gat;
+  exception when undefined_table then
+    return new;
+  end;
   if v_sufit is null or new.n <= v_sufit then
     return new;
   end if;
