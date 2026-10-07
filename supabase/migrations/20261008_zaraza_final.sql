@@ -267,22 +267,51 @@ $$;
 revoke all on function private.zaraza_final_tik() from public;
 revoke all on function private.zaraza_final_tik() from anon, authenticated;
 
-create extension if not exists pg_cron with schema pg_catalog;
-
+-- pg_cron już działa w tym projekcie (zadanie community-event-expiry).
+-- Bez "create extension": na to polecenie Supabase uruchamia ponownie swój
+-- skrypt uprawnień crona, który w tej bazie kończy się błędem 2BP01
+-- (dependent privileges exist) i cofa cały plik (7 X 2026, 16:09).
+-- Gdyby zadania nie dało się założyć, plik i tak przechodzi, a finał
+-- uruchomi gra zalogowanego gracza (zaraza_final_teraz).
 do $$
 declare
   v_job bigint;
 begin
-  select j.jobid into v_job from cron.job j where j.jobname = 'zaraza-final' limit 1;
-  if v_job is not null then
-    perform cron.unschedule(v_job);
-  end if;
-  -- Po wykonanym finale zadanie nie wraca.
-  if not exists (select 1 from public.zaraza_stan s where s.id = 1 and s.final_kiedy is not null) then
-    perform cron.schedule('zaraza-final', '* * * * *', 'select private.zaraza_final_tik();');
-  end if;
+  begin
+    select j.jobid into v_job from cron.job j where j.jobname = 'zaraza-final' limit 1;
+    if v_job is not null then
+      perform cron.unschedule(v_job);
+    end if;
+    -- Po wykonanym finale zadanie nie wraca.
+    if not exists (select 1 from public.zaraza_stan s where s.id = 1 and s.final_kiedy is not null) then
+      perform cron.schedule('zaraza-final', '* * * * *', 'select private.zaraza_final_tik();');
+    end if;
+  exception when others then
+    raise notice 'ZADANIE ZEGARA NIE RUSZYLO: %', sqlerrm;
+  end;
 end;
 $$;
+
+-- Stan zadania zegara do linijki wyniku; brak dostępu do cron.job nie
+-- przerywa pliku.
+create or replace function private.zaraza_final_zegar()
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v text;
+begin
+  select 'jest (' || j.schedule || ')' into v from cron.job j where j.jobname = 'zaraza-final' limit 1;
+  return coalesce(v, 'brak');
+exception when others then
+  return 'nie wiadomo: ' || sqlerrm;
+end;
+$$;
+
+revoke all on function private.zaraza_final_zegar() from public;
+revoke all on function private.zaraza_final_zegar() from anon, authenticated;
 
 -- 7. Zapas dla zegara: gra zalogowanego gracza woła to po 23:00, gdy nie
 -- widzi wyniku finału. Przed czasem i po wykonaniu nic nie zmienia.
@@ -342,7 +371,7 @@ $$;
 -- Wynik: stan zegara finału i plan resetu z tej chwili.
 select 'zaraza: etap ' || public.zaraza_etap(now())
        || ' | finał: ' || coalesce(to_char(s.final_kiedy at time zone 'Europe/Warsaw', 'DD.MM HH24:MI'), 'czeka na pt 23:00')
-       || ' | zadanie zegara: ' || coalesce((select 'jest (' || j.schedule || ')' from cron.job j where j.jobname = 'zaraza-final'), 'brak')
+       || ' | zadanie zegara: ' || private.zaraza_final_zegar()
        || ' | sufity: ' || case when exists (select 1 from pg_trigger t where t.tgname = 'eko_sufit') then 'SĄ' else 'brak' end
        as stan
 from public.zaraza_stan s
