@@ -1,0 +1,14 @@
+{
+  "project": "POLAND2050",
+  "core_scope_definition": "T0+T1+T2",
+  "nodes": {
+    "01": {"domain": "ADMIN / GOVERNANCE / LAW", "scope": 126, "roles": {"T0": 24, "T1": 42, "T2": 60}},
+    "02": {"domain": "DIGITAL STATE / DATA / AI / CYBER", "scope": 99, "roles": {"T0": 12, "T1": 29, "T2": 58}},
+    "03": {"domain": "ECONOMY / FINANCE / INDUSTRY / LABOUR", "scope": 169, "roles": {"T0": 28, "T1": 94, "T2": 47}},
+    "04": {"domain": "HEALTH / SOCIAL / DEMOGRAPHY", "scope": 92, "roles": {"T0": 30, "T1": 25, "T2": 37}},
+    "05": {"domain": "EDUCATION / SCIENCE / CULTURE", "scope": 98, "roles": {"T0": 15, "T1": 62, "T2": 21}},
+    "06": {"domain": "INFRASTRUCTURE / TRANSPORT / ENERGY / ENVIRONMENT", "scope": 191, "roles": {"T0": 56, "T1": 69, "T2": 66}},
+    "07": {"domain": "AGRICULTURE / RESOURCES / TERRITORY", "scope": 96, "roles": {"T0": 36, "T1": 18, "T2": 42}},
+    "08": {"domain": "DEFENCE / SECURITY / RESILIENCE / DEEP-TECH", "scope": 184, "roles": {"T0": 38, "T1": 37, "T2": 109}}
+  }
+}

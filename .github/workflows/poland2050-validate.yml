@@ -1,0 +1,34 @@
+name: POLAND2050 artifact validator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'poland2050/**'
+      - '.github/workflows/poland2050-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate artifacts and refresh MASTER_STATUS
+        run: python poland2050/tools/validate.py --write-status
+      - name: Commit refreshed MASTER_STATUS if changed
+        shell: bash
+        run: |
+          if ! git diff --quiet -- poland2050/MASTER_STATUS.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add poland2050/MASTER_STATUS.json
+            git commit -m "chore(pol2050): refresh master status [skip ci]"
+            git push
+          fi
