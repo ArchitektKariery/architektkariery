@@ -23,6 +23,18 @@
 
    Interfejs: chip ZARAZA pod przyciskiem MENU (zegar do szczytu i stan
    etapu) oraz panel LABORATORIUM w zwyklym panelu gry (pokazPanel).
+
+   FINAŁ (pt 9 X 23:00, supabase/migrations/20261008_zaraza_final.sql).
+   Robi go serwer: zadanie pg_cron ustawia kazdy gatunek na poziom jego
+   pasma (zostaje 40% ryb, pasmo 1 najliczniejsze, kazde nastepne mniej)
+   i wlacza sufit gatunku. Gra po 23:00:
+     - czyta wynik z zaraza_stan_publiczny (pole final) i pokazuje go
+       w laboratorium, w chipie i raz w samoczynnie otwartym panelu,
+     - gdy wyniku nie ma, wola zaraza_final_teraz (zapas za zegar
+       serwera; przed czasem i po wykonaniu serwer nic nie zmienia),
+     - raz na finał pobiera nowe liczby jeziora i sufity, a potem
+       czysci lokalna ikre i kohorty (Eko.wyczyscPoZarazie).
+   Chip zostaje 3 dni po finale, potem znika.
    ============================================================ */
 const Zaraza = (() => {
   const T = {
@@ -54,7 +66,8 @@ const Zaraza = (() => {
   let testowy = false;
   try {
     const q = new URLSearchParams(location.search).get('zaraza');
-    const cel = { '1': '2026-10-07T12:00:00+02:00', '2': '2026-10-08T12:00:00+02:00', '3': '2026-10-09T12:00:00+02:00' }[q];
+    const cel = { '1': '2026-10-07T12:00:00+02:00', '2': '2026-10-08T12:00:00+02:00', '3': '2026-10-09T12:00:00+02:00',
+                  '4': '2026-10-10T12:00:00+02:00' }[q];
     if (cel) { przesuniecie = Date.parse(cel) - Date.now(); testowy = true; }
   } catch (e) {}
 
@@ -64,6 +77,33 @@ const Zaraza = (() => {
     return t < T.start ? 0 : t < T.etap2 ? 1 : t < T.etap3 ? 2 : t < T.final ? 3 : 4;
   }
   function aktywny() { const e = etap(); return e >= 1 && e <= 3; }
+  const OKNO_FINALU_MS = 3 * 24 * 3600 * 1000;
+  function widoczny() {
+    const e = etap();
+    return aktywny() || (e === 4 && teraz() < T.final + OKNO_FINALU_MS);
+  }
+
+  /* Wynik finału z serwera. Podglad ?zaraza=4 bez wyniku na serwerze
+     pokazuje przykladowe liczby z atrapy bazy (103 625 ryb przed), zeby
+     dalo sie obejrzec karte przed piatkiem; karta podpisuje je jako
+     podglad. */
+  const FINAL_PODGLADU = {
+    przed: 103625, po: 41496, zostaje: 0.4, podglad: true,
+    poziomy: { 1: 4259, 2: 937, 3: 179, 4: 47, 5: 17, 6: 8, 7: 4 },
+    sufity: { 1: 11500, 2: 2530, 3: 483, 4: 127, 5: 46, 6: 16, 7: 5 }
+  };
+  function finalStan() {
+    if (stan && stan.final && typeof stan.final === 'object') return stan.final;
+    if (testowy && etap() === 4) return FINAL_PODGLADU;
+    return null;
+  }
+  function odmiana(n, jeden, kilka, wiele) {
+    n = Math.abs(Math.round(+n || 0));
+    const n10 = n % 10, n100 = n % 100;
+    if (n === 1) return jeden;
+    if (n10 >= 2 && n10 <= 4 && !(n100 >= 12 && n100 <= 14)) return kilka;
+    return wiele;
+  }
 
   const fmt = n => Math.max(0, Math.round(+n || 0)).toLocaleString('pl-PL');
   function skrotQryb(n) {
@@ -108,6 +148,7 @@ const Zaraza = (() => {
     /* Pierwszy odczyt moze przyjsc juz po otwarciu laboratorium: wtedy
        przebudowujemy cala tresc, bo zmieniaja sie tez cele i kolory kart. */
     const pierwszy = !stan;
+    const mialFinal = !!(stan && stan.final);
     try {
       const s = await publicRpc('zaraza_stan_publiczny', {});
       if (s && typeof s === 'object') { stan = s; ostatniOdczyt = Date.now(); }
@@ -117,7 +158,9 @@ const Zaraza = (() => {
     } catch (e) {}
     trwaOdczyt = false;
     rysujHud();
-    if (panelOtwarty() && !trwaWplata) { if (pierwszy && stan) rysujPanel(); else aktualizujLiczby(); }
+    /* Wynik finału zmienia cala karte na gorze, wiec wtedy tez pelna przebudowa. */
+    const nowyFinal = !!(stan && stan.final) !== mialFinal;
+    if (panelOtwarty() && !trwaWplata) { if ((pierwszy && stan) || nowyFinal) rysujPanel(); else aktualizujLiczby(); }
   }
 
   const nowyId = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
@@ -221,8 +264,21 @@ const Zaraza = (() => {
     if (!hud) zbudujHud();
     if (!hud) return;
     const e = etap();
-    if (!aktywny()) { hud.classList.remove('on'); return; }
+    if (!widoczny()) { hud.classList.remove('on'); return; }
     hud.classList.add('on');
+    if (e === 4) {
+      const f = finalStan();
+      let duzy = 'SZCZYT', linia4 = 'LABORATORIUM LICZY STRATY';
+      if (f && (+f.zostaje || 0) >= 1) { duzy = 'OCALONE'; linia4 = 'SZCZEPIONKA GOTOWA'; }
+      else if (f) {
+        const przed = +f.przed || 0, po = +f.po || 0;
+        duzy = '-' + (przed > 0 ? Math.round(100 * Math.max(0, przed - po) / przed) : 0) + '%';
+        linia4 = 'ZOSTAŁO ' + fmt(po) + ' ' + odmiana(po, 'RYBA', 'RYBY', 'RYB');
+      }
+      hud.innerHTML = '<span>ZARAZA · FINAŁ</span><b>' + duzy + '</b><i>' + linia4 + '</i>';
+      ulozHud();
+      return;
+    }
     let linia = '';
     if (e === 1) linia = 'ZANĘTY ' + fmt(stan ? stan.zanety_oddane : 0) + ' / ' + fmt(celZanet());
     else if (e === 2) linia = 'QRYBY ' + skrotQryb(stan ? stan.qryby_zebrane : 0) + ' / ' + skrotQryb(celQryb());
@@ -267,6 +323,45 @@ const Zaraza = (() => {
       '</div>';
   }
 
+  /* Karta finału na gorze laboratorium (etap 4). */
+  function kartaFinalu() {
+    const f = finalStan();
+    let h = '<div class="zad zr-etap zr-final" data-nr="4">';
+    if (!f) {
+      return h + '<div class="gw">SZCZYT ZARAZY<span>PT 9 X · 23:00</span></div>' +
+        '<div class="tr">Zaraza uderza. Laboratorium liczy straty, wynik pojawi się za chwilę.</div></div>';
+    }
+    const przed = +f.przed || 0, po = +f.po || 0;
+    const zginelo = Math.max(0, przed - po);
+    const proc = przed > 0 ? Math.round(100 * zginelo / przed) : 0;
+    const P = f.poziomy || {};
+    const pasma = [1, 2, 3, 4, 5, 6, 7].filter(k => P[k] != null)
+      .map(k => 'pasmo ' + k + ': ' + fmt(P[k])).join(' · ');
+    const ocalone = (+f.zostaje || 0) >= 1;
+    const podejscia = stan ? +stan.podejscia || 0 : 0;
+    h += '<div class="gw">' + (ocalone ? 'SZCZEPIONKA GOTOWA' : 'SZCZYT ZARAZY') +
+         '<span>' + (f.podglad ? 'PODGLĄD' : 'PT 9 X · 23:00') + '</span></div>';
+    if (ocalone) {
+      h += '<div class="tr">Lucjanka Zero złowił ' + esc((stan && stan.zlowil) || 'jeden z was') +
+           '. Laboratorium zrobiło szczepionkę i zaraza nie zabrała ani jednej ryby.</div>';
+    } else {
+      h += '<div class="tr">W całym jeziorze był jeden Lucjanek Zero. Podpłynął do waszych przynęt ' +
+           fmt(podejscia) + ' ' + odmiana(podejscia, 'raz', 'razy', 'razy') +
+           ', a bierze raz na 13 983 816 podejść. Laboratorium nie dostało przeciwciał.</div>' +
+           '<div class="zr-final-liczba"><b>' + fmt(zginelo) + '</b><span>' +
+           odmiana(zginelo, 'rybę', 'ryby', 'ryb') + ' zabrała zaraza, ' + proc + '% jeziora</span></div>' +
+           '<div class="tr">W jeziorze ' + odmiana(po, 'została', 'zostały', 'zostało') + ' ' + fmt(po) + ' ' +
+           odmiana(po, 'ryba', 'ryby', 'ryb') + '.</div>';
+    }
+    if (pasma) {
+      h += '<div class="tr">Każdy gatunek wrócił do poziomu swojego pasma. Ryb na gatunek: ' + pasma + '.</div>';
+    }
+    h += '<div class="tr">Tarło odbuduje jezioro, ale żaden gatunek nie urośnie ponad sufit swojego pasma.</div>' +
+         (f.podglad ? '<div class="zr-linia">PODGLĄD: liczby z atrapy, prawdziwe przyjdą z serwera w piątek o 23:00</div>' : '') +
+         '</div>';
+    return h;
+  }
+
   function liniaPodejsc() {
     return 'podejścia do przynęt: ' + fmt(stan ? stan.podejscia : 0) +
       (moj ? ' · twoje: ' + fmt(moj.podejscia) : '');
@@ -305,9 +400,12 @@ const Zaraza = (() => {
     const qr = stan ? +stan.qryby_zebrane || 0 : 0;
     const darcz = stan ? +stan.darczyncow || 0 : 0;
     let h = '<h3>LABORATORIUM<em>ZARAZA W JEZIORZE</em></h3>';
-    h += '<div class="tr zr-fab">Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. ' +
-         'Laboratorium robi szczepionkę w trzech etapach.</div>';
-    h += '<div class="zr-szczyt">SZCZYT ZARAZY ZA <b>' + zegar(T.final - teraz()) + '</b><span>piątek 23:00</span></div>';
+    h += e === 4
+      ? '<div class="tr zr-fab">Lucjanek wrócił z odnowy z zarazą. Sam był odporny, reszta ryb nie.</div>'
+      : '<div class="tr zr-fab">Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. ' +
+        'Laboratorium robi szczepionkę w trzech etapach.</div>';
+    if (e === 4) h += kartaFinalu();
+    else h += '<div class="zr-szczyt">SZCZYT ZARAZY ZA <b>' + zegar(T.final - teraz()) + '</b><span>piątek 23:00</span></div>';
 
     /* Etap 1 */
     const k1 = e === 1 ? (zan >= celZanet() ? 'ok' : 'czeka') : (e > 1 && zan >= celZanet() ? 'ok' : 'zr-zamk');
@@ -326,13 +424,17 @@ const Zaraza = (() => {
     h += kartaEtapu(3, e >= 3 ? 'ETAP 3 · LUCJANEK ZERO' : 'ETAP 3 · ???', e === 3 ? 'DO PT 23:00' : (e > 3 ? 'ZAMKNIĘTY' : 'OD CZW 23:00'),
       e >= 3 ? (stan && stan.zlowil
                   ? 'Lucjanka Zero złowił ' + esc(stan.zlowil) + '. Laboratorium ma przeciwciała.'
-                  : 'Złówcie Lucjanka Zero. Tylko on ma przeciwciała. W całym jeziorze jest jeden: blady, powolny, pływa tuż pod taflą między innymi rybami.')
+                  : e > 3
+                    ? 'Lucjanek Zero nie dał się złowić. Laboratorium nie dostało przeciwciał.'
+                    : 'Złówcie Lucjanka Zero. Tylko on ma przeciwciała. W całym jeziorze jest jeden: blady, powolny, pływa tuż pod taflą między innymi rybami.')
              : 'Laboratorium jeszcze nie wie, czego zabraknie.',
       -1, e >= 3 ? liniaPodejsc() : '', e === 3 ? (stan && stan.zlowil ? 'ok' : 'czeka') : 'zr-zamk');
 
     if (komunikat) h += '<div class="zr-msg">' + esc(komunikat) + '</div>';
 
-    if (!zalogowany()) {
+    if (e > 3) {
+      /* Po finale laboratorium tylko pokazuje wynik. */
+    } else if (!zalogowany()) {
       h += '<div class="zr-msg">Potwierdź mail w koncie, żeby pomagać laboratorium.</div>';
     } else if (e === 1) {
       const D = (window.Zapis && Zapis.dane) ? Zapis.dane() : {};
@@ -430,19 +532,75 @@ const Zaraza = (() => {
     odswiez(true);
   }
 
+  /* ---------- finał ---------- */
+  let probaOdczytuFinalu = 0, probaZapasu = 0, probaLokalna = 0, trwaLokalny = false;
+
+  /* Zapas za zegar serwera: po 23:00 bez wyniku zalogowana gra prosi
+     serwer o finał, najwyzej raz na minute. Serwer wykonuje go tylko
+     raz i tylko po czasie, wiec kilka gier naraz niczego nie psuje. */
+  async function zapasFinalu() {
+    if (testowy || !zalogowany() || !window.Chmura || !Chmura.wolajRpc) return;
+    if (Date.now() - probaZapasu < 60000) return;
+    probaZapasu = Date.now();
+    try {
+      const w = await Chmura.wolajRpc('zaraza_final_teraz', {});
+      if (w && (w.ok || w.powod === 'JUZ_WYKONANY')) await odswiez(true);
+    } catch (e) {}
+  }
+
+  /* Raz na finał w tej grze: nowe liczby jeziora i sufity z serwera,
+     potem czyszczenie lokalnej ikry i kohort sprzed finału. Klucz
+     w Magazynie trzyma czas finału, wiec cofniety i powtorzony finał
+     wykona sie jeszcze raz. */
+  const K_FINAL = 'zaraza.final.lok';
+  async function finalLokalny() {
+    const f = stan && stan.final;
+    if (testowy || !f || !f.kiedy || trwaLokalny) return;
+    let zrobione = null;
+    try { zrobione = window.Magazyn ? Magazyn.czytaj(K_FINAL) : localStorage.getItem(K_FINAL); }
+    catch (e) { return; }
+    if (zrobione !== null && zrobione !== undefined && String(zrobione) === String(f.kiedy)) return;
+    if (!window.Eko || !Eko.Serwer || !Eko.Serwer.dostepny || !Eko.Serwer.dostepny()) return;
+    if (Date.now() - probaLokalna < 15000) return;
+    probaLokalna = Date.now();
+    trwaLokalny = true;
+    try {
+      const ok = await Eko.Serwer.pobierz();
+      if (!ok) return;
+      try { if (Eko.Serwer.pobierzPasma) await Eko.Serwer.pobierzPasma(true); } catch (e) {}
+      try { if (Eko.wyczyscPoZarazie) Eko.wyczyscPoZarazie(); } catch (e) {}
+      try { if (window.Magazyn) Magazyn.pisz(K_FINAL, String(f.kiedy)); else localStorage.setItem(K_FINAL, String(f.kiedy)); }
+      catch (e) {}
+    } finally {
+      trwaLokalny = false;
+    }
+  }
+
   /* ---------- zycie modulu ---------- */
   function tik() {
     rysujHud();
     const e = etap();
     if (aktywny()) odswiez(false);
+    if (e === 4 && widoczny() && !testowy) {
+      if (stan && stan.final) {
+        odswiez(false);
+        finalLokalny();
+      } else {
+        /* Po 23:00 wynik finału czytamy co 10 s, dopoki nie przyjdzie. */
+        if (Date.now() - probaOdczytuFinalu > 10000) { probaOdczytuFinalu = Date.now(); odswiez(true); }
+        zapasFinalu();
+      }
+    }
     /* Licznik do szczytu w otwartym panelu bez przebudowy calej tresci. */
     if (panelOtwarty()) {
       const b = document.querySelector('#panelTresc .zr-szczyt b');
       if (b) b.textContent = zegar(T.final - teraz());
     }
     /* Pierwsze wejscie w kazdym etapie: laboratorium otwiera sie samo, raz
-       na etap. Bez tego start etapu 2 i 3 zauwazylby tylko maly chip. */
-    if (e >= 1 && e <= 3 && !testowy && !introPokazane(e)) {
+       na etap. Bez tego start etapu 2 i 3 zauwazylby tylko maly chip.
+       Finał (etap 4) otwiera sie dopiero z wynikiem z serwera. */
+    const doIntro = (e >= 1 && e <= 3) || (e === 4 && widoczny() && !!(stan && stan.final));
+    if (doIntro && !testowy && !introPokazane(e)) {
       const zajete = document.body.classList.contains('panel-otwarty') ||
         document.body.classList.contains('ksiega-otwarta') ||
         document.body.classList.contains('karta-otwarta') ||
@@ -473,8 +631,8 @@ const Zaraza = (() => {
   else setTimeout(start, 0);
 
   return {
-    T, etap, aktywny, otworz, odswiez, stan: () => stan, testowy: () => testowy,
-    liczPodejscie, zglosZlowienie,
+    T, etap, aktywny, widoczny, otworz, odswiez, stan: () => stan, testowy: () => testowy,
+    finalStan, liczPodejscie, zglosZlowienie,
     /* tylko testy: przesuniecie zegara w milisekundach */
     _ustawCzas: ms => { przesuniecie = (+ms || 0) - Date.now(); rysujHud(); }
   };

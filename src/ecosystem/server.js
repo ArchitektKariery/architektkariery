@@ -122,6 +122,35 @@ Eko.Serwer = (function () {
     finally { trwa = false; }
   }
 
+  /* ============================================================
+     SUFITY GATUNKOW (finał ZARAZY, pt 9 X 2026). Tabela eko_pasma
+     trzyma pasmo i sufit kazdego gatunku; sufit ustawia finał na
+     serwerze. Gra czyta je co 5 minut (tabela ma kilkadziesiat
+     wierszy) i przekazuje do Eko.ustawSufity. Przed finałem wszystkie
+     sufity sa puste, wiec tarlo dziala po staremu.
+     ============================================================ */
+  const PASMA_MS = 300000;
+  let pasmaT = 0, trwaPasma = false;
+  async function pobierzPasma(wymus) {
+    const k = konfiguracja(); if (!k || trwaPasma) return false;
+    if (!wymus && Date.now() - pasmaT < PASMA_MS) return false;
+    trwaPasma = true;
+    try {
+      const o = await fetch(k.url + '/rest/v1/eko_pasma?select=gat,sufit', {
+        headers: { 'apikey': k.klucz, 'Authorization': 'Bearer ' + k.klucz }
+      });
+      if (!o.ok) return false;
+      const dane = await o.json();
+      if (!Array.isArray(dane)) return false;
+      const mapa = {};
+      for (const w of dane) if (w && w.gat) mapa[w.gat] = w.sufit;
+      Eko.ustawSufity(mapa);
+      pasmaT = Date.now();
+      return true;
+    } catch (e) { return false; }
+    finally { trwaPasma = false; }
+  }
+
   /* Jedyna droga zmiany populacji, gdy serwer jest wlaczony.
      Nie czeka na odpowiedz, zeby nie zamrazac kadru -- bufor lokalny
      zmienia sie od razu, a odpowiedz serwera go potem prostuje. */
@@ -184,7 +213,8 @@ Eko.Serwer = (function () {
 
   if (dostepny()) {
     pobierz().then(() => doslij());
-    setInterval(() => { pobierz().then(() => doslij()); }, ODSWIEZ_MS);
+    pobierzPasma(true);
+    setInterval(() => { pobierz().then(() => doslij()); pobierzPasma(false); }, ODSWIEZ_MS);
   }
 
   /* Wpis do WSPOLNEJ kroniki. Nie czeka na odpowiedz i nie przeszkadza
@@ -223,6 +253,6 @@ Eko.Serwer = (function () {
   }
 
   return { dostepny, pobierz, zmien, doslij, zasiewSQL, wpiszStan, odrodzWymarle,
-           wpis, kronikaWspolna, odswiezKronike };
+           wpis, kronikaWspolna, odswiezKronike, pobierzPasma };
 })();
 

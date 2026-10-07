@@ -143,6 +143,68 @@ const Eko = (() => {
     return (typeof window !== 'undefined' && window.KLASA && window.KLASA[gk]) || 1;
   }
 
+  /* ============================================================
+     SUFIT GATUNKU PO ZARAZIE (finał eventu ZARAZA, pt 9 X 2026 23:00,
+     decyzja Andrzeja 7 X 2026: "przywrocic dobry rozklad pasm, zeby 1
+     bylo najwiecej, 2 mniej, 3 mniej i tak dalej").
+
+     DLACZEGO. Tarlo daje kazdemu gatunkowi pasm 3-7 te sama ikre (okolo
+     1 200 ziaren), bez wzgledu na norme pasma. Zmierzone na wzorach tego
+     pliku, po cieciu do 40%: jedno tarlo ploci dokłada srednio 288 ryb,
+     czyli 2,9% jej normy 10 000, a jedno tarlo ryby z pasma 7 dokłada
+     24 ryby, czyli szesc razy wiecej, niz wynosi jej norma (4). Para
+     mitycznych w tarlisku powtarza to po kazdej karencji. Tak pasma
+     rozjechaly sie przed zaraza i tak rozjechalyby sie po resecie.
+
+     JAK. Finał na serwerze ustawia kazdy gatunek na poziom jego pasma
+     i zapisuje sufit gatunku w tabeli eko_pasma (1,15 normy pasma).
+     Gra czyta sufity (Eko.Serwer.pobierzPasma) i:
+       - przycina narybek, ktory nie zmiesci sie pod sufitem gatunku,
+       - liczy zageszczenie gatunku wzgledem sufitu, a nie historycznego
+         maksimum, wiec gatunek blisko sufitu ma dluzsza karencje
+         i gorsze scenariusze tarla,
+       - obniza przezywalnosc narybku z 0,055 do 0,041 (polecenie
+         Andrzeja z 6 X: "troche obnizyc wspolczynnik wzrostu populacji,
+         po resecie").
+     Ten sam sufit pilnuje wyzwalacz eko_sufit na serwerze, wiec gra
+     tylko pokazuje uczciwie to, co i tak przytnie baza.
+     Bez sufitow z serwera (przed finałem, bez sieci) wszystko dziala
+     po staremu.
+     ============================================================ */
+  CFG.SUFIT = {};                         /* gat -> sufit z eko_pasma */
+  CFG.PRZEZYJ_NARYBKU_PO_ZARAZIE = 0.041;
+
+  function sufitGatunku(gk) {
+    const s = CFG.SUFIT[gk];
+    return (typeof s === 'number' && isFinite(s) && s >= 0) ? s : null;
+  }
+  function poZarazie() {
+    for (const k in CFG.SUFIT) if (sufitGatunku(k) !== null) return true;
+    return false;
+  }
+  function ustawSufity(mapa) {
+    const nowa = {};
+    if (mapa) for (const k in mapa) {
+      const s = +mapa[k];
+      if (mapa[k] !== null && mapa[k] !== undefined && isFinite(s) && s >= 0) nowa[k] = Math.floor(s);
+    }
+    CFG.SUFIT = nowa;
+    return Object.keys(nowa).length;
+  }
+  /* Zageszczenie gatunku 0..1+. Po zarazie wzgledem sufitu gatunku,
+     wczesniej wzgledem historycznego maksimum (stara regula). */
+  function gestoGatunku(gk, r) {
+    r = r || rekord(gk);
+    if (!r) return 0.5;
+    const s = sufitGatunku(gk);
+    if (s !== null && s > 0) return r.n / s;
+    return (r.max > 0) ? (r.n / r.max) : 0.5;
+  }
+  function przezyjEtapu(E2) {
+    if (E2 && E2.id === 'narybek' && poZarazie()) return CFG.PRZEZYJ_NARYBKU_PO_ZARAZIE;
+    return E2 ? E2.przezyj : 0;
+  }
+
   function popStartowa(gk) {
     const G2 = (typeof GATUNKI !== 'undefined') ? GATUNKI[gk] : null;
     if (!G2) return CFG.POP_MIN_START;
@@ -178,6 +240,48 @@ const Eko = (() => {
     zapisz('reset', '', 'populacje przywrócone do wartości startowych', po);
     if (typeof Zapis !== 'undefined') Zapis.zapisz();
     return { gatunkow: ile, przed: przed, po: po };
+  }
+
+  /* ============================================================
+     FINAŁ ZARAZY W ZAPISIE GRACZA (pt 9 X 2026). Wolane raz na finał
+     przez src/events/zaraza.js, PO pobraniu nowych liczb z serwera.
+     Zaraza zabiera tez ikre i narybek w drodze: kohorty sprzed finału
+     naleza do jeziora sprzed resetu i po resecie dokladalyby ryby do
+     gatunkow ustawionych juz na poziom pasma.
+     Listy osobnikow (tryb indywidualny, ponizej 100 sztuk) skracamy do
+     liczby z serwera, z zachowaniem plci, zeby gra nie wyciagala numerow
+     ryb, ktorych w jeziorze juz nie ma.
+     ============================================================ */
+  function wyczyscPoZarazie() {
+    const E = stan(); if (!E) return null;
+    const kohort = (E.koh || []).length;
+    let ikraRazem = 0;
+    for (const k in (E.ikra || {})) ikraRazem += E.ikra[k] || 0;
+    E.koh = [];
+    E.ikra = {};
+    let osobnikow = 0;
+    if (E.osob) {
+      for (const gk in E.osob) {
+        const lista = E.osob[gk];
+        if (!Array.isArray(lista)) continue;
+        const r = E.gat[gk];
+        const n = r ? Math.max(0, r.n || 0) : 0;
+        if (lista.length <= n) continue;
+        let m = r ? Math.max(0, r.m || 0) : 0, f = r ? Math.max(0, r.f || 0) : 0;
+        const zostaw = [];
+        for (const o of lista) {
+          if (zostaw.length >= n) break;
+          if (o.plec === 'm' && m > 0) { m--; zostaw.push(o); }
+          else if (o.plec === 'f' && f > 0) { f--; zostaw.push(o); }
+        }
+        osobnikow += lista.length - zostaw.length;
+        E.osob[gk] = zostaw;
+      }
+    }
+    zapisz('zaraza', '', 'zaraza zabrała ikrę i narybek w drodze', kohort);
+    window.__wagiTab = null;
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    return { kohort: kohort, ikra: ikraRazem, osobnikow: osobnikow };
   }
 
   function rekord(gk) {
@@ -776,7 +880,7 @@ const Eko = (() => {
     const r = rekord(gk);
     if (!r) return CFG.KARENCJA_BAZA;
     const D = (typeof window !== 'undefined' && window.DRAPIEZNIK) ? window.DRAPIEZNIK[gk] : null;
-    const gesto = (r.max > 0) ? (r.n / r.max) : 0.5;
+    const gesto = gestoGatunku(gk, r);
     let wspGlodu;
     if (D) {
       /* Drapieznik: duzo pokarmu -> krotka karencja. */
@@ -1089,8 +1193,8 @@ const Eko = (() => {
     /* Zageszczenie wlasnej populacji: im blizej historycznego maksimum,
        tym wieksza konkurencja o miejsce i pokarm. */
     const r = rekord(gk);
-    if (r && r.max > 0) {
-      const gesto = r.n / r.max;
+    if (r && (r.max > 0 || sufitGatunku(gk) !== null)) {
+      const gesto = gestoGatunku(gk, r);
       if (gesto > 0.8) { w.konkurencja *= 2.6; w.choroba *= 1.7; w.swietne *= 0.4; }
       if (gesto < 0.25) { w.pokarm *= 1.8; w.swietne *= 1.5; }
     }
@@ -1175,7 +1279,7 @@ const Eko = (() => {
         if (teraz - k.od < E2.ms) break;
         const sc = scenPoId(k.scen);
         const przed = k.n;
-        k.n = Math.floor(k.n * Math.min(0.95, E2.przezyj * sc.mn));
+        k.n = Math.floor(k.n * Math.min(0.95, przezyjEtapu(E2) * sc.mn));
         k.od += E2.ms;
         k.etap++;
         zmiana = true;
@@ -1230,6 +1334,20 @@ const Eko = (() => {
             zapisz('pokolenie', k.gat, 'jezioro pełne, młode nie przeżyły', 0);
             K.splice(i, 1);
             break;
+          }
+          /* Sufit gatunku po zarazie (opis przy CFG.SUFIT): ta sama krzywa
+             co dla jeziora, liczona dla gatunku, i twarde ciecie do miejsca,
+             ktore zostalo pod sufitem. Serwer przycina tak samo. */
+          const suf = sufitGatunku(k.gat);
+          if (suf !== null) {
+            const jest = populacja(k.gat);
+            const miejsceGat = Math.max(0, 1 - Math.pow(Math.min(1, jest / Math.max(1, suf)), CFG.KRZYWA_MIEJSCA));
+            k.n = Math.min(Math.floor(k.n * miejsceGat), Math.max(0, suf - jest));
+            if (k.n <= 0) {
+              zapisz('pokolenie', k.gat, 'gatunek ma komplet, młode nie zmieściły się pod sufitem pasma', 0);
+              K.splice(i, 1);
+              break;
+            }
           }
           if (k.n < przed2) zapisz('pokolenie', k.gat, 'ciasno w jeziorze, część młodych nie przeżyła', k.n);
           const przedN = populacja(k.gat);
@@ -1584,7 +1702,8 @@ const Eko = (() => {
            tarloPary, poTarle, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
            sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
            meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
-           podsumowanie, kronika, zapisz, popStartowa };
+           podsumowanie, kronika, zapisz, popStartowa,
+           sufitGatunku, ustawSufity, poZarazie, gestoGatunku, przezyjEtapu, wyczyscPoZarazie };
 })();
 window.Eko = Eko;
 

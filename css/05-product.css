@@ -802,3 +802,10 @@ body.menu-master-open #zarazaHud,body.panel-otwarty #zarazaHud{opacity:0;pointer
   font-weight:800;border:2px solid var(--tusz);border-radius:2px;background:rgba(255,250,236,.85);color:var(--tusz)}
 #panelTresc .zr-wplata .odb{width:auto;padding:10px 16px}
 #panelTresc .zr-bez-anim .zad{animation:none;opacity:1;transform:none}
+/* Finał (etap 4): ta sama karta, rdzawy tusz zamiast czarnego. */
+#panelTresc .zr-final{border:2px solid var(--rdza)}
+#panelTresc .zr-final .gw{color:var(--rdza)}
+#panelTresc .zr-final-liczba{margin:10px 0 4px;text-align:center}
+#panelTresc .zr-final-liczba b{display:block;font-size:26px;line-height:1.1;letter-spacing:.03em;
+  color:var(--rdza);font-variant-numeric:tabular-nums}
+#panelTresc .zr-final-liczba span{display:block;font-size:10px;font-weight:800;letter-spacing:.06em;opacity:.8}

@@ -123,6 +123,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |
 | Event ZARAZA (6-9 X 2026): zegar etapów, chip pod MENU, panel LABORATORIUM, oddawanie zanęt i wpłata qryb; opis `docs/zaraza.md` | `src/events/zaraza.js`, SQL `supabase/migrations/20261006_zaraza.sql`, style `css/05-product.css` (blok ZARAZA) |
 | Lucjanek Zero (etap 3 ZARAZY): rzadkość jednej ryby w jeziorze (`LucjanekZero.moze` w `makeFishZLimitem`), blady sprite, zamrożony rzut 1 : 13 983 816, blokada sieci, licznik podejść; opis `docs/zaraza.md` | `src/events/lucjanek-zero.js`, punkty zaczepienia w `src/fish/hook.js`, `behavior.js` (`chetnaZaatakowac`, `dobraOfiara`), `school-update.js` (`makeFishZLimitem`), `species.js` (`obrazRyby`), `src/ecosystem/net-anim.js`, `net-catch.js`, `src/card/card.js` |
+| Finał ZARAZY (pt 9 X 23:00): reset jeziora do rozkładu pasm (40% ryb), sufit gatunku 1,15 normy pasma pilnowany wyzwalaczem `eko_sufit`, narybek 0,041 po finale, karta finału w laboratorium; opis `docs/zaraza.md` | SQL `supabase/migrations/20261007_zaraza_final_podglad.sql` (`eko_pasma`, `zaraza_final_plan`), `20261008_zaraza_final.sql`; gra: `src/ecosystem/population.js` (`CFG.SUFIT`, `wyczyscPoZarazie`), `src/ecosystem/server.js` (`pobierzPasma`), `src/events/zaraza.js` (`kartaFinalu`, `finalLokalny`, `zapasFinalu`) |
 
 ## Dane graficzne
 
