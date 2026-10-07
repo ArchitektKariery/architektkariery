@@ -1609,6 +1609,12 @@
       h += '<button class="odb" onclick="SiecUI.sprzedaj()">SPRZEDAJ ZA ' + q + ' QRYB</button>';
     /* Bez karencji: przycisk jest zawsze. Jedyna przerwa to sama animacja
        ciagniecia, po ktorej lawica wraca i mozna zarzucic od nowa. */
+    if (window.LucjanekZero && LucjanekZero.wLawicy()) {
+      h += '<div class="tr" style="margin-top:8px;font-weight:800">Lucjanek Zero pływa w ławicy. ' +
+           'Sieć ruszy, gdy odpłynie albo przyjdzie nowa ławica.</div>';
+      h += '<button class="duzy" disabled style="opacity:.45">SIEĆ ZABLOKOWANA</button>';
+      return h;
+    }
     h += '<button class="duzy" onclick="SiecUI.zarzuc()">ZARZUĆ SIEĆ</button>';
     return h;
   }

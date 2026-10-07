@@ -29,6 +29,9 @@ function chetnaZaatakowac(f) {
      prawdopodobienstwo z czasem roslo by w strone 100%. */
   if (f && f.gat === 'smok_zycia' && f.smokBiteRolled)
     return f.smokBierze ? 1 : 0;
+  /* Lucjanek Zero (event ZARAZA): ten sam zamrozony rzut, 1 : 13 983 816,
+     wylosowany raz przy pojawieniu (src/events/lucjanek-zero.js). */
+  if (f && f.lzZero) return f.lzBierze ? 1 : 0;
   const g = window.GATUNKI && GATUNKI[f.gat];
   return (g && g.mit) ? 0.28 : 0.86;
 }
@@ -205,6 +208,8 @@ function zachWolno(f) {
    ktora gracz wlasnie oglada. */
 function dobraOfiara(f, ofi, D) {
   if (ofi === f || ofi.caught) return false;
+  /* Lucjanek Zero (event ZARAZA) nie nalezy do populacji jeziora. */
+  if (ofi.lzZero) return false;
   if (ofi.mood !== 'idle' && ofi.mood !== 'odplywa') return false;
   if (typeof lure !== 'undefined' && ofi === lure) return false;
   if (ofi.cm > D.ofiara * f.cm) return false;
@@ -574,12 +579,15 @@ function cyklLawicy(dt) {
   if (CYKL.t >= CYKL.okres) {
     CYKL.t -= CYKL.okres; CYKL.faza = 'zyje';
     if(window.SmokZycia) SmokZycia.koniecLawicy();
+    if(window.LucjanekZero) LucjanekZero.koniecLawicy();
     /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
     for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
     const ile = POP.cel + Math.round(Math.random() * 3);
     for (let i = 0; i < ile; i++) school.push(wplyw());
     spawnT = POP.odstep[0];
     const __smokAuto = !!(window.SmokZycia && SmokZycia.zastapLawiceJesliCzeka(school));
+    /* Lucjanek Zero (event ZARAZA): po Smoku, bo wrozba ma pierwszenstwo. */
+    const __lzAuto = !__smokAuto && !!(window.LucjanekZero && LucjanekZero.zastapLawice(school, false));
     /* ============================================================
        BLAD ZASTANY (znaleziony IX 2026 przy okazji dodawania nowej
        zanety, ktora potrzebowala tego samego haka): wymiana lawicy
@@ -598,17 +606,20 @@ function cyklLawicy(dt) {
        (if(!z) return;) i podmiana nigdy sie nie odbywala. Module 18 mial
        to w dobrej kolejnosci od zawsze (wstaw NAJPIERW, zuzyj POTEM) --
        ten blok teraz robi dokladnie to samo, w tej samej kolejnosci. */
-    if (!__smokAuto) {
+    if (!__smokAuto && !__lzAuto) {
       if (typeof wstawGwarant === 'function') wstawGwarant();
       if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
     }
-    if (typeof Zapis !== 'undefined') Zapis.zuzyjLawice();
+    /* Lawica Lucjanka Zero nie zjada rundy zanety: zaneta i tak nie ma
+       w niej na czym zadzialac. */
+    if (typeof Zapis !== 'undefined' && !__lzAuto) Zapis.zuzyjLawice();
   }
 }
 
 function zarzadzajPopulacja(dt) {
   cyklLawicy(dt);
   if(window.SmokZycia && SmokZycia.aktywnaLawica()) return;
+  if(window.LucjanekZero && LucjanekZero.aktywnaLawica()) return;
   /* W fazie ucieczki populacja sie nie uzupelnia, inaczej nowe ryby
      wplywalyby w sam srodek exodusu.
      FAZA 'siec' dziala tak samo, ale z innego powodu: po zarzuceniu

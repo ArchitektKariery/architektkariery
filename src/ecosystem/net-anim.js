@@ -18,6 +18,9 @@ const SIEC_ANIM = { aktywna: false, od: 0, ryby: [] };
 
 function siecZarzuc() {
   if (!window.Siec || typeof school === 'undefined') return null;
+  /* Event ZARAZA: siec zgarnia lawice bez brania, wiec przy Lucjanku Zero
+     ominelaby jego rzut. Dopoki plywa w kadrze, siec nie rusza. */
+  if (window.LucjanekZero && LucjanekZero.blokujSiec()) return null;
   const zywe = school.filter(f => !f.caught);
   if (!zywe.length) return null;
   /* Migawka PRZED zarzuceniem. Trzymamy same ryby: maja juz sprite,

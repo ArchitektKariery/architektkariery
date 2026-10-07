@@ -69,6 +69,7 @@ window.MIX = MIX;
 const NOWA = { blysk: 0 };
 function nowaLawica() {
   if(window.SmokZycia) SmokZycia.koniecLawicy();
+  if(window.LucjanekZero) LucjanekZero.koniecLawicy();
   /* wedka i przyneta puszczaja */
   if (typeof G !== 'undefined') {
     if (G.hooked) { G.hooked.caught = false; G.hooked.mood = 'idle'; G.hooked = null; }
@@ -114,7 +115,9 @@ function nowaLawica() {
      lawice. Funkcja siedzi w pozniejszym bloku skryptu, wiec pytamy o nia
      przez typeof: przy pierwszych klatkach po starcie moze jeszcze nie byc. */
   const __smokEvent = !!(window.SmokZycia && SmokZycia.zastapLawiceJesliCzeka(school));
-  if (!__smokEvent) {
+  /* Lucjanek Zero (event ZARAZA): po Smoku, bo wrozba ma pierwszenstwo. */
+  const __lzEvent = !__smokEvent && !!(window.LucjanekZero && LucjanekZero.zastapLawice(school, true));
+  if (!__smokEvent && !__lzEvent) {
     if (typeof wstawGwarant === 'function') wstawGwarant();
     if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
     if (window.FortuneCookie) {
@@ -141,7 +144,8 @@ function nowaLawica() {
        teraz placi az do 50000 za SZTUKE zamiast do 5000, bez zadnego
        ryzyka utraty serii. Nie cofam tej zmiany, bo Andrzej prosil
        wprost -- ale to jest realny kompromis, nie oczywista poprawka. */
-    Zapis.dane().stat.sesji++; Zapis.odswiezono(); Zapis.zuzyjLawice();
+    Zapis.dane().stat.sesji++; Zapis.odswiezono();
+    if (!__lzEvent) Zapis.zuzyjLawice();
     const bp = Zapis.sprawdzProgi();
     if (bp > 0 && typeof Ruch !== 'undefined') Ruch.zaRekord(bp, ['PROG DOBY']);
   }

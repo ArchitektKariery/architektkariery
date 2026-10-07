@@ -1641,6 +1641,8 @@ function zKonturem(img) {
    na koncu zwykly stan spoczynkowy. Wywolania bez f (karta, podglad
    w pomocy) zawsze dostaja stan spoczynkowy. */
 function obrazRyby(G2, f) {
+  /* Lucjanek Zero (event ZARAZA): ten sam Lucjan, ale blady i chory. */
+  if (f && f.lzKontur) return f.lzKontur;
   if (f && f.pyskKlatka && G2 && G2.klatkiKontur && G2.klatkiKontur[f.pyskKlatka])
     return G2.klatkiKontur[f.pyskKlatka];
   if (f && f.nadety > 0.5 && G2 && G2.konturNadety) return G2.konturNadety;

@@ -87,7 +87,8 @@ const Siec = (() => {
       /* Ta sama droga, co ryba wzieta do wiaderka: jedyne wejscie
          do populacji, wiec nie da sie obejsc niezmiennika \"n >= 0\". */
       try {
-        if (window.Eko && Eko.zatrzymano) {
+        /* Lucjanek Zero (event ZARAZA) nie nalezy do populacji jeziora. */
+        if (window.Eko && Eko.zatrzymano && !f.lzZero) {
           const pl = (f.plec === 'm' || f.plec === 'f') ? f.plec : Eko.losujPlec(f.gat);
           Eko.zatrzymano(f.gat, pl);
         }

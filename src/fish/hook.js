@@ -161,6 +161,8 @@ function lureFish(dt) {
     G.bite = Math.max(G.bite, Math.max(0, 0.30 - dist / 300));
 
     if (f.moodT <= 0) {
+      /* Lucjanek Zero: kazda decyzja to jedno podejscie w liczniku eventu. */
+      if (f.lzZero && window.LucjanekZero) LucjanekZero.podejscie(f);
       /* Im wieksza ryba, tym czesciej odmawia po obejrzeniu przynety. */
       if (Math.random() < chetnaZaatakowac(f)) {
         f.mood = 'strike'; f.moodT = 1.4;
@@ -170,6 +172,8 @@ function lureFish(dt) {
       else {
         if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.poOdmowie) {
           SmokZycia.poOdmowie(f);
+        } else if (f.lzZero && window.LucjanekZero) {
+          LucjanekZero.poOdmowie(f);
         } else {
           f.mood = 'idle'; f.face = Math.sign(f.vx) || f.face || 1; delete f.strona;
           f.karencja = 7 + Math.random() * 10;   /* nie wraca od razu */

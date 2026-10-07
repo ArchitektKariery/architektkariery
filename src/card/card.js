@@ -219,6 +219,7 @@ function openCard(fish, lenCm, fromX, fromY) {
     const pkt = XScore.punkty(gk, GATUNKI[gk], lenCm, w);
     kolekcja = Zapis.zlowiono(gk, lenCm, w, pkt);
       if(gk==='smok_zycia' && window.SmokZycia) SmokZycia.poZlowieniu();
+      if(fish && fish.lzZero && window.LucjanekZero) LucjanekZero.poZlowieniu(fish);
     try { if (window.Progression) Progression.poZlowieniu(); } catch (e) {}
     /* Zawody licza sie z tej samej liczby, co atlas. Jedno zrodlo punktow,
        zero szans na rozjechanie sie tablicy z wlasnym rekordem. */
