@@ -8,7 +8,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | Etap | Od | Do | Zadanie |
 |---|---|---|---|
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
-| 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 2 000 000 000 qryb |
+| 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 500 000 000 qryb (było 2 mld, zmiana 7 X po saldach graczy) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero (moduł w budowie) |
 | finał | pt 9 X 23:00 | | cięcie populacji i nowe tarło (osobny plik SQL) |
 
@@ -40,6 +40,7 @@ Adres gry z `?zaraza=2` albo `?zaraza=3` przestawia zegar tej karty na środek e
 - punkty zaczepienia: `obrazRyby` (`src/fish/species.js`), `chetnaZaatakowac` i `dobraOfiara` (`src/fish/behavior.js`), decyzja przy przynęcie (`src/fish/hook.js`), wymiana ławicy (`nowaLawica` w `src/fish/school.js`, `cyklLawicy` w `src/fish/behavior.js`), `siecZarzuc` (`src/ecosystem/net-anim.js`), `Siec.zarzuc` (`src/ecosystem/net-catch.js`), zakładka SIEĆ (`src/ui/panel.js`), `openCard` (`src/card/card.js`)
 - `css/05-product.css` — blok „ZARAZA”
 - `supabase/migrations/20261006_zaraza.sql` — stan, wpłaty, okna czasowe, funkcje: `zaraza_stan_publiczny`, `zaraza_moj_wklad`, `zaraza_oddaj_zanety`, `zaraza_wplac_qryby`, `zaraza_podejscie`, `zaraza_zlowiony`
+- `supabase/migrations/20261007_zaraza_cele.sql` — cele etapów w kolumnach `zaraza_stan.zanety_cel` i `qryby_cel`, funkcje czytają kolumny; cel etapu 2 = 500 000 000. Salda graczy 7 X 11:08 bez konta twórcy: razem 588 841 406, najwięcej Babcia 429 220 066, więc 2 mld było nieosiągalne nawet przy oddaniu wszystkiego. Zmiana celu: `update public.zaraza_stan set qryby_cel = … where id = 1;`
 
 ## Zasady serwera
 - torba (`zapis->zanetyMam`) i portfel (`zapis->monety`) gracza schodzą w tej samej transakcji co wpis do licznika, jak w `community_contribute`,
@@ -54,3 +55,4 @@ Adres gry z `?zaraza=2` albo `?zaraza=3` przestawia zegar tej karty na środek e
 - Lucjanek Zero na żywym silniku (podgląd `?zaraza=3` i zegar przestawiony bez podglądu): 60 ławic w etapie 1 bez ani jednego Lucjanka Zero; pierwsza ławica etapu 3 to on, potem dokładnie co 20.; blady sprite z konturem; sieć zablokowana (ławica zostaje, zakładka SIEĆ wyłączona); zarzut, oglądanie, odmowa, odpływ i powrót zwykłej ławicy; jedno wywołanie `zaraza_podejscie` i licznik 1 na chipie; 2 000 000 rzutów bez trafienia; zwykły Lucjan dalej z szansą ataku 0,86; wymuszone branie, hol, karta i wywołanie `zaraza_zlowiony`; zero błędów strony.
 - Lucjanek Zero w zwykłych ławicach (build v2): 60 ławic w etapie 1 bez niego; w etapie 3 pierwsza ławica 14 ryb z nim, potem co 20. przy wymianie guzikiem i zegarem; sieć zablokowana przy pełnej ławicy (14 ryb zostaje); podejście wśród innych ryb, odmowa, sieć odblokowana; runda zanęty schodzi normalnie (100 → 60 po 40 ławicach); zero błędów strony.
 - Rzadkość jednej ryby w jeziorze (build v3): 200 ławic w etapie 1 bez niego; w etapie 3 szansa 1 : 97 567 na miejsce i 35 trafień na 3 000 000 (oczekiwane 30,7); zanęty: pasmo 4 → 1 : 1 981, KOTLETY → 1 : 20 863, pasmo 1 → 0 trafień na 200 000; podgląd: 35 ławic na 100, nigdy dwa naraz; podejście, odmowa, licznik 1, sieć odblokowana; zero błędów strony.
+- Cele w kolumnach (PostgreSQL 16, atrapa `auth`): plik na świeżej bazie i drugi raz, cel 500 000 000 w stanie publicznym, wpłata Babci 429 220 066, wpłata Elżbiety przycięta do 70 779 934 (saldo 64 180 188), cel osiągnięty, ponowione żądanie, zmiana celu jedną linijką. Lucjanek Zero: 2000 ławic z zanętą pasma 4 w podglądzie, 613 z nim, ani jednej z dwoma; 300 ławic z dosyłaniem ryb bez drugiego; dosadzanie partnera i gody go pomijają.

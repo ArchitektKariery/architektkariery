@@ -824,13 +824,13 @@ const Eko = (() => {
        i ktore w ogole moga sie rozmnazac (sa oba plcie w populacji). */
     for (let i = 0; i < school.length; i++) {
       const a = school[i];
-      if (!a.gat || a.gody || GODY[a.gat]) continue;
+      if (!a.gat || a.gody || GODY[a.gat] || a.lzZero) continue;   /* Lucjanek Zero nie odbywa godow */
       if ((PO_TARLE[a.gat] || 0) > teraz) continue;   /* karencja po tarle */
       if (!moznaRozmnazac(a.gat)) continue;
       if (a.plec !== 'm' && a.plec !== 'f') continue;
       for (let j = i + 1; j < school.length; j++) {
         const b = school[j];
-        if (b.gat !== a.gat || b.gody) continue;
+        if (b.gat !== a.gat || b.gody || b.lzZero) continue;
         if (b.plec === a.plec) continue;
         if (b.plec !== 'm' && b.plec !== 'f') continue;
         const dx = a.x - b.x, dy = a.y - b.y;
@@ -892,7 +892,9 @@ const Eko = (() => {
     teraz = teraz || Date.now();
     const wg = {};
     for (const f of school) {
-      if (!f || !f.gat) continue;
+      /* Lucjanek Zero (event ZARAZA) nie nalezy do populacji: nie dostaje
+         partnera, wiec obok niego nie wplywa drugi Lucjan. */
+      if (!f || !f.gat || f.lzZero) continue;
       (wg[f.gat] = wg[f.gat] || []).push(f);
     }
     const out = [];
