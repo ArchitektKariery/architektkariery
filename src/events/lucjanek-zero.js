@@ -14,16 +14,20 @@
    obrazRyby w src/fish/species.js). Plywa wolniej i trzyma sie tuz pod
    tafla, jak prawdziwa chora ryba.
 
-   POJAWIENIE. Plywa SAM w co 20. lawicy gracza w czasie etapu 3, liczac
-   wymiany guzikiem i zegarem. Pierwsza lawica etapu 3 to od razu on.
-   Gdy jest w lawicy, inne ryby nie wplywaja, a siec jest zablokowana:
-   siec zgarnia cala lawice bez brania, wiec ominelaby jego rzut.
+   POJAWIENIE. W co 20. lawicy gracza w czasie etapu 3 dolacza do
+   zwyklych ryb (decyzja Andrzeja 7 X 2026: "wiecej emocji szukajac go").
+   Liczy sie kazda wymiana, guzikiem i zegarem; pierwsza lawica etapu 3
+   juz go ma. Gra nie oglasza jego przyjscia: trzeba go wypatrzyc.
+   Zanety, gwarancje i runda zanety dzialaja w tej lawicy normalnie.
+   Dopoki plywa w kadrze, siec jest zablokowana: siec zgarnia cala
+   lawice bez brania, wiec ominelaby jego rzut.
 
    BRANIE: JEDEN RZUT NA POJAWIENIE, ZAMROZONY, JAK U SMOKA ZYCIA.
    Szansa 1 : 13 983 816, czyli szostka w Totolotku. Rzut pada przy
-   stworzeniu ryby i nie powtarza sie. Lucjanek Zero podplywa do przynety
-   najwyzej raz: po odmowie odplywa za kadr i lawica wraca do zwyklego
-   zycia. Zanety dzialaja zgodnie z opisem (Wlocznia przyciagnie go do
+   stworzeniu ryby i nie powtarza sie. Lucjanek Zero dochodzi do decyzji
+   przy przynecie najwyzej raz: po odmowie odplywa za kadr. Inne ryby
+   moga go ubiec przy przynecie, wtedy plywa dalej i mozna probowac znowu.
+   Zanety dzialaja zgodnie z opisem (Wlocznia przyciagnie go do
    przynety), ale zadna nie dotyka rzutu.
 
    LICZNIK. Kazda decyzja przy przynecie to jedno podejscie, liczone na
@@ -38,8 +42,6 @@ const LucjanekZero = (() => {
      przesunal prawdziwej kolejki gracza na czwartek. */
   const kluczLicznika = () => K_LICZNIK_BAZA + ((window.Zaraza && Zaraza.testowy && Zaraza.testowy()) ? '.test' : '');
 
-  let aktywna = false;               /* lawica Lucjanka Zero trwa */
-  let zaleglosc = false;             /* wypadla jego kolej, ale gracz holowal rybe */
   let blady = null;                  /* kontur bladego sprite'a */
 
   function wEtapie() {
@@ -143,34 +145,22 @@ const LucjanekZero = (() => {
     return f;
   }
 
-  /* Wolane przy kazdej nowej lawicy (guzik i zegar), PO Smoku Zycia.
-     Zwraca true, gdy lawica nalezy do Lucjanka Zero. */
-  function zastapLawice(arr, wKadrze) {
+  /* Wolane przy kazdej nowej lawicy (guzik i zegar), po zwyklym skladzie,
+     gwarancjach zanet i wrozbach, poza lawica Smoka Zycia. W co 20.
+     lawicy dopisuje Lucjanka Zero do zwyklych ryb. Zwraca true, gdy dolaczyl. */
+  function dolaczDoLawicy(arr, wKadrze) {
     if (!wEtapie() || juzZlowiony() || !arr) return false;
     let n = czytajLicznik();
-    /* Pierwsza lawica etapu 3 to od razu Lucjanek Zero. */
+    /* Pierwsza lawica etapu 3 juz go ma. */
     if (n < 0) n = CO_ILE - 1;
     n += 1;
     zapiszLicznik(n);
-    const kolej = (n % CO_ILE === 0) || zaleglosc;
-    if (!kolej) return false;
-    /* W trakcie holu lawica zostaje: Lucjanek Zero przyplynie nastepnym razem. */
-    if (arr.some(f => f && f.caught)) { zaleglosc = true; return false; }
+    if (n % CO_ILE !== 0) return false;
     const f = stworz(wKadrze);
     if (!f) return false;
-    zaleglosc = false;
-    arr.length = 0;
     arr.push(f);
-    aktywna = true;
-    try {
-      if (typeof Ruch !== 'undefined' && Ruch.powiedz) Ruch.powiedz('LUCJANEK ZERO W ŁAWICY');
-      if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
-    } catch (e) {}
     return true;
   }
-
-  function aktywnaLawica() { return aktywna; }
-  function koniecLawicy() { aktywna = false; }
 
   /* Czy Lucjanek Zero plywa teraz w kadrze. Na tym stoi blokada sieci. */
   function wLawicy() {
@@ -186,7 +176,7 @@ const LucjanekZero = (() => {
     try { if (window.Zaraza && Zaraza.liczPodejscie) Zaraza.liczPodejscie(); } catch (e) {}
   }
 
-  /* Odmowa: odplywa za kadr i juz nie wraca. Lawica wraca do zwyklego zycia. */
+  /* Odmowa: odplywa za kadr i w tej lawicy juz nie wraca. */
   function poOdmowie(f) {
     if (!f) return;
     f.mood = 'odplywa';
@@ -196,7 +186,6 @@ const LucjanekZero = (() => {
     f.vTarget = f.face * Math.max(f.base * 5, 70);
     f.hover = 0; f.turn = 999; f.pobyt = 0;
     delete f.strona;
-    aktywna = false;
     try { if (typeof Ruch !== 'undefined' && Ruch.powiedz) Ruch.powiedz('LUCJANEK ZERO ODPŁYNĄŁ'); } catch (e) {}
   }
 
@@ -216,7 +205,7 @@ const LucjanekZero = (() => {
     return true;
   }
 
-  return { SZANSA, CO_ILE, zastapLawice, aktywnaLawica, koniecLawicy, wLawicy,
+  return { SZANSA, CO_ILE, dolaczDoLawicy, wLawicy,
            podejscie, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
 })();
 window.LucjanekZero = LucjanekZero;

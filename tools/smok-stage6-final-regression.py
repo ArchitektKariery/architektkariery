@@ -84,16 +84,14 @@ checks["dragon_event_consumes_flag"] = "FortuneCookie.consumeLegendary();" in sm
 checks["dragon_event_active_flag"] = "aktywna = true;" in smok_mod and "function koniecLawicy(){ aktywna=false; }" in smok_mod
 
 # Both manual/new-shoal and timed cycle paths must bypass ordinary additions.
-# Od 7 X 2026 ta sama bramka obejmuje tez lawice Lucjanka Zero (event ZARAZA),
-# wiec warunek moze miec dopisany drugi czlon.
 checks["manual_shoal_bypass"] = (
     "const __smokEvent" in src and
     "SmokZycia.zastapLawiceJesliCzeka(school)" in src and
-    ("if (!__smokEvent)" in src or "if (!__smokEvent && !__lzEvent)" in src)
+    "if (!__smokEvent)" in src
 )
 checks["timed_shoal_bypass"] = (
     "const __smokAuto" in src and
-    ("if (!__smokAuto)" in src or "if (!__smokAuto && !__lzAuto)" in src)
+    "if (!__smokAuto)" in src
 )
 checks["active_dragon_blocks_population_refill"] = "SmokZycia.aktywnaLawica()) return;" in src
 

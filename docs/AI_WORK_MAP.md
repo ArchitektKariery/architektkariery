@@ -122,7 +122,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Nagroda odnowy „para” (1 samiec + 1 samica od razu), zamknięcie Lucjanka, start zbiórki Karpika | `supabase/migrations/20261001_odnowa_karpik.sql` |
 | Pani Raptorowa (codzienna niespodzianka) | `src/events/raptor-love.js` |
 | Event ZARAZA (6-9 X 2026): zegar etapów, chip pod MENU, panel LABORATORIUM, oddawanie zanęt i wpłata qryb; opis `docs/zaraza.md` | `src/events/zaraza.js`, SQL `supabase/migrations/20261006_zaraza.sql`, style `css/05-product.css` (blok ZARAZA) |
-| Lucjanek Zero (etap 3 ZARAZY): ławica co 20., blady sprite, zamrożony rzut 1 : 13 983 816, blokada sieci, licznik podejść; opis `docs/zaraza.md` | `src/events/lucjanek-zero.js`, punkty zaczepienia w `src/fish/hook.js`, `behavior.js`, `school.js`, `species.js`, `src/ecosystem/net-anim.js`, `net-catch.js`, `src/card/card.js` |
+| Lucjanek Zero (etap 3 ZARAZY): dołącza do co 20. ławicy, blady sprite, zamrożony rzut 1 : 13 983 816, blokada sieci, licznik podejść; opis `docs/zaraza.md` | `src/events/lucjanek-zero.js`, punkty zaczepienia w `src/fish/hook.js`, `behavior.js` (`cyklLawicy`, `chetnaZaatakowac`, `dobraOfiara`), `school.js` (`nowaLawica`), `species.js` (`obrazRyby`), `src/ecosystem/net-anim.js`, `net-catch.js`, `src/card/card.js` |
 
 ## Dane graficzne
 

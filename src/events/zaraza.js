@@ -323,7 +323,7 @@ const Zaraza = (() => {
     h += kartaEtapu(3, e >= 3 ? 'ETAP 3 · LUCJANEK ZERO' : 'ETAP 3 · ???', e === 3 ? 'DO PT 23:00' : (e > 3 ? 'ZAMKNIĘTY' : 'OD CZW 23:00'),
       e >= 3 ? (stan && stan.zlowil
                   ? 'Lucjanka Zero złowił ' + esc(stan.zlowil) + '. Laboratorium ma przeciwciała.'
-                  : 'Złówcie Lucjanka Zero. Tylko on ma przeciwciała. Pływa sam w co 20. ławicy: blady, powolny, tuż pod taflą.')
+                  : 'Złówcie Lucjanka Zero. Tylko on ma przeciwciała. Pływa w co 20. ławicy, między innymi rybami: blady, powolny, tuż pod taflą.')
              : 'Laboratorium jeszcze nie wie, czego zabraknie.',
       -1, e >= 3 ? liniaPodejsc() : '', e === 3 ? (stan && stan.zlowil ? 'ok' : 'czeka') : 'zr-zamk');
 

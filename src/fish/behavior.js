@@ -579,15 +579,12 @@ function cyklLawicy(dt) {
   if (CYKL.t >= CYKL.okres) {
     CYKL.t -= CYKL.okres; CYKL.faza = 'zyje';
     if(window.SmokZycia) SmokZycia.koniecLawicy();
-    if(window.LucjanekZero) LucjanekZero.koniecLawicy();
     /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
     for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
     const ile = POP.cel + Math.round(Math.random() * 3);
     for (let i = 0; i < ile; i++) school.push(wplyw());
     spawnT = POP.odstep[0];
     const __smokAuto = !!(window.SmokZycia && SmokZycia.zastapLawiceJesliCzeka(school));
-    /* Lucjanek Zero (event ZARAZA): po Smoku, bo wrozba ma pierwszenstwo. */
-    const __lzAuto = !__smokAuto && !!(window.LucjanekZero && LucjanekZero.zastapLawice(school, false));
     /* ============================================================
        BLAD ZASTANY (znaleziony IX 2026 przy okazji dodawania nowej
        zanety, ktora potrzebowala tego samego haka): wymiana lawicy
@@ -606,20 +603,19 @@ function cyklLawicy(dt) {
        (if(!z) return;) i podmiana nigdy sie nie odbywala. Module 18 mial
        to w dobrej kolejnosci od zawsze (wstaw NAJPIERW, zuzyj POTEM) --
        ten blok teraz robi dokladnie to samo, w tej samej kolejnosci. */
-    if (!__smokAuto && !__lzAuto) {
+    if (!__smokAuto) {
       if (typeof wstawGwarant === 'function') wstawGwarant();
       if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
+      /* Lucjanek Zero (event ZARAZA): w co 20. lawicy dolacza do zwyklych ryb. */
+      if (window.LucjanekZero) LucjanekZero.dolaczDoLawicy(school, false);
     }
-    /* Lawica Lucjanka Zero nie zjada rundy zanety: zaneta i tak nie ma
-       w niej na czym zadzialac. */
-    if (typeof Zapis !== 'undefined' && !__lzAuto) Zapis.zuzyjLawice();
+    if (typeof Zapis !== 'undefined') Zapis.zuzyjLawice();
   }
 }
 
 function zarzadzajPopulacja(dt) {
   cyklLawicy(dt);
   if(window.SmokZycia && SmokZycia.aktywnaLawica()) return;
-  if(window.LucjanekZero && LucjanekZero.aktywnaLawica()) return;
   /* W fazie ucieczki populacja sie nie uzupelnia, inaczej nowe ryby
      wplywalyby w sam srodek exodusu.
      FAZA 'siec' dziala tak samo, ale z innego powodu: po zarzuceniu
