@@ -7,13 +7,339 @@
   "stage5_gate": "BLOCKED",
   "migration_to_github": "IN_PROGRESS",
   "nodes": {
-    "01": {"scope": 126, "snapshot": {"stage1_unique": 120, "stage2_unique": 106, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "Rebuild final 6 Stage1 cards, then missing 20 Stage2 cards"}, "artifact_scan": {}},
-    "02": {"scope": 99, "snapshot": {"stage1_unique": 99, "stage2_unique": 99, "stage4_7_complete": true, "traceability_recheck_complete": false, "next": "No rebuild work; await master traceability review"}, "artifact_scan": {}},
-    "03": {"scope": 169, "snapshot": {"stage1_unique": 120, "stage2_unique": 9, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "49 Stage1 cards remain; then 160 missing Stage2 cards"}, "artifact_scan": {}},
-    "04": {"scope": 92, "snapshot": {"stage1_unique": 60, "stage2_unique": 32, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "32 Stage1 cards remain; then 60 missing Stage2 cards"}, "artifact_scan": {}},
-    "05": {"scope": 98, "snapshot": {"stage1_unique": 0, "stage2_unique": 78, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "Controlled Stage1 rebuild 98 cards; then 20 missing Stage2 cards"}, "artifact_scan": {}},
-    "06": {"scope": 191, "snapshot": {"stage1_unique": 191, "stage2_unique": 191, "stage4_7_complete": true, "traceability_recheck_complete": true, "next": "No work; READY FOR MASTER REVIEW"}, "artifact_scan": {}},
-    "07": {"scope": 96, "snapshot": {"stage1_unique": 0, "stage2_unique": 0, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "Controlled rebuild Stage1 96 and Stage2 96"}, "artifact_scan": {}},
-    "08": {"scope": 184, "snapshot": {"stage1_unique": 100, "stage2_unique": 0, "stage4_7_complete": false, "traceability_recheck_complete": false, "next": "84 Stage1 T2 cards remain; then Stage2 184 cards"}, "artifact_scan": {}}
+    "01": {
+      "scope": 126,
+      "snapshot": {
+        "stage1_unique": 120,
+        "stage2_unique": 106,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "Rebuild final 6 Stage1 cards, then missing 20 Stage2 cards"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/120",
+          "stage2_vs_snapshot": "0/106",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "02": {
+      "scope": 99,
+      "snapshot": {
+        "stage1_unique": 99,
+        "stage2_unique": 99,
+        "stage4_7_complete": true,
+        "traceability_recheck_complete": false,
+        "next": "No rebuild work; await master traceability review"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/99",
+          "stage2_vs_snapshot": "0/99",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "03": {
+      "scope": 169,
+      "snapshot": {
+        "stage1_unique": 120,
+        "stage2_unique": 9,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "49 Stage1 cards remain; then 160 missing Stage2 cards"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/120",
+          "stage2_vs_snapshot": "0/9",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "04": {
+      "scope": 92,
+      "snapshot": {
+        "stage1_unique": 60,
+        "stage2_unique": 32,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "32 Stage1 cards remain; then 60 missing Stage2 cards"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/60",
+          "stage2_vs_snapshot": "0/32",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "05": {
+      "scope": 98,
+      "snapshot": {
+        "stage1_unique": 0,
+        "stage2_unique": 78,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "Controlled Stage1 rebuild 98 cards; then 20 missing Stage2 cards"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/0",
+          "stage2_vs_snapshot": "0/78",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "06": {
+      "scope": 191,
+      "snapshot": {
+        "stage1_unique": 191,
+        "stage2_unique": 191,
+        "stage4_7_complete": true,
+        "traceability_recheck_complete": true,
+        "next": "No work; READY FOR MASTER REVIEW"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/191",
+          "stage2_vs_snapshot": "0/191",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    },
+    "07": {
+      "scope": 96,
+      "snapshot": {
+        "stage1_unique": 0,
+        "stage2_unique": 0,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "Controlled rebuild Stage1 96 and Stage2 96"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/0",
+          "stage2_vs_snapshot": "0/0",
+          "migration_complete_for_snapshot": true
+        }
+      }
+    },
+    "08": {
+      "scope": 184,
+      "snapshot": {
+        "stage1_unique": 100,
+        "stage2_unique": 0,
+        "stage4_7_complete": false,
+        "traceability_recheck_complete": false,
+        "next": "84 Stage1 T2 cards remain; then Stage2 184 cards"
+      },
+      "artifact_scan": {
+        "stage1": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "stage2": {
+          "files": 0,
+          "physical_cards": 0,
+          "unique": 0,
+          "duplicates": [],
+          "roles": {
+            "T0": 0,
+            "T1": 0,
+            "T2": 0
+          },
+          "errors": []
+        },
+        "storage_health": {
+          "stage1_vs_snapshot": "0/100",
+          "stage2_vs_snapshot": "0/0",
+          "migration_complete_for_snapshot": false
+        }
+      }
+    }
+  },
+  "artifact_scan_updated_at_utc": "2026-10-07T20:45:53.072850+00:00",
+  "validator": {
+    "result": "PASS",
+    "fatal_errors": [],
+    "rule": "Incomplete is allowed; duplicates, malformed cards and scope overflow fail."
   }
 }
