@@ -26,14 +26,16 @@
 
    FINAŁ (pt 9 X 23:00, supabase/migrations/20261008_zaraza_final.sql).
    Robi go serwer: zadanie pg_cron ustawia kazdy gatunek na poziom jego
-   pasma (zostaje 40% ryb, pasmo 1 najliczniejsze, kazde nastepne mniej)
-   i wlacza sufit gatunku. Gra po 23:00:
+   pasma (zostaje 40% ryb, pasmo 1 najliczniejsze, kazde nastepne mniej).
+   Sufitow gatunkow nie ma: dalej jezioro zmienia sie od polowow,
+   wypuszczen i tarla (decyzja Andrzeja 7 X 2026). Gra po 23:00:
      - czyta wynik z zaraza_stan_publiczny (pole final) i pokazuje go
        w laboratorium, w chipie i raz w samoczynnie otwartym panelu,
      - gdy wyniku nie ma, wola zaraza_final_teraz (zapas za zegar
        serwera; przed czasem i po wykonaniu serwer nic nie zmienia),
-     - raz na finał pobiera nowe liczby jeziora i sufity, a potem
-       czysci lokalna ikre i kohorty (Eko.wyczyscPoZarazie).
+     - raz na finał pobiera nowe liczby jeziora, a potem czysci lokalna
+       ikre i kohorty (Eko.wyczyscPoZarazie).
+   Slabsze tarlo po finale (narybek 0,041) liczy src/ecosystem/population.js.
    Chip zostaje 3 dni po finale, potem znika.
    ============================================================ */
 const Zaraza = (() => {
@@ -84,13 +86,12 @@ const Zaraza = (() => {
   }
 
   /* Wynik finału z serwera. Podglad ?zaraza=4 bez wyniku na serwerze
-     pokazuje przykladowe liczby z atrapy bazy (103 625 ryb przed), zeby
-     dalo sie obejrzec karte przed piatkiem; karta podpisuje je jako
-     podglad. */
+     pokazuje liczby z podgladu planu z sr 7 X 2026 (118 477 ryb przed,
+     47 409 po), zeby dalo sie obejrzec karte przed piatkiem; karta
+     podpisuje je jako podglad. */
   const FINAL_PODGLADU = {
-    przed: 103625, po: 41496, zostaje: 0.4, podglad: true,
-    poziomy: { 1: 4259, 2: 937, 3: 179, 4: 47, 5: 17, 6: 8, 7: 4 },
-    sufity: { 1: 11500, 2: 2530, 3: 483, 4: 127, 5: 46, 6: 16, 7: 5 }
+    przed: 118477, po: 47409, zostaje: 0.4, podglad: true,
+    poziomy: { 1: 4856, 2: 1068, 3: 204, 4: 53, 5: 19, 6: 8, 7: 4 }
   };
   function finalStan() {
     if (stan && stan.final && typeof stan.final === 'object') return stan.final;
@@ -356,8 +357,8 @@ const Zaraza = (() => {
     if (pasma) {
       h += '<div class="tr">Każdy gatunek wrócił do poziomu swojego pasma. Ryb na gatunek: ' + pasma + '.</div>';
     }
-    h += '<div class="tr">Tarło odbuduje jezioro, ale żaden gatunek nie urośnie ponad sufit swojego pasma.</div>' +
-         (f.podglad ? '<div class="zr-linia">PODGLĄD: liczby z atrapy, prawdziwe przyjdą z serwera w piątek o 23:00</div>' : '') +
+    h += '<div class="tr">Od teraz jezioro znowu zależy od was: od połowów, wypuszczeń i tarła.</div>' +
+         (f.podglad ? '<div class="zr-linia">PODGLĄD: liczby ze stanu jeziora w środę 7 X, prawdziwe przyjdą z serwera w piątek o 23:00</div>' : '') +
          '</div>';
     return h;
   }
@@ -548,8 +549,8 @@ const Zaraza = (() => {
     } catch (e) {}
   }
 
-  /* Raz na finał w tej grze: nowe liczby jeziora i sufity z serwera,
-     potem czyszczenie lokalnej ikry i kohort sprzed finału. Klucz
+  /* Raz na finał w tej grze: nowe liczby jeziora z serwera, potem
+     czyszczenie lokalnej ikry i kohort sprzed finału. Klucz
      w Magazynie trzyma czas finału, wiec cofniety i powtorzony finał
      wykona sie jeszcze raz. */
   const K_FINAL = 'zaraza.final.lok';
@@ -567,7 +568,6 @@ const Zaraza = (() => {
     try {
       const ok = await Eko.Serwer.pobierz();
       if (!ok) return;
-      try { if (Eko.Serwer.pobierzPasma) await Eko.Serwer.pobierzPasma(true); } catch (e) {}
       try { if (Eko.wyczyscPoZarazie) Eko.wyczyscPoZarazie(); } catch (e) {}
       try { if (window.Magazyn) Magazyn.pisz(K_FINAL, String(f.kiedy)); else localStorage.setItem(K_FINAL, String(f.kiedy)); }
       catch (e) {}

@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-07-zaraza-final-v1`; finał czeka na pt 9 X 23:00)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-07-zaraza-final-v2`; finał czeka na pt 9 X 23:00)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 
@@ -10,7 +10,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
 | 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 600 000 000 qryb (było 2 mld; 7 X po saldach graczy 500 mln, potem decyzja Andrzeja: 600 mln) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero |
-| finał | pt 9 X 23:00 | | zostaje 40% ryb w rozkładzie pasm, sufit gatunku, słabsze tarło |
+| finał | pt 9 X 23:00 | | zostaje 40% ryb w rozkładzie pasm, słabsze tarło, bez sufitów gatunków |
 
 ## Etap 3: Lucjanek Zero (w grze, budzi się sam w czw 8 X o 23:00)
 - zwykła ryba `lucjan_czerwony` z flagą `f.lzZero`, więc punkty, hol, ruch, grubość i wycena działają bez zmian, a gra nie dostaje nowego gatunku (atlas, zadania, liga i nagrody za komplet zostają nietknięte); zwykły Lucjan czerwony bierze normalnie,
@@ -26,10 +26,38 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 - nie należy do populacji jeziora: drapieżniki go nie zjadają, a sieć nie odejmuje go od Lucjana,
 - złowienie wysyła `zaraza_zlowiony` (liczy się pierwszy łowca) i otwiera zwykłą kartę Lucjana; laboratorium pokazuje łowcę.
 
-## Finał: rozkład pasm i sufit gatunku (pt 9 X 23:00)
-Decyzje Andrzeja: zaraza zabiera 60% ryb (6 X), reset przywraca rozkład pasm, „żeby 1 było najwięcej, 2 mniej, 3 mniej i tak dalej” (7 X), tarło po resecie trochę słabsze (6 X).
+## Finał: rozkład pasm (pt 9 X 23:00)
+Decyzje Andrzeja: zaraza zabiera 60% ryb (6 X), reset przywraca rozkład pasm, „żeby 1 było najwięcej, 2 mniej, 3 mniej i tak dalej” (7 X), tarło po resecie trochę słabsze (6 X). Po podglądzie planu (7 X, 15:55): „Resetujemy do 40% i ustawiamy porządek w pasmach. Dalej znowu gracze decydują ponownie. Jak będziemy coś chcieli zmienić w przyszłości, to w ten sam sposób eventem.” Dlatego finał nie zakłada sufitów gatunków (pierwsza wersja z 7 X je miała; nowy plik je zdejmuje).
 
-**Dlaczego pasma się rozjechały.** Tarło daje każdemu gatunkowi pasm 3-7 tę samą ikrę (ok. 1 200 ziaren), bez względu na normę pasma. Policzone na wzorach `src/ecosystem/population.js` (symulacja 200 000 tareł na pasmo, scenariusze jesieni):
+**Reset** (`zaraza_final_plan`, plik `20261007_zaraza_final_podglad.sql`):
+- każdy żywy gatunek dostaje poziom swojego pasma; poziomy mają proporcje norm gry (10 000 / 2 200 / 420 / 110 / 40 / 14 / 4), przeskalowane tak, żeby w jeziorze zostało 40% ryb (100%, gdy ktoś złowił Lucjanka Zero),
+- każde pasmo ma co najmniej 1,5 raza więcej ryb na gatunek i 1,25 raza więcej razem niż następne; pasmo 7 ma najmniej 4 sztuki (2 + 2),
+- płeć w tych samych proporcjach; gatunek bez samic albo samców zostaje bez nich (reset nikogo nie wskrzesza),
+- wymarłe zostają wymarłe; Lucjan czerwony i Karpik Surinamski (gatunki odnowy) bez zmian; Smoka Życia nie ma w tabeli pasm; gatunki bez wiersza w bazie dostają wiersz na poziomie pasma.
+
+**Podgląd planu na żywej bazie (śr 7 X, 15:55, zrzut Andrzeja):**
+
+| pasmo | gatunki | teraz | min-max na gatunek | najliczniejszy | po resecie na gatunek | po resecie razem | zmiana |
+|---|---|---|---|---|---|---|---|
+| 1 | 6 | 64 062 | 8 390-12 627 | krap | 4 856 | 29 136 | -55% |
+| 2 | 12 | 32 711 | 1 756-6 309 | klen | 1 068 | 12 816 | -61% |
+| 3 | 21 | 14 628 | 3-1 075 | sum | 204 | 4 284 | -71% |
+| 4 | 18 | 3 008 | 95-396 | certa | 53 | 954 | -68% |
+| 5 | 6 | 877 | 49-267 | rozdymka | 19 | 114 | -87% |
+| 6 | 7 | 2 216 | 2-1 798 | morświn | 8 | 56 | -97% |
+| 7 | 11 | 970 | 1-281 | tyrios morski | 4 | 44 | -95% |
+| poza resetem | 3 | 5 | | Karpik Surinamski (2) | | 5 | 0% |
+| razem | | 118 477 | | | | 47 409 | -60% |
+
+Wymarłych gatunków nie było. Ten sam rozkład na atrapie bazy (te same sumy, minima i maksima pasm) dał finał 118 477 → 47 409, 78 gatunków ciętych, 3 dosiane (te z minimum pasma 3, 6 i 7).
+
+**Po finale:**
+- sufitów gatunków nie ma: jezioro zmienia się wyłącznie od połowów, wypuszczeń i tarła; kolejne korekty rozkładu pasm robimy następnymi eventami,
+- narybek przeżywa ostatni etap w 4,1% zamiast 5,5% (`Eko.przezyjEtapu`, próg z zegara: pt 9 X 23:00),
+- gra raz na finał pobiera nowe liczby jeziora i czyści lokalną ikrę i kohorty sprzed finału (`Eko.wyczyscPoZarazie`), listy osobników skraca do liczby z serwera,
+- laboratorium pokazuje kartę finału (licznik podejść Lucjanka Zero, ile ryb zabrała zaraza, poziom każdego pasma, zdanie „Od teraz jezioro znowu zależy od was”), otwiera się samo raz (`qryby.zaraza.intro.4`), chip „ZARAZA · FINAŁ” zostaje 3 dni.
+
+**Na przyszłe eventy: dlaczego pasma się rozjeżdżają.** Tarło daje każdemu gatunkowi pasm 3-7 tę samą ikrę (ok. 1 200 ziaren), bez względu na normę pasma. Policzone na wzorach `src/ecosystem/population.js` (symulacja 200 000 tareł na pasmo, scenariusze jesieni):
 
 | pasmo | norma | ryb z tarła przy jeziorze pełnym w 81% | po cięciu do 40% |
 |---|---|---|---|
@@ -41,33 +69,15 @@ Decyzje Andrzeja: zaraza zabiera 60% ryb (6 X), reset przywraca rozkład pasm, �
 | 6 | 14 | 9 (65%) | 24 (173%) |
 | 7 | 4 | 9 (228%) | 24 (601%) |
 
-Para mitycznych w tarlisku powtarza tarło po każdej karencji (3-40 min). Bez sufitu pierwsze tarło po resecie znowu zrobiłoby z mitycznej ryby rybę liczniejszą od każdego gatunku pasma 5.
-
-**Reset** (`zaraza_final_plan`, plik `20261007_zaraza_final_podglad.sql`):
-- każdy żywy gatunek dostaje poziom swojego pasma; poziomy mają proporcje norm gry (10 000 / 2 200 / 420 / 110 / 40 / 14 / 4), przeskalowane tak, żeby w jeziorze zostało 40% ryb (100%, gdy ktoś złowił Lucjanka Zero),
-- każde pasmo ma co najmniej 1,5 raza więcej ryb na gatunek i 1,25 raza więcej razem niż następne; pasmo 7 ma najmniej 4 sztuki (2 + 2),
-- płeć w tych samych proporcjach; gatunek bez samic albo samców zostaje bez nich,
-- wymarłe zostają wymarłe; Lucjan czerwony i Karpik Surinamski (gatunki odnowy) bez zmian; Smoka Życia nie ma w tabeli pasm; gatunki bez wiersza w bazie dostają wiersz na poziomie pasma.
-
-Atrapa bazy (103 625 ryb, pasma 5-7 przerośnięte): po resecie 41 496 (40,04%), na gatunek 4 259 / 937 / 179 / 47 / 17 / 8 / 4, sumy pasm 25 554 / 11 244 / 3 580 / 846 / 85 / 56 / 44.
-
-**Sufit gatunku** (`eko_pasma.sufit`): 1,15 normy pasma, nigdy poniżej poziomu po resecie: 11 500 / 2 530 / 483 / 127 / 46 / 16 / 5. Pilnuje go wyzwalacz `eko_sufit` na `eko_populacja` (każdy wzrost, także ze starej wersji gry, z nagrody odnowy i z wypuszczenia); spadki przechodzą bez zmian. Suma sufitów to ok. 112 tys., poniżej pojemności jeziora 120 000, więc jezioro odbudowuje się do normy gry, ale w dobrym rozkładzie. To cofa polecenie z IX 2026 („pasma i gatunki nie mają swoich ograniczeń”) i wraca do sufitu gatunku 1,15, który gra miała wcześniej. Zmiana sufitu: `update public.eko_pasma set sufit = … where pasmo = …;`
-
-**Gra po finale** (`src/ecosystem/population.js`, `server.js`, `src/events/zaraza.js`):
-- czyta sufity z `eko_pasma` co 5 minut (`Eko.Serwer.pobierzPasma`); bez sufitów działa po staremu,
-- przycina narybek do miejsca pod sufitem (ta sama krzywa co dla jeziora, potem twarde cięcie),
-- liczy zagęszczenie gatunku względem sufitu, nie historycznego maksimum: gatunek przy suficie ma dłuższą karencję i gorsze scenariusze tarła,
-- narybek przeżywa w 4,1% zamiast 5,5%,
-- raz na finał pobiera nowe liczby jeziora i czyści lokalną ikrę i kohorty sprzed finału (`Eko.wyczyscPoZarazie`), listy osobników skraca do liczby z serwera,
-- laboratorium pokazuje kartę finału (licznik podejść Lucjanka Zero, ile ryb zabrała zaraza, poziom każdego pasma), otwiera się samo raz (`qryby.zaraza.intro.4`), chip „ZARAZA · FINAŁ” zostaje 3 dni.
+Para w tarlisku powtarza tarło po każdej karencji (3-40 min). Tabela `eko_pasma` i funkcja `zaraza_final_plan(udział)` zostają w bazie, więc kolejny event porządkujący pasma może użyć tego samego planu.
 
 **Uruchomienie.** Zadanie pg_cron `zaraza-final` sprawdza zegar co minutę i po wykonaniu samo się wyłącza. Zapas: zalogowana gra po 23:00 bez wyniku woła `zaraza_final_teraz` (najwyżej raz na minutę); serwer wykonuje finał tylko raz i tylko po czasie.
 
 **Ręcznie (SQL Editor):**
 - `select private.zaraza_final_wykonaj(true);` finał od razu, przed czasem,
-- `select private.zaraza_final_cofnij();` przywraca kopię jeziora (`zaraza_final_kopia`), zdejmuje sufity i ukrywa wynik w grze; ponowny finał: `select private.zaraza_final_wykonaj(true);`.
+- `select private.zaraza_final_cofnij();` przywraca kopię jeziora (`zaraza_final_kopia`) i ukrywa wynik w grze; ponowny finał: `select private.zaraza_final_wykonaj(true);`.
 
-Podgląd w grze: `?zaraza=4` (sobota 12:00, liczby z atrapy, podpisane PODGLĄD).
+Podgląd w grze: `?zaraza=4` (sobota 12:00, liczby z podglądu planu z 7 X, podpisane PODGLĄD).
 
 ## Laboratorium
 - otwiera się samo raz na każdy etap (`qryby.zaraza.intro`, `.2`, `.3`), dopiero gdy ekran jest wolny (bez panelu, księgi, karty i holu),
@@ -82,11 +92,11 @@ Adres gry z `?zaraza=2`, `?zaraza=3` albo `?zaraza=4` przestawia zegar tej karty
 - `src/events/lucjanek-zero.js` — Lucjanek Zero: rzadkość jednej ryby w jeziorze (`moze`, wołane z `makeFishZLimitem` w `src/fish/school-update.js`), blady sprite, zamrożony rzut, odpływanie, blokada sieci
 - punkty zaczepienia: `obrazRyby` (`src/fish/species.js`), `chetnaZaatakowac` i `dobraOfiara` (`src/fish/behavior.js`), decyzja przy przynęcie (`src/fish/hook.js`), wymiana ławicy (`nowaLawica` w `src/fish/school.js`, `cyklLawicy` w `src/fish/behavior.js`), `siecZarzuc` (`src/ecosystem/net-anim.js`), `Siec.zarzuc` (`src/ecosystem/net-catch.js`), zakładka SIEĆ (`src/ui/panel.js`), `openCard` (`src/card/card.js`)
 - `css/05-product.css` — blok „ZARAZA” (z kartą finału `.zr-final`)
-- `src/ecosystem/population.js` — sufit gatunku po zarazie (`CFG.SUFIT`, `sufitGatunku`, `gestoGatunku`, `przezyjEtapu`, `wyczyscPoZarazie`), `src/ecosystem/server.js` — `pobierzPasma`
+- `src/ecosystem/population.js` — słabsze tarło po finale (`CFG.NARYBEK_PO_ZARAZIE`, `przezyjEtapu`) i czyszczenie lokalnej ikry (`wyczyscPoZarazie`)
 - `supabase/migrations/20261006_zaraza.sql` — stan, wpłaty, okna czasowe, funkcje: `zaraza_stan_publiczny`, `zaraza_moj_wklad`, `zaraza_oddaj_zanety`, `zaraza_wplac_qryby`, `zaraza_podejscie`, `zaraza_zlowiony`
 - `supabase/migrations/20261007_zaraza_cele.sql` — cele etapów w kolumnach `zaraza_stan.zanety_cel` i `qryby_cel`, funkcje czytają kolumny; cel etapu 2 = 600 000 000 (decyzja Andrzeja). Salda graczy 7 X 11:08 bez konta twórcy: razem 588 841 406, najwięcej Babcia 429 220 066; 600 mln przewyższa wszystkie salda o 11 158 594, więc grupa musi oddać wszystko i dorobić resztę w czasie etapu. Zmiana celu: `update public.zaraza_stan set qryby_cel = … where id = 1;`
-- `supabase/migrations/20261007_zaraza_final_podglad.sql` — tabela `eko_pasma` (pasmo i sufit gatunku) i funkcja `zaraza_final_plan`; sam plik nie zmienia ryb, pokazuje plan w podziale na pasma
-- `supabase/migrations/20261008_zaraza_final.sql` — finał: kopia jeziora, reset, sufity, wyzwalacz `eko_sufit`, zadanie pg_cron `zaraza-final`, `zaraza_final_teraz`, cofnięcie, wynik w `zaraza_stan_publiczny`
+- `supabase/migrations/20261007_zaraza_final_podglad.sql` — tabela `eko_pasma` (pasmo gatunku; kolumna `sufit` zostaje pusta) i funkcja `zaraza_final_plan`; sam plik nie zmienia ryb, pokazuje plan w podziale na pasma
+- `supabase/migrations/20261008_zaraza_final.sql` — finał: kopia jeziora, reset, zadanie pg_cron `zaraza-final`, `zaraza_final_teraz`, cofnięcie, wynik w `zaraza_stan_publiczny`; zdejmuje wyzwalacz `eko_sufit` z pierwszej wersji pliku
 
 ## Zasady serwera
 - torba (`zapis->zanetyMam`) i portfel (`zapis->monety`) gracza schodzą w tej samej transakcji co wpis do licznika, jak w `community_contribute`,
@@ -102,5 +112,7 @@ Adres gry z `?zaraza=2`, `?zaraza=3` albo `?zaraza=4` przestawia zegar tej karty
 - Lucjanek Zero w zwykłych ławicach (build v2): 60 ławic w etapie 1 bez niego; w etapie 3 pierwsza ławica 14 ryb z nim, potem co 20. przy wymianie guzikiem i zegarem; sieć zablokowana przy pełnej ławicy (14 ryb zostaje); podejście wśród innych ryb, odmowa, sieć odblokowana; runda zanęty schodzi normalnie (100 → 60 po 40 ławicach); zero błędów strony.
 - Rzadkość jednej ryby w jeziorze (build v3): 200 ławic w etapie 1 bez niego; w etapie 3 szansa 1 : 97 567 na miejsce i 35 trafień na 3 000 000 (oczekiwane 30,7); zanęty: pasmo 4 → 1 : 1 981, KOTLETY → 1 : 20 863, pasmo 1 → 0 trafień na 200 000; podgląd: 35 ławic na 100, nigdy dwa naraz; podejście, odmowa, licznik 1, sieć odblokowana; zero błędów strony.
 - Cele w kolumnach (PostgreSQL 16, atrapa `auth`): plik na świeżej bazie i drugi raz, cel 500 000 000 w stanie publicznym, wpłata Babci 429 220 066, wpłata Elżbiety przycięta do 70 779 934 (saldo 64 180 188), cel osiągnięty, ponowione żądanie, zmiana celu jedną linijką. Lucjanek Zero: 2000 ławic z zanętą pasma 4 w podglądzie, 613 z nim, ani jednej z dwoma; 300 ławic z dosyłaniem ryb bez drugiego; dosadzanie partnera i gody go pomijają.
-- Finał (PostgreSQL 16, atrapa `auth`, `cron` i `eko_zmien`): pliki dwa razy na świeżej bazie; finał przed czasem odmawia (`ZA_WCZESNIE`), wymuszony: 103 625 → 41 496 (40,04%), poziomy i sumy pasm malejąco, wymarłe, Lucjan, Karpik i wiersze spoza tabeli bez zmian, brakujący gatunek dostaje wiersz; wyzwalacz: tarło mitycznej +24 → +1 (sufit 5), płoć +500 bez cięcia, połów −1 bez zmian, nagroda odnowy przez `on conflict` nie przebija sufitu; drugi finał `JUZ_WYKONANY`; cofnięcie przywraca jezioro co do ryby (0 różnic), zdejmuje sufity i wynik; ponowny finał po cofnięciu; zegar w etapie 4 wykonuje finał i usuwa swoje zadanie; `zaraza_final_teraz`: gość `AUTH_REQUIRED`, gracz po finale `JUZ_WYKONANY`; uprawnienia (`anon` bez dostępu, `authenticated` tylko `zaraza_final_teraz`).
-- Finał w grze (atrapa serwera przez przechwycone żądania): dziś stary reżim (narybek 0,055, brak sufitów); podgląd `?zaraza=4`: chip „-60% / ZOSTAŁO 41 496 RYB”, karta z podpisem PODGLĄD; etap 4 bez wyniku: chip „SZCZYT / LABORATORIUM LICZY STRATY”, jedno wywołanie `zaraza_final_teraz`; po wyniku: jezioro 41 495 (bez wiersza Smoka), kohorty i ikra wyczyszczone, osobniki Nessy 157 → 4, 83 sufity, narybek 0,041, laboratorium otwarte samo raz; tarło po finale: Nessy 4 → 5 (sufit 5), płoć 4 259 → 8 065 (sufit 11 500); karencja Nessy przy suficie 17 min; zero błędów strony.
+- Finał, pierwsza wersja z sufitami, wycofana 7 X (PostgreSQL 16, atrapa `auth`, `cron` i `eko_zmien`): pliki dwa razy na świeżej bazie; finał przed czasem odmawia (`ZA_WCZESNIE`), wymuszony: 103 625 → 41 496 (40,04%), poziomy i sumy pasm malejąco, wymarłe, Lucjan, Karpik i wiersze spoza tabeli bez zmian, brakujący gatunek dostaje wiersz; wyzwalacz: tarło mitycznej +24 → +1 (sufit 5), płoć +500 bez cięcia, połów −1 bez zmian, nagroda odnowy przez `on conflict` nie przebija sufitu; drugi finał `JUZ_WYKONANY`; cofnięcie przywraca jezioro co do ryby (0 różnic), zdejmuje sufity i wynik; ponowny finał po cofnięciu; zegar w etapie 4 wykonuje finał i usuwa swoje zadanie; `zaraza_final_teraz`: gość `AUTH_REQUIRED`, gracz po finale `JUZ_WYKONANY`; uprawnienia (`anon` bez dostępu, `authenticated` tylko `zaraza_final_teraz`).
+- Finał w grze, pierwsza wersja z sufitami, wycofana 7 X (atrapa serwera przez przechwycone żądania): dziś stary reżim (narybek 0,055, brak sufitów); podgląd `?zaraza=4`: chip „-60% / ZOSTAŁO 41 496 RYB”, karta z podpisem PODGLĄD; etap 4 bez wyniku: chip „SZCZYT / LABORATORIUM LICZY STRATY”, jedno wywołanie `zaraza_final_teraz`; po wyniku: jezioro 41 495 (bez wiersza Smoka), kohorty i ikra wyczyszczone, osobniki Nessy 157 → 4, 83 sufity, narybek 0,041, laboratorium otwarte samo raz; tarło po finale: Nessy 4 → 5 (sufit 5), płoć 4 259 → 8 065 (sufit 11 500); karencja Nessy przy suficie 17 min; zero błędów strony.
+- Finał bez sufitów (7 X, po decyzji Andrzeja; PostgreSQL 16): atrapa z sumami, minimami i maksimami pasm z podglądu Andrzeja daje co do liczby jego tabelę (118 477 → 47 409, poziomy 4 856 / 1 068 / 204 / 53 / 19 / 8 / 4); nowy plik po starej wersji zdejmuje wyzwalacz i funkcję sufitu, sufity puste, zadanie zegara zostaje; finał: 78 gatunków ciętych, 3 dosiane; po finale tarło mitycznej +24 przechodzi w całości (bez sufitu); cofnięcie 0 różnic; świeża instalacja dwa razy; zegar w etapie 4 wykonuje finał i usuwa zadanie.
+- Gra bez sufitów: narybek 0,055 dziś i minutę przed finałem, 0,041 od pt 23:00, inne etapy bez zmian; podgląd `?zaraza=4` z liczbami z 7 X (zabrała 71 068, zostało 47 409); etap 4 z atrapą serwera: zapas `zaraza_final_teraz`, wynik, czyszczenie kohort i osobników (77 → 4), laboratorium otwarte samo, gra nie pyta już o `eko_pasma`; zero błędów strony.

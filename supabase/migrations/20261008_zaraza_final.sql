@@ -2,19 +2,22 @@
 -- Uruchomienie: Supabase → SQL Editor → New query → wklej cały plik → Run.
 -- Uruchom PRZED piątkiem 23:00. Wymaga plików 20261006_zaraza.sql,
 -- 20261007_zaraza_cele.sql i 20261007_zaraza_final_podglad.sql.
--- Bezpieczne do ponownego uruchomienia.
+-- Bezpieczne do ponownego uruchomienia; zastępuje też pierwszą wersję
+-- tego pliku (z sufitami gatunków).
+--
+-- DECYZJA ANDRZEJA (7 X 2026, 15:55): "Resetujemy do 40% i ustawiamy
+-- porzadek w pasmach. Dalej znowu gracze decyduja ponownie. Jak bedziemy
+-- cos chcieli zmienic w przyszlosci, to w ten sam sposob eventem."
+-- Dlatego finał NIE zakłada sufitów gatunków: po resecie jezioro
+-- zmienia się wyłącznie od połowów, wypuszczeń i tarła.
 --
 -- CO ROBI FINAŁ (raz, w piątek o 23:00, sam):
 --   1. kopiuje całą tabelę eko_populacja do zaraza_final_kopia,
 --   2. ustawia każdy gatunek na poziom jego pasma według zaraza_final_plan:
---      zostaje 40% ryb, pasmo 1 najliczniejsze, każde następne mniej;
---      gdy ktoś złowił Lucjanka Zero, zostaje 100% ryb i reset tylko
---      porządkuje pasma,
---   3. włącza sufit na gatunek: 1,15 normy pasma (eko_pasma.sufit).
---      Sufitu pilnuje wyzwalacz eko_sufit na eko_populacja, więc żaden
---      wzrost (tarło, nagroda odnowy, wypuszczenie ryby) go nie przebije,
---      także u graczy ze starą wersją gry,
---   4. zapisuje wynik w zaraza_stan; gra pokazuje go w laboratorium.
+--      zostaje 40% ryb, pasmo 1 najliczniejsze, każde następne mniej,
+--      na gatunek i w sumie pasma; gdy ktoś złowił Lucjanka Zero,
+--      zostaje 100% ryb i reset tylko porządkuje pasma,
+--   3. zapisuje wynik w zaraza_stan; gra pokazuje go w laboratorium.
 --
 -- Uruchamia go zadanie pg_cron 'zaraza-final': co minutę sprawdza zegar
 -- i po wykonaniu samo się wyłącza. Zapas: gra zalogowanego gracza woła
@@ -22,8 +25,11 @@
 --
 -- RĘCZNIE (SQL Editor):
 --   select private.zaraza_final_wykonaj(true);  -- finał od razu, przed czasem
---   select private.zaraza_final_cofnij();       -- przywraca kopię, zdejmuje sufity
---   update public.eko_pasma set sufit = 6 where pasmo = 7;  -- inny sufit pasma
+--   select private.zaraza_final_cofnij();       -- przywraca kopię jeziora
+--
+-- NA PRZYSZŁE EVENTY: tabela eko_pasma i funkcja zaraza_final_plan(udział)
+-- zostają w bazie. Ten sam porządek pasm przy innym udziale ryb to
+-- private.zaraza_final_wykonaj w nowym evencie albo kopia jej treści.
 
 -- Bez podglądu (tabela eko_pasma i funkcja zaraza_final_plan) finał nie
 -- ma z czego liczyć. Wtedy plik kończy się tym błędem i niczego nie zmienia.
@@ -38,17 +44,22 @@ $$;
 
 create schema if not exists private;
 
--- 1. Wynik finału w stanie eventu.
+-- 1. Bez sufitów gatunków: sprzątanie po pierwszej wersji pliku, jeśli
+-- ktoś zdążył ją uruchomić. Bez niej te polecenia nic nie robią.
+drop trigger if exists eko_sufit on public.eko_populacja;
+drop function if exists public.eko_sufit_pilnuj();
+update public.eko_pasma set sufit = null where sufit is not null;
+
+-- 2. Wynik finału w stanie eventu.
 alter table public.zaraza_stan add column if not exists final_kiedy timestamptz;
 alter table public.zaraza_stan add column if not exists final_przed bigint;
 alter table public.zaraza_stan add column if not exists final_po bigint;
 alter table public.zaraza_stan add column if not exists final_zostaje numeric;
 alter table public.zaraza_stan add column if not exists final_poziomy jsonb;
-alter table public.zaraza_stan add column if not exists final_sufity jsonb;
 alter table public.zaraza_stan add column if not exists final_nowe text[];
 alter table public.zaraza_stan add column if not exists final_cofniety timestamptz;
 
--- 2. Kopia jeziora sprzed finału.
+-- 3. Kopia jeziora sprzed finału.
 create table if not exists public.zaraza_final_kopia (
   gat text primary key,
   n integer,
@@ -64,75 +75,6 @@ create table if not exists public.zaraza_final_kopia (
 alter table public.zaraza_final_kopia enable row level security;
 -- Bez polityk: kopię czytają i zmieniają wyłącznie funkcje niżej.
 
--- 3. Sufit gatunku. Działa tylko przy WZROŚCIE liczby ryb i tylko dla
--- gatunków z ustawionym sufitem (eko_pasma.sufit). Spadki (połów,
--- drapieżnik, sieć) przechodzą bez zmian. Przyrost ponad sufit przepada,
--- a płeć dzieli się w tych samych proporcjach, w jakich chciała ją dodać
--- zmiana.
-create or replace function public.eko_sufit_pilnuj()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_sufit integer;
-  v_n0 integer := 0;
-  v_m0 integer := 0;
-  v_f0 integer := 0;
-  v_wolne integer;
-  v_dm integer;
-  v_df integer;
-  v_m integer;
-begin
-  if tg_op = 'UPDATE' then
-    v_n0 := coalesce(old.n, 0);
-    v_m0 := coalesce(old.samcow, 0);
-    v_f0 := coalesce(old.samic, 0);
-  end if;
-  if coalesce(new.n, 0) <= v_n0 then
-    return new;
-  end if;
-
-  -- Bez tabeli pasm gra ma działać dalej, więc brak tabeli = brak sufitu.
-  begin
-    select p.sufit into v_sufit from public.eko_pasma p where p.gat = new.gat;
-  exception when undefined_table then
-    return new;
-  end;
-  if v_sufit is null or new.n <= v_sufit then
-    return new;
-  end if;
-
-  v_wolne := greatest(0, v_sufit - v_n0);
-  v_dm := greatest(0, coalesce(new.samcow, 0) - v_m0);
-  v_df := greatest(0, coalesce(new.samic, 0) - v_f0);
-  if v_dm + v_df > 0 then
-    v_m := round(v_wolne::numeric * v_dm / (v_dm + v_df));
-  else
-    v_m := round(v_wolne * 0.5);
-  end if;
-
-  new.n := v_n0 + v_wolne;
-  new.samcow := least(new.n, v_m0 + v_m);
-  new.samic := greatest(0, new.n - new.samcow);
-  if tg_op = 'UPDATE' then
-    new.max_hist := greatest(coalesce(old.max_hist, 0), new.n);
-  else
-    new.max_hist := new.n;
-  end if;
-  return new;
-end;
-$$;
-
-revoke all on function public.eko_sufit_pilnuj() from public;
-revoke all on function public.eko_sufit_pilnuj() from anon, authenticated;
-
-drop trigger if exists eko_sufit on public.eko_populacja;
-create trigger eko_sufit
-  before insert or update on public.eko_populacja
-  for each row execute function public.eko_sufit_pilnuj();
-
 -- 4. Wykonanie finału. Raz: drugi raz odmawia (JUZ_WYKONANY), chyba że
 -- finał cofnięto i wołasz z p_przed_czasem = true.
 create or replace function private.zaraza_final_wykonaj(p_przed_czasem boolean default false)
@@ -142,12 +84,10 @@ security definer
 set search_path = public
 as $$
 declare
-  v_norma constant integer[] := array[10000, 2200, 420, 110, 40, 14, 4];
   v_stan public.zaraza_stan%rowtype;
   v_zostaje numeric;
   v_plan jsonb;
   v_poziomy jsonb;
-  v_sufity jsonb;
   v_nowe text[];
   v_przed bigint;
   v_po bigint;
@@ -167,10 +107,6 @@ begin
 
   -- Złowiony Lucjanek Zero ratuje ryby: reset tylko porządkuje pasma.
   v_zostaje := case when v_stan.zlowil_nick is null then 0.40 else 1.0 end;
-
-  -- Sufity zdjęte na czas resetu, żeby wyzwalacz nie przyciął dosiewu.
-  -- Nowe wchodzą na końcu.
-  update public.eko_pasma set sufit = null where sufit is not null;
 
   -- Całe jezioro pod blokadą, żeby nikt nie zmienił liczb w trakcie.
   perform 1 from public.eko_populacja for update;
@@ -212,7 +148,7 @@ begin
     into v_ciete, v_dosiane
   from jsonb_to_recordset(v_plan) as p(akcja text);
 
-  -- Poziom każdego pasma (do komunikatu w grze i do sufitu).
+  -- Poziom każdego pasma, do komunikatu w grze.
   select coalesce(jsonb_object_agg(q.pasmo::text, q.poziom), '{}'::jsonb) into v_poziomy
   from (
     select p.pasmo, max(p.po) as poziom
@@ -220,14 +156,6 @@ begin
     where p.akcja in ('ciecie', 'dosiew', 'bez zmian', 'brak w bazie')
     group by p.pasmo
   ) q;
-
-  -- Sufit: 1,15 normy pasma, nigdy poniżej poziomu po resecie.
-  update public.eko_pasma p set
-    sufit = greatest(round(1.15 * v_norma[p.pasmo])::integer,
-                     coalesce((v_poziomy ->> p.pasmo::text)::integer, 0));
-
-  select coalesce(jsonb_object_agg(q.pasmo::text, q.sufit), '{}'::jsonb) into v_sufity
-  from (select p.pasmo, max(p.sufit) as sufit from public.eko_pasma p group by p.pasmo) q;
 
   select coalesce(sum(e.n), 0) into v_po from public.eko_populacja e;
 
@@ -237,7 +165,6 @@ begin
     final_po = v_po,
     final_zostaje = v_zostaje,
     final_poziomy = v_poziomy,
-    final_sufity = v_sufity,
     final_nowe = v_nowe,
     final_cofniety = null,
     zmieniono = now()
@@ -251,16 +178,16 @@ begin
     'ciete', v_ciete,
     'dosiane', v_dosiane,
     'nowe', to_jsonb(v_nowe),
-    'poziomy', v_poziomy,
-    'sufity', v_sufity);
+    'poziomy', v_poziomy);
 end;
 $$;
 
 revoke all on function private.zaraza_final_wykonaj(boolean) from public;
 revoke all on function private.zaraza_final_wykonaj(boolean) from anon, authenticated;
 
--- 5. Cofnięcie: kopia wraca do eko_populacja, sufity znikają, wiersze
--- dodane przez finał znikają. Ponowny finał: zaraza_final_wykonaj(true).
+-- 5. Cofnięcie: kopia wraca do eko_populacja, wiersze dodane przez finał
+-- znikają, gra przestaje pokazywać wynik. Ponowny finał:
+-- select private.zaraza_final_wykonaj(true);
 create or replace function private.zaraza_final_cofnij()
 returns jsonb
 language plpgsql
@@ -279,9 +206,6 @@ begin
   if not exists (select 1 from public.zaraza_final_kopia) then
     return jsonb_build_object('ok', false, 'powod', 'BRAK_KOPII');
   end if;
-
-  -- Najpierw sufity, inaczej wyzwalacz przyciąłby powrót do starych liczb.
-  update public.eko_pasma set sufit = null;
 
   update public.eko_populacja e set
     n = k.n,
@@ -408,18 +332,18 @@ as $$
         'przed', s.final_przed,
         'po', s.final_po,
         'zostaje', s.final_zostaje,
-        'poziomy', s.final_poziomy,
-        'sufity', s.final_sufity)
+        'poziomy', s.final_poziomy)
     end
   )
   from public.zaraza_stan s
   where s.id = 1
 $$;
 
--- Wynik: stan zegara finału.
+-- Wynik: stan zegara finału i plan resetu z tej chwili.
 select 'zaraza: etap ' || public.zaraza_etap(now())
        || ' | finał: ' || coalesce(to_char(s.final_kiedy at time zone 'Europe/Warsaw', 'DD.MM HH24:MI'), 'czeka na pt 23:00')
        || ' | zadanie zegara: ' || coalesce((select 'jest (' || j.schedule || ')' from cron.job j where j.jobname = 'zaraza-final'), 'brak')
+       || ' | sufity: ' || case when exists (select 1 from pg_trigger t where t.tgname = 'eko_sufit') then 'SĄ' else 'brak' end
        as stan
 from public.zaraza_stan s
 where s.id = 1;
