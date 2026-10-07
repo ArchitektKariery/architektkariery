@@ -606,8 +606,6 @@ function cyklLawicy(dt) {
     if (!__smokAuto) {
       if (typeof wstawGwarant === 'function') wstawGwarant();
       if (typeof wstawNowyGatunek === 'function') wstawNowyGatunek();
-      /* Lucjanek Zero (event ZARAZA): w co 20. lawicy dolacza do zwyklych ryb. */
-      if (window.LucjanekZero) LucjanekZero.dolaczDoLawicy(school, false);
     }
     if (typeof Zapis !== 'undefined') Zapis.zuzyjLawice();
   }

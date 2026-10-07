@@ -121,9 +121,6 @@ function nowaLawica() {
       try { FortuneCookie.afterShoal(school); } catch (e) {}
       try { FortuneCookie.consumeShoal(); } catch (e) {}
     }
-    /* Lucjanek Zero (event ZARAZA): w co 20. lawicy dolacza do zwyklych ryb.
-       Po wrozbach, zeby zadna z nich go nie usunela ani nie podmienila. */
-    if (window.LucjanekZero) LucjanekZero.dolaczDoLawicy(school, true);
   }
 
   /* liczniki sesji od zera, kolekcja zostaje */

@@ -47,6 +47,9 @@ window.nadajTozsamosc = nadajTozsamosc;
    z gry tedy przechodzi i nie da sie tego obejsc przypadkiem.
    ============================================================ */
 function makeFishZLimitem() {
+  /* Lucjanek Zero (event ZARAZA, etap 3): kazde miejsce w lawicy moze
+     byc nim z rzadkoscia jednej ryby w jeziorze (src/events/lucjanek-zero.js). */
+  if (window.LucjanekZero) { const lz = LucjanekZero.moze(); if (lz) return lz; }
   let f=nadajTozsamosc(makeFishZLimitemSurowy());
   if(window.FortuneCookie&&FortuneCookie.adjustFish)f=FortuneCookie.adjustFish(f);
   return f;

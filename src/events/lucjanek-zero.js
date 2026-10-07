@@ -14,13 +14,20 @@
    obrazRyby w src/fish/species.js). Plywa wolniej i trzyma sie tuz pod
    tafla, jak prawdziwa chora ryba.
 
-   POJAWIENIE. W co 20. lawicy gracza w czasie etapu 3 dolacza do
-   zwyklych ryb (decyzja Andrzeja 7 X 2026: "wiecej emocji szukajac go").
-   Liczy sie kazda wymiana, guzikiem i zegarem; pierwsza lawica etapu 3
-   juz go ma. Gra nie oglasza jego przyjscia: trzeba go wypatrzyc.
-   Zanety, gwarancje i runda zanety dzialaja w tej lawicy normalnie.
-   Dopoki plywa w kadrze, siec jest zablokowana: siec zgarnia cala
-   lawice bez brania, wiec ominelaby jego rzut.
+   POJAWIENIE: RZADKOSC JEDNEJ RYBY W JEZIORZE (decyzja Andrzeja 7 X 2026).
+   Plywa w zwyklych lawicach tak, jakby byl gatunkiem z populacja 1:
+   kazde miejsce w lawicy (nowa lawica i kazda ryba wplywajaca zza kadru)
+   jest nim z szansa 1 / (S + 1), gdzie S to suma wag w tej samej tabeli
+   losowania (`__wagiTab.suma`, czyli zywa populacja jeziora, okolo
+   100 000). Zaneta zawezajaca pule dziala na niego tak samo jak na kazdy
+   gatunek pasma 4: pula bez Lucjana go nie wpusci, a pula samego pasma 4
+   podnosi szanse tyle razy, ile razy jest mniejsza od calego jeziora.
+   W jeziorze jest jeden, wiec w kadrze najwyzej jeden naraz. Gra nie
+   oglasza jego przyjscia: trzeba go wypatrzyc. Dopoki plywa w kadrze,
+   siec jest zablokowana: siec zgarnia cala lawice bez brania, wiec
+   ominelaby jego rzut.
+   Podglad ?zaraza=3 liczy szanse tak, jakby jezioro mialo 30 ryb, zeby
+   dalo sie go zobaczyc przed czwartkiem.
 
    BRANIE: JEDEN RZUT NA POJAWIENIE, ZAMROZONY, JAK U SMOKA ZYCIA.
    Szansa 1 : 13 983 816, czyli szostka w Totolotku. Rzut pada przy
@@ -36,11 +43,8 @@
    ============================================================ */
 const LucjanekZero = (() => {
   const SZANSA = 1 / 13983816;       /* szostka w Totolotku */
-  const CO_ILE = 20;                 /* co ktora lawica */
-  const K_LICZNIK_BAZA = 'zaraza.lz.lawice';
-  /* Podglad ?zaraza=3 liczy lawice pod osobnym kluczem, zeby test nie
-     przesunal prawdziwej kolejki gracza na czwartek. */
-  const kluczLicznika = () => K_LICZNIK_BAZA + ((window.Zaraza && Zaraza.testowy && Zaraza.testowy()) ? '.test' : '');
+  const POP = 1;                     /* jedna ryba w jeziorze */
+  const S_PODGLADU = 30;             /* podglad ?zaraza=3: jezioro "30 ryb" */
 
   let blady = null;                  /* kontur bladego sprite'a */
 
@@ -51,16 +55,35 @@ const LucjanekZero = (() => {
     try { const s = window.Zaraza && Zaraza.stan(); return !!(s && s.zlowil); } catch (e) { return false; }
   }
 
-  /* ---------- licznik lawic gracza ---------- */
-  function czytajLicznik() {
-    try {
-      const v = window.Magazyn ? Magazyn.czytaj(kluczLicznika()) : localStorage.getItem(kluczLicznika());
-      const n = parseInt(v, 10);
-      return Number.isFinite(n) ? n : -1;
-    } catch (e) { return -1; }
+  function testowy() {
+    try { return !!(window.Zaraza && Zaraza.testowy && Zaraza.testowy()); } catch (e) { return false; }
   }
-  function zapiszLicznik(n) {
-    try { if (window.Magazyn) Magazyn.pisz(kluczLicznika(), n); else localStorage.setItem(kluczLicznika(), String(n)); } catch (e) {}
+
+  /* ---------- rzadkosc: jedna ryba w tabeli losowania ---------- */
+  /* Suma wag tej samej tabeli, z ktorej losuje losujGatunek. Tabela zyje
+     400 ms i przebudowuje sie przy kazdym losowaniu, wiec przy tworzeniu
+     lawicy jest swieza. Bez tabeli: zywa populacja jeziora. */
+  function sumaWag() {
+    const TW = window.__wagiTab;
+    if (TW && TW.suma > 0) return TW.suma;
+    try { if (window.Eko && Eko.sumaPopulacji) return Eko.sumaPopulacji(); } catch (e) {}
+    return 0;
+  }
+  /* Zaneta zawezajaca pule (np. KOTLETY, WIDELEC BABCI) wpuszcza tylko
+     swoje gatunki. Lucjanek Zero przechodzi, gdy pula zawiera Lucjana. */
+  function pulaPozwala() {
+    const TW = window.__wagiTab;
+    return !(TW && Array.isArray(TW.tylko) && TW.tylko.indexOf('lucjan_czerwony') < 0);
+  }
+  function szansaMiejsca() {
+    if (testowy()) return POP / (S_PODGLADU + POP);
+    const S = sumaWag();
+    return S > 0 ? POP / (S + POP) : 0;
+  }
+  function wKadrze() {
+    if (typeof school === 'undefined' || !school) return false;
+    for (const f of school) if (f && f.lzZero) return true;
+    return false;
   }
 
   /* ---------- wyglad ---------- */
@@ -145,21 +168,13 @@ const LucjanekZero = (() => {
     return f;
   }
 
-  /* Wolane przy kazdej nowej lawicy (guzik i zegar), po zwyklym skladzie,
-     gwarancjach zanet i wrozbach, poza lawica Smoka Zycia. W co 20.
-     lawicy dopisuje Lucjanka Zero do zwyklych ryb. Zwraca true, gdy dolaczyl. */
-  function dolaczDoLawicy(arr, wKadrze) {
-    if (!wEtapie() || juzZlowiony() || !arr) return false;
-    let n = czytajLicznik();
-    /* Pierwsza lawica etapu 3 juz go ma. */
-    if (n < 0) n = CO_ILE - 1;
-    n += 1;
-    zapiszLicznik(n);
-    if (n % CO_ILE !== 0) return false;
-    const f = stworz(wKadrze);
-    if (!f) return false;
-    arr.push(f);
-    return true;
+  /* Wolane z makeFishZLimitem przy KAZDYM miejscu w lawicy (nowa lawica,
+     ryba wplywajaca zza kadru, start gry). Zwraca Lucjanka Zero albo null;
+     polozenie i kierunek ustawia wolajacy, tak jak kazdej innej rybie. */
+  function moze() {
+    if (!wEtapie() || juzZlowiony() || wKadrze() || !pulaPozwala()) return null;
+    if (Math.random() >= szansaMiejsca()) return null;
+    return stworz(true);
   }
 
   /* Czy Lucjanek Zero plywa teraz w kadrze. Na tym stoi blokada sieci. */
@@ -205,7 +220,7 @@ const LucjanekZero = (() => {
     return true;
   }
 
-  return { SZANSA, CO_ILE, dolaczDoLawicy, wLawicy,
+  return { SZANSA, POP, moze, szansaMiejsca, wLawicy,
            podejscie, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
 })();
 window.LucjanekZero = LucjanekZero;
