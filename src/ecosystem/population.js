@@ -145,11 +145,23 @@ const Eko = (() => {
 
   /* ============================================================
      SLABSZE TARLO PO ZARAZIE (finał eventu ZARAZA, pt 9 X 2026 23:00).
-     Polecenie Andrzeja z 6 X 2026: "troche obnizyc wspolczynnik wzrostu
-     populacji, po resecie". Od chwili finału narybek przezywa ostatni
-     etap w 4,1% zamiast 5,5%, czyli z tarla dochodzi do jeziora o 25%
-     mniej ryb. Prog liczony z zegara, wiec zmiana nie zalezy od tego,
-     czy modul eventu jest jeszcze w grze.
+     Prog liczony z zegara, wiec zmiany nie zaleza od tego, czy modul
+     eventu jest jeszcze w grze. Od chwili finału:
+
+     1. NARYBEK. Polecenie Andrzeja z 6 X 2026: "troche obnizyc
+        wspolczynnik wzrostu populacji, po resecie". Ostatni etap
+        przezywa 4,1% narybku zamiast 5,5%: z udanego tarla dochodzi do
+        jeziora o 25% mniej ryb.
+
+     2. ZERWANE TARLO. Polecenie Andrzeja z 7 X 2026: "zalezy mi, zeby
+        tarlo rzadziej mialo sukces, ryby niech czesciej zrywaja tarlo
+        miedzy soba". Co druga para (CFG.ZERWANIE_TARLA) rozstaje sie
+        w trakcie godow, miedzy 25% a 85% ich czasu: w lawicy ryby
+        rozplywaja sie w dwie strony, w tarlisku pasek gasnie. Ikry nie
+        ma, a gatunek wchodzi w zwykla karencje po tarle, wiec zerwanie
+        naprawde zabiera okazje do rozrodu, a nie tylko 30 sekund.
+        Razem z punktem 1 do jeziora dochodzi okolo 37% dzisiejszego
+        narybku (0,5 * 0,041 / 0,055).
 
      SUFITOW GATUNKOW NIE MA (decyzja Andrzeja z 7 X 2026, 15:55:
      "Resetujemy do 40% i ustawiamy porzadek w pasmach. Dalej znowu
@@ -165,13 +177,24 @@ const Eko = (() => {
      24 ryby (szesc razy wiecej, niz wynosi jej norma 4). Dlatego rzadkie
      pasma z czasem doganiaja czeste.
      ============================================================ */
-  CFG.NARYBEK_PO_ZARAZIE = { od: Date.parse('2026-10-09T23:00:00+02:00'), przezyj: 0.041 };
+  CFG.PO_ZARAZIE_OD = Date.parse('2026-10-09T23:00:00+02:00');
+  CFG.NARYBEK_PO_ZARAZIE = 0.041;
+  CFG.ZERWANIE_TARLA = 0.5;
+
+  function poZarazie(teraz) { return (teraz || Date.now()) >= CFG.PO_ZARAZIE_OD; }
 
   function przezyjEtapu(E2, teraz) {
     if (!E2) return 0;
-    const N = CFG.NARYBEK_PO_ZARAZIE;
-    if (E2.id === 'narybek' && N && (teraz || Date.now()) >= N.od) return N.przezyj;
+    if (E2.id === 'narybek' && poZarazie(teraz)) return CFG.NARYBEK_PO_ZARAZIE;
     return E2.przezyj;
+  }
+
+  /* Losowane RAZ, gdy para zaczyna gody (w lawicy albo w tarlisku).
+     null: para dotrwa do konca. Liczba 0,25-0,85: ulamek czasu godow,
+     przy ktorym para sie rozstanie. */
+  function losujZerwanie(teraz) {
+    if (!poZarazie(teraz) || !(Math.random() < CFG.ZERWANIE_TARLA)) return null;
+    return 0.25 + Math.random() * 0.6;
   }
 
   function popStartowa(gk) {
@@ -870,6 +893,38 @@ const Eko = (() => {
   function parujeSie(gk) { return !!GODY[gk]; }
   function paraGodowa(gk) { return GODY[gk] || null; }
 
+  /* Zerwane tarlo (po zarazie, opis przy CFG.ZERWANIE_TARLA): brak ikry,
+     zwykla karencja gatunku, wpis w dzienniku i komunikat na gorze. */
+  function zerwijTarlo(gk, teraz, gdzie) {
+    teraz = teraz || Date.now();
+    PO_TARLE[gk] = teraz + karencjaTarla(gk);
+    const wTarlisku = gdzie === 'tarlisko';
+    zapisz('gody-zerwane', gk, wTarlisku ? 'para w tarlisku zerwała tarło, brak ikry' : 'para zerwała tarło, brak ikry', 0);
+    try {
+      const G2 = (typeof GATUNKI !== 'undefined') ? GATUNKI[gk] : null;
+      const nazwa = G2 && G2.nazwa ? G2.nazwa : String(gk).toUpperCase();
+      if (typeof Ruch !== 'undefined' && Ruch.powiedz)
+        Ruch.powiedz(nazwa + (wTarlisku ? ': PARA W TARLISKU ZERWAŁA TARŁO' : ': PARA ZERWAŁA TARŁO'));
+    } catch (e) {}
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+  }
+  /* Rozstanie widac w kadrze: obie ryby odplywaja w przeciwne strony.
+     Ruszamy tylko ryby, ktore spokojnie plywaja; ryba przy przynecie,
+     na haczyku albo w drodze za kadr zostaje przy swoim. */
+  function rozplynSie(a, b) {
+    try {
+      const kier = (a.x <= b.x) ? -1 : 1;
+      const pary = [[a, kier], [b, -kier]];
+      for (const p of pary) {
+        const f = p[0];
+        if (!f || f.caught || (f.mood && f.mood !== 'idle')) continue;
+        f.face = p[1];
+        if (typeof f.base === 'number') f.vTarget = f.face * f.base * 1.8;
+        f.turn = 2.5 + Math.random() * 2;
+      }
+    } catch (e) {}
+  }
+
   /* Wolane co klatke z petli lawicy. Trzy zadania: tykac trwajace gody,
      przerywac te, ktorym zginela ryba, i skladac nowe pary. */
   function tikGodow(school, teraz) {
@@ -884,6 +939,13 @@ const Eko = (() => {
         g.a.gody = false; g.b.gody = false;
         delete GODY[gk];
         zapisz('gody-przerwane', gk, 'gody przerwane, brak ikry', 0);
+        continue;
+      }
+      if (g.zerwanie != null && teraz - g.start >= g.zerwanie * CFG.CZAS_GODOW) {
+        g.a.gody = false; g.b.gody = false;
+        delete GODY[gk];
+        rozplynSie(g.a, g.b);
+        zerwijTarlo(gk, teraz, 'lawica');
         continue;
       }
       if (teraz - g.start >= CFG.CZAS_GODOW) {
@@ -909,7 +971,7 @@ const Eko = (() => {
         const dx = a.x - b.x, dy = a.y - b.y;
         if (dx * dx + dy * dy > CFG.DYSTANS_GODOW * CFG.DYSTANS_GODOW) continue;
         a.gody = true; b.gody = true;
-        GODY[a.gat] = { a: a, b: b, start: teraz };
+        GODY[a.gat] = { a: a, b: b, start: teraz, zerwanie: losujZerwanie(teraz) };
         zapisz('gody', a.gat, 'para dobrala sie w lawicy', 0);
         break;
       }
@@ -1658,7 +1720,7 @@ const Eko = (() => {
            sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
            meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
            podsumowanie, kronika, zapisz, popStartowa,
-           przezyjEtapu, wyczyscPoZarazie };
+           przezyjEtapu, wyczyscPoZarazie, poZarazie, losujZerwanie, zerwijTarlo };
 })();
 window.Eko = Eko;
 

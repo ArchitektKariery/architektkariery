@@ -1510,9 +1510,17 @@
             st.blok ? st.blok.typ : 'ok', ost ? ost.kiedy : 0, pelneW ? 'W' : 'w'].join('|');
   }
   const minutDo = t => Math.max(1, Math.ceil((t - Date.now()) / 60000));
+  /* Para w tarlisku zerwala tarlo (po zarazie, Eko.CFG.ZERWANIE_TARLA)
+     i gatunek odpoczywa po tej probie. */
+  function tarliskoZerwane(st) {
+    const ost = (window.Rozrod && Rozrod.ostatnie()) || null;
+    return !!(ost && ost.zerwane && st.para && ost.gat === st.para &&
+              st.blok && st.blok.typ === 'karencja');
+  }
   function tarliskoKto(st) {
     const n = st.lista.length;
     if (!n) return 'PUSTE';
+    if (tarliskoZerwane(st)) return 'PARA ZERWAŁA TARŁO';
     if (st.para && st.blok && st.blok.typ === 'karencja') return 'ODPOCZYWA PO TARLE';
     if (st.para && st.blok) return 'TARŁO WSTRZYMANE';
     if (st.para) return 'PARA TRZE SIĘ';
@@ -1526,6 +1534,9 @@
     if (!n) return 'Tarlisko mieści ' + max + ' ryby. Przesuń z wiaderka samca i samicę tego samego gatunku ' +
       'ikonką stawu obok krzyżyka. Para trze się tu 30 sekund, a ikra trafia do jeziora. ' +
       'Ryby w tarlisku nie idą na sprzedaż.';
+    if (tarliskoZerwane(st))
+      return 'Para rozstała się przed końcem tarła, więc ikry nie ma. Gatunek ' + nazwa(st.para) +
+             ' wróci do tarła za <b id="tarlMin">' + minutDo(st.blok.do) + ' min</b>.';
     if (st.para && st.blok && st.blok.typ === 'karencja')
       return 'Gatunek ' + nazwa(st.para) + ' odpoczywa po tarle jeszcze <b id="tarlMin">' + minutDo(st.blok.do) +
              ' min</b>. Potem para zacznie od nowa.';
@@ -1570,8 +1581,9 @@
     const ost = (window.Rozrod && Rozrod.ostatnie()) || null;
     if (ost && GATUNKI[ost.gat]) {
       const min = Math.max(0, Math.round((Date.now() - ost.kiedy) / 60000));
-      h += '<div class="zlaw">ostatnie tarło: ' + GATUNKI[ost.gat].nazwa + ' · ' + qrybG(ost.ikra || 0) +
-           ' ziaren ikry · ' + (min < 1 ? 'przed chwilą' : min + ' min temu') + '</div>';
+      h += '<div class="zlaw">ostatnie tarło: ' + GATUNKI[ost.gat].nazwa + ' · ' +
+           (ost.zerwane ? 'para zerwała tarło' : qrybG(ost.ikra || 0) + ' ziaren ikry') +
+           ' · ' + (min < 1 ? 'przed chwilą' : min + ' min temu') + '</div>';
     }
     h += '</div>';
 

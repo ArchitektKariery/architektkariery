@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-07-zaraza-final-v2`; finał czeka na pt 9 X 23:00)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-07-zaraza-final-v3`; finał czeka na pt 9 X 23:00)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 
@@ -10,7 +10,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
 | 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 600 000 000 qryb (było 2 mld; 7 X po saldach graczy 500 mln, potem decyzja Andrzeja: 600 mln) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero |
-| finał | pt 9 X 23:00 | | zostaje 40% ryb w rozkładzie pasm, słabsze tarło, bez sufitów gatunków |
+| finał | pt 9 X 23:00 | | zostaje 40% ryb w rozkładzie pasm, słabsze tarło (narybek 4,1%, co druga para zrywa tarło), bez sufitów gatunków |
 
 ## Etap 3: Lucjanek Zero (w grze, budzi się sam w czw 8 X o 23:00)
 - zwykła ryba `lucjan_czerwony` z flagą `f.lzZero`, więc punkty, hol, ruch, grubość i wycena działają bez zmian, a gra nie dostaje nowego gatunku (atlas, zadania, liga i nagrody za komplet zostają nietknięte); zwykły Lucjan czerwony bierze normalnie,
@@ -54,6 +54,7 @@ Wymarłych gatunków nie było. Ten sam rozkład na atrapie bazy (te same sumy, 
 **Po finale:**
 - sufitów gatunków nie ma: jezioro zmienia się wyłącznie od połowów, wypuszczeń i tarła; kolejne korekty rozkładu pasm robimy następnymi eventami,
 - narybek przeżywa ostatni etap w 4,1% zamiast 5,5% (`Eko.przezyjEtapu`, próg z zegara: pt 9 X 23:00),
+- co druga para zrywa tarło (polecenie Andrzeja 7 X, 16:08: „tarło rzadziej ma mieć sukces, ryby niech częściej zrywają tarło między sobą”; `Eko.CFG.ZERWANIE_TARLA = 0.5`, ten sam próg z zegara): zerwanie losowane raz na parę, przypada między 25% a 85% czasu godów; w ławicy ryby odpływają w dwie strony, w tarlisku pasek gaśnie, panel pisze „PARA ZERWAŁA TARŁO”; ikry nie ma, a gatunek wchodzi w zwykłą karencję po tarle, więc zerwanie naprawdę zabiera okazję do rozrodu. Razem z narybkiem do jeziora dochodzi ok. 37% dzisiejszego przyrostu z tarła (0,5 × 0,041 / 0,055); `src/ecosystem/population.js` (`losujZerwanie`, `zerwijTarlo`), `src/ecosystem/reproduction.js` (`Rozrod.tik`), `src/ui/panel.js` (tarlisko),
 - gra raz na finał pobiera nowe liczby jeziora i czyści lokalną ikrę i kohorty sprzed finału (`Eko.wyczyscPoZarazie`), listy osobników skraca do liczby z serwera,
 - laboratorium pokazuje kartę finału (licznik podejść Lucjanka Zero, ile ryb zabrała zaraza, poziom każdego pasma, zdanie „Od teraz jezioro znowu zależy od was”), otwiera się samo raz (`qryby.zaraza.intro.4`), chip „ZARAZA · FINAŁ” zostaje 3 dni.
 
@@ -116,3 +117,4 @@ Adres gry z `?zaraza=2`, `?zaraza=3` albo `?zaraza=4` przestawia zegar tej karty
 - Finał w grze, pierwsza wersja z sufitami, wycofana 7 X (atrapa serwera przez przechwycone żądania): dziś stary reżim (narybek 0,055, brak sufitów); podgląd `?zaraza=4`: chip „-60% / ZOSTAŁO 41 496 RYB”, karta z podpisem PODGLĄD; etap 4 bez wyniku: chip „SZCZYT / LABORATORIUM LICZY STRATY”, jedno wywołanie `zaraza_final_teraz`; po wyniku: jezioro 41 495 (bez wiersza Smoka), kohorty i ikra wyczyszczone, osobniki Nessy 157 → 4, 83 sufity, narybek 0,041, laboratorium otwarte samo raz; tarło po finale: Nessy 4 → 5 (sufit 5), płoć 4 259 → 8 065 (sufit 11 500); karencja Nessy przy suficie 17 min; zero błędów strony.
 - Finał bez sufitów (7 X, po decyzji Andrzeja; PostgreSQL 16): atrapa z sumami, minimami i maksimami pasm z podglądu Andrzeja daje co do liczby jego tabelę (118 477 → 47 409, poziomy 4 856 / 1 068 / 204 / 53 / 19 / 8 / 4); nowy plik po starej wersji zdejmuje wyzwalacz i funkcję sufitu, sufity puste, zadanie zegara zostaje; finał: 78 gatunków ciętych, 3 dosiane; po finale tarło mitycznej +24 przechodzi w całości (bez sufitu); cofnięcie 0 różnic; świeża instalacja dwa razy; zegar w etapie 4 wykonuje finał i usuwa zadanie.
 - Gra bez sufitów: narybek 0,055 dziś i minutę przed finałem, 0,041 od pt 23:00, inne etapy bez zmian; podgląd `?zaraza=4` z liczbami z 7 X (zabrała 71 068, zostało 47 409); etap 4 z atrapą serwera: zapas `zaraza_final_teraz`, wynik, czyszczenie kohort i osobników (77 → 4), laboratorium otwarte samo, gra nie pyta już o `eko_pasma`; zero błędów strony.
+- Zerwane tarło (build v3, żywy silnik): losowanie 20 000 razy dziś i sekundę przed finałem: 0 zerwań, po finale 10 062 (50,3%), ułamek czasu 0,25-0,85; ławica, 400 prób przed finałem: 400 udanych, po finale: 186 udanych, 214 zerwanych, z czego 146 przed 20. sekundą i we wszystkich 146 ryby odpłynęły w przeciwne strony; tarlisko, 400 prób: przed finałem 400 udanych, po finale 200 / 200; panel tarliska: „PARA ZERWAŁA TARŁO”, „Para rozstała się przed końcem tarła, więc ikry nie ma. Gatunek PŁOĆ wróci do tarła za 17 min.”, linia „ostatnie tarło: PŁOĆ · para zerwała tarło”; komunikat „PŁOĆ: PARA W TARLISKU ZERWAŁA TARŁO”; zero błędów strony.

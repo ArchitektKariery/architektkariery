@@ -185,18 +185,34 @@ const Rozrod = (() => {
     if (dt <= 0) return null;
 
     const moga = zdolne();
+    /* Zerwania par (po zarazie, opis przy Eko.CFG.ZERWANIE_TARLA):
+       ulamek czasu godow, przy ktorym para sie rozstanie, losowany raz
+       na probe i trzymany w zapisie, wiec przeladowanie gry go nie zmienia. */
+    if (!s.zerw) s.zerw = {};
     /* Para, ktora przestala byc para (ryba wrocila do wiaderka albo
        zostala wypuszczona), traci uzbierany czas -- tak samo jak gody
        przerwane w toni. To samo czysci czas par z dawnego tarla
        w wiaderku, ktore od 1 X 2026 nie dziala. */
-    for (const gk in s.pary) if (moga.indexOf(gk) < 0) delete s.pary[gk];
+    for (const gk in s.pary) if (moga.indexOf(gk) < 0) { delete s.pary[gk]; delete s.zerw[gk]; }
 
     let wynik = null;
     for (const gk of moga) {
-      if (blokada(gk, teraz)) { delete s.pary[gk]; continue; }
+      if (blokada(gk, teraz)) { delete s.pary[gk]; delete s.zerw[gk]; continue; }
+      if (s.pary[gk] === undefined) {
+        let los = null;
+        try { if (window.Eko && Eko.losujZerwanie) los = Eko.losujZerwanie(teraz); } catch (e) {}
+        if (typeof los === 'number') s.zerw[gk] = los; else delete s.zerw[gk];
+      }
       s.pary[gk] = (s.pary[gk] || 0) + dt;
+      const zerw = s.zerw[gk];
+      if (typeof zerw === 'number' && s.pary[gk] >= zerw * okres) {
+        delete s.pary[gk]; delete s.zerw[gk];
+        s.ostatnie = { gat: gk, ikra: 0, zerwane: true, kiedy: teraz };
+        try { if (window.Eko && Eko.zerwijTarlo) Eko.zerwijTarlo(gk, teraz, 'tarlisko'); } catch (e) {}
+        continue;
+      }
       if (s.pary[gk] < okres) continue;
-      delete s.pary[gk];
+      delete s.pary[gk]; delete s.zerw[gk];
       /* Cala reszta nalezy do ekosystemu. */
       let r = null;
       try { if (window.Eko && Eko.tarloPary) r = Eko.tarloPary(gk, genZTarliska(gk, 'm'), genZTarliska(gk, 'f'), teraz); } catch (e) {}
