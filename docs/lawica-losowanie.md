@@ -24,7 +24,7 @@ Każde miejsce w ławicy losuje gatunek osobno (`losujGatunek` w `src/fish/fish-
 - Poniżej 100 ryb gatunku ryba to konkretny osobnik z numerem i cechami, który może wrócić w kolejnej ławicy.
 
 ## Co zmienia skład ławicy
-- **Partner dla samotnej rzadkiej ryby: WYŁĄCZONY od 8 X 2026** (polecenie Andrzeja: „nie losuje się dodatkowy partner, po prostu muszą się trafić dwie takie ryby, bez pomocy gry”; flaga `DOSADZAJ_PARTNERA = false` w `src/fish/school.js`). Wcześniej gatunek z pasma 3-7 pływający sam w ławicy z przycisku ŁAWICA dostawał partnera przeciwnej płci z szansą 8-55% (`dosadzPartnerow`, `Eko.szukaSamotnych`), przez co pasma 3-7 widać było w ławicach częściej, niż wynika z populacji: w normie gry pasmo 3 to 9,0% ryb jeziora, a było 13,2% ryb w ławicach. Bez partnera udział ryb w ławicach równa się udziałowi w jeziorze (pomiar niżej), a para rzadkiego gatunku powstaje tylko wtedy, gdy losowanie samo przyniesie dwie ryby tego gatunku. Zegarowa wymiana ławicy co 60 s nigdy partnera nie dosadzała.
+- **Partner dla samotnej rzadkiej ryby: WYŁĄCZONY od 8 X 2026** (polecenie Andrzeja: „nie losuje się dodatkowy partner, po prostu muszą się trafić dwie takie ryby, bez pomocy gry”; flaga `DOSADZAJ_PARTNERA = false` w `src/fish/school.js`). Wcześniej gatunek z pasma 3-7 pływający sam w ławicy z przycisku ŁAWICA dostawał partnera przeciwnej płci z szansą 8-55% (`dosadzPartnerow`, `Eko.szukaSamotnych`), przez co ryb z pasm 3-7 pływało w ławicach więcej, niż wynika z populacji: w normie gry pasmo 3 to 9,0% ryb jeziora, a było 13,2% ryb w ławicach. Partner dopływał tylko do ryby, która już była w ławicy, więc nie zmieniał, w ilu ławicach pojawia się rzadkie pasmo; zmieniał liczbę par (tabela „Pary w nowej ławicy” niżej). Bez partnera udział ryb w ławicach równa się udziałowi w jeziorze, a para rzadkiego gatunku powstaje tylko wtedy, gdy losowanie samo przyniesie dwie ryby tego gatunku. Zegarowa wymiana ławicy co 60 s nigdy partnera nie dosadzała.
 - **Zanęty** (`src/market/bait-effects.js`): „tylko” zamyka pulę na grupę (drapieżniki, jedno pasmo, wartościowe z pasm 1-3), a w puli dalej decyduje populacja; „próg” dokłada losowania aż do ryby z odpowiednią liczbą punktów, przy czym dodatkowe losowania idą tylko z docelowego pasma; „rozmiar” i „potwór” powiększają okazy; „gwarant” rozciąga najlepszą rybę nowej ławicy do progu punktów; „nowy gatunek” (posążek) podmienia jedną rybę na nieodkryty gatunek z pasm 1-6; „najlepsza” (włócznia) kieruje do przynęty najlepszą rybę.
 - **Seria:** po co najmniej 2 złowionych z rzędu rybach tego samego gatunku każde miejsce dostaje 1 + seria/2 losowań (najwyżej 90) i bierze gatunek serii, gdy wypadnie.
 - **Limit dużych okazów** (tier 4: jeden w kadrze, tiery 5-7 razem: jeden) działa tylko przy zanęcie albo serii.
@@ -54,4 +54,26 @@ W środę pasmo 6 było częstsze od pasma 5 (morświn: 1 798 ryb), a ryba mityc
 | środa 7 X | 11,5 | 53,9 / 28,3 / 12,2 / 2,5 / 0,73 / 1,76 / 0,60 | 1 na 13 | 1 na 5 | 1 na 15 |
 | po 90%, minimum pasma 7 = 2 | 11,5 | 60,6 / 27,6 / 9,1 / 2,0 / 0,33 / 0,26 / 0,12 | 1 na 27 | 1 na 33 | 1 na 73 |
 
-Udział ryb w ławicach pokrywa się teraz z udziałem w jeziorze (norma: 61,5 / 27,1 / 9,0 / 2,0 / 0,25 / 0,10 / 0,045%). Pasmo 7 w tym pomiarze wypada rzadziej niż w pierwszym także dlatego, że okno wieżowca zdążyło się zamknąć.
+Udział ryb w ławicach pokrywa się teraz z udziałem w jeziorze (norma: 61,5 / 27,1 / 9,0 / 2,0 / 0,25 / 0,10 / 0,045%). Kolumny „ławica z pasmem” obu tabel różnią się tylko rozrzutem pomiaru (3 000 ławic) i porą gry, bo partner liczby ławic z danym pasmem nie zmieniał. Pasmo 7 wypada tu rzadziej, bo okno wieżowca zdążyło się zamknąć.
+
+## Pary w nowej ławicy (pomiar 8 X 2026)
+50 000 nowych ławic na każdy wariant, ten sam stan jeziora i ta sama pora (9:49 czasu gry, pochmurno, więc okna Nessy i wieżowca zamknięte). Para to dwie ryby tego samego gatunku różnej płci w jednej ławicy, czyli warunek godów w jeziorze (`tikGodow`, do tego odległość najwyżej 260 px).
+
+| pasmo | ławica z pasmem | para bez partnera (od 8 X) | para z partnerem (do 8 X) |
+|---|---|---|---|
+| **jezioro po finale 90%, minimum pasma 7 = 2** | | | |
+| 1 | 100% | 77,6% ławic | 77,9% ławic |
+| 2 | 97,2% | 1 na 6,4 | 1 na 6,5 |
+| 3 | 66,1% | 1 na 86 | 1 na 4,4 |
+| 4 | 1 na 4,8 | 1 na 1 351 | 1 na 18 |
+| 5 | 1 na 29 | 1 na 25 000 | 1 na 108 |
+| 6 | 1 na 37 | 1 na 50 000 | 1 na 107 |
+| 7 | 1 na 74 | 0 na 50 000 | 1 na 158 |
+| **norma gry** | | | |
+| 3 | 65,9% | 1 na 89 | 1 na 2,3 |
+| 4 | 1 na 4,8 | 1 na 1 389 | 1 na 8,3 |
+| 5 | 1 na 37 | 1 na 25 000 | 1 na 63 |
+| 6 | 1 na 91 | 0 na 50 000 | 1 na 147 |
+| 7 | 1 na 321 | 0 na 50 000 | 1 na 667 |
+
+Skutek: od pasma 4 w górę gatunek praktycznie nie zaczyna godów w jeziorze sam, a po finale połowa par i tak zrywa tarło. Rzadkie gatunki rosną głównie z tarliska, gdy gracz złowi samca i samicę. Pomiar dotyczy nowej ławicy z przycisku; w trakcie minuty dopływają kolejne ryby, więc szansa na minutę gry jest trochę wyższa, ale rząd wielkości zostaje.
