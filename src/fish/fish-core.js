@@ -241,6 +241,43 @@ window.wOknieZegara = wOknieZegara;
 const REKOMPENSATA_OKNA = { ksiaznik: 3, smucior: 4, nessy: 5, kupid: 12, wiezowak: 320 };
 window.REKOMPENSATA_OKNA = REKOMPENSATA_OKNA;
 
+/* ============================================================
+   LOSOWANIE NA LAWICE, NIE NA MIEJSCE (8 X 2026, polecenie Andrzeja:
+   "losuje sie na kazde miejsce, co zwieksza szanse niewymiernie na wyzsze
+   pasma. Jak morswin jest 1 na 100 ryb, to jego szansa pojawienia sie
+   w calej lawicy ma byc 1%").
+
+   BYLO: kazde miejsce w lawicy i kazda ryba doplywajaca w trakcie minuty
+   losowaly gatunek z calego jeziora. Gatunek z udzialem p trafial do
+   lawicy z szansa 1-(1-p)^N, gdzie N to liczba losowan na lawice, czyli
+   prawie N razy czesciej, niz mowi jego udzial.
+
+   JEST: lawica ma JEDNO losowanie z calego jeziora, na pierwszym miejscu
+   nowej lawicy (start gry, przycisk LAWICA, zegar co 60 s). Kazde nastepne
+   miejsce i kazda ryba doplywajaca w trakcie minuty losuja tylko z TLA,
+   czyli z gatunkow ponizej pasma `odPasma` (pasma 1-2). Gatunek z pasm
+   3-7 trafia do lawicy wylacznie przez to jedno losowanie, z szansa rowna
+   dokladnie swojemu udzialowi w jeziorze (wadze w tabeli nizej).
+
+   Pasma 1-2 losuja dalej na kazde miejsce, bo ktos musi wypelnic lawice:
+   gdyby kazdy gatunek mial szanse rowna udzialowi, suma tych szans dawalaby
+   srednio JEDEN gatunek na lawice.
+
+   Zaneta zamykajaca pule ("tylko", dodatkowe proby "progu") losuje jak
+   dotad na kazde miejsce: gracz kupuje wlasnie zageszczenie.
+   Seria ponawia losowanie z tej samej puli co miejsce: dla gatunku z pasm
+   1-2 na kazdym miejscu, dla gatunku z pasm 3-7 w jednym losowaniu lawicy.
+   Lucjanek Zero (src/events/lucjanek-zero.js) zostaje na kazdym miejscu.
+   Pomiar i opis: docs/lawica-losowanie.md. Powrot do losowania na kazde
+   miejsce: LOS_LAWICY.wlaczony = false.
+   ============================================================ */
+const LOS_LAWICY = { wlaczony: true, odPasma: 3, pelne: 0 };
+window.LOS_LAWICY = LOS_LAWICY;
+/* Wolane tuz przed budowa nowej lawicy. Pierwsza ryba zbudowana potem
+   przez makeFishZLimitem losuje z calego jeziora, kazda kolejna z tla. */
+function nowaLawicaLosu() { LOS_LAWICY.pelne = 1; }
+window.nowaLawicaLosu = nowaLawicaLosu;
+
 function losujGatunek(r) {
   /* Gatunek z niewczytanym sprite em wypada z puli, wiec jeden brakujacy
      PNG kosztuje jeden gatunek, a nie cala lawice. */
@@ -286,7 +323,8 @@ function losujGatunek(r) {
      ============================================================ */
   const teraz = Date.now();
   let TW = window.__wagiTab;
-  if (!TW || teraz - TW.t > 400 || TW.tylko !== tylko || TW.mn !== T.mnoznik) {
+  if (!TW || teraz - TW.t > 400 || TW.tylko !== tylko || TW.mn !== T.mnoznik
+      || TW.odPasma !== LOS_LAWICY.odPasma) {
     const st = (window.PORA && PORA.teraz) ? PORA.teraz() : null;
     const S = st ? { godzina: st.godzina, sezon: st.sezon, pogoda: st.pogoda, opad: st.opad }
                 : { godzina: 12, sezon: 'lato', pogoda: 'pogodnie', opad: null };
@@ -359,6 +397,12 @@ function losujGatunek(r) {
       * 1;
     const klucze = [], kum = [], wag = {};
     let sm = 0;
+    /* Druga, wezsza tabela w tym samym przebiegu: TLO, czyli gatunki ponizej
+       pasma LOS_LAWICY.odPasma. Te same wagi i te same bramy, wiec udzialy
+       w tle sa proporcjonalne do populacji tak samo jak w calym jeziorze. */
+    const odPasma = LOS_LAWICY.odPasma;
+    const kluczeT = [], kumT = [];
+    let smT = 0;
     const populacjaOdnowy = (k) => {
       try { return window.liczbaPopulacjiSpawn ? (+liczbaPopulacjiSpawn(k) || 0) : 0; }
       catch (e) { return 0; }
@@ -410,9 +454,11 @@ function losujGatunek(r) {
       /* Brama przeszla. W aktywnym oknie gatunek ma DOKLADNIE wage
          rowna swojej populacji. Nie ma kompensacji ani ukrytego boosta. */
       sm += w; klucze.push(k); kum.push(sm);
+      if (((window.KLASA && KLASA[k]) || 1) < odPasma) { smT += w; kluczeT.push(k); kumT.push(smT); }
     }
-    TW = window.__wagiTab = { t: teraz, tylko: tylko, mn: T.mnoznik,
-                              klucze: klucze, kum: kum, suma: sm, wag: wag };
+    TW = window.__wagiTab = { t: teraz, tylko: tylko, mn: T.mnoznik, odPasma: odPasma,
+                              klucze: klucze, kum: kum, suma: sm, wag: wag,
+                              kluczeT: kluczeT, kumT: kumT, sumaT: smT };
   }
   /* ============================================================
      AUTOMATYCZNY KUPON ODKRYWCY WYLACZONY DLA NATURALNEJ LAWICY.
@@ -421,10 +467,15 @@ function losujGatunek(r) {
      procentem populacji. Jawne mechaniki gracza (zaneta/seria) zostaja.
      ============================================================ */
   if (!(TW.suma > 0) || !TW.klucze.length) return 'ploc';
-  const x = (r ? r() : Math.random()) * TW.suma;
-  let lo = 0, hi = TW.kum.length - 1;
-  while (lo < hi) { const sr = (lo + hi) >> 1; if (TW.kum[sr] < x) lo = sr + 1; else hi = sr; }
-  return TW.klucze[lo];
+  /* Miejsce z tla (opis przy LOS_LAWICY): bez zanety zamykajacej pule
+     losuje tylko z pasm ponizej odPasma. Puste tlo (wszystkie pasma 1-2
+     wymarle) wraca do calego jeziora, zeby lawica w ogole powstala. */
+  const tlo = window.__pulaLawicy === 'tlo' && !tylko && TW.sumaT > 0 && TW.kluczeT.length > 0;
+  const kl = tlo ? TW.kluczeT : TW.klucze, ku = tlo ? TW.kumT : TW.kum;
+  const x = (r ? r() : Math.random()) * (tlo ? TW.sumaT : TW.suma);
+  let lo = 0, hi = ku.length - 1;
+  while (lo < hi) { const sr = (lo + hi) >> 1; if (ku[sr] < x) lo = sr + 1; else hi = sr; }
+  return kl[lo];
 }
 window.losujGatunek = losujGatunek;
 

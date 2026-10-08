@@ -64,6 +64,8 @@ Przy głębokim cięciu minimum pasma 7 decyduje o rzadkości pasm 5-7, bo gatun
 | po 90%, minimum pasma 7 = 1 | 1 na 85 | 1 na 93 | 1 na 37 |
 | norma gry (10 000 / … / 4) | 1 na 189 | 1 na 100 | 1 na 34 |
 
+Tabela wyżej mierzy losowanie na każde miejsce. Od 8 X (build `2026-10-08-lawica-raz-v1`, polecenie Andrzeja: „jak morświn jest 1 na 100 ryb, to jego szansa pojawienia się w całej ławicy ma być 1%”) gra losuje pasma 3-7 raz na ławicę, więc ławica z pasmem ma szansę równą udziałowi pasma w jeziorze. Po 90% z minimum 2 (50 000 ławic, dzień, bez opadu): pasmo 5: 1 na 327, pasmo 6: 1 na 431, pasmo 7: 1 na 909. Opis i pomiary: `docs/lawica-losowanie.md`.
+
 Minimum 1 oznacza jedną rybę na gatunek mityczny: nie rozmnoży się, a pierwszy połów kończy gatunek (wraca dopiero przez Smoka Życia). Zmiana: `update public.zaraza_stan set final_min7 = 1 where id = 1;`.
 
 **Po finale:**

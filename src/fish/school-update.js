@@ -50,7 +50,21 @@ function makeFishZLimitem() {
   /* Lucjanek Zero (event ZARAZA, etap 3): kazde miejsce w lawicy moze
      byc nim z rzadkoscia jednej ryby w jeziorze (src/events/lucjanek-zero.js). */
   if (window.LucjanekZero) { const lz = LucjanekZero.moze(); if (lz) return lz; }
-  let f=nadajTozsamosc(makeFishZLimitemSurowy());
+  /* LOSOWANIE NA LAWICE (opis przy LOS_LAWICY w src/fish/fish-core.js).
+     Pierwsze miejsce nowej lawicy losuje z calego jeziora, kazde nastepne
+     i kazda ryba doplywajaca w trakcie minuty tylko z tla (pasma 1-2).
+     Pula obowiazuje przez cala budowe miejsca, wiec ponowienia serii,
+     zanety i awaryjnej ryby losuja z tej samej puli co pierwsza proba. */
+  const L = window.LOS_LAWICY;
+  let pula = null;
+  if (L && L.wlaczony) {
+    if (L.pelne > 0) { L.pelne--; pula = 'pelna'; } else pula = 'tlo';
+  }
+  const poprzednia = window.__pulaLawicy;
+  window.__pulaLawicy = pula;
+  let f;
+  try { f = nadajTozsamosc(makeFishZLimitemSurowy()); }
+  finally { window.__pulaLawicy = poprzednia; }
   if(window.FortuneCookie&&FortuneCookie.adjustFish)f=FortuneCookie.adjustFish(f);
   return f;
 }
@@ -203,6 +217,7 @@ window.dosadzPartnerow = dosadzPartnerow;
 
 /* Start: cala lawica rozlozona po szerokosci i glebokosciach. */
 const START = 15;
+if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();   /* jedno losowanie z calego jeziora na lawice */
 for (let i = 0; i < START; i++) {
   const f = makeFishZLimitem();
   f.x = 40 + (i + 0.5) * (Scene.W - 80) / START + (Math.random() - 0.5) * 40;
