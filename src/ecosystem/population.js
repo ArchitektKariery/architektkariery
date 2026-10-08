@@ -1007,6 +1007,10 @@ const Eko = (() => {
      dokladnie ta pulapka, o ktora chodzi: przelowiony gatunek trudniej
      sie odbudowuje.
      ============================================================ */
+  /* WYLACZONE 8 X 2026 (polecenie Andrzeja: para rzadkiego gatunku ma sie
+     trafic sama, bez pomocy gry). nowaLawica nie wola juz dosadzPartnerow
+     (flaga DOSADZAJ_PARTNERA w src/fish/school.js), wiec szukaSamotnych
+     i szansaSpotkania czekaja nieuzywane na ewentualny powrot. */
   CFG.PASMO_SPOTKAN = 3;        /* od tego pasma w gore dosadzamy partnera */
   CFG.SPOTKANIE_MIN = 0.08;     /* gatunek na ostatnich nogach */
   CFG.SPOTKANIE_MAX = 0.55;     /* gatunek w pelni sil */

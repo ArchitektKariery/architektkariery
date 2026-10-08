@@ -67,6 +67,7 @@ window.MIX = MIX;
    rozlozone po calej szerokosci i glebokosci, tak jak przy starcie gry.
    Zostaje tylko blysk tafli na 0,3 s, zeby oko wiedzialo, ze cos sie stalo. */
 const NOWA = { blysk: 0 };
+const DOSADZAJ_PARTNERA = false;   /* opis przy wywolaniu w nowaLawica */
 function nowaLawica() {
   if(window.SmokZycia) SmokZycia.koniecLawicy();
   /* wedka i przyneta puszczaja */
@@ -106,10 +107,14 @@ function nowaLawica() {
     f.turn = 1 + Math.random() * 4;
     school.push(f);
   }
-  /* Rzadki gatunek plywajacy samotnie moze dostac partnera. Bez tego
-     pasma 3+ nie mialy fizycznej mozliwosci zlozenia pary -- pomiar na
-     500 lawicach: ani jednej pary powyzej pasma 2. */
-  if (typeof dosadzPartnerow === 'function') { try { dosadzPartnerow(school); } catch (e) {} }
+  /* DOSADZANIE PARTNERA WYLACZONE (8 X 2026, polecenie Andrzeja: "nie
+     losuje sie dodatkowy partner, po prostu musi sie trafic dwie takie
+     ryby, bez pomocy gry"). Do tej pory samotna ryba z pasma 3-7 w nowej
+     lawicy dostawala partnera przeciwnej plci z szansa 8-55%. Teraz para
+     rzadkiego gatunku powstaje tylko wtedy, gdy losowanie samo przyniesie
+     dwie ryby tego gatunku. Funkcja dosadzPartnerow zostaje w
+     src/fish/school-update.js; powrot to DOSADZAJ_PARTNERA = true. */
+  if (DOSADZAJ_PARTNERA && typeof dosadzPartnerow === 'function') { try { dosadzPartnerow(school); } catch (e) {} }
   /* Zaneta gwarantujaca podmienia jedna sztuke, zanim ktokolwiek zobaczy
      lawice. Funkcja siedzi w pozniejszym bloku skryptu, wiec pytamy o nia
      przez typeof: przy pierwszych klatkach po starcie moze jeszcze nie byc. */
