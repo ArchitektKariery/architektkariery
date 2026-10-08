@@ -52,6 +52,7 @@ require(any(x in html for x in [
     "2026-10-08-zmiany-od-finalu-v1",
     "2026-10-08-rozmiar-lawicy-v1",
     "2026-10-08-ekonomia-po-finale-v1",
+    "2026-10-08-zaraza-rzut-serwer-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -210,6 +211,18 @@ require("if (!kand || lista.indexOf(kand.i) >= 0 || !wPuli(kand)) continue;" in 
 require("const ile = nagroda(Z);" in _zad, "task payout must use the post-finale stars")
 require("const lawic = (naLawice > 0 && naLawiceDoFinalu > 0)" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
         "order deadline must grow with in-school rarity after the finale")
+# Lucjanek Zero: rzut brania robi serwer, a zlowienie bez brania z serwera
+# odpada (audyt ekonomii K2, 8 X 2026). Wczesniej jedno wywolanie
+# zaraza_zlowiony z konsoli ratowalo 100% ryb w finale.
+_rzut = (root / "supabase/migrations/20261008_zaraza_rzut_serwer.sql").read_text(encoding="utf-8")
+require("v_bierze := floor(random() * 13983816) = 0;" in _rzut and "'bierze', v_bierze" in _rzut,
+        "zaraza_podejscie must roll the Lucjanek Zero bite on the server")
+require("raise exception 'BRAK_BRANIA';" in _rzut and "v_branie < now() - interval '15 minutes'" in _rzut,
+        "zaraza_zlowiony must reject a catch without a server-side bite")
+require("if (LucjanekZero.czeka && LucjanekZero.czeka(f)) { f.moodT = 0.1; return; }" in html,
+        "Lucjanek Zero must wait at the bait for the server roll")
+require("if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze;" in html,
+        "Lucjanek Zero must take the bite from the server answer")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

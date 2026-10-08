@@ -29,13 +29,23 @@
    Podglad ?zaraza=3 liczy szanse tak, jakby jezioro mialo 30 ryb, zeby
    dalo sie go zobaczyc przed czwartkiem.
 
-   BRANIE: JEDEN RZUT NA POJAWIENIE, ZAMROZONY, JAK U SMOKA ZYCIA.
-   Szansa 1 : 13 983 816, czyli szostka w Totolotku. Rzut pada przy
-   stworzeniu ryby i nie powtarza sie. Lucjanek Zero dochodzi do decyzji
-   przy przynecie najwyzej raz: po odmowie odplywa za kadr. Inne ryby
-   moga go ubiec przy przynecie, wtedy plywa dalej i mozna probowac znowu.
-   Zanety dzialaja zgodnie z opisem (Wlocznia przyciagnie go do
-   przynety), ale zadna nie dotyka rzutu.
+   BRANIE: JEDEN RZUT NA POJAWIENIE, JAK U SMOKA ZYCIA.
+   Szansa 1 : 13 983 816, czyli szostka w Totolotku. Lucjanek Zero
+   dochodzi do decyzji przy przynecie najwyzej raz: po odmowie odplywa
+   za kadr. Inne ryby moga go ubiec przy przynecie, wtedy plywa dalej
+   i mozna probowac znowu. Zanety dzialaja zgodnie z opisem (Wlocznia
+   przyciagnie go do przynety), ale zadna nie dotyka rzutu.
+
+   RZUT ROBI SERWER (8 X 2026, audyt ekonomii K2). Do 8 X rzut robila
+   przegladarka, a serwer przyjmowal kazde zgloszenie zlowienia, wiec
+   jedno wywolanie z konsoli wygrywalo etap 3. Teraz zaraza_podejscie
+   liczy podejscie i losuje branie, a zaraza_zlowiony przyjmuje tylko
+   rybe, ktora wziela na serwerze
+   (supabase/migrations/20261008_zaraza_rzut_serwer.sql). Przy decyzji
+   ryba krazy wokol przynety, az przyjdzie odpowiedz (zwykle ulamek
+   sekundy, najwyzej CZEKAJ_MS). Bez pola 'bierze' w odpowiedzi (gracz
+   bez konta, podglad ?zaraza=3, blad sieci, serwer sprzed poprawki)
+   zostaje rzut z pojawienia, liczony w przegladarce jak dawniej.
 
    LICZNIK. Kazda decyzja przy przynecie to jedno podejscie, liczone na
    serwerze (Zaraza.liczPodejscie -> zaraza_podejscie). Finał poda graczom
@@ -45,6 +55,7 @@ const LucjanekZero = (() => {
   const SZANSA = 1 / 13983816;       /* szostka w Totolotku */
   const POP = 1;                     /* jedna ryba w jeziorze */
   const S_PODGLADU = 30;             /* podglad ?zaraza=3: jezioro "30 ryb" */
+  const CZEKAJ_MS = 6000;            /* najdluzsze czekanie przy przynecie na rzut z serwera */
 
   let blady = null;                  /* kontur bladego sprite'a */
 
@@ -140,9 +151,11 @@ const LucjanekZero = (() => {
     f.kupon = false;
     f.lzZero = true;
     f.lzKontur = bladyKontur();
-    /* JEDEN rzut na cale pojawienie. */
+    /* JEDEN rzut na cale pojawienie. Zalogowanemu graczowi w etapie 3
+       nadpisuje go rzut z serwera przy pierwszej decyzji (podejscie). */
     f.lzBierze = Math.random() < SZANSA;
     f.lzLiczone = false;
+    f.lzCzekaDo = 0;
     f.osobnik = null;
     f.plec = 'm';
     f.pobyt = 9999;
@@ -184,11 +197,22 @@ const LucjanekZero = (() => {
     return false;
   }
 
-  /* Decyzja przy przynecie (src/fish/hook.js), przed sprawdzeniem rzutu. */
+  /* Decyzja przy przynecie (src/fish/hook.js), przed sprawdzeniem rzutu.
+     Liczy podejscie i bierze rzut z serwera; do odpowiedzi hook.js trzyma
+     rybe przy przynecie (czeka). */
   function podejscie(f) {
     if (!f || !f.lzZero || f.lzLiczone) return;
     f.lzLiczone = true;
-    try { if (window.Zaraza && Zaraza.liczPodejscie) Zaraza.liczPodejscie(); } catch (e) {}
+    let p = null;
+    try { if (window.Zaraza && Zaraza.liczPodejscie) p = Zaraza.liczPodejscie(); } catch (e) { p = null; }
+    if (!p || typeof p.then !== 'function') return;
+    f.lzCzekaDo = Date.now() + CZEKAJ_MS;
+    p.then(w => { if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze; }, () => {})
+     .then(() => { f.lzCzekaDo = 0; });
+  }
+  /* Czy ryba czeka jeszcze przy przynecie na rzut z serwera. */
+  function czeka(f) {
+    return !!(f && f.lzZero && f.lzCzekaDo && Date.now() < f.lzCzekaDo);
   }
 
   /* Odmowa: odplywa za kadr i w tej lawicy juz nie wraca. */
@@ -220,7 +244,7 @@ const LucjanekZero = (() => {
     return true;
   }
 
-  return { SZANSA, POP, moze, szansaMiejsca, wLawicy,
-           podejscie, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
+  return { SZANSA, POP, CZEKAJ_MS, moze, szansaMiejsca, wLawicy,
+           podejscie, czeka, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
 })();
 window.LucjanekZero = LucjanekZero;

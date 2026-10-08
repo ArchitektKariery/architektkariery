@@ -371,19 +371,24 @@ const Zaraza = (() => {
 
   /* Podejscie Lucjanka Zero do przynety (wola src/events/lucjanek-zero.js).
      Licznik rosnie od razu na ekranie, a serwer liczy najwyzej jedno
-     podejscie na 5 sekund na gracza (zaraza_podejscie). */
+     podejscie na 5 sekund na gracza (zaraza_podejscie). Od 8 X 2026 serwer
+     losuje tez branie 1 : 13 983 816 i oddaje je w polu 'bierze'
+     (supabase/migrations/20261008_zaraza_rzut_serwer.sql). Zwraca
+     odpowiedz serwera albo null: gracz bez konta, podglad, blad sieci. */
   async function liczPodejscie() {
     if (!stan) stan = { podejscia: 0 };
     stan.podejscia = (+stan.podejscia || 0) + 1;
     if (moj) moj.podejscia = (+moj.podejscia || 0) + 1;
     rysujHud();
     if (panelOtwarty()) aktualizujLiczby();
-    if (!zalogowany() || !window.Chmura || !Chmura.wolajRpc || etap() !== 3 || testowy) return;
+    if (!zalogowany() || !window.Chmura || !Chmura.wolajRpc || etap() !== 3 || testowy) return null;
+    let w = null;
     try {
-      const w = await Chmura.wolajRpc('zaraza_podejscie', {});
+      w = await Chmura.wolajRpc('zaraza_podejscie', {});
       if (w && stan && +w.razem > 0) stan.podejscia = Math.max(+stan.podejscia || 0, +w.razem);
-    } catch (e) {}
+    } catch (e) { w = null; }
     rysujHud();
+    return w || null;
   }
 
   /* Zlowienie Lucjanka Zero: pierwszy lowca trafia na serwer (zaraza_zlowiony). */

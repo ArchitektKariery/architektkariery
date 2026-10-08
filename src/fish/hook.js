@@ -161,8 +161,13 @@ function lureFish(dt) {
     G.bite = Math.max(G.bite, Math.max(0, 0.30 - dist / 300));
 
     if (f.moodT <= 0) {
-      /* Lucjanek Zero: kazda decyzja to jedno podejscie w liczniku eventu. */
-      if (f.lzZero && window.LucjanekZero) LucjanekZero.podejscie(f);
+      /* Lucjanek Zero: kazda decyzja to jedno podejscie w liczniku eventu.
+         Rzut brania robi serwer, wiec ryba krazy dalej przy przynecie, az
+         przyjdzie odpowiedz (LucjanekZero.czeka, najwyzej kilka sekund). */
+      if (f.lzZero && window.LucjanekZero) {
+        LucjanekZero.podejscie(f);
+        if (LucjanekZero.czeka && LucjanekZero.czeka(f)) { f.moodT = 0.1; return; }
+      }
       /* Im wieksza ryba, tym czesciej odmawia po obejrzeniu przynety. */
       if (Math.random() < chetnaZaatakowac(f)) {
         f.mood = 'strike'; f.moodT = 1.4;
