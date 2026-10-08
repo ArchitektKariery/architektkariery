@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zadania376-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00; plik `20261008_zaraza_rzut_serwer.sql` do uruchomienia przed czw 8 X 23:00)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zadania376-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00; plik `20261008_zaraza_rzut_serwer.sql` uruchomiony 8 X ok. 15:30)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 

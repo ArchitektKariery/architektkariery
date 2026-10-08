@@ -113,7 +113,7 @@ Inne źródła na godzinę:
 - Założenia: 4 złowienia na minutę, średni handlarz z wag `HANDLARZE` bez odrzucania ofert, gracz zawsze sprzedaje 10 najcenniejszych ryb. Gracz wolniejszy (2 na minutę) sprzedaje wszystko i nic nie wypuszcza.
 
 ## 9. Decyzje i stan napraw
-- **8 X, 14:00, K2:** rzut brania Lucjanka Zero na serwerze. Gra wypchnięta (build `2026-10-08-zaraza-rzut-serwer-v1`), SQL `supabase/migrations/20261008_zaraza_rzut_serwer.sql` czeka na uruchomienie przez Andrzeja przed czw 8 X 23:00.
+- **8 X, 14:00, K2:** rzut brania Lucjanka Zero na serwerze. Gra wypchnięta (build `2026-10-08-zaraza-rzut-serwer-v1`), SQL `supabase/migrations/20261008_zaraza_rzut_serwer.sql` Andrzej uruchomił 8 X ok. 15:30, przed startem etapu 3.
 - **8 X, 14:50, decyzja Andrzeja:** „Zwiększ tylko nagrody za zlecenia i zadania. Dostosowane do ekonomii gry” (build `2026-10-08-nagrody-v1`, opis i pomiar w `docs/ekonomia-po-finale.md`):
   - zadania x40: 280 000 / 1 400 000 / 7 000 000, odświeżenie 1 120 000; po finale zadanie płaci ok. 52 500 qryb za minutę, tyle co zwykła gra (B4),
   - 10 zadań robionych w kilka minut dostało 1 gwiazdkę z czasu: sprzedaż i utarg, 10 ryb w wiaderku, wymiana ławicy 15-45 razy (W4 przy okazji, bo przy x40 jedna sprzedaż płaciłaby 7 mln),
