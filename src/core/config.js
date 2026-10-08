@@ -10,7 +10,7 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-10-08-rozmiar-lawicy-v1';
+window.QRYBY_BUILD = '2026-10-08-ekonomia-po-finale-v1';
 /* Finał ZARAZY: pt 9 X 2026, 23:00 czasu polskiego. Od tej chwili dziala
    losowanie lawicy na gosci (LOS_LAWICY w src/fish/fish-core.js) i znika
    dosadzanie partnera (src/fish/school.js); polecenie Andrzeja z 8 X,

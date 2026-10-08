@@ -2175,16 +2175,20 @@
     z.lista.forEach((id, n) => {
       const Z = ZADANIA[id];
       if (!Z) return;                      /* zadanie spoza puli: pomijamy */
-      const gw = '&#9733;'.repeat(Z.g);
+      /* Gwiazdki i nagroda wedlug zasad obowiazujacych teraz (od finalu
+         ZARAZY przeliczone z czasu wykonania, src/tasks/tasks.js). */
+      const gwZ = Zadania.gwiazdki ? Zadania.gwiazdki(Z) : Z.g;
+      const nagZ = Zadania.nagroda ? Zadania.nagroda(Z) : Zadania.NAGRODA[Z.g];
+      const gw = '&#9733;'.repeat(gwZ);
       const p = Math.min(z.postep[n], Z.c);
       const czeka = z.gotowe[n] && !z.odebrane[n];
       const wziete = z.odebrane[n];
       h += '<div class="zad' + (czeka ? ' czeka' : (wziete ? ' ok' : '')) + '">' +
-           '<div class="gw">' + gw + '<span>' + Zadania.NAGRODA[Z.g] + ' qryb</span></div>' +
+           '<div class="gw">' + gw + '<span>' + nagZ + ' qryb</span></div>' +
            '<div class="tr">' + Z.o + '</div>' +
            '<div class="pas"><i data-w="' + Math.round(100 * p / Z.c) + '"></i></div>' +
            (czeka
-             ? '<button class="odb mini" data-n="' + n + '">ODBIERZ +' + Zadania.NAGRODA[Z.g] + '</button>'
+             ? '<button class="odb mini" data-n="' + n + '">ODBIERZ +' + nagZ + '</button>'
              : '<div class="li">' + (wziete ? 'ODEBRANE' : p + ' / ' + Z.c) + '</div>') +
            '</div>';
     });

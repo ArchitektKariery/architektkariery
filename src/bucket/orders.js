@@ -66,6 +66,9 @@ const Zlecenia = (() => {
      spalic lawice na szukanie, a kiedy dolowic to, co juz plywa.
      ============================================================ */
   const LAWIC_PASMA = { 1: 10, 2: 20, 3: 40, 4: 60, 5: 80, 6: 100 };
+  /* Od finalu ZARAZY termin rosnie z rzadkoscia gatunku w lawicy, najwyzej
+     tyle razy (opis przy liczeniu terminu w zbudujZlecenie). */
+  const TERMIN_MAX_RAZY = 4;
   /* Prog punktowy NIGDY ponizej 35 (decyzja Andrzeja). Zlecenie ma dotyczyc
      okazu, nie pierwszej lepszej sztuki -- ponizej 35 punktow kazda ryba
      z lawicy zaliczalaby je przypadkiem. */
@@ -292,8 +295,8 @@ const Zlecenia = (() => {
       const gk = losujKlucz();
       const P = POZIOMY[Math.floor(Math.random() * POZIOMY.length)];
       const pasmo = Math.min(6, Math.max(1, (window.KLASA && KLASA[gk]) || 1));
-      const lawic = LAWIC_PASMA[pasmo];
-      if (!lawic) continue;
+      const lawicPasma = LAWIC_PASMA[pasmo];
+      if (!lawicPasma) continue;
 
       const pr = probkaPunktow(gk, PROBKA);
       const pkty = pr.pkty;
@@ -312,8 +315,37 @@ const Zlecenia = (() => {
          POP.max x pGat jak dotad, od finalu gosc lawicy (pasma 3-7) ma
          jedna szanse na lawice, a tlo skaluje sie rozmiarem lawicy
          (oczekiwanaLiczbaWLawicy w src/fish/fish-core.js). */
+      const naLawiceDoFinalu = (window.POP ? POP.max : 25) * pGat;
       const naLawice = window.oczekiwanaLiczbaWLawicy
-        ? oczekiwanaLiczbaWLawicy(gk, pGat) : (window.POP ? POP.max : 25) * pGat;
+        ? oczekiwanaLiczbaWLawicy(gk, pGat) : naLawiceDoFinalu;
+      /* ============================================================
+         TERMIN ROSNIE RAZEM Z RZADKOSCIA W LAWICY (8 X 2026, polecenie
+         Andrzeja: "popraw ekonomie zadan i zlecen, bo teraz sa
+         nieoplacalne").
+         Od finalu ZARAZY gatunek trafia sie w lawicy rzadziej: tlo, bo
+         lawica ma 5-14 ryb zamiast okolo 11,5, a pasma 3-7, bo sa
+         goscmi z jedna szansa na lawice. Przy tym samym terminie szansa
+         zlecenia spadala, a przy kaucji 30% zlecenie ponizej 23,1% szansy
+         jest strata: zmierzone na 600 propozycjach, srednia szansa 35,6%
+         przed finalem i 20,5% po finale, srednia wartosc oczekiwana dla
+         gracza +8 tys. i -8,4 tys. qryb.
+         Teraz termin z tabeli pasm rosnie dokladnie o tyle, o ile mniej
+         sztuk gatunku przypada na lawice, wiec szansa zlecenia jest taka
+         sama jak przed finalem. Stawka za czas (PREMIA_LAWICY za lawice)
+         rosnie razem z terminem, wiec zlecenie placi tyle samo za lawice.
+         Do finalu oba rachunki sa rowne i termin zostaje z tabeli.
+         SUFIT: termin najwyzej TERMIN_MAX_RAZY dluzszy niz w tabeli. Gosc
+         lawicy (pasma 3-6) trafia sie po finale 25 razy rzadziej, wiec bez
+         sufitu zlecenie na suma mialoby 1 000 lawic i stawke 8 mln przy
+         szansie 5,7%, czyli tak samo zly interes jak przed finalem, tylko
+         z kwotami, ktore rozsadzaja gospodarke. Z sufitem takie zlecenia
+         maja mniejsza szanse i przez wazenie s^WYKLADNIK_SZANSY prawie sie
+         nie pojawiaja, a zlecenia na ryby z tla odzyskuja szanse sprzed
+         finalu w calosci (lawica 5 ryb to termin x 2,3). */
+      const lawic = (naLawice > 0 && naLawiceDoFinalu > 0)
+        ? Math.max(1, Math.min(lawicPasma * TERMIN_MAX_RAZY,
+            Math.ceil(lawicPasma * naLawiceDoFinalu / naLawice - 1e-9)))
+        : lawicPasma;
       const oczek = lawic * naLawice * pProg;
       const szansa = 1 - Math.exp(-oczek);
       /* Wazenie zamiast twardego progu -- patrz komentarz przy

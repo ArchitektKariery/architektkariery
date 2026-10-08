@@ -51,6 +51,7 @@ require(any(x in html for x in [
     "2026-10-08-lawica-goscie-v1",
     "2026-10-08-zmiany-od-finalu-v1",
     "2026-10-08-rozmiar-lawicy-v1",
+    "2026-10-08-ekonomia-po-finale-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -191,6 +192,7 @@ for plik, wzor in [
     ("src/fish/fish-core.js", "od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
     ("src/fish/school.js", "do: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
     ("src/fish/fish-core.js", "const ROZMIAR_LAWICY = { wlaczony: true, od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
+    ("src/tasks/tasks.js", "const PO_FINALE = { wlaczony: true, od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
 ]:
     require(wzor in (root / plik).read_text(encoding="utf-8"), plik + ": finale moment must be " + FINAL_ZARAZY)
 require("LOS_LAWICY.aktywna = losLawicyDziala();" in html, "school draw must choose its rule when the school is created")
@@ -199,6 +201,15 @@ require("const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.rando
         and "const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.random() * 3));" in (root / "src/fish/behavior.js").read_text(encoding="utf-8")
         and "const START = ileRybNowejLawicy(POP_DO_FINALU.start);" in (root / "src/fish/school-update.js").read_text(encoding="utf-8"),
         "every new school (button, clock, game start) must take its size from ileRybNowejLawicy")
+_zad = (root / "src/tasks/tasks.js").read_text(encoding="utf-8")
+import re as _re
+_gw = _re.search(r"const GWIAZDKI_PO_FINALE = \[(.*?)\];", _zad, _re.S)
+require(_gw is not None and len(_gw.group(1).replace("\n", "").replace(" ", "").split(",")) == len(_re.search(r"const ZADANIA = (\[.*?\]);", _zad, _re.S).group(1).split('"i":')) - 1,
+        "GWIAZDKI_PO_FINALE must have one entry per task in ZADANIA")
+require("if (!kand || lista.indexOf(kand.i) >= 0 || !wPuli(kand)) continue;" in _zad, "daily draw must skip tasks outside the post-finale pool")
+require("const ile = nagroda(Z);" in _zad, "task payout must use the post-finale stars")
+require("const lawic = (naLawice > 0 && naLawiceDoFinalu > 0)" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
+        "order deadline must grow with in-school rarity after the finale")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

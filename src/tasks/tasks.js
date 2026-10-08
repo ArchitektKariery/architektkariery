@@ -36,6 +36,58 @@ const Zadania = (() => {
   const NAGRODA = { 1: 7000, 2: 35000, 3: 175000 }, KOSZT_ODSWIEZENIA = 28000;
   const ILE_NA_DOBE = 5;
 
+  /* ============================================================
+     ZADANIA OD FINALU ZARAZY (pt 9 X 23:00; polecenie Andrzeja z 8 X 2026,
+     11:06: "popraw ekonomie zadan i zlecen, bo teraz sa nieoplacalne").
+
+     Po finale jezioro ma 10% ryb, ryby z pasm 3-7 trafiaja do lawicy jako
+     goscie z szansa rowna udzialowi w jeziorze (LOS_LAWICY w
+     src/fish/fish-core.js), a lawica ma 5-14 ryb. Zadania na rzadkie
+     gatunki, wysokie karty i duzo punktow trwaja wiec dluzej, a niektore
+     przestaja byc do zrobienia w ciagu dnia.
+
+     Zasada zostaje ta sama co wyzej: gwiazdka (czyli nagroda) liczy sie
+     z CZASU wykonania, do 12 min 1, do 45 min 2, dluzej 3. Czas po finale
+     zmierzony na modelu polowu (lawica co minute, 4 zlowienia na lawice,
+     wybor ryby przez pickLure, 200 000 zlowien na stan jeziora, tempo
+     3,9 zlowienia na minute jak w kolumnie m). Bierzemy wiekszy z dwoch
+     szacunkow: m razy zmiana czasu w modelu (jezioro w normie przed
+     finalem wobec jeziora po finale) albo czas wprost z modelu po finale.
+     Zadanie, ktore po finale trwaloby dluzej niz najdluzsze zadanie przed
+     finalem (320 min), wypada z losowania dnia.
+
+     GWIAZDKI_PO_FINALE: indeks = numer zadania (pole i), wartosc 1-3 to
+     gwiazdki po finale, 0 to zadanie spoza losowania. Wynik: 182 zadania
+     w puli (68 / 64 / 50 z 1 / 2 / 3 gwiazdkami), 48 w gore, 5 w dol,
+     94 wypada (83 na rzadkie gatunki, ryba mityczna, 3 trafienia
+     dokladnie w 44-54 punkty, 25-42 rozne gatunki, 3 i 5 nowych gatunkow,
+     8 ryb pasma 6+, srednia powyzej 42). Zadania w puli placa po finale
+     okolo 1 200-1 300 qryb za minute (dwa przebiegi modelu), przed
+     finalem 1 327. Drugi przebieg narzedzia rozni sie od tej tabeli
+     czterema zadaniami tuz przy granicy 320 min (rozrzut losowania).
+     Tabele liczy tools/zadania_po_finale.py; opis docs/ekonomia-po-finale.md.
+     ============================================================ */
+  const GWIAZDKI_PO_FINALE = [
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,3,1,1,1,3,2,3,3,1,
+    3,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,3,1,2,2,3,2,2,1,1,2,1,2,1,2,1,1,1,1,3,1,3,1,3,2,2,2,2,2,
+    2,2,1,3,2,3,2,1,2,0,1,2,2,2,2,2,2,3,2,0,2,2,2,2,2,2,3,2,2,2,3,2,0,2,2,0,3,2,2,2,2,2,2,3,3,2,
+    3,2,3,3,0,2,0,0,2,3,3,3,0,3,0,3,2,2,2,3,0,0,0,0,0,3,3,0,0,3,2,2,2,0,0,3,0,3,2,2,0,3,3,2,0,3,
+    0,3,2,0,2,0,0,0,0,0,0,2,3,0,0,0,3,2,3,0,3,0,3,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,
+    0,0,0,3,3,3,3,0,0,3,3,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  ];
+  const PO_FINALE = { wlaczony: true, od: window.QRYBY_FINAL_ZARAZY || Date.parse('2026-10-09T23:00:00+02:00') };
+  function poFinale(teraz) { return !!PO_FINALE.wlaczony && (teraz || Date.now()) >= PO_FINALE.od; }
+  /* Gwiazdki zadania wedlug zasad obowiazujacych teraz. Zadanie spoza puli,
+     ktore zostalo w zestawie dnia z czasu przed finalem, placi jak trzy. */
+  function gwiazdki(Z) {
+    if (!Z) return 1;
+    if (!poFinale()) return Z.g;
+    const g = GWIAZDKI_PO_FINALE[Z.i];
+    return g === 0 ? 3 : (g || Z.g);
+  }
+  function nagroda(Z) { return NAGRODA[gwiazdki(Z)]; }
+  function wPuli(Z) { return !!Z && (!poFinale() || GWIAZDKI_PO_FINALE[Z.i] !== 0); }
+
   /* Prosty generator z ziarna, zeby ten sam dzien dawal ten sam zestaw. */
   function ziarno(txt) {
     let h = 2166136261;
@@ -56,7 +108,7 @@ const Zadania = (() => {
     let ochrona = 0;
     while (lista.length < ILE_NA_DOBE && ochrona++ < 200) {
       const kand = ZADANIA[Math.floor(r() * ZADANIA.length)];
-      if (!kand || lista.indexOf(kand.i) >= 0) continue;
+      if (!kand || lista.indexOf(kand.i) >= 0 || !wPuli(kand)) continue;
       lista.push(kand.i);
     }
     return lista;
@@ -149,9 +201,10 @@ const Zadania = (() => {
     const z = stan(); if (!z || !z.gotowe[n] || z.odebrane[n]) return 0;
     const Z = ZADANIA[z.lista[n]];
     z.odebrane[n] = 1;
-    Zapis.dane().monety = (Zapis.dane().monety || 0) + NAGRODA[Z.g];
+    const ile = nagroda(Z);
+    Zapis.dane().monety = (Zapis.dane().monety || 0) + ile;
     Zapis.zapisz();
-    return NAGRODA[Z.g];
+    return ile;
   }
   /* Ile nagrod czeka na odbior. HUD pyta o to co pol sekundy. */
   function doOdbioru() {
@@ -163,7 +216,8 @@ const Zadania = (() => {
   const wszystkieZrobione = () => { const z = stan(); return z && z.odebrane.every(Boolean); };
   const opis = n => { const z = stan(); return z ? ZADANIA[z.lista[n]] : null; };
   return { stan, odswiez, zdarzenie, odbierz, doOdbioru, wszystkieZrobione, opis,
-           NAGRODA, KOSZT_ODSWIEZENIA, ILE: () => ZADANIA.length };
+           NAGRODA, KOSZT_ODSWIEZENIA, ILE: () => ZADANIA.length,
+           gwiazdki, nagroda, wPuli, poFinale, PO_FINALE, GWIAZDKI_PO_FINALE, wybierz };
 })();
 window.Zadania = Zadania;
 

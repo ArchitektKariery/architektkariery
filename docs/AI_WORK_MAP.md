@@ -62,7 +62,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Wiaderko i giełda (oferty handlarzy) | `src/bucket/bucket.js` |
 | Zakładka TARLISKO w panelu wiaderka, ikonka stawu obok krzyżyka w wierszu ryby | `src/ui/panel.js` (`tarliskoHTML`, `stawSVG`, sekcja `PANEL WIADERKA`), style `css/03-eko-icons.css` |
 | Wycena ryb, handlarze, średnia rynkowa, tempo połowu | `src/bucket/pricing.js` |
-| Zlecenia handlarzy, tablica ogłoszeń; próbki punktów liczone zawczasu w bezczynności (`rozgrzejProbki`) | `src/bucket/orders.js` |
+| Zlecenia handlarzy, tablica ogłoszeń; próbki punktów liczone zawczasu w bezczynności (`rozgrzejProbki`); od finału ZARAZY termin rośnie z rzadkością w ławicy, najwyżej 4 razy (`TERMIN_MAX_RAZY`, `oczekiwanaLiczbaWLawicy`), opis `docs/ekonomia-po-finale.md` | `src/bucket/orders.js`, `src/fish/fish-core.js` |
 | Widok straganu i panelu wiaderka w menu | `src/ui/panel.js` (sekcje `SKLEP`, `STRAGAN`, `PANEL WIADERKA`) |
 
 ## Gracz, konto, serwer
@@ -75,7 +75,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Panel gracza i sekcja konta w menu | `src/ui/panel.js` (sekcje `PANEL GRACZA`, `SEKCJA KONTA`) |
 | Turnieje, liga, pasek turniejowy, nagrody turniejowe | `src/tournaments/tournaments.js` |
 | Panel turniejów i tabela wyników | `src/ui/panel.js` (sekcje `PANEL TURNIEJOW`, `TABELKA WYNIKOW`) |
-| Zadania dzienne (`ZADANIA`, `Zadania`) | `src/tasks/tasks.js` |
+| Zadania dzienne (`ZADANIA`, `Zadania`); od finału ZARAZY gwiazdki z czasu po finale i pula bez zadań dłuższych niż 320 min (`GWIAZDKI_PO_FINALE`, `Zadania.gwiazdki`, `Zadania.nagroda`, `Zadania.wPuli`), tabelę liczy `tools/zadania_po_finale.py`, opis `docs/ekonomia-po-finale.md` | `src/tasks/tasks.js`, `src/ui/panel.js` (lista zadań) |
 
 ## Interfejs, scena, efekty
 
