@@ -10,7 +10,15 @@ window.QRYBY_CHMURA = {
    wplywaja na balans. Kazdy nastepny etap produktu moze zostac wlaczony
    osobno bez przepisywania rdzenia gry.
    ============================================================ */
-window.QRYBY_BUILD = '2026-10-08-lawica-goscie-v1';
+window.QRYBY_BUILD = '2026-10-08-zmiany-od-finalu-v1';
+/* Finał ZARAZY: pt 9 X 2026, 23:00 czasu polskiego. Od tej chwili dziala
+   losowanie lawicy na gosci (LOS_LAWICY w src/fish/fish-core.js) i znika
+   dosadzanie partnera (src/fish/school.js); polecenie Andrzeja z 8 X,
+   10:43: "zrobic te wszystkie zmiany od finalu w piatek". Ta sama chwila
+   stoi w src/events/zaraza.js (T.final) i src/ecosystem/population.js
+   (CFG.PO_ZARAZIE_OD); tools/community_event_qa.py pilnuje, zeby sie
+   zgadzaly. */
+window.QRYBY_FINAL_ZARAZY = Date.parse('2026-10-09T23:00:00+02:00');
 window.QRYBY_FEATURES = Object.freeze({
   telemetry: true,
   onboardingV2: true,

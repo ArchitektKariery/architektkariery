@@ -49,6 +49,7 @@ require(any(x in html for x in [
     "2026-10-08-bez-partnera-v1",
     "2026-10-08-lawica-raz-v1",
     "2026-10-08-lawica-goscie-v1",
+    "2026-10-08-zmiany-od-finalu-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -178,6 +179,20 @@ if "tajemnica: true" in reg:
     require("GATUNKI[gk].odnowa && !r.wymarly && !(r.n > 0)) continue" in html, "Smok Zycia must not release an unfunded restoration species")
     require("function odslon(card, C)" in live and "odslon(card, C);" in live, "live client must reveal the fish after success")
     require(".odn-odslona" in html, "reveal animation style missing")
+
+# Final ZARAZY: jedna chwila w czterech miejscach (zegar karty, tarlo po
+# finale, losowanie lawicy na gosci i koniec dosadzania partnera).
+FINAL_ZARAZY = "Date.parse('2026-10-09T23:00:00+02:00')"
+for plik, wzor in [
+    ("src/core/config.js", "window.QRYBY_FINAL_ZARAZY = " + FINAL_ZARAZY),
+    ("src/events/zaraza.js", "final: " + FINAL_ZARAZY),
+    ("src/ecosystem/population.js", "CFG.PO_ZARAZIE_OD = " + FINAL_ZARAZY),
+    ("src/fish/fish-core.js", "od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
+    ("src/fish/school.js", "do: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
+]:
+    require(wzor in (root / plik).read_text(encoding="utf-8"), plik + ": finale moment must be " + FINAL_ZARAZY)
+require("LOS_LAWICY.aktywna = losLawicyDziala();" in html, "school draw must choose its rule when the school is created")
+require("if (dosadzajPartnera() && typeof dosadzPartnerow === 'function')" in html, "partner top-up must end at the finale, not earlier")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

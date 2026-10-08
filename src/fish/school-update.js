@@ -58,7 +58,7 @@ function makeFishZLimitem() {
      z tej samej puli co pierwsza proba. */
   const L = window.LOS_LAWICY;
   let pula = null, gosc = null;
-  if (L && L.wlaczony) {
+  if (L && L.aktywna) {   /* regula wybrana przy powstaniu lawicy (od finalu ZARAZY) */
     pula = 'tlo';
     if (L.doWstawienia && L.doWstawienia.length) gosc = L.doWstawienia.shift();
   }

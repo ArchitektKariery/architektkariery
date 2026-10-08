@@ -278,9 +278,23 @@ window.REKOMPENSATA_OKNA = REKOMPENSATA_OKNA;
    zostaje na kazdym miejscu.
    Pomiar i opis: docs/lawica-losowanie.md. Powrot do losowania na kazde
    miejsce: LOS_LAWICY.wlaczony = false.
+
+   START OD FINALU ZARAZY (polecenie Andrzeja 8 X, 10:43: "zrobic te
+   wszystkie zmiany od finalu w piatek"): goscie dzialaja od chwili
+   LOS_LAWICY.od = window.QRYBY_FINAL_ZARAZY (pt 9 X 23:00, src/core/config.js).
+   Wczesniej kazde miejsce losuje z calego jeziora jak dotad. Regule wybiera
+   kazda nowa lawica w chwili powstania (LOS_LAWICY.aktywna), wiec lawica
+   z 22:59 konczy minute na starych zasadach, a pierwsza po 23:00 losuje
+   gosci.
    ============================================================ */
-const LOS_LAWICY = { wlaczony: true, odPasma: 3, goscie: [], doWstawienia: [] };
+const LOS_LAWICY = { wlaczony: true, odPasma: 3, goscie: [], doWstawienia: [], aktywna: false,
+                     od: window.QRYBY_FINAL_ZARAZY || Date.parse('2026-10-09T23:00:00+02:00') };
 window.LOS_LAWICY = LOS_LAWICY;
+/* Czy nowa lawica losuje gosci: flaga wlaczona i minal finał ZARAZY. */
+function losLawicyDziala(teraz) {
+  return !!LOS_LAWICY.wlaczony && (teraz || Date.now()) >= LOS_LAWICY.od;
+}
+window.losLawicyDziala = losLawicyDziala;
 
 /* Tabela wag losowania, wspolna dla losujGatunek i rzutu na goscia.
    `tylko` to pula zamknieta przez zanete albo null. */
@@ -455,7 +469,8 @@ window.tabelaWag = tabelaWag;
 function nowaLawicaLosu() {
   LOS_LAWICY.goscie = [];
   LOS_LAWICY.doWstawienia = [];
-  if (!LOS_LAWICY.wlaczony) return;
+  LOS_LAWICY.aktywna = losLawicyDziala();
+  if (!LOS_LAWICY.aktywna) return;   /* przed finałem: kazde miejsce z calego jeziora */
   if (window.zanetaTylko && window.zanetaTylko()) return;   /* zaneta "tylko": cala lawica z jej puli */
   const TW = tabelaWag(null);
   if (!(TW.suma > 0) || !TW.kluczeR) return;

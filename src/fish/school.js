@@ -67,7 +67,14 @@ window.MIX = MIX;
    rozlozone po calej szerokosci i glebokosci, tak jak przy starcie gry.
    Zostaje tylko blysk tafli na 0,3 s, zeby oko wiedzialo, ze cos sie stalo. */
 const NOWA = { blysk: 0 };
-const DOSADZAJ_PARTNERA = false;   /* opis przy wywolaniu w nowaLawica */
+/* Dosadzanie partnera: dziala do finalu ZARAZY, potem wylaczone
+   (opis przy wywolaniu w nowaLawica). `do` to pt 9 X 23:00 z src/core/config.js. */
+const PARTNER_LAWICY = { wlaczony: true, do: window.QRYBY_FINAL_ZARAZY || Date.parse('2026-10-09T23:00:00+02:00') };
+window.PARTNER_LAWICY = PARTNER_LAWICY;
+function dosadzajPartnera(teraz) {
+  return !!PARTNER_LAWICY.wlaczony && (teraz || Date.now()) < PARTNER_LAWICY.do;
+}
+window.dosadzajPartnera = dosadzajPartnera;
 function nowaLawica() {
   if(window.SmokZycia) SmokZycia.koniecLawicy();
   /* wedka i przyneta puszczaja */
@@ -110,14 +117,16 @@ function nowaLawica() {
     f.turn = 1 + Math.random() * 4;
     school.push(f);
   }
-  /* DOSADZANIE PARTNERA WYLACZONE (8 X 2026, polecenie Andrzeja: "nie
-     losuje sie dodatkowy partner, po prostu musi sie trafic dwie takie
-     ryby, bez pomocy gry"). Do tej pory samotna ryba z pasma 3-7 w nowej
-     lawicy dostawala partnera przeciwnej plci z szansa 8-55%. Teraz para
-     rzadkiego gatunku powstaje tylko wtedy, gdy losowanie samo przyniesie
-     dwie ryby tego gatunku. Funkcja dosadzPartnerow zostaje w
-     src/fish/school-update.js; powrot to DOSADZAJ_PARTNERA = true. */
-  if (DOSADZAJ_PARTNERA && typeof dosadzPartnerow === 'function') { try { dosadzPartnerow(school); } catch (e) {} }
+  /* DOSADZANIE PARTNERA KONCZY SIE Z FINALEM ZARAZY (polecenia Andrzeja
+     z 8 X 2026: 09:40 "nie losuje sie dodatkowy partner, po prostu musi
+     sie trafic dwie takie ryby, bez pomocy gry"; 10:43 "zrobic te wszystkie
+     zmiany od finalu w piatek"). Do pt 9 X 23:00 samotna ryba z pasma 3-7
+     w nowej lawicy dostaje partnera przeciwnej plci z szansa 8-55%, jak
+     dotad. Od finalu para rzadkiego gatunku powstaje tylko wtedy, gdy
+     losowanie samo przyniesie dwie ryby tego gatunku. Funkcja
+     dosadzPartnerow zostaje w src/fish/school-update.js; wylaczenie od
+     razu: PARTNER_LAWICY.wlaczony = false. */
+  if (dosadzajPartnera() && typeof dosadzPartnerow === 'function') { try { dosadzPartnerow(school); } catch (e) {} }
   /* Zaneta gwarantujaca podmienia jedna sztuke, zanim ktokolwiek zobaczy
      lawice. Funkcja siedzi w pozniejszym bloku skryptu, wiec pytamy o nia
      przez typeof: przy pierwszych klatkach po starcie moze jeszcze nie byc. */
