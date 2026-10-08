@@ -51,20 +51,23 @@ function makeFishZLimitem() {
      byc nim z rzadkoscia jednej ryby w jeziorze (src/events/lucjanek-zero.js). */
   if (window.LucjanekZero) { const lz = LucjanekZero.moze(); if (lz) return lz; }
   /* LOSOWANIE NA LAWICE (opis przy LOS_LAWICY w src/fish/fish-core.js).
-     Pierwsze miejsce nowej lawicy losuje z calego jeziora, kazde nastepne
-     i kazda ryba doplywajaca w trakcie minuty tylko z tla (pasma 1-2).
-     Pula obowiazuje przez cala budowe miejsca, wiec ponowienia serii,
-     zanety i awaryjnej ryby losuja z tej samej puli co pierwsza proba. */
+     Kazdy gosc nowej lawicy dostaje jedno miejsce na jej starcie; kazde
+     inne miejsce i kazda ryba doplywajaca w trakcie minuty losuje z tla
+     (pasma 1-2) razem z goscmi tej lawicy. Pula obowiazuje przez cala
+     budowe miejsca, wiec ponowienia serii, zanety i awaryjnej ryby losuja
+     z tej samej puli co pierwsza proba. */
   const L = window.LOS_LAWICY;
-  let pula = null;
+  let pula = null, gosc = null;
   if (L && L.wlaczony) {
-    if (L.pelne > 0) { L.pelne--; pula = 'pelna'; } else pula = 'tlo';
+    pula = 'tlo';
+    if (L.doWstawienia && L.doWstawienia.length) gosc = L.doWstawienia.shift();
   }
-  const poprzednia = window.__pulaLawicy;
+  const poprzedniaPula = window.__pulaLawicy, poprzedniGosc = window.__gatunekMiejsca;
   window.__pulaLawicy = pula;
+  window.__gatunekMiejsca = gosc;
   let f;
   try { f = nadajTozsamosc(makeFishZLimitemSurowy()); }
-  finally { window.__pulaLawicy = poprzednia; }
+  finally { window.__pulaLawicy = poprzedniaPula; window.__gatunekMiejsca = poprzedniGosc; }
   if(window.FortuneCookie&&FortuneCookie.adjustFish)f=FortuneCookie.adjustFish(f);
   return f;
 }
@@ -217,7 +220,7 @@ window.dosadzPartnerow = dosadzPartnerow;
 
 /* Start: cala lawica rozlozona po szerokosci i glebokosciach. */
 const START = 15;
-if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();   /* jedno losowanie z calego jeziora na lawice */
+if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();   /* rzut na gosci lawicy z pasm 3-7 (LOS_LAWICY) */
 for (let i = 0; i < START; i++) {
   const f = makeFishZLimitem();
   f.x = 40 + (i + 0.5) * (Scene.W - 80) / START + (Math.random() - 0.5) * 40;

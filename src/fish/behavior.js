@@ -582,7 +582,7 @@ function cyklLawicy(dt) {
     /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
     for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
     const ile = POP.cel + Math.round(Math.random() * 3);
-    /* Jedno losowanie z calego jeziora na lawice, reszta z tla
+    /* Rzut na gosci lawicy z pasm 3-7, reszta miejsc z tla i gosci
        (opis przy LOS_LAWICY w src/fish/fish-core.js). */
     if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();
     for (let i = 0; i < ile; i++) school.push(wplyw());

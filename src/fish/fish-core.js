@@ -242,71 +242,51 @@ const REKOMPENSATA_OKNA = { ksiaznik: 3, smucior: 4, nessy: 5, kupid: 12, wiezow
 window.REKOMPENSATA_OKNA = REKOMPENSATA_OKNA;
 
 /* ============================================================
-   LOSOWANIE NA LAWICE, NIE NA MIEJSCE (8 X 2026, polecenie Andrzeja:
-   "losuje sie na kazde miejsce, co zwieksza szanse niewymiernie na wyzsze
-   pasma. Jak morswin jest 1 na 100 ryb, to jego szansa pojawienia sie
-   w calej lawicy ma byc 1%").
+   LOSOWANIE NA LAWICE, NIE NA MIEJSCE (8 X 2026, dwa polecenia Andrzeja:
+   10:00 "Jak morswin jest 1 na 100 ryb, to jego szansa pojawienia sie
+   w calej lawicy ma byc 1%"; 10:21 usunac zasade "w lawicy plywa najwyzej
+   jedna ryba z pasm 3-7", bo odcinala tym pasmom tarlo w jeziorze).
 
-   BYLO: kazde miejsce w lawicy i kazda ryba doplywajaca w trakcie minuty
-   losowaly gatunek z calego jeziora. Gatunek z udzialem p trafial do
-   lawicy z szansa 1-(1-p)^N, gdzie N to liczba losowan na lawice, czyli
-   prawie N razy czesciej, niz mowi jego udzial.
+   BYLO (do 8 X): kazde miejsce w lawicy i kazda ryba doplywajaca w trakcie
+   minuty losowaly gatunek z calego jeziora. Gatunek z udzialem p trafial
+   do lawicy z szansa 1-(1-p)^N, gdzie N to liczba losowan na lawice
+   (11,5 na przycisk, 19,4 na minute zegara), czyli prawie N razy czesciej,
+   niz mowi jego udzial.
 
-   JEST: lawica ma JEDNO losowanie z calego jeziora, na pierwszym miejscu
-   nowej lawicy (start gry, przycisk LAWICA, zegar co 60 s). Kazde nastepne
-   miejsce i kazda ryba doplywajaca w trakcie minuty losuja tylko z TLA,
-   czyli z gatunkow ponizej pasma `odPasma` (pasma 1-2). Gatunek z pasm
-   3-7 trafia do lawicy wylacznie przez to jedno losowanie, z szansa rowna
-   dokladnie swojemu udzialowi w jeziorze (wadze w tabeli nizej).
+   JEST: przy kazdej nowej lawicy (start gry, przycisk LAWICA, zegar co
+   60 s) `nowaLawicaLosu` rzuca RAZ dla kazdego dostepnego gatunku od pasma
+   `odPasma` w gore: gatunek zostaje GOSCIEM lawicy z szansa rowna swojemu
+   udzialowi w jeziorze (waga / suma wag, te same bramy czasu). Kazdy gosc
+   dostaje jedno miejsce na starcie lawicy. Pozostale miejsca i ryby
+   doplywajace w trakcie minuty losuja z TLA (pasma ponizej odPasma) RAZEM
+   z goscmi tej lawicy, wagami populacji. Gosc moze wiec przyplynac drugi
+   i trzeci raz z ta sama szansa co przy starym losowaniu, a dwa rozne
+   rzadkie gatunki trafiaja do lawicy niezaleznie od siebie. Gatunek, ktory
+   nie zostal gosciem, do tej lawicy nie wplynie.
 
-   Pasma 1-2 losuja dalej na kazde miejsce, bo ktos musi wypelnic lawice:
-   gdyby kazdy gatunek mial szanse rowna udzialowi, suma tych szans dawalaby
-   srednio JEDEN gatunek na lawice.
+   Wynik: szansa, ze gatunek z pasm 3-7 jest w lawicy, rowna sie jego
+   udzialowi w jeziorze, a liczba jego ryb w lawicy nie ma sufitu.
+   Pasma 1-2 losuja na kazde miejsce, bo wypelniaja lawice: gdyby kazdy
+   gatunek mial szanse rowna udzialowi, suma tych szans dawalaby srednio
+   JEDEN gatunek na lawice.
 
-   Zaneta zamykajaca pule ("tylko", dodatkowe proby "progu") losuje jak
-   dotad na kazde miejsce: gracz kupuje wlasnie zageszczenie.
-   Seria ponawia losowanie z tej samej puli co miejsce: dla gatunku z pasm
-   1-2 na kazdym miejscu, dla gatunku z pasm 3-7 w jednym losowaniu lawicy.
-   Lucjanek Zero (src/events/lucjanek-zero.js) zostaje na kazdym miejscu.
+   Zaneta zamykajaca pule ("tylko") i dodatkowe proby "progu" losuja jak
+   dotad na kazde miejsce w swojej puli: gracz kupuje wlasnie zageszczenie.
+   Przy zanecie "tylko" gosci nie ma. Seria na gatunek z pasm 3-7 podbija
+   rzut na goscia tak, jakby gatunek mial 1 + seria/2 losowan; na miejscu
+   seria dziala jak dotad. Lucjanek Zero (src/events/lucjanek-zero.js)
+   zostaje na kazdym miejscu.
    Pomiar i opis: docs/lawica-losowanie.md. Powrot do losowania na kazde
    miejsce: LOS_LAWICY.wlaczony = false.
    ============================================================ */
-const LOS_LAWICY = { wlaczony: true, odPasma: 3, pelne: 0 };
+const LOS_LAWICY = { wlaczony: true, odPasma: 3, goscie: [], doWstawienia: [] };
 window.LOS_LAWICY = LOS_LAWICY;
-/* Wolane tuz przed budowa nowej lawicy. Pierwsza ryba zbudowana potem
-   przez makeFishZLimitem losuje z calego jeziora, kazda kolejna z tla. */
-function nowaLawicaLosu() { LOS_LAWICY.pelne = 1; }
-window.nowaLawicaLosu = nowaLawicaLosu;
 
-function losujGatunek(r) {
-  /* Gatunek z niewczytanym sprite em wypada z puli, wiec jeden brakujacy
-     PNG kosztuje jeden gatunek, a nie cala lawice. */
-  /* Podglad rzadkich gatunkow bez czekania: przy 61 gatunkach polowa rejestru
-     wypada rzadziej niz raz na osiem godzin lowienia, wiec bez tego nie da sie
-     ich obejrzec w grze. QRYBY_TEST.wymus wymusza gatunek, QRYBY_TEST.mnoznik
-     podbija jego udzial. Oba dzialaja na zywo. */
+/* Tabela wag losowania, wspolna dla losujGatunek i rzutu na goscia.
+   `tylko` to pula zamknieta przez zanete albo null. */
+function tabelaWag(tylko) {
   const T = window.QRYBY_TEST || {};
-  window.__kuponOdkrywcy = false;
-  if (T.wymus && GATUNKI[T.wymus] && !GATUNKI[T.wymus].zepsuty) { window.__kuponOdkrywcy = true; return T.wymus; }
   const mn = T.mnoznik || {};
-  /* Kontekst pory doby, sezonu i pogody. Bez PORA modul okien dalej dziala,
-     tylko dostaje polnoc pierwszego stycznia, wiec lepiej go miec. */
-  /* Wszystko, co drogie, zeszlo do galezi odswiezania tabeli wag nizej:
-     PORA.teraz, dwa domkniecia i siedemdziesiat kilka wag. Tutaj zostaje
-     sam odczyt zegara. */
-  /* Kazdy modul osobno i w klatce ochronnej. Gdyby ktorykolwiek rzucil wyjatek
-     albo jeszcze sie nie wczytal, waga spada do samego udzialu z rejestru,
-     zamiast wywalac cala funkcje. Bez tego jeden blad w module zamrazal
-     lawice na tych pietnastu rybach, ktore akurat byly w kadrze, i gracz
-     przez cala sesje ogladal ten sam zestaw gatunkow. */
-
-  /* Kupon odkrywcy: co Atlas.KUPON_MIN minut jedna ryba idzie wylacznie
-     z puli nieodkrytych. Bez niego ogon rejestru jest nieosiagalny: przy
-     stu testerach i dwustu godzinach kazdy ZADEN nie domknal atlasu,
-     a mediana zatrzymala sie na 50 gatunkach z 61. */
-  const tylko = window.__wymusPasmoProg
-    ? zanPasmoLista(window.__wymusPasmoProg)
-    : (window.zanetaTylko ? window.zanetaTylko() : null);
   /* ============================================================
      TABELA WAG Z KROTKA PAMIECIA.
      Wersja bez pamieci liczyla wage KAZDEGO gatunku dwa razy na jedno
@@ -403,6 +383,10 @@ function losujGatunek(r) {
     const odPasma = LOS_LAWICY.odPasma;
     const kluczeT = [], kumT = [];
     let smT = 0;
+    /* `dost`: waga kazdego gatunku, ktory przeszedl bramy (do rzutu na
+       goscia i do losowania gosci na miejscach z tla); `kluczeR`: dostepne
+       gatunki od pasma odPasma w gore, czyli kandydaci na gosci lawicy. */
+    const dost = {}, kluczeR = [];
     const populacjaOdnowy = (k) => {
       try { return window.liczbaPopulacjiSpawn ? (+liczbaPopulacjiSpawn(k) || 0) : 0; }
       catch (e) { return 0; }
@@ -453,13 +437,68 @@ function losujGatunek(r) {
       if (oknoZ && !wOknieZegara(oknoZ, S.godzina)) continue;
       /* Brama przeszla. W aktywnym oknie gatunek ma DOKLADNIE wage
          rowna swojej populacji. Nie ma kompensacji ani ukrytego boosta. */
-      sm += w; klucze.push(k); kum.push(sm);
+      sm += w; klucze.push(k); kum.push(sm); dost[k] = w;
       if (((window.KLASA && KLASA[k]) || 1) < odPasma) { smT += w; kluczeT.push(k); kumT.push(smT); }
+      else kluczeR.push(k);
     }
     TW = window.__wagiTab = { t: teraz, tylko: tylko, mn: T.mnoznik, odPasma: odPasma,
                               klucze: klucze, kum: kum, suma: sm, wag: wag,
-                              kluczeT: kluczeT, kumT: kumT, sumaT: smT };
+                              kluczeT: kluczeT, kumT: kumT, sumaT: smT, dost: dost, kluczeR: kluczeR };
   }
+  return TW;
+}
+window.tabelaWag = tabelaWag;
+
+/* Wolane tuz przed budowa nowej lawicy (start gry, przycisk LAWICA, zegar
+   co 60 s). Rzut na goscia dla kazdego dostepnego gatunku od pasma
+   odPasma w gore; opis przy LOS_LAWICY. */
+function nowaLawicaLosu() {
+  LOS_LAWICY.goscie = [];
+  LOS_LAWICY.doWstawienia = [];
+  if (!LOS_LAWICY.wlaczony) return;
+  if (window.zanetaTylko && window.zanetaTylko()) return;   /* zaneta "tylko": cala lawica z jej puli */
+  const TW = tabelaWag(null);
+  if (!(TW.suma > 0) || !TW.kluczeR) return;
+  let S = null;
+  try { S = (typeof seriaGatunku === 'function') ? seriaGatunku() : null; } catch (e) { S = null; }
+  for (let i = 0; i < TW.kluczeR.length; i++) {
+    const k = TW.kluczeR[i];
+    let p = (TW.dost[k] || 0) / TW.suma;
+    if (!(p > 0)) continue;
+    if (S && S.gat === k) p = 1 - Math.pow(1 - p, Math.min(90, 1 + Math.floor(S.ile / 2)));
+    if (Math.random() < p) { LOS_LAWICY.goscie.push(k); LOS_LAWICY.doWstawienia.push(k); }
+  }
+}
+window.nowaLawicaLosu = nowaLawicaLosu;
+
+function szukajWTabeli(kum, klucze, x) {
+  let lo = 0, hi = kum.length - 1;
+  while (lo < hi) { const sr = (lo + hi) >> 1; if (kum[sr] < x) lo = sr + 1; else hi = sr; }
+  return klucze[lo];
+}
+
+function losujGatunek(r) {
+  /* Gatunek z niewczytanym sprite em wypada z puli, wiec jeden brakujacy
+     PNG kosztuje jeden gatunek, a nie cala lawice. */
+  /* Podglad rzadkich gatunkow bez czekania: przy 61 gatunkach polowa rejestru
+     wypada rzadziej niz raz na osiem godzin lowienia, wiec bez tego nie da sie
+     ich obejrzec w grze. QRYBY_TEST.wymus wymusza gatunek, QRYBY_TEST.mnoznik
+     podbija jego udzial. Oba dzialaja na zywo. */
+  const T = window.QRYBY_TEST || {};
+  window.__kuponOdkrywcy = false;
+  if (T.wymus && GATUNKI[T.wymus] && !GATUNKI[T.wymus].zepsuty) { window.__kuponOdkrywcy = true; return T.wymus; }
+  /* Miejsce goscia lawicy (opis przy LOS_LAWICY): gatunek z rzutu na goscia
+     w nowaLawicaLosu. Bez kuponu odkrywcy, bo to zwykla ryba z jeziora. */
+  const gm = window.__gatunekMiejsca;
+  if (gm && GATUNKI[gm] && !GATUNKI[gm].zepsuty) return gm;
+  /* Kupon odkrywcy: co Atlas.KUPON_MIN minut jedna ryba idzie wylacznie
+     z puli nieodkrytych. Bez niego ogon rejestru jest nieosiagalny: przy
+     stu testerach i dwustu godzinach kazdy ZADEN nie domknal atlasu,
+     a mediana zatrzymala sie na 50 gatunkach z 61. */
+  const tylko = window.__wymusPasmoProg
+    ? zanPasmoLista(window.__wymusPasmoProg)
+    : (window.zanetaTylko ? window.zanetaTylko() : null);
+  const TW = tabelaWag(tylko);
   /* ============================================================
      AUTOMATYCZNY KUPON ODKRYWCY WYLACZONY DLA NATURALNEJ LAWICY.
      Niewidzialny pity-system podstawial nieodkryty gatunek niezaleznie od
@@ -467,15 +506,24 @@ function losujGatunek(r) {
      procentem populacji. Jawne mechaniki gracza (zaneta/seria) zostaja.
      ============================================================ */
   if (!(TW.suma > 0) || !TW.klucze.length) return 'ploc';
+  const los = r || Math.random;
   /* Miejsce z tla (opis przy LOS_LAWICY): bez zanety zamykajacej pule
-     losuje tylko z pasm ponizej odPasma. Puste tlo (wszystkie pasma 1-2
-     wymarle) wraca do calego jeziora, zeby lawica w ogole powstala. */
-  const tlo = window.__pulaLawicy === 'tlo' && !tylko && TW.sumaT > 0 && TW.kluczeT.length > 0;
-  const kl = tlo ? TW.kluczeT : TW.klucze, ku = tlo ? TW.kumT : TW.kum;
-  const x = (r ? r() : Math.random()) * (tlo ? TW.sumaT : TW.suma);
-  let lo = 0, hi = ku.length - 1;
-  while (lo < hi) { const sr = (lo + hi) >> 1; if (ku[sr] < x) lo = sr + 1; else hi = sr; }
-  return kl[lo];
+     losuje z pasm ponizej odPasma i z gosci tej lawicy, wagami populacji.
+     Puste tlo (wszystkie pasma 1-2 wymarle) wraca do calego jeziora,
+     zeby lawica w ogole powstala. */
+  if (window.__pulaLawicy === 'tlo' && !tylko && TW.sumaT > 0 && TW.kluczeT.length > 0) {
+    const G = LOS_LAWICY.goscie;
+    let ekstra = 0;
+    for (let i = 0; i < G.length; i++) ekstra += (TW.dost[G[i]] || 0);
+    let x = los() * (TW.sumaT + ekstra);
+    if (x >= TW.sumaT) {
+      x -= TW.sumaT;
+      for (let i = 0; i < G.length; i++) { const w = TW.dost[G[i]] || 0; if (x < w) return G[i]; x -= w; }
+      x = los() * TW.sumaT;   /* zaokraglenie na samym koncu przedzialu */
+    }
+    return szukajWTabeli(TW.kumT, TW.kluczeT, x);
+  }
+  return szukajWTabeli(TW.kum, TW.klucze, los() * TW.suma);
 }
 window.losujGatunek = losujGatunek;
 

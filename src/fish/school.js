@@ -96,7 +96,7 @@ function nowaLawica() {
      zobaczyc okolo 7 ploci w lawicy 12 ryb. Poprzedni sufit 4 sztuk zabieral
      udzial najliczniejszym i sztucznie rozdawal go rzadszym gatunkom.
      ============================================================ */
-  /* Jedno losowanie z calego jeziora na lawice, reszta z tla
+  /* Rzut na gosci lawicy z pasm 3-7, reszta miejsc z tla i gosci
      (opis przy LOS_LAWICY w src/fish/fish-core.js). */
   if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();
   for (let i = 0; i < ile; i++) {

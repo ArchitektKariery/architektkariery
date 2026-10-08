@@ -48,6 +48,7 @@ require(any(x in html for x in [
     "2026-10-08-zaraza-final90-v1",
     "2026-10-08-bez-partnera-v1",
     "2026-10-08-lawica-raz-v1",
+    "2026-10-08-lawica-goscie-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
