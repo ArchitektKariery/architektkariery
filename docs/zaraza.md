@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zaraza-final90-v1`; SQL finału uruchomiony 7 X 16:22, zmiana na 90% w pliku `20261008_zaraza_final_90.sql`, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zmiany-od-finalu-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 
@@ -10,7 +10,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
 | 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 600 000 000 qryb (było 2 mld; 7 X po saldach graczy 500 mln, potem decyzja Andrzeja: 600 mln) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero |
-| finał | pt 9 X 23:00 | | zostaje 10% ryb w rozkładzie pasm (decyzja 8 X; wcześniej 40%), słabsze tarło (narybek 4,1%, co druga para zrywa tarło), bez sufitów gatunków |
+| finał | pt 9 X 23:00 | | zostaje 10% ryb w rozkładzie pasm (decyzja 8 X; wcześniej 40%), słabsze tarło (narybek 4,1%, co druga para zrywa tarło), bez sufitów gatunków, ławica losuje rzadkie pasma raz (goście), bez dosadzania partnera |
 
 ## Etap 3: Lucjanek Zero (w grze, budzi się sam w czw 8 X o 23:00)
 - zwykła ryba `lucjan_czerwony` z flagą `f.lzZero`, więc punkty, hol, ruch, grubość i wycena działają bez zmian, a gra nie dostaje nowego gatunku (atlas, zadania, liga i nagrody za komplet zostają nietknięte); zwykły Lucjan czerwony bierze normalnie,
@@ -52,6 +52,8 @@ Decyzje Andrzeja: zaraza zabiera 60% ryb (6 X), reset przywraca rozkład pasm, �
 Wymarłych gatunków nie było. Ten sam rozkład na atrapie bazy (te same sumy, minima i maksima pasm) dał finał 118 477 → 47 409, 78 gatunków ciętych, 3 dosiane (te z minimum pasma 3, 6 i 7).
 
 **Zmiana na 90% (8 X 2026, 08:46: „chcę, żeby zaraza jednak zabiła 90% populacji”).** Ile ryb zostaje, decyduje kolumna `zaraza_stan.final_cel` (0.10), a minimum ryb na gatunek w paśmie 7 kolumna `zaraza_stan.final_min7` (2). Finał czyta obie w chwili wykonania; plik `20261008_zaraza_final_90.sql` je dodaje i przestawia funkcję planu na dwa parametry. Plan na stanie jeziora ze środy 7 X: 118 477 → 11 884 (10,03%), na gatunek 1 214 / 267 / 51 / 13 / 6 / 4 / 2, sumy pasm 7 284 / 3 204 / 1 071 / 234 / 36 / 28 / 22.
+
+**Podgląd z prawdziwej bazy (8 X, ok. 10:50, po uruchomieniu pliku 90%):** 118 221 → 11 854 ryb (-90%). Na gatunek 1 211 / 266 / 51 / 13 / 6 / 4 / 2, sumy pasm 7 266 / 3 192 / 1 071 / 234 / 36 / 28 / 22; poza resetem 5 ryb w 3 gatunkach (Lucjan czerwony, Karpik Surinamski, Smok Życia z 2 rybami w `eko_populacja`; gra Smoka do ławic nie losuje). Najliczniejsze przed cięciem: krąp, kleń, sum, certa, rozdymka, morświn (1 763), tyrios morski (275). Najmniejsze gatunki pasm 3, 6 i 7 mają dziś 3, 2 i 1 rybę, więc finał je dosieje do 51, 4 i 2, z zachowaniem płci (brakującej płci nie dosiewa). Finał liczy plan od nowa o 23:00, z liczb z tej chwili.
 
 Przy głębokim cięciu minimum pasma 7 decyduje o rzadkości pasm 5-7, bo gatunki pospolite tracą 90%, a rzadkie nie mogą zejść poniżej kilku sztuk. Pomiar na żywym silniku, 3 000 nowych ławic na każdy stan jeziora, dzień w grze, deszcz (otwarte okna Nessy i wieżowca):
 
