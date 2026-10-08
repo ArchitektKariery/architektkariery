@@ -106,7 +106,18 @@ const Zlecenia = (() => {
      i TRUDNOSC. Trudnosc to odwrotnosc szansy powodzenia, przycieta do 40 --
      bez tego zlecenie na rzadki gatunek placiloby tyle samo co na plocie,
      mimo ze jest nieporownanie trudniejsze. */
-  const PREMIA_LAWICY = 1400;
+  /* PREMIA_LAWICY x20 (8 X 2026, polecenie Andrzeja: "zwieksz tylko
+     nagrody za zlecenia i zadania. Dostosowane do ekonomii gry").
+     1 400 za lawice pochodzi z czasow, gdy ryba szla za okolo 100 qryb.
+     Po finale ZARAZY zwykla gra placi okolo 53 000 qryb za minute. Termin
+     zlecenia liczy sie w nacisnieciach przycisku LAWICA (kilka sekund
+     kazde), wiec lowca zlecen przerabia je duzo szybciej niz zadania:
+     x40 jak w zadaniach dawaloby mu po finale 1-4 razy wiecej niz zwykla
+     gra. Przy x20 polowanie na zlecenia daje po finale 0,5-2 razy tyle
+     co zwykla gra (zaleznie od wprawy), a gracz, ktory nie naciska
+     przycisku, konczy zlecenie przy okazji, srednio raz na kilka godzin.
+     Pomiar i model lowcy: docs/ekonomia-po-finale.md. */
+  const PREMIA_LAWICY = 28000;
   const UDZIAL_WARTOSCI = 0.35;
   const TRUDNOSC_MAX = 4;
   /* KAUCJA = 30% NAGRODY, NA SZTYWNO (IX 2026, decyzja Andrzeja:

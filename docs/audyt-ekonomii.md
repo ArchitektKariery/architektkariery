@@ -96,7 +96,7 @@ Inne źródła na godzinę:
 |---|---|---|---|
 | 1 | **K2 dziś:** rzut brania 1 : 13 983 816 robi serwer w `zaraza_podejscie` (pole `bierze`), a `zaraza_zlowiony` przyjmuje złowienie tylko z trafionym rzutem z ostatnich 15 minut; gra czeka przy przynęcie na rzut z serwera (build `2026-10-08-zaraza-rzut-serwer-v1`, bez SQL działa jak dawniej). Konto wołające z konsoli co 5 s przez dobę: 0,12% szansy | gra gotowa; SQL `20261008_zaraza_rzut_serwer.sql`, 1 min | uruchomić SQL przed 23:00 |
 | 2 | **W1:** termin zlecenia tyka także przy zmianie ławicy z zegara i z sieci | gra, mała | brak, to błąd |
-| 3 | **W4:** progi zadań sprzedażowych do dzisiejszych cen albo gwiazdki z czasu (jedna sprzedaż = 1 gwiazdka) | gra, mała | wybór wariantu |
+| 3 | **W4:** progi zadań sprzedażowych do dzisiejszych cen albo gwiazdki z czasu (jedna sprzedaż = 1 gwiazdka) | gra, mała | zrobione 8 X razem z nagrodami x40: gwiazdki z czasu (punkt 9) |
 | 4 | **W5:** odświeżenie najpierw wypłaca gotowe zadania albo pyta | gra, mała | brak, to błąd |
 | 5 | **W2:** seria: sufit niżej, nagroda na serię zamiast na rybę, albo przycisk znowu przerywa serię | gra, mała | wybór reguły |
 | 6 | **W3:** sieć: przerwa (np. 60 s jak dawniej) albo limit zarzutów na dobę | gra, mała | wybór reguły |
@@ -111,3 +111,11 @@ Inne źródła na godzinę:
 - Model połowu i ekonomii zadań: `tools/zadania_po_finale.py` (ten sam model połowu), opis `docs/ekonomia-po-finale.md`.
 - Dochód na godzinę, seria i sieć: pomiar na żywym silniku 8 X 2026 (Playwright, zegar strony przestawiony na pt 23:00:30 dla stanów po finale).
 - Założenia: 4 złowienia na minutę, średni handlarz z wag `HANDLARZE` bez odrzucania ofert, gracz zawsze sprzedaje 10 najcenniejszych ryb. Gracz wolniejszy (2 na minutę) sprzedaje wszystko i nic nie wypuszcza.
+
+## 9. Decyzje i stan napraw
+- **8 X, 14:00, K2:** rzut brania Lucjanka Zero na serwerze. Gra wypchnięta (build `2026-10-08-zaraza-rzut-serwer-v1`), SQL `supabase/migrations/20261008_zaraza_rzut_serwer.sql` czeka na uruchomienie przez Andrzeja przed czw 8 X 23:00.
+- **8 X, 14:50, decyzja Andrzeja:** „Zwiększ tylko nagrody za zlecenia i zadania. Dostosowane do ekonomii gry” (build `2026-10-08-nagrody-v1`, opis i pomiar w `docs/ekonomia-po-finale.md`):
+  - zadania x40: 280 000 / 1 400 000 / 7 000 000, odświeżenie 1 120 000; po finale zadanie płaci ok. 52 500 qryb za minutę, tyle co zwykła gra (B4),
+  - 10 zadań robionych w kilka minut dostało 1 gwiazdkę z czasu: sprzedaż i utarg, 10 ryb w wiaderku, wymiana ławicy 15-45 razy (W4 przy okazji, bo przy x40 jedna sprzedaż płaciłaby 7 mln),
+  - zlecenia x20: premia 28 000 za ławicę; po finale mediana nagrody 4,9 mln, kaucja 1,5 mln, polowanie na zlecenia 0,4-2 razy tyle co zwykła gra,
+  - reszta planu (K1, K3, K4, W1-W3, W5, W6, B1-B3, P1-P5) zostaje bez zmian.

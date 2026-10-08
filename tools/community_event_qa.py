@@ -53,6 +53,7 @@ require(any(x in html for x in [
     "2026-10-08-rozmiar-lawicy-v1",
     "2026-10-08-ekonomia-po-finale-v1",
     "2026-10-08-zaraza-rzut-serwer-v1",
+    "2026-10-08-nagrody-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -209,6 +210,19 @@ require(_gw is not None and len(_gw.group(1).replace("\n", "").replace(" ", "").
         "GWIAZDKI_PO_FINALE must have one entry per task in ZADANIA")
 require("if (!kand || lista.indexOf(kand.i) >= 0 || !wPuli(kand)) continue;" in _zad, "daily draw must skip tasks outside the post-finale pool")
 require("const ile = nagroda(Z);" in _zad, "task payout must use the post-finale stars")
+# Nagrody dostosowane do ekonomii (8 X 2026, docs/ekonomia-po-finale.md):
+# zadania x40 z odswiezeniem w tej samej proporcji, zlecenia x20, a zadania
+# robione w kilka minut (sprzedaz, utarg, 10 ryb w wiaderku, 15-45 wymian
+# lawicy) maja 1 gwiazdke przed finalem i po finale.
+require("const NAGRODA = { 1: 280000, 2: 1400000, 3: 7000000 }, KOSZT_ODSWIEZENIA = 1120000;" in _zad,
+        "task rewards must be x40 with the refresh price in the same proportion")
+require("const PREMIA_LAWICY = 28000;" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
+        "order premium per school must be x20 (28 000)")
+import json as _json
+_ZAD = _json.loads(_re.search(r"const ZADANIA = (\[.*?\]);", _zad, _re.S).group(1))
+_GWP = [int(x) for x in _gw.group(1).replace("\n", "").replace(" ", "").split(",")]
+for _i in (130, 202, 121, 196, 235, 105, 98, 116, 146, 195):
+    require(_ZAD[_i]["g"] == 1 and _GWP[_i] == 1, "quick task %d (%s) must pay one star" % (_i, _ZAD[_i]["o"]))
 require("const lawic = (naLawice > 0 && naLawiceDoFinalu > 0)" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
         "order deadline must grow with in-school rarity after the finale")
 # Lucjanek Zero: rzut brania robi serwer, a zlowienie bez brania z serwera

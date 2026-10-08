@@ -27,7 +27,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPO = 3.9
-NAGRODA = {1: 7000, 2: 35000, 3: 175000}
+NAGRODA = {1: 280000, 2: 1400000, 3: 7000000}   # nadpisywane stawkami z src/tasks/tasks.js w main()
 
 USTAW = """(dane) => {
   const pasmo = k => (window.KLASA && KLASA[k]) || 1;
@@ -126,6 +126,8 @@ def main():
     a = ap.parse_args()
     src = (ROOT / "src/tasks/tasks.js").read_text(encoding="utf-8")
     Z = json.loads(re.search(r"const ZADANIA = (\[.*?\]);", src, re.S).group(1))
+    n = re.search(r"const NAGRODA = \{ 1: (\d+), 2: (\d+), 3: (\d+) \}", src)
+    if n: NAGRODA.update({1: int(n.group(1)), 2: int(n.group(2)), 3: int(n.group(3))})
     port = wolny_port()
     srv = subprocess.Popen([sys.executable, "-m", "http.server", str(port), "--bind", "127.0.0.1"],
                            cwd=str(ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

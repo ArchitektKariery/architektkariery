@@ -1,6 +1,6 @@
 # QRyby: zadania i zlecenia po finale ZARAZY
 
-Stan kodu z 8 X 2026 (build `2026-10-08-ekonomia-po-finale-v1`). Polecenie Andrzeja (8 X, 11:06): „Popraw ekonomię zadań i zleceń, bo teraz są nieopłacalne”. Obie poprawki działają od finału ZARAZY, pt 9 X 23:00 (`window.QRYBY_FINAL_ZARAZY` w `src/core/config.js`), tak jak reszta zmian ławicy (`docs/lawica-losowanie.md`).
+Stan kodu z 8 X 2026 (build `2026-10-08-ekonomia-po-finale-v1`; nagrody x40 i x20 od buildu `2026-10-08-nagrody-v1`, sekcja niżej). Polecenie Andrzeja (8 X, 11:06): „Popraw ekonomię zadań i zleceń, bo teraz są nieopłacalne”. Obie poprawki działają od finału ZARAZY, pt 9 X 23:00 (`window.QRYBY_FINAL_ZARAZY` w `src/core/config.js`), tak jak reszta zmian ławicy (`docs/lawica-losowanie.md`).
 
 ## Dlaczego po finale przestawały się opłacać
 Po finale jezioro ma 10% ryb, ławica 5-14 ryb, a ryby z pasm 3-7 trafiają do ławicy jako goście z szansą równą udziałowi w jeziorze. Pomiar na żywym silniku (model połowu niżej):
@@ -33,12 +33,39 @@ Zadania na rzadkie gatunki, wysokie karty i dużo punktów trwały po finale kil
 Zlecenia z pasm 3-6 spadają po finale z ok. 10% propozycji do ok. 0,5% i dalej są złym interesem (szansa 0,3-1,1%), tak jak przed finałem.
 
 ## Zadania: gwiazdki z czasu po finale
-- Zasada z IX 2026 zostaje: gwiazdka (czyli nagroda 7 000 / 35 000 / 175 000 qryb) liczy się z czasu wykonania, do 12 min 1, do 45 min 2, dłużej 3.
+- Zasada z IX 2026 zostaje: gwiazdka (czyli nagroda, od 8 X 2026 280 000 / 1 400 000 / 7 000 000 qryb) liczy się z czasu wykonania, do 12 min 1, do 45 min 2, dłużej 3.
 - **Czas po finale** to większy z dwóch szacunków: m z tabeli zadań razy zmiana czasu w modelu połowu (jezioro w normie przed finałem wobec jeziora po finale) albo czas wprost z modelu po finale.
 - **Zadanie, które po finale trwałoby dłużej niż najdłuższe zadanie przed finałem (320 min), wypada z losowania dnia.** Zadanie, które zostało w zestawie dnia sprzed finału, płaci do północy jak trzy gwiazdki.
 - `GWIAZDKI_PO_FINALE` w `src/tasks/tasks.js` (indeks = numer zadania, 1-3 gwiazdki, 0 = poza losowaniem); `Zadania.gwiazdki`, `Zadania.nagroda`, `Zadania.wPuli`; panel zadań (`src/ui/panel.js`) pokazuje gwiazdki i nagrodę według zasad obowiązujących teraz.
 - **Wynik:** 182 zadania w puli po finale (68 / 64 / 50 z 1 / 2 / 3 gwiazdkami), 48 zadań w górę (np. „Złów rybę pasma 5 lub wyżej” 1 → 2 gwiazdki, „Złów 12 ryb pasma 5 lub wyżej” 2 → 3), 5 w dół (pospolite: lin, sielawa, ukleja, leszcz), 94 wypada: 83 zadania na rzadkie gatunki, ryba mityczna, trafienie dokładnie w 44, 52 i 54 punkty, 25, 30 i 42 różne gatunki, 3 i 5 nowych gatunków, 8 ryb pasma 6+, średnia powyżej 42.
 - **Zapłata za minutę zadań w puli:** przed finałem 1 327 qryb, po finale ok. 1 200-1 300 (dwa przebiegi modelu).
+
+## Nagrody dostosowane do ekonomii (8 X 2026, 14:50)
+Polecenie Andrzeja: „Zwiększ tylko nagrody za zlecenia i zadania. Dostosowane do ekonomii gry”. Działa od razu (build `2026-10-08-nagrody-v1`), bez bramy finału: przed finałem gra płaci 14 razy więcej, więc tam nowe stawki zostają dodatkiem i nie ruszają zbiórki etapu 2.
+
+**Punkt odniesienia:** zwykła gra po finale płaci ok. 53 000 qryb za minutę (3,2 mln na godzinę przy jeziorze 9,9%, 2,55 mln przy 50%; pomiar w `docs/audyt-ekonomii.md`). Stare stawki zadań płaciły ok. 1 300 qryb za minutę, a premia zlecenia 1 400 qryb za ławicę: obie pochodzą z czasów, gdy ryba szła za ok. 100 qryb.
+
+**Zadania x40** (`NAGRODA`, `KOSZT_ODSWIEZENIA` w `src/tasks/tasks.js`):
+- nagrody 280 000 / 1 400 000 / 7 000 000 qryb (było 7 000 / 35 000 / 175 000),
+- odświeżenie 1 120 000 (było 28 000), ta sama proporcja do nagród; przy starej cenie dokupowanie zestawów za ułamek nagrody dawałoby zarobek bez łowienia,
+- 10 zadań, które robi się w kilka minut, dostało 1 gwiazdkę z czasu (przed i po finale): sprzedaż wiaderka za 1 500 i 4 000 w jednej transakcji, utarg 1 500, 4 000 i 12 000 w ciągu doby (jedna wizyta handlarza, do 5 min), 10 ryb naraz w wiaderku (2,6 min), wymiana ławicy 15, 20, 30 i 45 razy (liczą się tylko naciśnięcia przycisku, ok. 2 s każde); bez tego jedna sprzedaż płaciłaby 7 mln,
+- pomiar (`tools/zadania_po_finale.py`, nagrody czyta z `src/tasks/tasks.js`): **ok. 52 500 qryb za minutę zadania przed finałem i po finale**, czyli po finale tyle, ile zwykła gra w tym samym czasie (1,0 przy jeziorze 9,9%, 1,2 przy 50%); przed finałem ok. 7% zarobku ze zwykłej gry,
+- pula po finale: 182 zadania, 78 / 57 / 47 z 1 / 2 / 3 gwiazdkami; przed finałem 94 / 105 / 77,
+- panel zadań i pomoc w atlasie pokazują kwoty z odstępami (`toLocaleString('pl-PL')`).
+
+**Zlecenia x20** (`PREMIA_LAWICY` w `src/bucket/orders.js`: 1 400 → 28 000 qryb za ławicę; kaucja dalej 30%):
+- x40 jak w zadaniach przesadza, bo termin zlecenia liczy się w naciśnięciach przycisku ŁAWICA (kilka sekund każde), więc łowca zleceń przerabia je dużo szybciej, niż wskazuje liczba ławic,
+- model łowcy: przyjmuje zlecenia z szansą co najmniej 23,1%, przerzuca ławice przyciskiem, łowi każdą sztukę gatunku ze zlecenia, aż trafi okaz ponad progiem (odsetek okazów: 55% / 25% / 8% dla 1 / 2 / 3 gwiazdek), przerwa 45 zdarzeń po zleceniu i 30 po odmowie; wariant szybki: 3 s na ławicę, 30 s na hol, 80% holi udanych; wariant zwykły: 5 s, 40 s, 60%,
+- gracz bez przycisku: łowi zwykle, ławica z zegara co minutę, 40% szans, że złowi sztukę gatunku ze zlecenia, gdy ta pływa w kadrze,
+- pomiar po zmianie (ok. 3 000 propozycji na stan jeziora, `zbudujZlecenie` na żywym silniku):
+
+| stan | mediana nagrody / kaucji | p99 / max nagrody | średnia szansa | wartość oczekiwana: wszystkie / opłacalne | łowca: szybki / zwykły (wobec zwykłej gry) | gracz bez przycisku |
+|---|---|---|---|---|---|---|
+| przed finałem | 2,26 mln / 0,68 mln | 10,0 / 16,7 mln | 32,5% | +115 tys. / +484 tys. | 0,08 / 0,02 | +0,7% zarobku, zlecenie co ok. 2 h |
+| po finale, jezioro 9,9% | 4,89 mln / 1,47 mln | 11,4 / 52,1 mln | 35,2% | +654 tys. / +975 tys. | 1,88 / 0,38 | +9,5% zarobku, zlecenie co ok. 3,5 h |
+| po finale, jezioro 50% | 2,73 mln / 0,82 mln | 6,5 / 45,0 mln | 39,1% | +363 tys. / +677 tys. | 2,13 / 0,55 | +11% zarobku, zlecenie co ok. 2,4 h |
+
+Po finale polowanie na zlecenia daje więc 0,4-2 razy tyle co zwykła gra, zależnie od wprawy, a gracz, który nie naciska przycisku, dostaje zlecenie przy okazji jako dodatek ok. 10%.
 
 ## Model połowu
 - Ławica co minutę, 4 złowienia na ławicę (3,9 złowienia na minutę, to samo tempo co w kolumnie m zadań), haczyk w losowym miejscu kadru, rybę wybiera `pickLure` (ta sama waga brania co w grze, z pierwszeństwem lepszych ryb), po złowieniu dopływ jak w grze. 200 000 złowień na stan jeziora.

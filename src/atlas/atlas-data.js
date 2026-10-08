@@ -90,7 +90,7 @@ const POMOC = [
     a: ['Pięć zadań na dobę, te same dla wszystkich graczy.',
         'Gwiazdki mówią, ile czasu zajmą: jedna do kwadransa, trzy nawet kilka godzin.',
         'Trafić może się pięć łatwych albo pięć trudnych.',
-        'Nowy zestaw za 4 000 qryb, jeśli nie chcesz czekać do północy.'] },
+        'Nowy zestaw za 1 120 000 qryb, jeśli nie chcesz czekać do północy.'] },
   { t: 'ZANĘTA',
     a: ['Za qryby kupisz zanętę na straganie.',
         'Zanęta sprowadza większe ryby przez określoną liczbę ławic.',
@@ -128,9 +128,9 @@ const POMOC = [
         ['Rekord życiowy', '200', 'twoja największa sztuka tego gatunku'],
         ['Seria dwóch ryb', '10', 'każda kolejna podwaja, do sufitu 5000 za sztukę']] },
   { t: 'QRYBY ZA ZBIERANIE',
-    c: [['Zadanie łatwe', '1 000'],
-        ['Zadanie średnie', '5 000'],
-        ['Zadanie trudne', '25 000'],
+    c: [['Zadanie łatwe', '280 000'],
+        ['Zadanie średnie', '1 400 000'],
+        ['Zadanie trudne', '7 000 000'],
         ['Komplet pasma', (function () {
             const w = Object.values(window.NAGRODA_PASMA || { 1: 1000, 6: 6000 });
             return Math.min.apply(null, w) + ' – ' + Math.max.apply(null, w);

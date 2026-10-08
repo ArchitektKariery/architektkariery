@@ -2178,7 +2178,8 @@
       /* Gwiazdki i nagroda wedlug zasad obowiazujacych teraz (od finalu
          ZARAZY przeliczone z czasu wykonania, src/tasks/tasks.js). */
       const gwZ = Zadania.gwiazdki ? Zadania.gwiazdki(Z) : Z.g;
-      const nagZ = Zadania.nagroda ? Zadania.nagroda(Z) : Zadania.NAGRODA[Z.g];
+      /* Nagrody w milionach (od 8 X 2026) czyta sie tylko z odstepami. */
+      const nagZ = (Zadania.nagroda ? Zadania.nagroda(Z) : Zadania.NAGRODA[Z.g]).toLocaleString('pl-PL');
       const gw = '&#9733;'.repeat(gwZ);
       const p = Math.min(z.postep[n], Z.c);
       const czeka = z.gotowe[n] && !z.odebrane[n];
@@ -2197,7 +2198,7 @@
          (komplet ? 'komplet na dziś' : 'nowy zestaw o północy') + '</div>';
     h += '<button id="odswiezZad" class="mini' + (komplet ? ' mocny' : '') + '"' +
          (m < Zadania.KOSZT_ODSWIEZENIA ? ' disabled' : '') + '>' +
-         (komplet ? 'DOKUP NOWE ZA ' : 'ODŚWIEŻ ZA ') + Zadania.KOSZT_ODSWIEZENIA + '</button>';
+         (komplet ? 'DOKUP NOWE ZA ' : 'ODŚWIEŻ ZA ') + Zadania.KOSZT_ODSWIEZENIA.toLocaleString('pl-PL') + '</button>';
     return h;
   }
   /* Przesypywanie monet: licznik w stopce dobija do nowej wartosci przez
@@ -2228,7 +2229,7 @@
         if (!zysk) return;
         if (navigator.vibrate) { try { navigator.vibrate([14, 30, 14]); } catch (err) {} }
         o.closest('.zad').classList.add('znika');
-        Ruch.powiedz('+' + zysk + ' QRYB', true);
+        Ruch.powiedz('+' + zysk.toLocaleString('pl-PL') + ' QRYB', true);
         const tt = document.getElementById('toast');
         if (tt) { tt.classList.remove('rozkwita'); void tt.offsetWidth; tt.classList.add('rozkwita');
                   setTimeout(() => tt.classList.remove('rozkwita'), 700); }
