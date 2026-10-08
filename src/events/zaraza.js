@@ -26,7 +26,8 @@
 
    FINAŁ (pt 9 X 23:00, supabase/migrations/20261008_zaraza_final.sql).
    Robi go serwer: zadanie pg_cron ustawia kazdy gatunek na poziom jego
-   pasma (zostaje 40% ryb, pasmo 1 najliczniejsze, kazde nastepne mniej).
+   pasma (zostaje 10% ryb, decyzja Andrzeja z 8 X 2026; pasmo 1
+   najliczniejsze, kazde nastepne mniej).
    Sufitow gatunkow nie ma: dalej jezioro zmienia sie od polowow,
    wypuszczen i tarla (decyzja Andrzeja 7 X 2026). Gra po 23:00:
      - czyta wynik z zaraza_stan_publiczny (pole final) i pokazuje go
@@ -86,12 +87,12 @@ const Zaraza = (() => {
   }
 
   /* Wynik finału z serwera. Podglad ?zaraza=4 bez wyniku na serwerze
-     pokazuje liczby z podgladu planu z sr 7 X 2026 (118 477 ryb przed,
-     47 409 po), zeby dalo sie obejrzec karte przed piatkiem; karta
-     podpisuje je jako podglad. */
+     pokazuje plan 90% policzony na stanie jeziora ze sr 7 X 2026
+     (118 477 ryb przed, 11 884 po), zeby dalo sie obejrzec karte przed
+     piatkiem; karta podpisuje je jako podglad. */
   const FINAL_PODGLADU = {
-    przed: 118477, po: 47409, zostaje: 0.4, podglad: true,
-    poziomy: { 1: 4856, 2: 1068, 3: 204, 4: 53, 5: 19, 6: 8, 7: 4 }
+    przed: 118477, po: 11884, zostaje: 0.1, podglad: true,
+    poziomy: { 1: 1214, 2: 267, 3: 51, 4: 13, 5: 6, 6: 4, 7: 2 }
   };
   function finalStan() {
     if (stan && stan.final && typeof stan.final === 'object') return stan.final;

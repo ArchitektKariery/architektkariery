@@ -9,15 +9,16 @@
 --      liczb w eko_populacja,
 -- a na końcu pokazuje plan w podziale na pasma.
 --
--- PLAN RESETU (decyzje Andrzeja 6-7 X 2026: zaraza zabiera 60% ryb,
--- reset przywraca rozkład pasm: pasmo 1 najliczniejsze, każde następne
--- mniej):
+-- PLAN RESETU (decyzje Andrzeja: 6 X zaraza zabiera 60% ryb, 7 X reset
+-- przywraca rozkład pasm: pasmo 1 najliczniejsze, każde następne mniej,
+-- 8 X zaraza zabiera 90% ryb):
 --   - każdy żywy gatunek dostaje poziom swojego pasma; poziomy mają
 --     proporcje norm gry (10 000 / 2 200 / 420 / 110 / 40 / 14 / 4 na
---     gatunek), przeskalowane tak, żeby w jeziorze zostało 40% ryb,
+--     gatunek), przeskalowane tak, żeby w jeziorze został podany udział
+--     ryb (p_zostaje; finał bierze go z zaraza_stan.final_cel),
 --   - każde pasmo ma co najmniej 1,5 raza więcej ryb na gatunek i 1,25
 --     raza więcej ryb razem niż pasmo następne; pasmo 7 ma najmniej
---     4 sztuki (2 + 2),
+--     p_min7 sztuk (finał: zaraza_stan.final_min7; do 7 X było 4),
 --   - płeć: proporcje zostają; gatunek bez samic albo bez samców zostaje
 --     bez nich (reset nikogo nie wskrzesza),
 --   - wymarłe zostają wymarłe, Lucjan czerwony i Karpik Surinamski
@@ -123,7 +124,12 @@ insert into public.eko_pasma (gat, pasmo, reset) values
   ('wiezowak', 7, true)
 on conflict (gat) do update set pasmo = excluded.pasmo, reset = excluded.reset;
 
-create or replace function public.zaraza_final_plan(p_zostaje numeric default 0.40)
+-- Wersja z 8 X 2026: drugi parametr to minimum pasma 7 (sztuk na gatunek).
+-- Stara funkcja z jednym parametrem znika, inaczej wywolanie z jedna
+-- liczba byloby niejednoznaczne.
+drop function if exists public.zaraza_final_plan(numeric);
+
+create or replace function public.zaraza_final_plan(p_zostaje numeric default 0.10, p_min7 integer default 2)
 returns table (
   gat text,
   pasmo smallint,
@@ -152,6 +158,9 @@ begin
   if p_zostaje is null or p_zostaje <= 0 or p_zostaje > 1 then
     raise exception 'ZLY_UDZIAL';
   end if;
+  if p_min7 is null or p_min7 < 1 or p_min7 > 10 then
+    raise exception 'ZLE_MINIMUM_PASMA_7';
+  end if;
 
   select coalesce(sum(e.n), 0) into v_teraz from public.eko_populacja e;
 
@@ -178,7 +187,7 @@ begin
   for k in reverse 7..1 loop
     v_poziom[k] := round(coalesce(v_lam, 0) * v_norma[k]);
     if k = 7 then
-      v_poziom[k] := greatest(v_poziom[k], 4);
+      v_poziom[k] := greatest(v_poziom[k], p_min7);
     else
       v_poziom[k] := greatest(v_poziom[k], ceil(1.5 * v_poziom[k + 1]));
       if v_ile[k] > 0 then
@@ -228,14 +237,15 @@ begin
 end;
 $$;
 
-revoke all on function public.zaraza_final_plan(numeric) from public;
-revoke all on function public.zaraza_final_plan(numeric) from anon, authenticated;
+revoke all on function public.zaraza_final_plan(numeric, integer) from public;
+revoke all on function public.zaraza_final_plan(numeric, integer) from anon, authenticated;
 
--- Wynik: plan w podziale na pasma. Liczby z tej chwili; finał policzy je
--- jeszcze raz w piątek o 23:00, z ówczesnych liczb.
+-- Wynik: plan w podziale na pasma (zostaje 10%, pasmo 7 najmniej 2 sztuki,
+-- decyzja z 8 X 2026). Liczby z tej chwili; finał policzy je jeszcze raz
+-- w piątek o 23:00, z ówczesnych liczb.
 with plan as (
   select q.gat, q.pasmo, q.przed, q.po, q.akcja
-  from public.zaraza_final_plan(0.40) q
+  from public.zaraza_final_plan(0.10, 2) q
 ),
 grupy as (
   select

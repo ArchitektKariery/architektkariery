@@ -14,9 +14,11 @@
 -- CO ROBI FINAŁ (raz, w piątek o 23:00, sam):
 --   1. kopiuje całą tabelę eko_populacja do zaraza_final_kopia,
 --   2. ustawia każdy gatunek na poziom jego pasma według zaraza_final_plan:
---      zostaje 40% ryb, pasmo 1 najliczniejsze, każde następne mniej,
---      na gatunek i w sumie pasma; gdy ktoś złowił Lucjanka Zero,
---      zostaje 100% ryb i reset tylko porządkuje pasma,
+--      zostaje zaraza_stan.final_cel ryb (od 8 X 2026: 10%, czyli zaraza
+--      zabiera 90%), pasmo 1 najliczniejsze, każde następne mniej, na
+--      gatunek i w sumie pasma, pasmo 7 najmniej zaraza_stan.final_min7
+--      sztuk na gatunek (2); gdy ktoś złowił Lucjanka Zero, zostaje 100%
+--      ryb i reset tylko porządkuje pasma,
 --   3. zapisuje wynik w zaraza_stan; gra pokazuje go w laboratorium.
 --
 -- Uruchamia go zadanie pg_cron 'zaraza-final': co minutę sprawdza zegar
@@ -26,8 +28,9 @@
 -- RĘCZNIE (SQL Editor):
 --   select private.zaraza_final_wykonaj(true);  -- finał od razu, przed czasem
 --   select private.zaraza_final_cofnij();       -- przywraca kopię jeziora
+--   update public.zaraza_stan set final_cel = 0.10, final_min7 = 2 where id = 1;  -- ile zostaje, minimum pasma 7
 --
--- NA PRZYSZŁE EVENTY: tabela eko_pasma i funkcja zaraza_final_plan(udział)
+-- NA PRZYSZŁE EVENTY: tabela eko_pasma i funkcja zaraza_final_plan(udział, minimum pasma 7)
 -- zostają w bazie. Ten sam porządek pasm przy innym udziale ryb to
 -- private.zaraza_final_wykonaj w nowym evencie albo kopia jej treści.
 
@@ -36,7 +39,7 @@
 do $$
 begin
   if to_regclass('public.eko_pasma') is null
-     or to_regprocedure('public.zaraza_final_plan(numeric)') is null then
+     or to_regprocedure('public.zaraza_final_plan(numeric, integer)') is null then
     raise exception 'NAJPIERW URUCHOM PODGLĄD: plik 20261007_zaraza_final_podglad.sql';
   end if;
 end;
@@ -58,6 +61,10 @@ alter table public.zaraza_stan add column if not exists final_zostaje numeric;
 alter table public.zaraza_stan add column if not exists final_poziomy jsonb;
 alter table public.zaraza_stan add column if not exists final_nowe text[];
 alter table public.zaraza_stan add column if not exists final_cofniety timestamptz;
+-- Ile ryb zostaje po finale i minimum pasma 7 (decyzja Andrzeja 8 X 2026:
+-- zaraza zabiera 90%). Zmiana: jedna linijka update, bez wdrażania gry.
+alter table public.zaraza_stan add column if not exists final_cel numeric not null default 0.10;
+alter table public.zaraza_stan add column if not exists final_min7 integer not null default 2;
 
 -- 3. Kopia jeziora sprzed finału.
 create table if not exists public.zaraza_final_kopia (
@@ -86,6 +93,7 @@ as $$
 declare
   v_stan public.zaraza_stan%rowtype;
   v_zostaje numeric;
+  v_min7 integer;
   v_plan jsonb;
   v_poziomy jsonb;
   v_nowe text[];
@@ -106,7 +114,8 @@ begin
   end if;
 
   -- Złowiony Lucjanek Zero ratuje ryby: reset tylko porządkuje pasma.
-  v_zostaje := case when v_stan.zlowil_nick is null then 0.40 else 1.0 end;
+  v_zostaje := case when v_stan.zlowil_nick is null then coalesce(v_stan.final_cel, 0.10) else 1.0 end;
+  v_min7 := coalesce(v_stan.final_min7, 2);
 
   -- Całe jezioro pod blokadą, żeby nikt nie zmienił liczb w trakcie.
   perform 1 from public.eko_populacja for update;
@@ -121,7 +130,7 @@ begin
   -- Plan liczony RAZ, przed zmianami. Druga kalkulacja po aktualizacji
   -- dałaby inne poziomy.
   select coalesce(jsonb_agg(to_jsonb(q)), '[]'::jsonb) into v_plan
-  from public.zaraza_final_plan(v_zostaje) q;
+  from public.zaraza_final_plan(v_zostaje, v_min7) q;
 
   update public.eko_populacja e set
     n = p.po,
