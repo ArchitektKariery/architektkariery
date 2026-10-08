@@ -38,7 +38,10 @@
               bo prog jest podnoszony do 35, jesli percentyl dal mniej.
      szansa   1 - exp(-lawic * POP.max * p_gat * p_prog), czyli realne
               prawdopodobienstwo, ze w calym terminie przeplynie choc jedna
-              pasujaca sztuka. Im mniejsza, tym rzadziej takie zlecenie
+              pasujaca sztuka. Od finalu ZARAZY (pt 9 X 23:00) zamiast
+              POP.max * p_gat idzie oczekiwanaLiczbaWLawicy z silnika lawicy:
+              gosc lawicy (pasma 3-7) ma jedna szanse na lawice, tlo skaluje
+              sie rozmiarem lawicy z zapelnienia jeziora. Im mniejsza, tym rzadziej takie zlecenie
               w ogole zostanie zaproponowane (wazenie s^WYKLADNIK_SZANSY).
      stawka   (lawice * PREMIA_LAWICY + wartosc okazu * UDZIAL) * poziom
               * trudnosc, gdzie trudnosc = 1/szansa przyciete do 40. Bez
@@ -304,8 +307,14 @@ const Zlecenia = (() => {
       if (pProg <= 0) continue;              /* gatunek nie dobija do 35 pkt */
 
       const pGat = 1 / (window.rzadkoscGatunku ? rzadkoscGatunku(gk) : 1);
-      /* Oczekiwana liczba pasujacych sztuk w calym terminie. */
-      const oczek = lawic * (window.POP ? POP.max : 25) * pGat * pProg;
+      /* Oczekiwana liczba pasujacych sztuk w calym terminie. Ile sztuk
+         gatunku przypada na lawice, mowi silnik lawicy: do finalu ZARAZY
+         POP.max x pGat jak dotad, od finalu gosc lawicy (pasma 3-7) ma
+         jedna szanse na lawice, a tlo skaluje sie rozmiarem lawicy
+         (oczekiwanaLiczbaWLawicy w src/fish/fish-core.js). */
+      const naLawice = window.oczekiwanaLiczbaWLawicy
+        ? oczekiwanaLiczbaWLawicy(gk, pGat) : (window.POP ? POP.max : 25) * pGat;
+      const oczek = lawic * naLawice * pProg;
       const szansa = 1 - Math.exp(-oczek);
       /* Wazenie zamiast twardego progu -- patrz komentarz przy
          WYKLADNIK_SZANSY. Im mniejsza szansa, tym rzadziej takie zlecenie

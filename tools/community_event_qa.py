@@ -50,6 +50,7 @@ require(any(x in html for x in [
     "2026-10-08-lawica-raz-v1",
     "2026-10-08-lawica-goscie-v1",
     "2026-10-08-zmiany-od-finalu-v1",
+    "2026-10-08-rozmiar-lawicy-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -189,10 +190,15 @@ for plik, wzor in [
     ("src/ecosystem/population.js", "CFG.PO_ZARAZIE_OD = " + FINAL_ZARAZY),
     ("src/fish/fish-core.js", "od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
     ("src/fish/school.js", "do: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
+    ("src/fish/fish-core.js", "const ROZMIAR_LAWICY = { wlaczony: true, od: window.QRYBY_FINAL_ZARAZY || " + FINAL_ZARAZY),
 ]:
     require(wzor in (root / plik).read_text(encoding="utf-8"), plik + ": finale moment must be " + FINAL_ZARAZY)
 require("LOS_LAWICY.aktywna = losLawicyDziala();" in html, "school draw must choose its rule when the school is created")
 require("if (dosadzajPartnera() && typeof dosadzPartnerow === 'function')" in html, "partner top-up must end at the finale, not earlier")
+require("const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.random() * 3));" in (root / "src/fish/school.js").read_text(encoding="utf-8")
+        and "const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.random() * 3));" in (root / "src/fish/behavior.js").read_text(encoding="utf-8")
+        and "const START = ileRybNowejLawicy(POP_DO_FINALU.start);" in (root / "src/fish/school-update.js").read_text(encoding="utf-8"),
+        "every new school (button, clock, game start) must take its size from ileRybNowejLawicy")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

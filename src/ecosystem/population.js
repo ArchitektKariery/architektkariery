@@ -600,6 +600,23 @@ const Eko = (() => {
   function coIleLawic(gk, rybNaLawice) {
     const p = udzialPopulacji(gk);
     if (!(p > 0)) return Infinity;
+    /* OD FINALU ZARAZY lawica losuje inaczej (LOS_LAWICY i ROZMIAR_LAWICY
+       w src/fish/fish-core.js): gatunek z pasm 3-7 jest gosciem z jedna
+       szansa na lawice rowna udzialowi, a gatunek z tla losuje na kazde
+       miejsce z samego tla, w lawicy o rozmiarze z zapelnienia jeziora. */
+    try {
+      if (typeof window !== 'undefined' && window.losLawicyDziala && losLawicyDziala()) {
+        const pasmo = (window.KLASA && KLASA[gk]) || 1;
+        if (pasmo >= LOS_LAWICY.odPasma) return 1 / Math.min(1, p);
+        const E = stan(); let tlo = 0;
+        if (E) for (const k in E.gat) if (((window.KLASA && KLASA[k]) || 1) < LOS_LAWICY.odPasma) tlo += Math.max(0, E.gat[k].n || 0);
+        const suma = sumaPopulacji();
+        const pT = Math.min(1, tlo > 0 && suma > 0 ? p * suma / tlo : p);
+        const nT = window.rozmiarLawicyTeraz ? rozmiarLawicyTeraz() : Math.max(1, +(rybNaLawice || 12));
+        const qT = 1 - Math.pow(1 - pT, nT);
+        return qT > 0 ? 1 / qT : Infinity;
+      }
+    } catch (e) {}
     const n = Math.max(1, +(rybNaLawice || 12));
     const q = 1 - Math.pow(1 - Math.min(1, p), n);
     return q > 0 ? 1 / q : Infinity;

@@ -218,8 +218,10 @@ function dosadzPartnerow(school) {
 }
 window.dosadzPartnerow = dosadzPartnerow;
 
-/* Start: cala lawica rozlozona po szerokosci i glebokosciach. */
-const START = 15;
+/* Start: cala lawica rozlozona po szerokosci i glebokosciach. Do finalu
+   ZARAZY 15 ryb, od finalu z zapelnienia jeziora (ROZMIAR_LAWICY
+   w src/fish/fish-core.js; przed wczytaniem Eko liczy z ostatniego zapisu). */
+const START = ileRybNowejLawicy(POP_DO_FINALU.start);
 if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();   /* rzut na gosci lawicy z pasm 3-7 (LOS_LAWICY) */
 for (let i = 0; i < START; i++) {
   const f = makeFishZLimitem();

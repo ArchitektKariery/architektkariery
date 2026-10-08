@@ -1,8 +1,8 @@
 # QRyby: jak powstaje ławica i jak gra losuje ryby
 
-Stan kodu z 8 X 2026 (build `2026-10-08-zmiany-od-finalu-v1`). Opis dla Andrzeja i na przyszłe eventy.
+Stan kodu z 8 X 2026 (build `2026-10-08-rozmiar-lawicy-v1`). Opis dla Andrzeja i na przyszłe eventy.
 
-**Od kiedy:** obie zmiany z 8 X (goście ławicy i koniec dosadzania partnera) działają od finału ZARAZY, pt 9 X 2026 23:00 (polecenie Andrzeja 8 X, 10:43: „zrobić te wszystkie zmiany od finału w piątek”). Do tej chwili każde miejsce losuje z całego jeziora, a samotna rzadka ryba dostaje partnera, jak przed 8 X. Chwila stoi w `window.QRYBY_FINAL_ZARAZY` (`src/core/config.js`); regułę losowania wybiera każda nowa ławica w chwili powstania, więc ławica z 22:59 kończy minutę na starych zasadach, a pierwsza po 23:00 losuje gości.
+**Od kiedy:** trzy zmiany z 8 X (rozmiar ławicy z zapełnienia jeziora, goście ławicy i koniec dosadzania partnera) działają od finału ZARAZY, pt 9 X 2026 23:00 (polecenie Andrzeja 8 X, 10:43: „zrobić te wszystkie zmiany od finału w piątek”). Do tej chwili każde miejsce losuje z całego jeziora, a samotna rzadka ryba dostaje partnera, jak przed 8 X. Chwila stoi w `window.QRYBY_FINAL_ZARAZY` (`src/core/config.js`); regułę losowania wybiera każda nowa ławica w chwili powstania, więc ławica z 22:59 kończy minutę na starych zasadach, a pierwsza po 23:00 losuje gości.
 
 ## Kiedy wpływają ryby
 - **Start gry:** 15 ryb rozłożonych po kadrze (`START` w `src/fish/school-update.js`).
@@ -10,6 +10,18 @@ Stan kodu z 8 X 2026 (build `2026-10-08-zmiany-od-finalu-v1`). Opis dla Andrzeja
 - **Zegar ławicy:** co 60 sekund (`CYKL` w `src/fish/behavior.js`). W 54. sekundzie cała ławica ucieka do krawędzi, w 60. wpływa nowa: 10-13 ryb zza krawędzi.
 - **W trakcie minuty:** każda ryba ma pobyt 22-70 s, potem odpływa, jeśli w kadrze zostaje więcej niż 7 ryb. Nowa ryba wpływa co 1,2-3,2 s, gdy czynnych ryb jest mniej niż 10 (powyżej 10 z szansą 26%). Sufit 25 ryb w kadrze, a poniżej 7 czynnych gra dosypuje rybę od razu (`zarzadzajPopulacja`, `POP` w `src/fish/fish-core.js`).
 - Pomiar: nowa ławica ma średnio 11,5 ryby, a przez pełną minutę zegara (ławica plus dopływ) gra buduje średnio 19,4 ryby.
+
+## Rozmiar ławicy od finału ZARAZY
+Polecenie Andrzeja (8 X 2026, 10:54): „Od finału: 10% zapełnienia jeziora to 5 ryb w ławicy, 20% - 6, 30% - 7, 40% - 8, 50% - 9, 60% - 10, 70% - 11, 80% - 12, 90% - 13, 100% - 14”.
+
+- **Zapełnienie** to liczba z zakładki EKOSYSTEM: ryby w jeziorze / pojemność 120 000 (`Eko.zapelnienie`). Przed wczytaniem modułu Eko (start gry) gra liczy je z ostatniego zapisu.
+- **Wzór z tabeli:** 4 + 10 × zapełnienie. Między progami liczba rośnie płynnie: przy 15% połowa ławic ma 5 ryb, połowa 6 (zaokrąglenie losowe, średnia równa wzorowi). Poniżej 10% zostaje 5, powyżej 100% zostaje 14.
+- **Każda nowa ławica** (start gry, przycisk ŁAWICA, zegar co 60 s) bierze rozmiar z zapełnienia w chwili powstania (`ileRybNowejLawicy`, `ROZMIAR_LAWICY` w `src/fish/fish-core.js`).
+- **W trakcie minuty** ta sama liczba jest celem dopływu (`POP.cel`): odpływającą rybę zastępuje nowa, a dopływ ponad cel jest wyłączony (było 26%). Podłoga `POP.min` to cel − 3, najmniej 2, żeby ryby mogły odpływać, a drapieżniki polować.
+- **Do finału** wszystko jak dotąd: ławica 10-13 ryb, start gry 15, cel 10, podłoga 7, dopływ ponad cel z szansą 26% (`POP_DO_FINALU`).
+- **Zlecenia handlarzy** liczą od finału szansę z tego samego silnika (`oczekiwanaLiczbaWLawicy`): gość ławicy (pasma 3-7) ma jedną szansę na ławicę, gatunek z tła skaluje się rozmiarem ławicy. **Zakładka EKOSYSTEM** pokazuje „średnio co N ławic” według tych samych zasad (`Eko.coIleLawic`).
+- **Pomiar** (żywy silnik, zegar strony pt 23:00:30, po 2 000 ławic): zapełnienie 9,9% → 5,00 ryby na ławicę, 15% → 5,50 (1 002 ławice po 5 i 998 po 6), 35% → 7,51, 50% → 9,00, 75% → 11,48, 100% → 14,00, 120% → 14,00. Minuta zegara przy 9,9%: średnio 4,9 ryby czynnej i 5,3 widocznej, 8,4 ryby wpływa na minutę (było 19,4); przy 100%: 13,6 czynnej, 14,8 widocznej, 23,5 na minutę. Czwartek (stare zasady): ławice 10-16 ryb, średnio 11,8 (powyżej 13 to partner, który działa do finału).
+- **Po finale** jezioro ma ok. 11 854 ryb, czyli 9,9% pojemności: ławica startuje z 5 ryb i rośnie o jedną na każde 12 000 ryb przybyłych w jeziorze.
 
 ## Jak gra wybiera gatunek
 **Od finału ZARAZY (pt 9 X 23:00) rzadkie pasma losują się raz na ławicę.** Dwa polecenia Andrzeja z 8 X: 10:00 „losuje się na każde miejsce, co zwiększa szanse niewymiernie na wyższe pasma. Jak morświn jest 1 na 100 ryb, to jego szansa pojawienia się w całej ławicy ma być 1%”; 10:21 usunąć zasadę „w ławicy pływa najwyżej jedna ryba z pasm 3-7”, bo odcinała tym pasmom tarło w jeziorze.
@@ -69,6 +81,7 @@ Pomiar skutków po finale (goście, bez partnera):
 ## Historia
 - **8 X, 10:00-11:00:** goście działali od razu, bez czekania na finał (buildy `2026-10-08-lawica-raz-v1` i `2026-10-08-lawica-goscie-v1`; partner wyłączony od 09:50, build `2026-10-08-bez-partnera-v1`). O 10:43 Andrzej przesunął obie zmiany na finał ZARAZY.
 - **8 X, 10:00-10:30:** wersja z jednym losowaniem z całego jeziora na pierwszym miejscu ławicy (build `2026-10-08-lawica-raz-v1`). Szanse pasm 3-7 takie same jak przy gościach, ale w ławicy pływała najwyżej jedna ryba z pasm 3-7, więc pary tych pasm w jeziorze nie było wcale. Andrzej kazał usunąć tę zasadę.
+- **8 X, 10:54:** Andrzej dodał rozmiar ławicy z zapełnienia jeziora, także od finału (build `2026-10-08-rozmiar-lawicy-v1`).
 - **Do finału ZARAZY:** losowanie z całego jeziora na każde miejsce. Pomiar z dosadzaniem partnera, 3 000 nowych ławic na każdy stan jeziora, dzień w grze, jesień, deszcz (otwarte okna Nessy i wieżowca):
 
 | stan jeziora | ryb na ławicę | udział ryb pasm 1-7 (%) | ławica z pasmem 5 | z pasmem 6 | z pasmem 7 |

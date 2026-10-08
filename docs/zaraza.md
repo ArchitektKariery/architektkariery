@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zmiany-od-finalu-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-rozmiar-lawicy-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 
@@ -10,7 +10,7 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 | 1 | wt 6 X 23:15 | śr 7 X 23:00 | społeczność oddaje 1 000 zanęt z toreb |
 | 2 | śr 7 X 23:00 | czw 8 X 23:00 | zbiórka 600 000 000 qryb (było 2 mld; 7 X po saldach graczy 500 mln, potem decyzja Andrzeja: 600 mln) |
 | 3 | czw 8 X 23:00 | pt 9 X 23:00 | Lucjanek Zero |
-| finał | pt 9 X 23:00 | | zostaje 10% ryb w rozkładzie pasm (decyzja 8 X; wcześniej 40%), słabsze tarło (narybek 4,1%, co druga para zrywa tarło), bez sufitów gatunków, ławica losuje rzadkie pasma raz (goście), bez dosadzania partnera |
+| finał | pt 9 X 23:00 | | zostaje 10% ryb w rozkładzie pasm (decyzja 8 X; wcześniej 40%), słabsze tarło (narybek 4,1%, co druga para zrywa tarło), bez sufitów gatunków, ławica losuje rzadkie pasma raz (goście), rozmiar ławicy z zapełnienia jeziora (5-14 ryb), bez dosadzania partnera |
 
 ## Etap 3: Lucjanek Zero (w grze, budzi się sam w czw 8 X o 23:00)
 - zwykła ryba `lucjan_czerwony` z flagą `f.lzZero`, więc punkty, hol, ruch, grubość i wycena działają bez zmian, a gra nie dostaje nowego gatunku (atlas, zadania, liga i nagrody za komplet zostają nietknięte); zwykły Lucjan czerwony bierze normalnie,
@@ -76,6 +76,7 @@ Minimum 1 oznacza jedną rybę na gatunek mityczny: nie rozmnoży się, a pierws
 - co druga para zrywa tarło (polecenie Andrzeja 7 X, 16:08: „tarło rzadziej ma mieć sukces, ryby niech częściej zrywają tarło między sobą”; `Eko.CFG.ZERWANIE_TARLA = 0.5`, ten sam próg z zegara): zerwanie losowane raz na parę, przypada między 25% a 85% czasu godów; w ławicy ryby odpływają w dwie strony, w tarlisku pasek gaśnie, panel pisze „PARA ZERWAŁA TARŁO”; ikry nie ma, a gatunek wchodzi w zwykłą karencję po tarle, więc zerwanie naprawdę zabiera okazję do rozrodu. Razem z narybkiem do jeziora dochodzi ok. 37% dzisiejszego przyrostu z tarła (0,5 × 0,041 / 0,055); `src/ecosystem/population.js` (`losujZerwanie`, `zerwijTarlo`), `src/ecosystem/reproduction.js` (`Rozrod.tik`), `src/ui/panel.js` (tarlisko),
 - gra raz na finał pobiera nowe liczby jeziora i czyści lokalną ikrę i kohorty sprzed finału (`Eko.wyczyscPoZarazie`), listy osobników skraca do liczby z serwera,
 - ławica losuje rzadkie pasma raz (polecenia Andrzeja 8 X: 10:00 „jak morświn jest 1 na 100 ryb, to jego szansa pojawienia się w całej ławicy ma być 1%”, 10:21 bez sufitu jednej rzadkiej ryby, 10:43 „zrobić te wszystkie zmiany od finału w piątek”): przy każdej nowej ławicy każdy gatunek z pasm 3-7 zostaje gościem z szansą równą udziałowi w jeziorze i dostaje miejsce, reszta ławicy i dopływ losują z pasm 1-2 razem z gośćmi; regułę wybiera każda nowa ławica w chwili powstania (`LOS_LAWICY` w `src/fish/fish-core.js`, opis `docs/lawica-losowanie.md`),
+- ławica ma tyle ryb, ile mówi zapełnienie jeziora (polecenie Andrzeja 8 X, 10:54: 10% → 5 ryb, 20% → 6 … 100% → 14; wzór 4 + 10 × zapełnienie, poniżej 10% zostaje 5, powyżej 100% zostaje 14): po finale jezioro ma ok. 9,9% pojemności 120 000, więc ławica startuje z 5 ryb; ta sama liczba jest celem dopływu w trakcie minuty (`ROZMIAR_LAWICY`, `ileRybNowejLawicy` w `src/fish/fish-core.js`, opis `docs/lawica-losowanie.md`); zlecenia handlarzy i zakładka EKOSYSTEM liczą szanse według nowych zasad,
 - gra przestaje dosadzać partnera samotnej rybie z pasm 3-7 (polecenie Andrzeja 8 X, 09:40: „nie losuje się dodatkowy partner, po prostu musi się trafić dwie takie ryby, bez pomocy gry”; `PARTNER_LAWICY` w `src/fish/school.js`),
 - wszystkie progi z zegara biorą tę samą chwilę: `window.QRYBY_FINAL_ZARAZY` w `src/core/config.js`, a `tools/community_event_qa.py` pilnuje, żeby `src/events/zaraza.js` i `src/ecosystem/population.js` miały tę samą datę,
 - laboratorium pokazuje kartę finału (licznik podejść Lucjanka Zero, ile ryb zabrała zaraza, poziom każdego pasma, zdanie „Od teraz jezioro znowu zależy od was”), otwiera się samo raz (`qryby.zaraza.intro.4`), chip „ZARAZA · FINAŁ” zostaje 3 dni.

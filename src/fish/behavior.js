@@ -581,7 +581,9 @@ function cyklLawicy(dt) {
     if(window.SmokZycia) SmokZycia.koniecLawicy();
     /* Kto nie zdazyl uciec, znika za kadrem razem z reszta. */
     for (let i = school.length - 1; i >= 0; i--) if (!school[i].caught) school.splice(i, 1);
-    const ile = POP.cel + Math.round(Math.random() * 3);
+    /* Liczba ryb: do finalu ZARAZY 10-13, od finalu z zapelnienia jeziora
+       (ileRybNowejLawicy i ROZMIAR_LAWICY w src/fish/fish-core.js). */
+    const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.random() * 3));
     /* Rzut na gosci lawicy z pasm 3-7, reszta miejsc z tla i gosci
        (opis przy LOS_LAWICY w src/fish/fish-core.js). */
     if (typeof nowaLawicaLosu === 'function') nowaLawicaLosu();

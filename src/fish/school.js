@@ -96,7 +96,9 @@ function nowaLawica() {
 
   /* nowa lawica od razu, rozlozona po kadrze jak na starcie */
   school.length = 0;
-  const ile = POP.cel + Math.round(Math.random() * 3);
+  /* Liczba ryb: do finalu ZARAZY 10-13, od finalu z zapelnienia jeziora
+     (ileRybNowejLawicy i ROZMIAR_LAWICY w src/fish/fish-core.js). */
+  const ile = ileRybNowejLawicy(POP_DO_FINALU.cel + Math.round(Math.random() * 3));
   /* ============================================================
      BRAK SUFITU POWTORZEN GATUNKU.
      Lawica jest probka populacji. Jezeli 60% jeziora to ploc, naturalne jest

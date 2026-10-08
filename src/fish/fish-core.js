@@ -136,6 +136,100 @@ const POP = {
 let spawnT = 2.0;
 
 /* ============================================================
+   ROZMIAR LAWICY Z ZAPELNIENIA JEZIORA, OD FINALU ZARAZY (8 X 2026,
+   polecenie Andrzeja: "Od finalu: 10% zapelnienia jeziora to 5 ryb
+   w lawicy, 20% - 6, 30% - 7, 40% - 8, 50% - 9, 60% - 10, 70% - 11,
+   80% - 12, 90% - 13, 100% - 14").
+
+   Zapelnienie to ta sama liczba, ktora pokazuje zakladka EKOSYSTEM:
+   ryby w jeziorze / pojemnosc 120 000 (Eko.zapelnienie). Wzor z tabeli:
+   4 + 10 x zapelnienie. Miedzy progami liczba rosnie plynnie: przy 15%
+   polowa lawic ma 5 ryb, polowa 6 (zaokraglenie losowe, srednia rowna
+   wzorowi). Ponizej 10% zostaje 5, powyzej 100% 14.
+
+   Ta sama liczba jest celem doplywu w trakcie minuty (POP.cel), wiec
+   w kadrze plywa tyle ryb, ile ma lawica: doplyw ponad cel jest od finalu
+   wylaczony, a podloga POP.min to cel - 3 (najmniej 2), zeby ryby mogly
+   odplywac, a drapiezniki polowac jak dotad.
+
+   Do finalu wszystko jak dotad: lawica 10-13 ryb, start gry 15, cel 10,
+   podloga 7, doplyw ponad cel z szansa 26% (POP_DO_FINALU).
+   Wylaczenie: ROZMIAR_LAWICY.wlaczony = false.
+   ============================================================ */
+const POP_DO_FINALU = { cel: POP.cel, min: POP.min, szansaPowyzejCelu: POP.szansaPowyzejCelu, start: 15 };
+window.POP_DO_FINALU = POP_DO_FINALU;
+const ROZMIAR_LAWICY = { wlaczony: true, od: window.QRYBY_FINAL_ZARAZY || Date.parse('2026-10-09T23:00:00+02:00'),
+                         min: 5, max: 14, pojemnosc: 120000, aktywny: false, ryb: 0 };
+window.ROZMIAR_LAWICY = ROZMIAR_LAWICY;
+
+/* Zapelnienie jeziora 0..1+ albo null, gdy gra jeszcze nie zna liczb.
+   Przed wczytaniem modulu Eko (start gry) liczy z ostatniego zapisu. */
+function zapelnienieJeziora() {
+  try {
+    if (window.Eko && Eko.zapelnienie && Eko.sumaPopulacji && Eko.sumaPopulacji() > 0) {
+      const z = Eko.zapelnienie();
+      if (isFinite(z) && z > 0) return z;
+    }
+  } catch (e) {}
+  try {
+    const D = window.Zapis && Zapis.dane ? Zapis.dane() : null;
+    const G = D && D.eko && D.eko.gat;
+    if (G) {
+      let n = 0;
+      for (const k in G) n += Math.max(0, +(G[k] && G[k].n) || 0);
+      const poj = (window.Eko && Eko.CFG && Eko.CFG.POJEMNOSC_JEZIORA) || ROZMIAR_LAWICY.pojemnosc;
+      if (n > 0) return n / poj;
+    }
+  } catch (e) {}
+  return null;
+}
+window.zapelnienieJeziora = zapelnienieJeziora;
+
+function rozmiarLawicyDziala(teraz) {
+  return !!ROZMIAR_LAWICY.wlaczony && (teraz || Date.now()) >= ROZMIAR_LAWICY.od;
+}
+window.rozmiarLawicyDziala = rozmiarLawicyDziala;
+
+/* Srednia liczba ryb w nowej lawicy przy danym zapelnieniu (wzor z tabeli). */
+function rybWLawicyZZapelnienia(z) {
+  return Math.max(ROZMIAR_LAWICY.min, Math.min(ROZMIAR_LAWICY.max, 4 + 10 * (+z || 0)));
+}
+window.rybWLawicyZZapelnienia = rybWLawicyZZapelnienia;
+
+/* Srednia liczba ryb w nowej lawicy wedlug zasad obowiazujacych teraz. */
+function rozmiarLawicyTeraz() {
+  const z = zapelnienieJeziora();
+  if (rozmiarLawicyDziala() && z !== null) return rybWLawicyZZapelnienia(z);
+  return POP_DO_FINALU.cel + 1.5;
+}
+window.rozmiarLawicyTeraz = rozmiarLawicyTeraz;
+
+/* Wolane przy kazdej nowej lawicy (start gry, przycisk LAWICA, zegar co
+   60 s): zwraca, ile ryb ma wplynac, i ustawia cel doplywu na te minute.
+   `staraLiczba` to liczba wedlug zasad sprzed finalu. */
+function ileRybNowejLawicy(staraLiczba) {
+  const R = ROZMIAR_LAWICY;
+  const z = rozmiarLawicyDziala() ? zapelnienieJeziora() : null;
+  R.aktywny = z !== null;
+  if (!R.aktywny) {
+    POP.cel = POP_DO_FINALU.cel;
+    POP.min = POP_DO_FINALU.min;
+    POP.szansaPowyzejCelu = POP_DO_FINALU.szansaPowyzejCelu;
+    R.ryb = staraLiczba;
+    return staraLiczba;
+  }
+  const x = rybWLawicyZZapelnienia(z);
+  let n = Math.floor(x);
+  if (Math.random() < x - n) n++;
+  POP.cel = n;
+  POP.min = Math.max(2, n - 3);
+  POP.szansaPowyzejCelu = 0;
+  R.ryb = n;
+  return n;
+}
+window.ileRybNowejLawicy = ileRybNowejLawicy;
+
+/* ============================================================
    ROZKLAD DLUGOSCI PLOCI (Rutilus rutilus)
    Dopasowany do danych wedkarskich rozklad logarytmiczno-normalny:
      dominanta 20 cm, czyli srodek przedzialu sredniaka 15-28 cm
@@ -295,6 +389,23 @@ function losLawicyDziala(teraz) {
   return !!LOS_LAWICY.wlaczony && (teraz || Date.now()) >= LOS_LAWICY.od;
 }
 window.losLawicyDziala = losLawicyDziala;
+
+/* Ile sztuk gatunku o udziale pGat gracz zobaczy srednio w jednej lawicy
+   wedlug zasad obowiazujacych teraz. Liczba dla zlecen handlarzy
+   (src/bucket/orders.js), ktore ustalaja z niej szanse i stawke.
+   Do finalu: dotychczasowy rachunek zlecen, POP.max x pGat.
+   Od finalu: gatunek z pasm odPasma-7 jest gosciem lawicy, wiec ma jedna
+   szanse na lawice rowna pGat; gatunek z tla dostaje dotychczasowy
+   rachunek w skali rozmiaru lawicy (rozmiar z zapelnienia / 11,5). */
+function oczekiwanaLiczbaWLawicy(gk, pGat) {
+  const p = Math.max(0, +pGat || 0);
+  const maks = POP.max || 25;
+  if (!losLawicyDziala()) return maks * p;
+  const pasmo = (window.KLASA && KLASA[gk]) || 1;
+  if (pasmo >= LOS_LAWICY.odPasma) return p;
+  return maks * (rozmiarLawicyTeraz() / (POP_DO_FINALU.cel + 1.5)) * p;
+}
+window.oczekiwanaLiczbaWLawicy = oczekiwanaLiczbaWLawicy;
 
 /* Tabela wag losowania, wspolna dla losujGatunek i rzutu na goscia.
    `tylko` to pula zamknieta przez zanete albo null. */
