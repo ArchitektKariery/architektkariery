@@ -119,3 +119,7 @@ Inne źródła na godzinę:
   - 10 zadań robionych w kilka minut dostało 1 gwiazdkę z czasu: sprzedaż i utarg, 10 ryb w wiaderku, wymiana ławicy 15-45 razy (W4 przy okazji, bo przy x40 jedna sprzedaż płaciłaby 7 mln),
   - zlecenia x20: premia 28 000 za ławicę; po finale mediana nagrody 4,9 mln, kaucja 1,5 mln, polowanie na zlecenia 0,4-2 razy tyle co zwykła gra,
   - reszta planu (K1, K3, K4, W1-W3, W5, W6, B1-B3, P1-P5) zostaje bez zmian.
+- **8 X, 15:13, decyzja Andrzeja:** „Napraw proszę i dodaj 100 nowych zadań” (build `2026-10-08-zadania376-v1`, `docs/ekonomia-po-finale.md`):
+  - W5 naprawione: odświeżenie, północ i zmiana puli najpierw wypłacają wykonane, a nieodebrane zadania,
+  - 100 nowych zadań (376 w tablicy, 282 w puli po finale), nowe rodzaje: waga i długość ryby, wypuszczanie, KRASNOPIÓRKA,
+  - zadanie „Złów rybę mityczną” dostało brakujące zdarzenie (wcześniej nie dało się go wykonać).

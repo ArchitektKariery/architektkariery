@@ -2182,6 +2182,12 @@
       const nagZ = (Zadania.nagroda ? Zadania.nagroda(Z) : Zadania.NAGRODA[Z.g]).toLocaleString('pl-PL');
       const gw = '&#9733;'.repeat(gwZ);
       const p = Math.min(z.postep[n], Z.c);
+      /* Postep w jednostkach zadania: waga w kg, dlugosc w cm, reszta
+         z odstepami tysiecy (zadania z 8 X 2026: waga i dlugosc ryby). */
+      const kgT = g => String(Math.round(g / 100) / 10).replace('.', ',');
+      const postepTxt = Z.t === 'waga' ? kgT(p) + ' / ' + kgT(Z.c) + ' kg'
+        : Z.t === 'dlugosc' ? p + ' / ' + Z.c + ' cm'
+        : p.toLocaleString('pl-PL') + ' / ' + Z.c.toLocaleString('pl-PL');
       const czeka = z.gotowe[n] && !z.odebrane[n];
       const wziete = z.odebrane[n];
       h += '<div class="zad' + (czeka ? ' czeka' : (wziete ? ' ok' : '')) + '">' +
@@ -2190,14 +2196,17 @@
            '<div class="pas"><i data-w="' + Math.round(100 * p / Z.c) + '"></i></div>' +
            (czeka
              ? '<button class="odb mini" data-n="' + n + '">ODBIERZ +' + nagZ + '</button>'
-             : '<div class="li">' + (wziete ? 'ODEBRANE' : p + ' / ' + Z.c) + '</div>') +
+             : '<div class="li">' + (wziete ? 'ODEBRANE' : postepTxt) + '</div>') +
            '</div>';
     });
     const komplet = Zadania.wszystkieZrobione();
     h += '<div class="stopka">Masz <b id="stanMonet">' + m + '</b> qryb &middot; ' +
          (komplet ? 'komplet na dziś' : 'nowy zestaw o północy') + '</div>';
+    /* Wykonane, a nieodebrane zadania wyplacaja sie przy odswiezeniu
+       i licza sie do oplaty (Zadania.odswiez). */
+    const zalegle = Zadania.doOdbioruQryb ? Zadania.doOdbioruQryb() : 0;
     h += '<button id="odswiezZad" class="mini' + (komplet ? ' mocny' : '') + '"' +
-         (m < Zadania.KOSZT_ODSWIEZENIA ? ' disabled' : '') + '>' +
+         (m + zalegle < Zadania.KOSZT_ODSWIEZENIA ? ' disabled' : '') + '>' +
          (komplet ? 'DOKUP NOWE ZA ' : 'ODŚWIEŻ ZA ') + Zadania.KOSZT_ODSWIEZENIA.toLocaleString('pl-PL') + '</button>';
     return h;
   }
@@ -2218,7 +2227,11 @@
     const b = document.getElementById('odswiezZad');
     if (b) b.addEventListener('click', e => {
       e.stopPropagation();
-      if (Zadania.odswiez()) { pokaz(listaZadan()); podepnijZadania(); Ruch.powiedz('NOWY ZESTAW ZADAŃ'); }
+      const w = Zadania.odswiez();
+      if (w) {
+        pokaz(listaZadan()); podepnijZadania();
+        Ruch.powiedz(w.wyplacono > 0 ? 'ODEBRANE +' + w.wyplacono.toLocaleString('pl-PL') + ' · NOWY ZESTAW' : 'NOWY ZESTAW ZADAŃ', w.wyplacono > 0);
+      }
     });
     for (const o of document.querySelectorAll('#panelTresc .odb')) {
       o.addEventListener('click', e => {

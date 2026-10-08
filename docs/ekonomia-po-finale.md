@@ -67,6 +67,26 @@ Polecenie Andrzeja: „Zwiększ tylko nagrody za zlecenia i zadania. Dostosowane
 
 Po finale polowanie na zlecenia daje więc 0,4-2 razy tyle co zwykła gra, zależnie od wprawy, a gracz, który nie naciska przycisku, dostaje zlecenie przy okazji jako dodatek ok. 10%.
 
+## 100 nowych zadań i wypłata nieodebranych (8 X 2026, 15:13)
+Polecenie Andrzeja: „Napraw proszę i dodaj 100 nowych zadań” (build `2026-10-08-zadania376-v1`).
+
+**Nic wykonanego nie przepada** (`wyplacZalegle`, `zalegleQryby`, `Zadania.doOdbioruQryb` w `src/tasks/tasks.js`):
+- odświeżenie najpierw wypłaca wykonane, a nieodebrane zadania, potem pobiera 1 120 000; wypłata liczy się do opłaty, więc gracz z gotowym zadaniem odświeży nawet przy pustym saldzie; panel pokazuje „ODEBRANE +… · NOWY ZESTAW”,
+- o północy i przy zmianie puli takie zadania też wypłacają się same, z komunikatem „NIEODEBRANE ZADANIA”,
+- wcześniej odświeżenie kasowało je bez ostrzeżenia, przy nagrodach x40 do 35 mln jednym kliknięciem.
+
+**100 nowych zadań** (numery 276-375 na końcu `ZADANIA`; pula przed finałem 376 zadań: 125 / 144 / 107 z 1 / 2 / 3 gwiazdkami; po finale 282 w puli: 102 / 99 / 81, 94 wypada):
+- nowe rodzaje: **waga jednej ryby** (9 zadań, 1,5-20 kg), **długość jednej ryby** (8 zadań, 50-120 cm), **wypuszczanie** (7 zadań, 10-200 ryb; nowe zdarzenie `wypusc` w `decyzjaKarty`, `src/card/card.js`), **KRASNOPIÓRKA** (gatunek bez zadań: 1, 2, 3, 5 sztuk),
+- wyższe progi: złowienia 70-300, punkty 2 000-6 500, karta 27-47 punktów, pasma 2-6 (25 i 35 ryb pasma 2+, do 4 ryb pasma 6+), trafienie dokładnie w 10-36 punktów, 14 różnych gatunków, gatunki pasm 1-2 (sielawa, krąp, leszcz, okoń, ukleja, płoć, jaź, kleń, karp, szczupak, ciernik, lin, słonecznica, karaś, jazgarz, kiełb),
+- czas każdego zadania liczy ten sam model połowu (400 000 złowień na stan jeziora); gwiazdki nowych zadań po finale: 24 / 42 / 34, przed finałem 31 / 39 / 30; po finale najdłuższe trwa ok. 250 min (ryba 120 cm), więc żadne nie wypada z puli,
+- bez nowych zadań na serię, sprzedaż, utarg, wiaderko i wymianę ławicy: ich czasu model nie liczy, a przy nagrodach x40 każdy błąd w czasie to prezent albo kara dla gracza,
+- zestaw dnia z puli 276 zostaje po aktualizacji razem z postępem (`stan`: zestaw z wersją `276x5` dostaje nową wersję zamiast nowego losowania),
+- panel zadań pokazuje postęp wagi w kg („1,5 / 2 kg”), długości w cm („44 / 50 cm”), resztę z odstępami tysięcy.
+
+**Naprawa przy okazji:** zadanie „Złów rybę mityczną” nie miało zdarzenia (`mit` nikt nie zgłaszał), więc nie dało się go wykonać. Karta zgłasza je teraz dla ryb pasma 7 i 8 (`KLASA[gk] >= 7`, ta sama zasada co premia mityczna w wiaderku). Po finale to zadanie i tak wypada z losowania.
+
+**Zapłata za minutę zadań po dodaniu 100 nowych** (`tools/zadania_po_finale.py`): przed finałem ok. 58 000 qryb, po finale ok. 56 000 (zwykła gra po finale: 53 000).
+
 ## Model połowu
 - Ławica co minutę, 4 złowienia na ławicę (3,9 złowienia na minutę, to samo tempo co w kolumnie m zadań), haczyk w losowym miejscu kadru, rybę wybiera `pickLure` (ta sama waga brania co w grze, z pierwszeństwem lepszych ryb), po złowieniu dopływ jak w grze. 200 000 złowień na stan jeziora.
 - Złowione ryby z pasm 1-7 (%): norma przed finałem 43,9 / 32,6 / 17,2 / 5,2 / 0,60 / 0,29 / 0,092; po finale 62,6 / 34,9 / 1,93 / 0,44 / 0,065 / 0,057 / 0,042.

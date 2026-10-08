@@ -54,6 +54,7 @@ require(any(x in html for x in [
     "2026-10-08-ekonomia-po-finale-v1",
     "2026-10-08-zaraza-rzut-serwer-v1",
     "2026-10-08-nagrody-v1",
+    "2026-10-08-zadania376-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -223,6 +224,16 @@ _ZAD = _json.loads(_re.search(r"const ZADANIA = (\[.*?\]);", _zad, _re.S).group(
 _GWP = [int(x) for x in _gw.group(1).replace("\n", "").replace(" ", "").split(",")]
 for _i in (130, 202, 121, 196, 235, 105, 98, 116, 146, 195):
     require(_ZAD[_i]["g"] == 1 and _GWP[_i] == 1, "quick task %d (%s) must pay one star" % (_i, _ZAD[_i]["o"]))
+# 100 nowych zadan i wyplata nieodebranych (8 X 2026, docs/ekonomia-po-finale.md).
+require(len(_ZAD) == 376 and all(z["i"] == n for n, z in enumerate(_ZAD)), "ZADANIA must hold 376 tasks indexed 0-375")
+require(len({(z["t"], z["c"], z.get("k")) for z in _ZAD}) == len(_ZAD), "no two tasks may share type, count and species")
+require(all(_GWP[i] in (1, 2, 3) for i in range(276, 376)), "every new task must stay in the post-finale pool")
+require("const wyplacono = wyplacZalegle(z);" in _zad and "const zalegle = wyplacZalegle(d.zadania);" in _zad,
+        "refresh, new day and pool change must pay out finished tasks first")
+require("if (d.zadania && d.zadania.w === '276x' + ILE_NA_DOBE && ZADANIA.length >= 276) d.zadania.w = wersjaPuli;" in _zad,
+        "the day's task set from the 276 pool must survive the append")
+require("zadWypusc = Zadania.zdarzenie('wypusc', 1)" in html, "releasing a fish must count for release tasks")
+require("if (window.KLASA && KLASA[gk] >= 7) pchnij('mit', 1);" in html, "catching a mythic fish must count for the mythic task")
 require("const lawic = (naLawice > 0 && naLawiceDoFinalu > 0)" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
         "order deadline must grow with in-school rarity after the finale")
 # Lucjanek Zero: rzut brania robi serwer, a zlowienie bez brania z serwera

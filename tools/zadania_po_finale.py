@@ -18,6 +18,9 @@ Co robi:
    Gwiazdki: do 12 min 1, do 45 min 2, do --max min 3, dluzej 0 (zadanie
    wypada z losowania dnia).
 4. Wypisuje tablice GWIAZDKI_PO_FINALE do wklejenia w src/tasks/tasks.js
+   (od 8 X 2026 model liczy tez dlugosc i wage zlowionej ryby oraz
+   wypuszczanie, dla zadan 'dlugosc', 'waga' i 'wypusc'; nagrody czyta
+   z src/tasks/tasks.js)
    i podsumowanie (pula, gwiazdki, qryb na minute przed i po).
 Opis metody i wyniki z 8 X 2026: docs/ekonomia-po-finale.md.
 """
@@ -44,7 +47,7 @@ MODEL = """(LAWIC) => {
   const pasmo = k => (window.KLASA && KLASA[k]) || 1;
   const D = Zapis.dane(); const zan = D.zaneta; D.zaneta = null; D.seria = null; window.__wagiTab = null;
   const tg = Eko.tikGodow; Eko.tikGodow = () => {};
-  const H = window.G, out = { n: 0, pasmo: {}, pkt: {}, gat: {}, gatPasmo: {} };
+  const H = window.G, out = { n: 0, pasmo: {}, pkt: {}, gat: {}, gatPasmo: {}, cm: {}, waga: {} };
   for (const k in GATUNKI) if (!GATUNKI[k].bezEko) out.gatPasmo[k] = pasmo(k);
   for (let i = 0; i < LAWIC; i++) {
     nowaLawica();
@@ -56,6 +59,11 @@ MODEL = """(LAWIC) => {
       const pk = Math.round(punktyRyby(f)), pp = pasmo(f.gat);
       out.n++; out.pasmo[pp] = (out.pasmo[pp] || 0) + 1;
       out.pkt[pk] = (out.pkt[pk] || 0) + 1; out.gat[f.gat] = (out.gat[f.gat] || 0) + 1;
+      /* dlugosc i waga jak na karcie (openCard): cm zaokraglone, waga w gramach,
+         w koszykach po 10 g */
+      const cm = fishCm(f), wg = f.waga ? f.waga : Math.round(0.01315 * Math.pow(cm, 3));
+      out.cm[cm] = (out.cm[cm] || 0) + 1;
+      const kw = 10 * Math.floor(wg / 10); out.waga[kw] = (out.waga[kw] || 0) + 1;
       const j = school.indexOf(f); if (j >= 0) school.splice(j, 1);
       if (school.length < POP.max) school.push(wplyw());
     }
@@ -90,20 +98,24 @@ def statystyki(w):
     for g, p in w["gatPasmo"].items(): ile[p] = ile.get(p, 0) + 1
     gat = {g: (w["gat"].get(g, 0) / n if w["gat"].get(g, 0) >= 30 else pas.get(p, 0) / ile[p])
            for g, p in w["gatPasmo"].items()}
-    return dict(n=n, hist=hist, pas=pas, gat=gat, srednia=sum(p * v for p, v in hist.items()) / n)
+    cm = {int(k): v for k, v in w.get("cm", {}).items()}
+    waga = {int(k): v for k, v in w.get("waga", {}).items()}
+    return dict(n=n, hist=hist, pas=pas, gat=gat, srednia=sum(p * v for p, v in hist.items()) / n, cm=cm, waga=waga)
 
 def ge(s, c): return sum(v for p, v in s["hist"].items() if p >= c) / s["n"]
 
 def zlowien(s, z, los):
     t, c = z["t"], z["c"]
     inf = math.inf
-    if t == "zlow": return c
+    if t in ("zlow", "wypusc"): return c          # wypuscic mozna kazda zlowiona rybe
     if t == "punkty": return c / s["srednia"]
     if t == "karta": p = ge(s, c); return 1 / p if p > 0 else inf
     if t == "dokladnie": p = s["hist"].get(c, 0) / s["n"]; return 1 / p if p > 0 else inf
     if t.startswith("tier"): p = ge(s, 10 * int(t[4:]) - 9); return c / p if p > 0 else inf
     if t == "gat": p = s["gat"].get(z["k"], 0); return c / p if p > 0 else inf
     if t == "mit": p = s["pas"].get(7, 0); return 1 / p if p > 0 else inf
+    if t == "dlugosc": p = sum(v for k, v in s["cm"].items() if k >= c) / s["n"]; return 1 / p if p > 0 else inf
+    if t == "waga": p = sum(v for k, v in s["waga"].items() if k >= c) / s["n"]; return 1 / p if p > 0 else inf   # c w gramach, wielokrotnosc 10
     if t == "nowy": p = sum(v for b, v in s["pas"].items() if b >= 4); return c / p if p > 0 else inf
     if t == "gatunki":
         ks = list(s["gat"].keys()); ws = list(s["gat"].values()); wyn = []

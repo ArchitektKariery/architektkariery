@@ -388,6 +388,9 @@ function openCard(fish, lenCm, fromX, fromY) {
         setTimeout(() => Ruch.zaRekord(prog, ['KAMIEŃ MILOWY']), bonus > 0 ? 2200 : 300);
       }
       if (lenCm > G3.cmMax) pchnij('olbrzym', 1);
+      /* Zadanie "Złów rybę mityczną" (pasmo 7, Smok Zycia 8) nie mialo
+         zdarzenia, wiec nie dalo sie go wykonac (naprawa 8 X 2026). */
+      if (window.KLASA && KLASA[gk] >= 7) pchnij('mit', 1);
       /* NAPRAWA Q09 (audyt IX 2026): DWA ZNACZENIA SLOWA "SERIA".
          `stat.seria` to licznik kolejnych zlowien BEZ WZGLEDU NA GATUNEK,
          a `dane.seria` (zglaszane wyzej, przy S.ile) to seria TEGO SAMEGO
@@ -569,8 +572,12 @@ function decyzjaKarty(kier) {
       D.stat.wypuszczonych = (D.stat.wypuszczonych || 0) + 1;
       Zapis.zapisz();
     }
+    /* Zadania "Wypuść N ryb" (8 X 2026): liczy sie kazde wypuszczenie
+       z karty, tutaj i nigdzie indziej. */
+    let zadWypusc = [];
+    try { if (typeof Zadania !== 'undefined') zadWypusc = Zadania.zdarzenie('wypusc', 1) || []; } catch (e) {}
     if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
-      Ruch.zaRekord(NAGRODA_ZA_WYPUSZCZENIE, [ileWypuszczonych()]);
+      Ruch.zaRekord(NAGRODA_ZA_WYPUSZCZENIE, zadWypusc.length ? [ileWypuszczonych(), 'ZADANIE WYKONANE'] : [ileWypuszczonych()]);
     else if (typeof Ruch !== 'undefined' && Ruch.powiedz)
       Ruch.powiedz('WYPUSZCZONA  +' + NAGRODA_ZA_WYPUSZCZENIE, false);
     if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(8);

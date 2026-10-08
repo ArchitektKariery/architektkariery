@@ -75,7 +75,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 | Panel gracza i sekcja konta w menu | `src/ui/panel.js` (sekcje `PANEL GRACZA`, `SEKCJA KONTA`) |
 | Turnieje, liga, pasek turniejowy, nagrody turniejowe | `src/tournaments/tournaments.js` |
 | Panel turniejów i tabela wyników | `src/ui/panel.js` (sekcje `PANEL TURNIEJOW`, `TABELKA WYNIKOW`) |
-| Zadania dzienne (`ZADANIA`, `Zadania`); nagrody 280 000 / 1 400 000 / 7 000 000 i odświeżenie 1 120 000 (x40 od 8 X 2026, `NAGRODA`, `KOSZT_ODSWIEZENIA`); od finału ZARAZY gwiazdki z czasu po finale i pula bez zadań dłuższych niż 320 min (`GWIAZDKI_PO_FINALE`, `Zadania.gwiazdki`, `Zadania.nagroda`, `Zadania.wPuli`), tabelę liczy `tools/zadania_po_finale.py`, opis `docs/ekonomia-po-finale.md` | `src/tasks/tasks.js`, `src/ui/panel.js` (lista zadań) |
+| Zadania dzienne (`ZADANIA`, 376 zadań, `Zadania`); nagrody 280 000 / 1 400 000 / 7 000 000 i odświeżenie 1 120 000 (x40 od 8 X 2026, `NAGRODA`, `KOSZT_ODSWIEZENIA`); wykonane, a nieodebrane wypłacają się same przy odświeżeniu, o północy i przy zmianie puli (`wyplacZalegle`); rodzaje zadań waga, długość i wypuszczanie (zdarzenie `wypusc` w `decyzjaKarty`, `src/card/card.js`); od finału ZARAZY gwiazdki z czasu po finale i pula bez zadań dłuższych niż 320 min (`GWIAZDKI_PO_FINALE`, `Zadania.gwiazdki`, `Zadania.nagroda`, `Zadania.wPuli`), tabelę liczy `tools/zadania_po_finale.py`, opis `docs/ekonomia-po-finale.md` | `src/tasks/tasks.js`, `src/ui/panel.js` (lista zadań) |
 
 ## Interfejs, scena, efekty
 
