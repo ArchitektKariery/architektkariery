@@ -58,6 +58,7 @@ require(any(x in html for x in [
     "2026-10-09-lucjanek-x10-v1",
     "2026-10-09-lucjanek-x100-v1",
     "2026-10-09-lucjanek-drazni-v1",
+    "2026-10-09-tarlo-ostatnich-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -257,6 +258,27 @@ require("if (LucjanekZero.czeka && LucjanekZero.czeka(f)) { f.moodT = 0.1; retur
         "Lucjanek Zero must wait at the bait for the server roll")
 require("if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze && !drazni();" in html,
         "Lucjanek Zero must take the bite from the server answer")
+# Tarlo ostatnich sztuk (pt 9 X 2026, 23:28, polecenie Andrzeja: "zmien, zeby
+# ostatnie sztuki mogly sie rozmnazac", docs/tarlisko.md). Para z tarliska trze
+# sie takze, gdy gatunek wymarl w jeziorze, a jej mlode przywracaja gatunek
+# przez eko_tarlo_ostatnich (eko_zmien celowo pomija wymarle).
+_roz = (root / "src/ecosystem/reproduction.js").read_text(encoding="utf-8")
+_pop = (root / "src/ecosystem/population.js").read_text(encoding="utf-8")
+_srv = (root / "src/ecosystem/server.js").read_text(encoding="utf-8")
+_ost = (root / "supabase/migrations/20261009_tarlo_ostatnich_sztuk.sql").read_text(encoding="utf-8")
+require("typ: 'jezioro'" not in _roz, "a tarlisko pair must not wait for a male and a female in the lake")
+require("genZTarliska(gk, 'f'), teraz, true)" in _roz and "if (!zTarliska && !moznaRozmnazac(gk)) return null;" in _pop,
+        "a tarlisko pair must spawn even when its species is extinct in the lake")
+require("if (wymarly(k.gat) && maPrawoDoSwiata()) {" in _pop and "const wrocilo = odrodzZTarla(k.gat, k.n, k.gen);" in _pop,
+        "grown young of an extinct species must bring it back through odrodzZTarla")
+require("if (!paraUGracza(gk)) return 0;" in _pop and "r.x->>'plec' = 'm'" in _ost and "r.x->>'plec' = 'f'" in _ost,
+        "revival must require the pair to stay with the player, in the game and on the server")
+require("CFG.TARLO_OSTATNICH_MAX = 60;" in _pop and "least(greatest(coalesce(p_n, 0), 0), 60)" in _ost,
+        "one revival must be capped at 60 fish in the game and on the server")
+require("rpc('eko_tarlo_ostatnich', { p_gat: gat, p_n: n })" in _srv and "ostatnieSztuki, wpis" in _srv,
+        "the game must call eko_tarlo_ostatnich for the revival")
+require("and e.wymarly" in _ost and "grant execute on function public.eko_tarlo_ostatnich(text, integer) to authenticated;" in _ost,
+        "eko_tarlo_ostatnich must revive only extinct species and only for signed-in players")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

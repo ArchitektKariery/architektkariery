@@ -1099,7 +1099,7 @@ const Eko = (() => {
        liczebnosci. */
     const genA = (g && g.a && g.a.gen) || genSrednia(gk);
     const genB = (g && g.b && g.b.gen) || genSrednia(gk);
-    nowaKohorta(gk, ikra, zmieszajGeny(genA, genB));
+    nowaKohorta(gk, ikra, zmieszajGeny(genA, genB), !!(g && g.tarlisko));
     if (typeof Zapis !== 'undefined') Zapis.zapisz();
   }
 
@@ -1117,14 +1117,34 @@ const Eko = (() => {
      obok kohort z lawicy i niczym sie od nich nie rozni. Nie ma drugiego
      zestawu regul, ktory trzeba by stroic osobno.
      ============================================================ */
-  function tarloPary(gk, genA, genB, teraz) {
+  /* ============================================================
+     TARLO OSTATNICH SZTUK (pt 9 X 2026, 23:28, polecenie Andrzeja:
+     "zmien, zeby ostatnie sztuki mogly sie rozmnazac", zrzut: para
+     MINOGA MAJLOWEGO w tarlisku, "TARLO WSTRZYMANE, gatunek wymarl").
+
+     BYLO: tarloPary wymagalo `moznaRozmnazac`, czyli zywego gatunku
+     z samcem i samica W JEZIORZE. Ryby w tarlisku zostaly z jeziora
+     wylowione, wiec ostatnia para gatunku stala w tarlisku bez szans.
+
+     JEST: para z tarliska (`zTarliska`) trze sie takze wtedy, gdy gatunek
+     wymarl albo w jeziorze brakuje samca lub samicy. Reszta bez zmian:
+     ta sama plodnosc, scenariusz, cykl pokolen, karencja i zerwania po
+     zarazie. Gdy mlode dorosna (tikKohort), a gatunek dalej jest wymarly,
+     wracaja do jeziora przez `odrodzZTarla`. Tarlo w toni (szukaSamotnych
+     i tikGodow) dalej wymaga `moznaRozmnazac`.
+     ============================================================ */
+  /* Sufit jednego odrodzenia, ten sam co w SQL eko_tarlo_ostatnich. */
+  CFG.TARLO_OSTATNICH_MAX = 60;
+
+  function tarloPary(gk, genA, genB, teraz, zTarliska) {
     teraz = teraz || Date.now();
     if (!GATUNKI || !GATUNKI[gk]) return null;
-    if (!moznaRozmnazac(gk)) return null;
+    if (GATUNKI[gk].bezEko) return null;            /* legenda nie ma populacji */
+    if (!zTarliska && !moznaRozmnazac(gk)) return null;
     if ((PO_TARLE[gk] || 0) > teraz) return null;   /* ta sama karencja, co w lawicy */
     PO_TARLE[gk] = teraz + karencjaTarla(gk);
     const przed = ikra(gk);
-    zakonczGody(gk, { a: { gen: genA }, b: { gen: genB } });
+    zakonczGody(gk, { a: { gen: genA }, b: { gen: genB }, tarlisko: !!zTarliska });
     return { gat: gk, ikra: ikra(gk) - przed };
   }
   /* Do kiedy gatunek odpoczywa po tarle (ms od epoki, 0 = nie odpoczywa).
@@ -1132,6 +1152,67 @@ const Eko = (() => {
      graczowi powod czekania zamiast paska, ktory dochodzi do konca
      i zaczyna od nowa bez skutku. */
   function poTarle(gk) { return PO_TARLE[gk] || 0; }
+
+  /* Czy gracz trzyma samca i samice gatunku w tarlisku albo w wiaderku.
+     Ten sam warunek sprawdza serwer w eko_tarlo_ostatnich, czytajac
+     zapis gracza (public.gracze.zapis). */
+  function paraUGracza(gk) {
+    try {
+      const D = (typeof Zapis !== 'undefined') ? Zapis.dane() : null;
+      if (!D) return false;
+      const ryby = [].concat(Array.isArray(D.tarlisko) ? D.tarlisko : [],
+                             Array.isArray(D.wiaderko) ? D.wiaderko : []);
+      let m = false, f = false;
+      for (const x of ryby) {
+        if (!x || x.gat !== gk) continue;
+        if (x.plec === 'm') m = true;
+        else if (x.plec === 'f') f = true;
+      }
+      return m && f;
+    } catch (e) { return false; }
+  }
+
+  /* ============================================================
+     ODRODZENIE Z TARLA OSTATNICH SZTUK. Wolane przez tikKohort, gdy
+     dorosly mlode gatunku, ktory dalej jest wymarly.
+
+     `zmien` tego nie zrobi: WYMARCIE JEST TRWALE w zwyklej sciezce,
+     a eko_zmien na serwerze pomija dodatnia zmiane wymarlego gatunku.
+     Dlatego osobne drzwi, wzorowane na odrodzWymarle (Smok Zycia):
+       1. tylko konto z mailem (maPrawoDoSwiata),
+       2. para dalej u gracza (paraUGracza): rodzice musza zostac
+          w tarlisku albo w wiaderku, dopoki mlode nie dorosna,
+       3. najwyzej CFG.TARLO_OSTATNICH_MAX ryb, plec po polowie
+          (samcow = n / 2 w dol, reszta samice, tak samo jak w SQL).
+     Lokalny stan zmienia sie od razu (podglad), a serwer dostaje
+     eko_tarlo_ostatnich i jego odpowiedz nadpisuje podglad.
+     Zwraca liczbe ryb, ktore wrocily, albo 0.
+     ============================================================ */
+  function odrodzZTarla(gk, ile, gen) {
+    if (!maPrawoDoSwiata()) return 0;
+    if (typeof GATUNKI !== 'undefined' && GATUNKI[gk] && GATUNKI[gk].bezEko) return 0;
+    const r = rekord(gk); if (!r || !r.wymarly) return 0;
+    if (!paraUGracza(gk)) return 0;
+    const n = Math.min(CFG.TARLO_OSTATNICH_MAX, Math.floor(ile || 0));
+    if (n < 1) return 0;
+    const m = Math.floor(n / 2);
+    r.n = n; r.m = m; r.f = n - m;
+    r.wymarly = false; r.kiedyWymarl = 0;
+    r.max = Math.max(r.max || 0, n); r.min = Math.min(r.min || 0, 0);
+    r.indyw = n < CFG.PROG_INDYWIDUALNY;
+    /* Cala populacja to to jedno pokolenie, wiec srednia cech gatunku
+       staje sie srednia mlodych (przed materializuj, zeby osobniki
+       dostaly cechy wokol nowej sredniej). */
+    przesunSrednia(gk, gen, 1);
+    const E = stan();
+    if (E && E.osob) E.osob[gk] = [];
+    if (r.indyw) { try { materializuj(gk); } catch (e) {} }
+    window.__wagiTab = null;
+    zapisz('odrodzenie', gk, 'Para z tarliska przywróciła gatunek: ' + n + ' młodych', n);
+    try { if (Eko.Serwer && Eko.Serwer.ostatnieSztuki) Eko.Serwer.ostatnieSztuki(gk, n); } catch (e) {}
+    if (typeof Zapis !== 'undefined') Zapis.zapisz();
+    return n;
+  }
 
   /* ============================================================
      CYKL POKOLEN (faza 9). Ikra NIE zamienia sie w dorosle ryby.
@@ -1293,7 +1374,7 @@ const Eko = (() => {
   }
 
   /* Wolane przez zakonczGody: ikra staje sie KOHORTA, nie liczba w worku. */
-  function nowaKohorta(gk, ile, gen) {
+  function nowaKohorta(gk, ile, gen, zTarliska) {
     const sc = losujScenariusz(gk);
     /* ============================================================
        NICK JEDZIE RAZEM Z KOHORTA (IX 2026, zgloszenie Andrzeja:
@@ -1310,8 +1391,13 @@ const Eko = (() => {
        Do WLASNEGO dziennika tarlo dalej leci, bo tam jest przydatne:
        gracz widzi, ze jego para cos zlozyla, i jaki scenariusz wypadl.
        ============================================================ */
-    kohorty().push({ gat: gk, etap: 0, n: ile, od: Date.now(), scen: sc.id,
-                     gen: gen || genSrednia(gk), nick: mojNick() });
+    const k = { gat: gk, etap: 0, n: ile, od: Date.now(), scen: sc.id,
+                gen: gen || genSrednia(gk), nick: mojNick() };
+    /* Kohorta z tarliska (tarlo ostatnich sztuk, opis przy tarloPary):
+       znacznik zmienia tylko komunikat, gdy mlode wymarlego gatunku
+       przepadna w tikKohort. */
+    if (zTarliska) k.tarlisko = true;
+    kohorty().push(k);
     zapisz('tarlo-wlasne', gk, 'tarło, ' + sc.txt, ile);
   }
 
@@ -1388,8 +1474,35 @@ const Eko = (() => {
             break;
           }
           if (k.n < przed2) zapisz('pokolenie', k.gat, 'ciasno w jeziorze, część młodych nie przeżyła', k.n);
+          /* TARLO OSTATNICH SZTUK (9 X 2026, opis przy tarloPary i
+             odrodzZTarla). Gatunek dalej wymarly: `zmien` by mlodych
+             pominal, wiec wracaja osobnymi drzwiami, o ile rodzice sa
+             u gracza. Bez konta z mailem swiat i tak sie nie zmienia,
+             wiec gosc idzie dawna droga ponizej. */
+          if (wymarly(k.gat) && maPrawoDoSwiata()) {
+            const wrocilo = odrodzZTarla(k.gat, k.n, k.gen);
+            if (!wrocilo) {
+              zapisz('pokolenie', k.gat, k.tarlisko
+                ? 'młode wymarłego gatunku przepadły: para nie została w tarlisku ani w wiaderku'
+                : 'młode nie przeżyły: gatunek wymarł w jeziorze', 0);
+              K.splice(i, 1);
+              break;
+            }
+            k.n = wrocilo;
+            if (k.nick) zapisz('narybek', k.gat, 'przywrócił gatunek: ' + lbInt(k.n) + ' szt. z tarła ostatniej pary', k.n, k.nick);
+            meldunek(k.gat, k.n, k.nick || '');
+            K.splice(i, 1);
+            break;
+          }
           const przedN = populacja(k.gat);
-          zmien(k.gat, k.n);
+          /* Mlode z tarliska dziela sie na plcie po polowie, a nie wedlug
+             skladu jeziora: przy samych samicach w jeziorze proporcja dalaby
+             same samice i gatunek dalej nie moglby trzec sie w toni. */
+          if (k.tarlisko) {
+            const nm = Math.floor(k.n / 2);
+            if (nm) zmien(k.gat, nm, 'm');
+            if (k.n - nm) zmien(k.gat, k.n - nm, 'f');
+          } else zmien(k.gat, k.n);
           /* Srednia gatunku przesuwa sie w strone cech TEGO pokolenia,
              proporcjonalnie do jego udzialu w nowej populacji. Stad
              bierze sie zmiana przez pokolenia. */
@@ -1737,7 +1850,7 @@ const Eko = (() => {
            mnoznikLosowania, losujPlec, moznaRozmnazac,
            karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
            szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
-           tarloPary, poTarle, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
+           tarloPary, poTarle, paraUGracza, odrodzZTarla, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
            sumaPopulacji, zapelnienie, nadmiar, udzialPopulacji, coIleLawic,
            meldunki, meldunkiCzekaja, potwierdzMeldunki, maPrawoDoSwiata,
            podsumowanie, kronika, zapisz, popStartowa,

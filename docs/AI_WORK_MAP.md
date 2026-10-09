@@ -47,6 +47,7 @@ Pełna lista funkcji i stałych z numerem linii: [`SYMBOL_INDEX.md`](SYMBOL_INDE
 |---|---|
 | Populacje (żywa populacja gatunków, `Eko`) | `src/ecosystem/population.js` |
 | Tarlisko (najwyżej 2 ryby z wiaderka, `Tarlisko`) i tarło w tarlisku (`Rozrod`); tarło w samym wiaderku wyłączone od 1 X 2026 | `src/ecosystem/reproduction.js`, opis `docs/tarlisko.md` |
+| Tarło ostatnich sztuk (9 X 2026): para z tarliska trze się przy wymarłym gatunku albo bez samca lub samicy w jeziorze, młode wymarłego gatunku wracają przez `Eko.odrodzZTarla` (para musi zostać u gracza, najwyżej 60 ryb), młode z tarliska po połowie samce i samice | `src/ecosystem/population.js` (`tarloPary`, `odrodzZTarla`, `tikKohort`), `src/ecosystem/server.js` (`ostatnieSztuki`), SQL `supabase/migrations/20261009_tarlo_ostatnich_sztuk.sql`, opis `docs/tarlisko.md` |
 | Płeć ławicy, dosadzanie partnera samotnemu gatunkowi | `src/fish/school-update.js` |
 | Wspólna populacja na serwerze (`Eko.Serwer`) | `src/ecosystem/server.js` |
 | EKO: zakładka ekosystemu i zegar pokoleń | `src/ecosystem/eko-tab.js` |

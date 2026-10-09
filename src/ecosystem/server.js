@@ -155,6 +155,46 @@ Eko.Serwer = (function () {
     return true;
   }
 
+  /* ============================================================
+     TARLO OSTATNICH SZTUK (pt 9 X 2026, polecenie Andrzeja: "zmien,
+     zeby ostatnie sztuki mogly sie rozmnazac"). Mlode z tarla pary
+     trzymanej przez gracza przywracaja wymarly gatunek (Eko.odrodzZTarla).
+     eko_zmien celowo pomija dodatnia zmiane wymarlego gatunku, wiec idzie
+     osobna funkcja (supabase/migrations/20261009_tarlo_ostatnich_sztuk.sql):
+     sprawdza mail, pare w zapisie gracza i przycina liczbe do 60.
+
+     PUSTA ODPOWIEDZ znaczy, ze gatunek juz zyje (przywrocil go ktos inny,
+     a lokalny bufor byl starszy) albo ze serwer odmowil. Wtedy mlode ida
+     zwykla droga eko_zmien: zywy gatunek je przyjmie, wymarly pominie,
+     a odpowiedz wyprostuje lokalny podglad.
+     BLAD (siec albo brak funkcji, bo SQL nie jest jeszcze uruchomiony):
+     dwie kolejne proby co 15 s, potem ta sama zwykla droga. Do kolejki
+     ekoKolejka to nie trafia: brak funkcji zatkalby ja na zawsze.
+     ============================================================ */
+  function ostatnieSztuki(gat, n, proba) {
+    if (!dostepny()) return false;
+    proba = proba || 0;
+    /* Zwykla droga dzieli mlode po polowie na plcie, tak jak tikKohort
+       dla kohorty z tarliska. */
+    const zwykle = () => {
+      const nm = Math.floor(n / 2);
+      if (nm) zmien(gat, nm, 'm');
+      if (n - nm) zmien(gat, n - nm, 'f');
+    };
+    rpc('eko_tarlo_ostatnich', { p_gat: gat, p_n: n })
+      .then(w => {
+        if (Array.isArray(w) && w[0]) {
+          wpiszStan(gat, w[0]);
+          if (typeof Zapis !== 'undefined') Zapis.zapisz();
+        } else zwykle();
+      })
+      .catch(() => {
+        if (proba < 2) setTimeout(() => ostatnieSztuki(gat, n, proba + 1), 15000);
+        else zwykle();
+      });
+    return true;
+  }
+
   async function odrodzWymarle() {
     if (!dostepny()) return [];
     try {
@@ -223,6 +263,6 @@ Eko.Serwer = (function () {
   }
 
   return { dostepny, pobierz, zmien, doslij, zasiewSQL, wpiszStan, odrodzWymarle,
-           wpis, kronikaWspolna, odswiezKronike };
+           ostatnieSztuki, wpis, kronikaWspolna, odswiezKronike };
 })();
 

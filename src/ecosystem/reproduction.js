@@ -23,10 +23,11 @@
    w zakladce EKOSYSTEM obok kohort z toni i niczym sie od nich nie rozni.
 
    CZAS PARY to `Eko.CFG.CZAS_GODOW`, czyli te same 30 sekund, co gody
-   w toni. Para, ktorej ekosystem i tak by odmowil (karencja gatunku albo
-   brak samca lub samicy w jeziorze, patrz `Eko.moznaRozmnazac`), NIE
+   w toni. Para, ktorej ekosystem i tak by odmowil (karencja gatunku), NIE
    zbiera czasu. Wczesniej pasek takiej pary dochodzil do 100%, zerowal
    sie i zaczynal od nowa bez zadnego skutku; teraz panel pokazuje powod.
+   Od 9 X 2026 para w tarlisku trze sie takze wtedy, gdy gatunek wymarl
+   w jeziorze albo brakuje w nim samca lub samicy (opis przy `blokada`).
    ============================================================ */
 const Tarlisko = (() => {
   const MAX = 2;
@@ -153,13 +154,18 @@ const Rozrod = (() => {
   function paryWWiaderku() { const D = d(); return paryW(D && D.wiaderko); }
 
   /* Dlaczego para w tarlisku nie zbiera czasu. null znaczy: moze.
-     'jezioro'  -- Eko.moznaRozmnazac odmawia (gatunek wymarly albo
-                   w jeziorze brakuje samca lub samicy),
-     'karencja' -- gatunek odpoczywa po tarle do chwili `do`. */
+     'karencja' -- gatunek odpoczywa po tarle do chwili `do`.
+
+     TARLO OSTATNICH SZTUK (pt 9 X 2026, 23:28, polecenie Andrzeja:
+     "zmien, zeby ostatnie sztuki mogly sie rozmnazac"). Do tej pory
+     byla tu druga blokada, 'jezioro': para w tarlisku stala, gdy gatunek
+     wymarl w jeziorze albo gdy w jeziorze brakowalo samca lub samicy
+     (Eko.moznaRozmnazac). Para w tarlisku JEST ta brakujaca para, wiec
+     od teraz trze sie zawsze, a mlode wymarlego gatunku przywracaja go
+     do jeziora (Eko.tarloPary z flaga zTarliska, opis w population.js). */
   function blokada(gk, teraz) {
     teraz = teraz || Date.now();
     try {
-      if (window.Eko && Eko.moznaRozmnazac && !Eko.moznaRozmnazac(gk)) return { typ: 'jezioro' };
       const po = (window.Eko && Eko.poTarle) ? Eko.poTarle(gk) : 0;
       if (po > teraz) return { typ: 'karencja', do: po };
     } catch (e) {}
@@ -215,7 +221,7 @@ const Rozrod = (() => {
       delete s.pary[gk]; delete s.zerw[gk];
       /* Cala reszta nalezy do ekosystemu. */
       let r = null;
-      try { if (window.Eko && Eko.tarloPary) r = Eko.tarloPary(gk, genZTarliska(gk, 'm'), genZTarliska(gk, 'f'), teraz); } catch (e) {}
+      try { if (window.Eko && Eko.tarloPary) r = Eko.tarloPary(gk, genZTarliska(gk, 'm'), genZTarliska(gk, 'f'), teraz, true); } catch (e) {}
       if (r) { wynik = r; s.ostatnie = { gat: r.gat, ikra: r.ikra, kiedy: teraz }; }
     }
     if (wynik && typeof Zapis !== 'undefined') Zapis.zapisz();

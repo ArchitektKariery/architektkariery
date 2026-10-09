@@ -1500,6 +1500,20 @@
     } catch (e) {}
     return st;
   }
+  /* TARLO OSTATNICH SZTUK (9 X 2026): para w tarlisku trze sie takze
+     wtedy, gdy gatunek wymarl w jeziorze albo brakuje w nim samca lub
+     samicy (opis przy Rozrod.blokada i Eko.tarloPary). Panel mowi
+     graczowi, ze ta para przywraca gatunek i ze rodzice musza zostac
+     u niego, dopoki mlode nie dorosna (Eko.odrodzZTarla). */
+  function tarliskoWymarly(gk) {
+    try { return !!(gk && window.Eko && Eko.wymarly && Eko.wymarly(gk)); } catch (e) { return false; }
+  }
+  function tarliskoMlode(gk) {
+    try { return !!(gk && window.Eko && Eko.pokolenia && Eko.pokolenia().some(p => p.gat === gk)); } catch (e) { return false; }
+  }
+  function tarliskoBezParyWJeziorze(gk) {
+    try { return !!(gk && window.Eko && Eko.moznaRozmnazac && !Eko.moznaRozmnazac(gk)); } catch (e) { return false; }
+  }
   /* Klucz stanu: zmiana skladu, pary, blokady albo nowe tarlo
      przerysowuje panel. Sam postep pary plynie bez przebudowy. */
   function tarliskoKlucz() {
@@ -1507,7 +1521,9 @@
     const ost = (window.Rozrod && Rozrod.ostatnie()) || null;
     const pelneW = (typeof Wiaderko !== 'undefined') && Wiaderko.pelne();
     return [st.lista.map(r => r.gat + ':' + (r.plec || '')).join(','), st.para || '-',
-            st.blok ? st.blok.typ : 'ok', ost ? ost.kiedy : 0, pelneW ? 'W' : 'w'].join('|');
+            st.blok ? st.blok.typ : 'ok', ost ? ost.kiedy : 0, pelneW ? 'W' : 'w',
+            tarliskoWymarly(st.para) ? 'X' : 'x', tarliskoMlode(st.para) ? 'K' : 'k',
+            tarliskoBezParyWJeziorze(st.para) ? 'J' : 'j'].join('|');
   }
   const minutDo = t => Math.max(1, Math.ceil((t - Date.now()) / 60000));
   /* Para w tarlisku zerwala tarlo (po zarazie, Eko.CFG.ZERWANIE_TARLA)
@@ -1523,7 +1539,7 @@
     if (tarliskoZerwane(st)) return 'PARA ZERWAŁA TARŁO';
     if (st.para && st.blok && st.blok.typ === 'karencja') return 'ODPOCZYWA PO TARLE';
     if (st.para && st.blok) return 'TARŁO WSTRZYMANE';
-    if (st.para) return 'PARA TRZE SIĘ';
+    if (st.para) return tarliskoWymarly(st.para) ? 'OSTATNIA PARA TRZE SIĘ' : 'PARA TRZE SIĘ';
     if (n === 1) return 'CZEKA NA PARĘ';
     return 'TO NIE JEST PARA';
   }
@@ -1537,17 +1553,23 @@
     if (tarliskoZerwane(st))
       return 'Para rozstała się przed końcem tarła, więc ikry nie ma. Gatunek ' + nazwa(st.para) +
              ' wróci do tarła za <b id="tarlMin">' + minutDo(st.blok.do) + ' min</b>.';
-    if (st.para && st.blok && st.blok.typ === 'karencja')
+    const wym = tarliskoWymarly(st.para);
+    if (st.para && st.blok && st.blok.typ === 'karencja') {
+      if (wym && tarliskoMlode(st.para))
+        return 'Młode gatunku ' + nazwa(st.para) + ' rosną w zakładce EKO i około 10 minut po tarle wrócą do jeziora. ' +
+               'Trzymaj parę w tarlisku albo w wiaderku do tego czasu, bo bez niej młode wymarłego gatunku przepadną. ' +
+               'Następne tarło za <b id="tarlMin">' + minutDo(st.blok.do) + ' min</b>.';
       return 'Gatunek ' + nazwa(st.para) + ' odpoczywa po tarle jeszcze <b id="tarlMin">' + minutDo(st.blok.do) +
              ' min</b>. Potem para zacznie od nowa.';
-    if (st.para && st.blok) {
-      let wym = false;
-      try { wym = !!(window.Eko && Eko.wymarly && Eko.wymarly(st.para)); } catch (e) {}
-      return wym
-        ? 'Gatunek ' + nazwa(st.para) + ' wymarł w jeziorze, więc ekosystem nie przyjmie ikry.'
-        : 'W jeziorze nie pływa teraz samiec albo samica gatunku ' + nazwa(st.para) +
-          ', więc ekosystem wstrzymuje tarło. Ruszy samo, gdy para znów pojawi się w jeziorze.';
     }
+    if (st.para && st.blok) return 'Tarło gatunku ' + nazwa(st.para) + ' czeka. Ruszy samo.';
+    if (st.para && wym)
+      return 'Gatunek ' + nazwa(st.para) + ' wymarł w jeziorze, a ta para może go przywrócić. Trze się 30 sekund, ' +
+             'młode rosną w zakładce EKO i około 10 minut po tarle wracają do jeziora. ' +
+             'Trzymaj parę w tarlisku albo w wiaderku, dopóki nie wrócą.';
+    if (st.para && tarliskoBezParyWJeziorze(st.para))
+      return 'W jeziorze brakuje samca albo samicy gatunku ' + nazwa(st.para) + ', więc ta para jest jego szansą. ' +
+             'Trze się 30 sekund, a ikra urośnie w zakładce EKO.';
     if (st.para) return 'Para trze się 30 sekund. Ikra trafi do jeziora i urośnie w zakładce EKO.';
     if (n === 1) {
       const r = st.lista[0];
