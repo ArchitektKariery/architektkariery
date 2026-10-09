@@ -56,6 +56,7 @@ require(any(x in html for x in [
     "2026-10-08-nagrody-v1",
     "2026-10-08-zadania376-v1",
     "2026-10-09-lucjanek-x10-v1",
+    "2026-10-09-lucjanek-x100-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -235,9 +236,9 @@ require("if (d.zadania && d.zadania.w === '276x' + ILE_NA_DOBE && ZADANIA.length
         "the day's task set from the 276 pool must survive the append")
 require("zadWypusc = Zadania.zdarzenie('wypusc', 1)" in html, "releasing a fish must count for release tasks")
 require("if (window.KLASA && KLASA[gk] >= 7) pchnij('mit', 1);" in html, "catching a mythic fish must count for the mythic task")
-# Lucjanek Zero: spotkania x10 od pt 9 X 19:44 (decyzja Andrzeja), branie bez zmian.
-require("const MNOZNIK_SPOTKAN = 10;" in html and "Math.min(1, MNOZNIK_SPOTKAN * POP / (S + POP))" in html,
-        "Lucjanek Zero must meet players 10 times more often")
+# Lucjanek Zero: spotkania x100 od pt 9 X wieczorem (decyzje Andrzeja 19:44 i 19:55), branie bez zmian.
+require("const MNOZNIK_SPOTKAN = 100;" in html and "Math.min(1, MNOZNIK_SPOTKAN * POP / (S + POP))" in html,
+        "Lucjanek Zero must meet players 100 times more often")
 require("const SZANSA = 1 / 13983816;" in html, "Lucjanek Zero bite chance must stay 1 : 13 983 816")
 require("return tabelaWag(tylko);" in (root / "src/events/lucjanek-zero.js").read_text(encoding="utf-8"),
         "Lucjanek Zero must take the lake size from a fresh draw table, not a stale one")

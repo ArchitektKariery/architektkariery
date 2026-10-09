@@ -22,8 +22,8 @@
    100 000). Zaneta zawezajaca pule dziala na niego tak samo jak na kazdy
    gatunek pasma 4: pula bez Lucjana go nie wpusci, a pula samego pasma 4
    podnosi szanse tyle razy, ile razy jest mniejsza od calego jeziora.
-   Od pt 9 X 2026, 19:44 szansa kazdego miejsca jest 10 razy wieksza
-   (MNOZNIK_SPOTKAN nizej, decyzja Andrzeja), branie bez zmian.
+   Od pt 9 X 2026 wieczorem szansa kazdego miejsca jest 100 razy wieksza
+   (MNOZNIK_SPOTKAN nizej, decyzje Andrzeja 19:44 i 19:55), branie bez zmian.
    W jeziorze jest jeden, wiec w kadrze najwyzej jeden naraz. Gra nie
    oglasza jego przyjscia: trzeba go wypatrzyc. Dopoki plywa w kadrze,
    siec jest zablokowana: siec zgarnia cala lawice bez brania, wiec
@@ -56,15 +56,16 @@
 const LucjanekZero = (() => {
   const SZANSA = 1 / 13983816;       /* szostka w Totolotku */
   const POP = 1;                     /* jedna ryba w jeziorze */
-  /* SPOTKANIA x10 (pt 9 X 2026, 19:44, polecenie Andrzeja: "zwieksz szanse
-     spotkania o 10 razy"). Przez prawie dobe etapu 3 nikt go nie spotkal:
-     przy jednej rybie na ok. 118 tys. zwykla gra (ok. 15 nowych ryb
-     w kadrze na minute) dawala jedno spotkanie na ok. 130 godzin gry.
-     Teraz kazde miejsce w lawicy jest nim z szansa 10 / (S + 1), czyli
-     ok. 1 na 11 800, jedno spotkanie na ok. 13 godzin zwyklej gry.
+  /* SPOTKANIA x100 (pt 9 X 2026, polecenia Andrzeja: 19:44 "zwieksz szanse
+     spotkania o 10 razy", 19:55 "to jeszcze razy 10"). Przez prawie dobe
+     etapu 3 nikt go nie spotkal: przy jednej rybie na ok. 118 tys. zwykla
+     gra (ok. 15 nowych ryb w kadrze na minute) dawala jedno spotkanie na
+     ok. 130 godzin gry. Teraz kazde miejsce w lawicy jest nim z szansa
+     100 / (S + 1), czyli ok. 1 na 1 180, jedno spotkanie na ok. 1,3 godziny
+     zwyklej gry. Szansa ma sufit 1, a w kadrze i tak plywa najwyzej jeden.
      Branie zostaje 1 : 13 983 816 (rzut na serwerze), wiec wynik finalu
      sie nie zmienia. Podglad ?zaraza=3 bez zmian. */
-  const MNOZNIK_SPOTKAN = 10;
+  const MNOZNIK_SPOTKAN = 100;
   const S_PODGLADU = 30;             /* podglad ?zaraza=3: jezioro "30 ryb" */
   const CZEKAJ_MS = 6000;            /* najdluzsze czekanie przy przynecie na rzut z serwera */
 
