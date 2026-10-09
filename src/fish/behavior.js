@@ -31,7 +31,7 @@ function chetnaZaatakowac(f) {
     return f.smokBierze ? 1 : 0;
   /* Lucjanek Zero (event ZARAZA): ten sam zamrozony rzut, 1 : 13 983 816,
      wylosowany raz przy pojawieniu (src/events/lucjanek-zero.js). */
-  if (f && f.lzZero) return f.lzBierze ? 1 : 0;
+  if (f && f.lzZero) return (f.lzBierze && !(window.LucjanekZero && LucjanekZero.drazni && LucjanekZero.drazni())) ? 1 : 0;
   const g = window.GATUNKI && GATUNKI[f.gat];
   return (g && g.mit) ? 0.28 : 0.86;
 }

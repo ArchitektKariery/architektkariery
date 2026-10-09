@@ -57,6 +57,7 @@ require(any(x in html for x in [
     "2026-10-08-zadania376-v1",
     "2026-10-09-lucjanek-x10-v1",
     "2026-10-09-lucjanek-x100-v1",
+    "2026-10-09-lucjanek-drazni-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -254,7 +255,7 @@ require("raise exception 'BRAK_BRANIA';" in _rzut and "v_branie < now() - interv
         "zaraza_zlowiony must reject a catch without a server-side bite")
 require("if (LucjanekZero.czeka && LucjanekZero.czeka(f)) { f.moodT = 0.1; return; }" in html,
         "Lucjanek Zero must wait at the bait for the server roll")
-require("if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze;" in html,
+require("if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze && !drazni();" in html,
         "Lucjanek Zero must take the bite from the server answer")
 
 if errors:

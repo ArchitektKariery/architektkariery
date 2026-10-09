@@ -116,6 +116,22 @@ const LucjanekZero = (() => {
     const S = sumaWag();
     return S > 0 ? Math.min(1, MNOZNIK_SPOTKAN * POP / (S + POP)) : 0;
   }
+  /* OSTATNIE 10 MINUT ETAPU 3 (pt 9 X 2026, 22:47, polecenie Andrzeja:
+     "na ostatnie 10 minut zrob tak, zeby dynamicznie podplywal do
+     przynety, ale nie bral"). Od 22:50 do 23:00 Lucjanek Zero w kadrze
+     sam idzie do kazdej przynety w wodzie (pickLure w src/fish/hook.js),
+     kreci sie przy niej, odmawia, odsuwa sie na 2-5 s i wraca. Nie bierze
+     nigdy (chetnaZaatakowac w src/fish/behavior.js). */
+  const DRAZNI_MS = 10 * 60 * 1000;
+  function drazni() {
+    if (!wEtapie() || testowy()) return false;
+    try {
+      const fin = (window.Zaraza && Zaraza.T && Zaraza.T.final) || Date.parse('2026-10-09T23:00:00+02:00');
+      const t = Date.now();
+      return t >= fin - DRAZNI_MS && t < fin;
+    } catch (e) { return false; }
+  }
+
   function wKadrze() {
     if (typeof school === 'undefined' || !school) return false;
     for (const f of school) if (f && f.lzZero) return true;
@@ -232,7 +248,7 @@ const LucjanekZero = (() => {
     try { if (window.Zaraza && Zaraza.liczPodejscie) p = Zaraza.liczPodejscie(); } catch (e) { p = null; }
     if (!p || typeof p.then !== 'function') return;
     f.lzCzekaDo = Date.now() + CZEKAJ_MS;
-    p.then(w => { if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze; }, () => {})
+    p.then(w => { if (w && typeof w.bierze === 'boolean') f.lzBierze = w.bierze && !drazni(); }, () => {})
      .then(() => { f.lzCzekaDo = 0; });
   }
   /* Czy ryba czeka jeszcze przy przynecie na rzut z serwera. */
@@ -243,6 +259,13 @@ const LucjanekZero = (() => {
   /* Odmowa: odplywa za kadr i w tej lawicy juz nie wraca. */
   function poOdmowie(f) {
     if (!f) return;
+    /* Ostatnie 10 minut: odsuwa sie i wraca do przynety, zamiast odplywac. */
+    if (drazni()) {
+      f.mood = 'idle'; f.face = Math.sign(f.vx) || f.face || 1; delete f.strona;
+      f.karencja = 2 + Math.random() * 3;
+      try { if (typeof Ruch !== 'undefined' && Ruch.powiedz) Ruch.powiedz('LUCJANEK ZERO NIE WZIĄŁ'); } catch (e) {}
+      return;
+    }
     f.mood = 'odplywa';
     f.face = f.x < Scene.W / 2 ? -1 : 1;
     /* Sploszony odplywa zdecydowanie, mimo choroby: przy polowie zwyklej
@@ -269,7 +292,7 @@ const LucjanekZero = (() => {
     return true;
   }
 
-  return { SZANSA, POP, MNOZNIK_SPOTKAN, CZEKAJ_MS, moze, szansaMiejsca, wLawicy,
+  return { SZANSA, POP, MNOZNIK_SPOTKAN, CZEKAJ_MS, drazni, moze, szansaMiejsca, wLawicy,
            podejscie, czeka, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
 })();
 window.LucjanekZero = LucjanekZero;

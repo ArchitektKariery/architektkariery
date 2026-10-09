@@ -1,5 +1,7 @@
 function sprobujPodmienic() {
   if (!lure || lure.mood !== 'inspect' || lure.zablokowany) return;
+  /* Lucjanek Zero w ostatnich 10 minutach etapu 3 nie oddaje przynety. */
+  if (lure.lzZero && window.LucjanekZero && LucjanekZero.drazni && LucjanekZero.drazni()) return;
   const moja = wagaKandydata(lure);
   let najl = null, najw = 0;
   for (const g2 of school) {
@@ -24,6 +26,15 @@ function sprobujPodmienic() {
 }
 
 function pickLure() {
+  /* Lucjanek Zero w ostatnich 10 minutach etapu 3 sam idzie do przynety
+     i nie bierze (LucjanekZero.drazni w src/events/lucjanek-zero.js). */
+  if (window.LucjanekZero && LucjanekZero.drazni && LucjanekZero.drazni()) {
+    for (const f of school) {
+      if (!f || !f.lzZero || f.caught || f.mood === 'odplywa' || f.mood === 'hooked') continue;
+      /* Odsuniety po odmowie: inne ryby czekaja, az wroci. */
+      return (f.karencja > 0) ? null : f;
+    }
+  }
   /* Wlocznia Przeznaczenia: pomija cala wage odleglosc/apetyt i bierze
      najlepsza sztuke z calej lawicy wprost, bez wzgledu na to, gdzie
      stoi haczyk. Sprawdzenie przed normalna petla, bo "najlepsza" liczy
@@ -107,6 +118,9 @@ function lureFish(dt) {
     /* Smok doplywa do przynety duzym lukiem, wiec jego zegar ogladania
        plynie dopiero, gdy pysk stoi przed przyneta. */
     if (f.gat === 'smok_zycia' && window.SmokZycia && SmokZycia.zegarOgladania) f.moodT -= SmokZycia.zegarOgladania(f, dt);
+    /* Lucjanek Zero w ostatnich 10 minutach: zegar ogladania plynie, dopiero
+       gdy dociera do przynety, wiec zawsze dochodzi do niej przed odmowa. */
+    else if (f.lzZero && window.LucjanekZero && LucjanekZero.drazni && LucjanekZero.drazni()) { if (dist < 110) f.moodT -= dt; }
     else f.moodT -= dt;
     /* Okno podmiany, potem lock i ploszenie reszty lawicy. */
     if (!f.zablokowany) {
