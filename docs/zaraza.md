@@ -1,6 +1,6 @@
 # QRyby — event ZARAZA
 
-STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-08-zadania376-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00; plik `20261008_zaraza_rzut_serwer.sql` uruchomiony 8 X ok. 15:30)
+STATUS: W GRZE od 6 X 2026, 23:15 (build `2026-10-09-lucjanek-x10-v1`; SQL finału uruchomiony 7 X 16:22, plik `20261008_zaraza_final_90.sql` uruchomiony 8 X ok. 10:50, zadanie zegara `zaraza-final` co minutę, finał czeka na pt 9 X 23:00; plik `20261008_zaraza_rzut_serwer.sql` uruchomiony 8 X ok. 15:30)
 
 Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odporny, reszta ryb nie. Laboratorium robi szczepionkę w trzech etapach. Etapy otwiera zegar, a nie tempo graczy, bo gracze mają setki zanęt i miliardy qryb.
 
@@ -17,6 +17,8 @@ Projekt Andrzeja (6 X 2026): Lucjanek wrócił z odnowy z zarazą. Sam jest odpo
 - wygląd: ten sam pixel-art, blady róż z zielonkawym nalotem, ciemny kontur zostaje (`f.lzKontur`, czytany przez `obrazRyby`); pływa o połowę wolniej, tuż pod taflą,
 - pływa w zwykłych ławicach z rzadkością jednej ryby w jeziorze (decyzje Andrzeja 7 X 2026: „więcej emocji szukając go”, „niech pływa z rzadkością 1 ryby w EKO”): każde miejsce w ławicy (nowa ławica, ryba wpływająca zza kadru) jest nim z szansą 1 / (S + 1), gdzie S to suma wag tabeli losowania (`__wagiTab.suma`, żywa populacja jeziora); zmierzone przy S = 97 566: 35 trafień na 3 000 000 miejsc wobec oczekiwanych 30,7,
 - przy 12,2 ryby na nową ławicę to jedna ławica z nim na ok. 8 000; przy 5 000 ławic na dobę gracz widzi go średnio 0,6 razy na dobę,
+- **od pt 9 X, ok. 20:00 spotkania x10** (decyzja Andrzeja 19:44, po dobie etapu 3 bez jednego spotkania): każde miejsce w ławicy jest nim z szansą 10 / (S + 1), czyli ok. 1 na 11 800 przy 118 tys. ryb (`MNOZNIK_SPOTKAN` w `src/events/lucjanek-zero.js`); zwykła gra (ok. 15 nowych ryb w kadrze na minutę) daje jedno spotkanie na ok. 13 godzin gry zamiast ok. 130, przerzucanie ławic przyciskiem co 5 s jedno na ok. 1,3 godziny, zanęta tylko na pasmo 4 ok. 35% na jedno użycie (6 ławic); branie bez zmian, 1 : 13 983 816 na serwerze; zmierzone: 31 trafień na 300 000 miejsc wobec oczekiwanych 30,7,
+- naprawa przy okazji (9 X): szansę liczy świeża tabela losowania z tą samą pulą zanęty (`tabelaWag`), a bez wczytanego ekosystemu Lucjanek Zero się nie pojawia; wcześniej pierwsze miejsce po starcie gry brało tabelę zbudowaną przed wczytaniem populacji (suma udziałów z rejestru, ok. 470 zamiast ok. 118 tys.), czyli 250 razy za dużą szansę na to jedno miejsce,
 - zanęta zawężająca pulę działa na niego jak na każdy gatunek pasma 4: COŚ CO... KIEDYŚ BYŁO CZYMŚ (samo pasmo 4) daje 1 : 1 981 na miejsce, KOTLETY 1 : 20 863, a pule bez Lucjana (np. WIDELEC BABCI) go nie wpuszczają,
 - w jeziorze jest jeden, więc w kadrze najwyżej jeden naraz; gra nie ogłasza jego przyjścia, trzeba go wypatrzyć,
 - jeden rzut na pojawienie, jak u Smoka Życia: 1 : 13 983 816 (szóstka w Totolotku), `chetnaZaatakowac` zwraca 1 albo 0,

@@ -22,6 +22,8 @@
    100 000). Zaneta zawezajaca pule dziala na niego tak samo jak na kazdy
    gatunek pasma 4: pula bez Lucjana go nie wpusci, a pula samego pasma 4
    podnosi szanse tyle razy, ile razy jest mniejsza od calego jeziora.
+   Od pt 9 X 2026, 19:44 szansa kazdego miejsca jest 10 razy wieksza
+   (MNOZNIK_SPOTKAN nizej, decyzja Andrzeja), branie bez zmian.
    W jeziorze jest jeden, wiec w kadrze najwyzej jeden naraz. Gra nie
    oglasza jego przyjscia: trzeba go wypatrzyc. Dopoki plywa w kadrze,
    siec jest zablokowana: siec zgarnia cala lawice bez brania, wiec
@@ -54,6 +56,15 @@
 const LucjanekZero = (() => {
   const SZANSA = 1 / 13983816;       /* szostka w Totolotku */
   const POP = 1;                     /* jedna ryba w jeziorze */
+  /* SPOTKANIA x10 (pt 9 X 2026, 19:44, polecenie Andrzeja: "zwieksz szanse
+     spotkania o 10 razy"). Przez prawie dobe etapu 3 nikt go nie spotkal:
+     przy jednej rybie na ok. 118 tys. zwykla gra (ok. 15 nowych ryb
+     w kadrze na minute) dawala jedno spotkanie na ok. 130 godzin gry.
+     Teraz kazde miejsce w lawicy jest nim z szansa 10 / (S + 1), czyli
+     ok. 1 na 11 800, jedno spotkanie na ok. 13 godzin zwyklej gry.
+     Branie zostaje 1 : 13 983 816 (rzut na serwerze), wiec wynik finalu
+     sie nie zmienia. Podglad ?zaraza=3 bez zmian. */
+  const MNOZNIK_SPOTKAN = 10;
   const S_PODGLADU = 30;             /* podglad ?zaraza=3: jezioro "30 ryb" */
   const CZEKAJ_MS = 6000;            /* najdluzsze czekanie przy przynecie na rzut z serwera */
 
@@ -71,25 +82,38 @@ const LucjanekZero = (() => {
   }
 
   /* ---------- rzadkosc: jedna ryba w tabeli losowania ---------- */
-  /* Suma wag tej samej tabeli, z ktorej losuje losujGatunek. Tabela zyje
-     400 ms i przebudowuje sie przy kazdym losowaniu, wiec przy tworzeniu
-     lawicy jest swieza. Bez tabeli: zywa populacja jeziora. */
+  /* Ta sama tabela, z ktorej losujGatunek wylosuje to miejsce, wzieta
+     TERAZ (tabelaWag trzyma ja 400 ms, z ta sama pula zanety).
+     NAPRAWA 9 X 2026: wczesniej czytalismy window.__wagiTab bez
+     odswiezenia, czyli tabele z poprzedniego losowania. Pierwsze miejsce
+     po starcie gry dostawalo wtedy tabele zbudowana, zanim ekosystem
+     wczytal populacje: sama suma udzialow z rejestru, ok. 470 zamiast
+     ok. 118 tys., czyli szansa 250 razy za duza na to jedno miejsce.
+     Bez wczytanego ekosystemu Lucjanek Zero nie pojawia sie wcale. */
+  function tabela() {
+    try {
+      if (!window.Eko || !Eko.sumaPopulacji || !(Eko.sumaPopulacji() > 0)) return null;
+      if (typeof tabelaWag !== 'function') return null;
+      const tylko = (window.__wymusPasmoProg && typeof zanPasmoLista === 'function')
+        ? zanPasmoLista(window.__wymusPasmoProg)
+        : (window.zanetaTylko ? window.zanetaTylko() : null);
+      return tabelaWag(tylko);
+    } catch (e) { return null; }
+  }
   function sumaWag() {
-    const TW = window.__wagiTab;
-    if (TW && TW.suma > 0) return TW.suma;
-    try { if (window.Eko && Eko.sumaPopulacji) return Eko.sumaPopulacji(); } catch (e) {}
-    return 0;
+    const TW = tabela();
+    return (TW && TW.suma > 0) ? TW.suma : 0;
   }
   /* Zaneta zawezajaca pule (np. KOTLETY, WIDELEC BABCI) wpuszcza tylko
      swoje gatunki. Lucjanek Zero przechodzi, gdy pula zawiera Lucjana. */
   function pulaPozwala() {
-    const TW = window.__wagiTab;
-    return !(TW && Array.isArray(TW.tylko) && TW.tylko.indexOf('lucjan_czerwony') < 0);
+    const TW = tabela();
+    return !!TW && !(Array.isArray(TW.tylko) && TW.tylko.indexOf('lucjan_czerwony') < 0);
   }
   function szansaMiejsca() {
     if (testowy()) return POP / (S_PODGLADU + POP);
     const S = sumaWag();
-    return S > 0 ? POP / (S + POP) : 0;
+    return S > 0 ? Math.min(1, MNOZNIK_SPOTKAN * POP / (S + POP)) : 0;
   }
   function wKadrze() {
     if (typeof school === 'undefined' || !school) return false;
@@ -244,7 +268,7 @@ const LucjanekZero = (() => {
     return true;
   }
 
-  return { SZANSA, POP, CZEKAJ_MS, moze, szansaMiejsca, wLawicy,
+  return { SZANSA, POP, MNOZNIK_SPOTKAN, CZEKAJ_MS, moze, szansaMiejsca, wLawicy,
            podejscie, czeka, poOdmowie, poZlowieniu, blokujSiec, bladyKontur, stworz };
 })();
 window.LucjanekZero = LucjanekZero;
