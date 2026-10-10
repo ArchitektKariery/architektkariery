@@ -19,8 +19,13 @@ function nadajTozsamosc(f) {
     f.plec = Eko.losujPlec(f.gat);
     if (!Eko.trybIndywidualny(f.gat)) return f;
     const o = Eko.wezOsobnika(f.gat);
-    if (o) { f.osobnik = o.id; f.plec = o.plec; f.gen = o.gen; }
+    if (o) { f.osobnik = o.id; f.gen = o.gen; if (o.plec === 'm' || o.plec === 'f') f.plec = o.plec; }
   } catch (e) {}
+  /* KAZDA RYBA MA PLEC (10 X 2026, polecenie Andrzeja). Gdy Eko juz jest,
+     a mimo to plci brak (blad w srodku), plec po polowie. Bez Eko (lawica
+     startowa) plec nadaje koniec src/ecosystem/population.js, ze skladu
+     populacji. */
+  if (f.plec !== 'm' && f.plec !== 'f') f.plec = Math.random() < 0.5 ? 'm' : 'f';
   return f;
 }
 window.nadajTozsamosc = nadajTozsamosc;

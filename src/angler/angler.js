@@ -636,7 +636,7 @@ const CardRaster = (() => {
     return [
       D.klucz || '', D.dl || 0, D.waga || 0, D.pasmo || D.tier || 0,
       (D.kolekcja && D.kolekcja.ile) || 0,
-      Card.plec || '', Card.mit ? 1 : 0,
+      Card.plec || '',
       Card.historia ? (Card.historia.linie || []).join('~') : '',
       Card.zagrozenie ? (Card.zagrozenie.txt + '~' + Card.zagrozenie.sub) : ''
     ].join('|');

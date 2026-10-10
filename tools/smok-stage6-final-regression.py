@@ -60,11 +60,13 @@ checks["screen_width_from_visible_lake"] = bool(re.search(r"const DLUGOSC_KADRU 
 ramka8 = re.search(r'window\.RAMKA8_SRC="data:image/png;base64,([A-Za-z0-9+/=]+)"', src)
 checks["dragon_band_8"] = "KLASA.smok_zycia = 8;" in src
 checks["band8_frame_png_crc_valid"] = bool(ramka8 and png_crc_valid(ramka8.group(1)))
+# Premia 10 000 000 za mityczna w sprzedanym wiaderku (KLASA[r.gat] >= 7
+# w src/bucket/bucket.js) usunieta 10 X 2026 na polecenie Andrzeja: pasmo 8
+# dalej wycenia sie jak pasmo 7 i nie dostaje zlecen.
 checks["band8_economy_like_mythic"] = all(x in src for x in [
-    "KLASA[r.gat] >= 7",
     "KLASA[gk]) || 1) >= 7) return false;",
     "Math.min(7, (window.KLASA && KLASA[slug]) || 1)",
-])
+]) and "MITYCZNA SPRZEDANA']" not in src
 checks["dragon_atlas_entry"] = '"smok_zycia":"Pierwsza prawdziwa legenda' in src and "legenda spoza rejestru" in src
 
 # 3) Fortune Cookie -> next shoal -> exactly one dragon

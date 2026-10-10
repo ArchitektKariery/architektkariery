@@ -26,7 +26,7 @@ limit 20;
 | źródło | ile płaci | ograniczenia | plik |
 |---|---|---|---|
 | sprzedaż wiaderka handlarzowi | wartość ryby = 1 300 × rzadkość^0,33 × rozmiar (0,55-1,90) × jakość z punktów (0,62-2,0); oferta × handlarz (0,45-1,70, średnio ok. 0,85) × apetyt na trofeum × tempo (0,65 przy 1 rybie, 1,40 przy 10) | handlarz co 300 s, wiaderko 10 ryb, czyli najwyżej 120 ryb na godzinę | `src/bucket/pricing.js`, `src/bucket/bucket.js` |
-| premia za rybę mityczną | +10 000 000 za każdą rybę z pasma 7 w sprzedanym wiaderku | brak | `src/bucket/bucket.js:155-164`, `src/card/card.js:152` |
+| premia za rybę mityczną | **usunięta 10 X 2026** (wcześniej +10 000 000 za każdą rybę z pasma 7 i 8 w sprzedanym wiaderku); mityczna płaci tyle, ile wyceni handlarz | brak | `src/bucket/bucket.js` (`Gielda.przyjmij`) |
 | wypuszczenie | +5 000 za każdą rybę, dowolny gatunek (decyzja Andrzeja IX 2026) | brak | `src/card/card.js:149, 545-575` |
 | seria | min(50 000, 10 × 2^(seria−2)) za rybę, od 15. ryby stałe 50 000 | przerywa tylko inny gatunek albo zerwana żyłka; przycisk ŁAWICA i ześlizg nie przerywają (decyzje Andrzeja IX 2026) | `src/card/card.js:350-375`, `src/fish/catching.js:150-156` |
 | sieć | 500 qryb za kg całej ławicy | przerwa tylko na animację 1,4 s (karencja wyłączona IX 2026) | `src/ecosystem/net-catch.js` |
@@ -123,3 +123,8 @@ Inne źródła na godzinę:
   - W5 naprawione: odświeżenie, północ i zmiana puli najpierw wypłacają wykonane, a nieodebrane zadania,
   - 100 nowych zadań (376 w tablicy, 282 w puli po finale), nowe rodzaje: waga i długość ryby, wypuszczanie, KRASNOPIÓRKA,
   - zadanie „Złów rybę mityczną” dostało brakujące zdarzenie (wcześniej nie dało się go wykonać).
+- **10 X, 16:23, decyzja Andrzeja:** „Usuń dodatkowe nagrody za mityczne w wiadrze” (build `2026-10-10-plec-kazdej-v1`):
+  - sprzedaż wiaderka nie dokłada już 10 000 000 za każdą rybę z pasma 7 i 8 (`MITYCZNA SPRZEDANA`, także przy paczce); wpływ na konto równa się ofercie handlarza co do qryby (test: oferta 251 455, wpływ 251 455),
+  - usunięte też martwe resztki tej premii: `NAGRODA_MITYCZNA`, gałąź `MITYCZNA ZABRANA` i stempel ZABIERZ z kwotą na karcie; mityczna ma na karcie zwykły stempel WIADERKO,
+  - mityczna u handlarza (typowy okaz, 50 pkt, 12 gatunków pasma 7, średnia z 300 ofert): sama w wiaderku ok. 213-225 tys., w pełnym wiaderku (tempo 10/10) ok. 430-498 tys. qryb,
+  - tekst pustego wiaderka mówił „Ryby mityczne omijają wiaderko: płacą od razu”, co od IX 2026 nie było prawdą; teraz: „Mityczne też: handlarz płaci za nie tyle, ile je wyceni”.

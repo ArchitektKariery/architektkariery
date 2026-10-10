@@ -413,7 +413,11 @@ const SmokZycia = (() => {
 
     f.gat = 'smok_zycia';
     f.legendarny = true;
-    f.osobnik = null; f.plec = '';
+    /* KAZDA RYBA MA PLEC (10 X 2026, polecenie Andrzeja: "Kazda ryba musi
+       miec plec"). Smok nie ma populacji, wiec plec losuje sie po polowie
+       i widac ja tylko na karcie: do wiaderka, tarliska i jeziora Smok
+       i tak nie wchodzi. */
+    f.osobnik = null; f.plec = Math.random() < 0.5 ? 'm' : 'f';
     f.pobyt = 9999;
     /* Renderer ciala: zywy lancuch z historia toru (nie portret). */
     f.smokZywy = true;

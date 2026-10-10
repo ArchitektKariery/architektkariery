@@ -147,10 +147,9 @@ window.CardPerf = CardPerf;
 
 const SWIPE_PROG = 120;      /* px sceny; Scene.W to 960, wiec ok. 1/8 szerokosci */
 const NAGRODA_ZA_WYPUSZCZENIE = 5000;   /* stala, patrz komentarz w decyzjaKarty */
-/* Mityczna zatrzymana placi dwa tysiace razy wiecej niz wypuszczona.
-   Ta przepasc jest celowa: decyzja ma bolec. */
-const NAGRODA_MITYCZNA = 10000000;
-window.NAGRODA_MITYCZNA = NAGRODA_MITYCZNA;
+/* NAGRODA_MITYCZNA (10 000 000 za mityczna) usunieta 10 X 2026, polecenie
+   Andrzeja: "Usun dodatkowe nagrody za mityczne w wiadrze". Mityczna
+   placi tyle, ile wyceni ja handlarz (src/bucket/pricing.js). */
 window.NAGRODA_ZA_WYPUSZCZENIE = NAGRODA_ZA_WYPUSZCZENIE;
 
 /* ============================================================
@@ -193,7 +192,7 @@ function openCard(fish, lenCm, fromX, fromY) {
   /* Swipe wygaszony na wejsciu: wlaczy go dopiero logika wiaderka nizej,
      i tylko dla ryb, ktore faktycznie czekaja na decyzje. Pasmo 7 placi
      od razu, wiec jego karta ma zostac zwyklym "stuknij, zeby zamknac". */
-  Card.swipe = false; Card.czeka = null; Card.mit = false;
+  Card.swipe = false; Card.czeka = null;
   /* Waga policzona przy narodzinach ryby, zeby nie zmieniala sie miedzy
      podgladem a karta. Wspolczynnik trafia rekord 2200 g przy 53 cm. */
   const w = (fish && fish.waga) ? fish.waga : Math.round(0.01315 * Math.pow(lenCm, 3));
@@ -246,9 +245,10 @@ function openCard(fish, lenCm, fromX, fromY) {
        JEST: jedna sciezka dla wszystkich. Mityczna zajmuje slot
        w wiaderku (wiec kosztuje miejsce, tak samo jak reszta towaru),
        moze zlozyc pare z druga sztuka swojego gatunku i moze wrocic
-       do jeziora. NAGRODA_MITYCZNA nie przepadla: placi sie przy
-       SPRZEDAZY handlarzowi, czyli wybor "10 mln albo zycie gatunku"
-       zostaje, tylko przesuwa sie o jeden krok dalej i wymaga slotu.
+       do jeziora. NAGRODA_MITYCZNA placila sie odtad przy SPRZEDAZY
+       handlarzowi, do 10 X 2026: wtedy Andrzej kazal ja usunac ("Usun
+       dodatkowe nagrody za mityczne w wiadrze"), wiec mityczna placi
+       tylko tyle, ile wyceni ja handlarz.
        ============================================================ */
     if (window.Wiaderko) {
       /* SWIPE (IX 2026): ryba NIE ladue juz w wiaderku automatycznie.
@@ -445,9 +445,10 @@ function openCard(fish, lenCm, fromX, fromY) {
      SIATKA BEZPIECZENSTWA (10 X 2026, zgloszenie Andrzeja: "plec nie
      zawsze jest okreslona"): ryba bez plci dostaje ja tutaj, w chwili
      zlowienia, ze skladu populacji. Ta sama plec idzie na karte, do
-     wiaderka i do odjecia z jeziora (plecZatrzymanej nizej). Legenda
-     (bezEko) plci nie ma i miec nie bedzie. */
-  if (fish && GATUNKI[gk] && !GATUNKI[gk].bezEko && fish.plec !== 'm' && fish.plec !== 'f') {
+     wiaderka i do odjecia z jeziora (plecZatrzymanej nizej). Od 10 X
+     2026 ("Kazda ryba musi miec plec") bez wyjatkow: legenda (bezEko)
+     tez, po polowie, bo nie ma populacji. */
+  if (fish && fish.plec !== 'm' && fish.plec !== 'f') {
     try { fish.plec = (window.Eko && Eko.losujPlec) ? Eko.losujPlec(gk) : (Math.random() < 0.5 ? 'm' : 'f'); } catch (e) {}
   }
   Card.plec = (fish && (fish.plec === 'm' || fish.plec === 'f')) ? fish.plec : null;
@@ -516,28 +517,16 @@ function decyzjaKarty(kier) {
         species: C.gk || '',
         score: C.pkt || 0,
         sex: Card.plec || '',
-        mythic: !!Card.mit
+        mythic: ((window.KLASA && KLASA[C.gk]) || 1) >= 7
       };
       Telemetry.onceSession('first_decision', tp);
       Telemetry.event(kier === 'wiaderko' ? 'fish_kept' : 'fish_released', tp);
     }
   } catch (e) {}
-  if (kier === 'wiaderko' && Card.mit) {
-    /* Mityczna zatrzymana: pelna stawka i sztuka znika ze swiata. */
-    const nagroda = window.NAGRODA_MITYCZNA || 10000000;
-    if (typeof Zapis !== 'undefined') {
-      const Dm = Zapis.dane();
-      Dm.monety = (Dm.monety || 0) + nagroda;
-      Zapis.zapisz();
-    }
-    if (window.Eko) {
-      if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));
-    }
-    if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
-      Ruch.zaRekord(nagroda, ['MITYCZNA ZABRANA']);
-    if (typeof Hap !== 'undefined' && Hap.buzz) Hap.buzz(20);
-  } else if (kier === 'wiaderko' && C.gk === 'smok_zycia') {
+  /* Dawna galaz "mityczna zatrzymana" (10 000 000 qryb od razu, MITYCZNA
+     ZABRANA) usunieta 10 X 2026 razem z NAGRODA_MITYCZNA: mityczna idzie
+     do wiaderka jak kazda ryba i placi przy sprzedazy tyle, ile handlarz. */
+  if (kier === 'wiaderko' && C.gk === 'smok_zycia') {
     /* PRZYNETA (2 X 2026, decyzja Andrzeja: "wiaderko to tylko clickbait
        dla gracza. Smok nigdy ma do niego nie trafiac"). Gracz dwa razy
        potwierdzil, ze bierze Smoka, ale Smok do wiaderka nie trafia:
@@ -971,34 +960,21 @@ function drawCard(g, t) {
       ctextC(g, napis, 0, 0, barwa, kS);
       g.restore();
     };
-    stempel(Card.mit ? 'ZABIERZ' : 'WIADERKO', KW * 0.34, KH * 0.20, -17, post, '#FFD267');
-    /* Przy mitycznej gracz musi widziec, o jakie pieniadze gra, ZANIM
-       puscil karte -- inaczej decyzja jest w ciemno. */
-    if (Card.mit && post > 0.02) {
-      const kM = Math.round(KW * 0.020);
-      g.save();
-      /* KWOTA POD RAMKA STEMPLA, NIE NA NIEJ (IX 2026, zgloszenie:
-         "wypusc przy swipe karty jest zaslonięte przez 5000").
-         Ramka stempla ma wysokosc 5*kS + 2*padY, czyli 9,4*kS przy
-         kS = KW*0,030 -- to jest 0,282 szerokosci karty. Poprzednie
-         przesuniecie o KH*0,055 (okolo 0,079 szerokosci) ladowalo
-         w SRODKU tej ramki i kwota siadala na napisie.
-         Przesuwamy w ukladzie JUZ OBROCONYM, zeby kwota szla rownolegle
-         do przechylonego stempla, a nie poziomo pod skosem. */
-      g.translate(KW * 0.34, KH * 0.20);
-      g.rotate(-17 * Math.PI / 180);
-      g.translate(0, Math.round(KW * 0.030) * 8.9);
-      g.globalAlpha = Math.min(1, 0.25 + post * 0.85);
-      ctextC(g, '+' + NAGRODA_MITYCZNA, 0, 0, '#FFD267', kM);
-      g.restore();
-    }
+    /* Stempel ZABIERZ z kwota 10 000 000 dla mitycznej zniknal 10 X 2026
+       razem z NAGRODA_MITYCZNA: kazda ryba, takze mityczna, ma WIADERKO. */
+    stempel('WIADERKO', KW * 0.34, KH * 0.20, -17, post, '#FFD267');
     stempel('WYPUŚĆ', KW * 0.66, KH * 0.20, 17, lewo, '#7FD4FF');
     /* Kwota pod stemplem: bez niej gracz nie wie, ze wypuszczenie PLACI,
        a cala edukacyjna intencja tej nagrody zalezy od tego, czy ja widzi. */
     if (lewo > 0.02) {
       const kS2 = Math.round(KW * 0.022);
       g.save();
-      /* To samo co przy mitycznej: pod ramke, w ukladzie obroconym. */
+      /* KWOTA POD RAMKA STEMPLA, NIE NA NIEJ (IX 2026, zgloszenie:
+         "wypusc przy swipe karty jest zaslonięte przez 5000").
+         Ramka stempla ma wysokosc 5*kS + 2*padY, czyli 9,4*kS przy
+         kS = KW*0,030 -- to jest 0,282 szerokosci karty. Przesuwamy
+         w ukladzie JUZ OBROCONYM, zeby kwota szla rownolegle do
+         przechylonego stempla, a nie poziomo pod skosem. */
       g.translate(KW * 0.66, KH * 0.20);
       g.rotate(17 * Math.PI / 180);
       g.translate(0, Math.round(KW * 0.030) * 8.9);

@@ -60,6 +60,7 @@ require(any(x in html for x in [
     "2026-10-09-lucjanek-drazni-v1",
     "2026-10-09-tarlo-ostatnich-v1",
     "2026-10-10-plec-ryb-v1",
+    "2026-10-10-plec-kazdej-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -105,7 +106,7 @@ require("SmokZycia.poDecyzji(kier);" in html, "card decision must hand the drago
 require("CFG.FURIA_UDZIAL = 0.75;" in html and "const T = Math.round(doCelu);" in html, "fury must remove exactly 75% of the lake")
 # Wiaderko to dla Smoka tylko przyneta (decyzja Andrzeja, 2 X 2026):
 # Smok nigdy do niego nie trafia, a stare zapisy traca go przy wczytaniu.
-require("} else if (kier === 'wiaderko' && C.gk === 'smok_zycia') {" in html, "keeping the dragon must not put it in the bucket")
+require("if (kier === 'wiaderko' && C.gk === 'smok_zycia') {" in html, "keeping the dragon must not put it in the bucket")
 require("if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return false;" in html, "bucket must refuse a legend species")
 require("(!window.GATUNKI || window.GATUNKI[r.gat]) && !legenda(r)).slice(0, 32);" in html, "save sanitizer must drop the dragon from the bucket")
 # Odrodzenie na wspolnym serwerze (2 X 2026): eko_zmien nie wskrzesza
@@ -287,12 +288,31 @@ _card = (root / "src/card/card.js").read_text(encoding="utf-8")
 _save = (root / "src/player/save.js").read_text(encoding="utf-8")
 require("PLEC DLA LAWICY STARTOWEJ" in _pop and "nadajTozsamosc(f);" in _pop.split("PLEC DLA LAWICY STARTOWEJ")[1],
         "the first school, built before Eko loads, must get its sexes once Eko exists")
-require(_card.count("else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));") == 2 and "Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk))" not in _card,
+require(_card.count("else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));") == 1 and "Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk))" not in _card,
         "a kept fish must leave the lake with the sex shown on its card")
 require("fish.plec = (window.Eko && Eko.losujPlec) ? Eko.losujPlec(gk)" in _card,
         "every caught lake fish must get a sex on its card")
 require("if (r.plec !== 'm' && r.plec !== 'f') r.plec = plecZCech(r);" in _save,
         "old bucket and tarlisko fish without a sex must get one on load")
+# Kazda ryba ma plec, bez wyjatkow (10 X 2026, polecenie Andrzeja: "Kazda ryba
+# musi miec plec"): Smok Zycia tez, a w liczbach jeziora samce + samice = liczba ryb.
+_smok = (root / "src/smok-zycia/event.js").read_text(encoding="utf-8")
+_srv2 = (root / "src/ecosystem/server.js").read_text(encoding="utf-8")
+_plecSql = (root / "supabase/migrations/20261010_plec_kazdej_ryby.sql").read_text(encoding="utf-8")
+require("f.osobnik = null; f.plec = Math.random() < 0.5 ? 'm' : 'f';" in _smok and "f.plec = '';" not in _smok,
+        "Smok Zycia must have a sex too")
+require("if (fish && fish.plec !== 'm' && fish.plec !== 'f') {" in _card,
+        "every caught fish, the legend included, must get a sex on its card")
+require("function plecDlaKazdej(n, m, f) {" in _pop and "Eko.plecDlaKazdej(w.n, w.samcow, w.samic)" in _srv2,
+        "lake numbers must keep males + females = fish, also for server rows")
+require("if (f.plec !== 'm' && f.plec !== 'f') f.plec = Math.random() < 0.5 ? 'm' : 'f';" in (root / "src/fish/school-update.js").read_text(encoding="utf-8"),
+        "nadajTozsamosc must never leave a fish without a sex once Eko exists")
+require("when z.n > z.m + z.f then z.m + (z.n - z.m - z.f) / 2" in _plecSql,
+        "the server repair must split fish without a sex in half")
+# Bez premii za mityczne w wiaderku (10 X 2026, polecenie Andrzeja: "Usun dodatkowe
+# nagrody za mityczne w wiadrze"): mityczna placi tyle, ile wyceni handlarz.
+for _mit in ["const NAGRODA_MITYCZNA", "bonusMit", "['MITYCZNA SPRZEDANA']", "['MITYCZNA ZABRANA']", "Card.mit"]:
+    require(_mit not in html, "mythic bucket bonus came back: " + _mit)
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

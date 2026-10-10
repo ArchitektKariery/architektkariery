@@ -1852,7 +1852,7 @@
     if (o && H) h += '<div class="tr">' + H.tekst + '</div>';
     else if (lista.length) h += '<div class="tr">Towar leży w wiaderku. Handlarz przyjdzie sam.</div>';
     else h += '<div class="tr">Złowione ryby trafiają tutaj i czekają na kupca. ' +
-              'Ryby mityczne omijają wiaderko: płacą od razu.</div>';
+              'Mityczne też: handlarz płaci za nie tyle, ile je wyceni.</div>';
     if (o && o.typ === 'kupon')
       h += '<div class="zlaw">To nie kupiec od ryb -- nic nie zabiera z wiaderka, tylko zostawia znizke.</div>';
     if (kupon && (!o || o.typ !== 'kupon'))

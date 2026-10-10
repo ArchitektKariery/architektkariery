@@ -146,22 +146,12 @@ window.Gielda = {
     }
     if (!d.wiaderko.length) return 0;
     /* ============================================================
-       MITYCZNA PLACI PRZY SPRZEDAZY (IX 2026). Odkad pasmo 7 wchodzi
-       do wiaderka zwykla sciezka, `NAGRODA_MITYCZNA` nie ma juz gdzie
-       sie wyplacic na karcie. Placi sie tutaj, doliczona do oferty
-       handlarza: wybor "dziesiec milionow albo zycie gatunku" zostaje,
-       tylko wymaga teraz slotu w wiaderku i doczekania handlarza.
-       Liczone PRZED wyczyszczeniem listy, bo obie galezie nizej ja kasuja. */
-    let bonusMit = 0;
-    if (window.KLASA) {
-      const stawka = window.NAGRODA_MITYCZNA || 10000000;
-      /* Pasmo 8 (Smok Zycia) placi tak samo jak mityczne pasmo 7. */
-      for (const r of d.wiaderko) if (r && KLASA[r.gat] >= 7) bonusMit += stawka;
-    }
-    if (bonusMit) {
-      d.monety = (d.monety || 0) + bonusMit;
-      if (typeof Ruch !== 'undefined' && Ruch.zaRekord) Ruch.zaRekord(bonusMit, ['MITYCZNA SPRZEDANA']);
-    }
+       BEZ PREMII ZA MITYCZNE (10 X 2026, polecenie Andrzeja: "Usun
+       dodatkowe nagrody za mityczne w wiadrze").
+       Do tej pory kazda ryba z pasma 7 i 8 w sprzedanym wiaderku dokladala
+       10 000 000 qryb ponad oferte handlarza (MITYCZNA SPRZEDANA, takze
+       przy paczce). Teraz mityczna placi tyle, ile wyceni ja handlarz,
+       jak kazda inna ryba (wartoscRyby w src/bucket/pricing.js). */
     if (o.typ === 'paczka') {
       for (const r of d.wiaderko) zapiszSprzedaz(r, 0);
       d.wiaderko = [];

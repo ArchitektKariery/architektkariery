@@ -578,7 +578,29 @@ const Eko = (() => {
      wiec gdy zostana same samice, kazda zlowiona sztuka bedzie samica. */
   function losujPlec(gk) {
     const r = rekord(gk); if (!r || r.n <= 0) return Math.random() < 0.5 ? 'm' : 'f';
+    /* Gatunek z rybami, ale bez zapisanych plci (stary zapis albo wiersz
+       serwera z zerami): po polowie, zamiast zawsze samicy. */
+    if (!(r.m + r.f > 0)) return Math.random() < 0.5 ? 'm' : 'f';
     return (Math.random() * (r.m + r.f) < r.m) ? 'm' : 'f';
+  }
+
+  /* ============================================================
+     KAZDA RYBA MA PLEC (10 X 2026, polecenie Andrzeja: "Kazda ryba musi
+     miec plec"). W liczbach jeziora znaczy to: samce + samice = liczba
+     ryb, w kazdym gatunku. Gdy suma sie nie zgadza (stary zapis albo
+     wiersz serwera), liczba ryb zostaje, a poprawiaja sie plcie:
+       brakuje plci  -> brakujace ryby po polowie (samce w dol),
+       plci za duzo  -> nadmiar schodzi proporcjonalnie do skladu.
+     Ta sama zasada siedzi w SQL 20261010_plec_kazdej_ryby.sql.
+     ============================================================ */
+  function plecDlaKazdej(n, m, f) {
+    n = Math.max(0, Math.floor(+n || 0));
+    m = Math.max(0, Math.floor(+m || 0));
+    f = Math.max(0, Math.floor(+f || 0));
+    const d = n - (m + f);
+    if (d > 0) { const dm = Math.floor(d / 2); m += dm; f += d - dm; }
+    else if (d < 0) { const s = m + f; m = Math.round(n * m / s); f = n - m; }
+    return { n: n, m: m, f: f };
   }
 
   /* Czy gatunek moze sie jeszcze rozmnazac. Specyfikacja: gatunek moze byc
@@ -1847,7 +1869,7 @@ const Eko = (() => {
            genSrednia, genZPopulacji, zmieszajGeny, przesunSrednia, odejmijZeSredniej,
            materializuj, wezOsobnika, zwolnij, usunOsobnika, osobniki,
            zmien, zatrzymano, wypuszczono, drapieznikZjadl, odrodzWymarle, furiaSmoka,
-           mnoznikLosowania, losujPlec, moznaRozmnazac,
+           mnoznikLosowania, losujPlec, plecDlaKazdej, moznaRozmnazac,
            karencjaTarla, wiekGatunku, bazaPokarmowa, agresja,
            szukaSamotnych, szansaSpotkania, kronikaPubliczna, scenPoId,
            tarloPary, poTarle, paraUGracza, odrodzZTarla, ikra, pokolenia, wagaZPopulacji, resetPopulacji,
@@ -1871,16 +1893,29 @@ window.Eko = Eko;
 
    Teraz, gdy Eko juz jest, kazda ryba lawicy bez plci dostaje tozsamosc:
    plec ze skladu populacji, a w trybie indywidualnym konkretnego osobnika.
-   Legenda (bezEko) i Lucjanek Zero (ma wlasna plec) zostaja bez zmian.
+   Od 10 X 2026 ("Kazda ryba musi miec plec") bez wyjatkow: legenda
+   (bezEko) dostaje plec po polowie, bo nie ma populacji.
+
+   Ten sam blok pilnuje plci w liczbach jeziora: w kazdym gatunku
+   samce + samice = liczba ryb (Eko.plecDlaKazdej). Stare zapisy z inna
+   suma dostaja poprawke od razu przy wczytaniu.
    ============================================================ */
 (function () {
+  try {
+    const E = Eko.stan();
+    if (E && E.gat) for (const gk in E.gat) {
+      const r = E.gat[gk]; if (!r) continue;
+      const p = Eko.plecDlaKazdej(r.n, r.m, r.f);
+      if (p.n !== r.n || p.m !== r.m || p.f !== r.f) { r.n = p.n; r.m = p.m; r.f = p.f; }
+    }
+  } catch (e) {}
   try {
     if (typeof school === 'undefined' || !Array.isArray(school) || typeof nadajTozsamosc !== 'function') return;
     for (const f of school) {
       if (!f || !f.gat || f.lzZero) continue;
       if (f.plec === 'm' || f.plec === 'f') continue;
-      if (typeof GATUNKI !== 'undefined' && GATUNKI[f.gat] && GATUNKI[f.gat].bezEko) continue;
       nadajTozsamosc(f);
+      if (f.plec !== 'm' && f.plec !== 'f') f.plec = Math.random() < 0.5 ? 'm' : 'f';
     }
   } catch (e) {}
 })();

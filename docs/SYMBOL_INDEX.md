@@ -267,7 +267,6 @@ Liczba wpisow: 537
 | `NADYMANIE_ZASIEG` | var | `src/fish/behavior.js` | 442 |
 | `nadymanieMood` | function | `src/fish/behavior.js` | 466 |
 | `NAGRODA_ATLASU` | const | `src/market/baits.js` | 40 |
-| `NAGRODA_MITYCZNA` | const | `src/card/card.js` | 152 |
 | `NAGRODA_ODKRYCIA` | const | `src/market/baits.js` | 30 |
 | `NAGRODA_PASMA` | const | `src/market/baits.js` | 31 |
 | `NAGRODA_PASMA7` | const | `src/bucket/pricing.js` | 43 |

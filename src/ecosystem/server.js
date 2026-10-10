@@ -93,7 +93,10 @@ Eko.Serwer = (function () {
        legenda nie ma populacji (opis przy Eko.rekord). */
     if (typeof GATUNKI !== 'undefined' && GATUNKI[gat] && GATUNKI[gat].bezEko) return;
     const r = Eko.rekord(gat); if (!r) return;
-    r.n = w.n; r.m = w.samcow; r.f = w.samic;
+    /* KAZDA RYBA MA PLEC (10 X 2026): samce + samice = liczba ryb takze
+       wtedy, gdy wiersz serwera ma inna sume (Eko.plecDlaKazdej). */
+    const p = Eko.plecDlaKazdej ? Eko.plecDlaKazdej(w.n, w.samcow, w.samic) : { n: w.n, m: w.samcow, f: w.samic };
+    r.n = p.n; r.m = p.m; r.f = p.f;
     r.wymarly = !!w.wymarly;
     if (r.n > r.max) r.max = r.n;
     if (r.n < r.min) r.min = r.n;
