@@ -4,7 +4,7 @@ const ZADANIA = [{"g":1,"t":"karta","c":12,"o":"Złów rybę na 12 punktów lub 
    ZADANIA DZIENNE.
 
    376 zadan w tablicy ZADANIA: 125 jednogwiazdkowych, 144 dwu, 107 trzy.
-   Nagrody 280 000, 1 400 000 i 7 000 000 qryb (NAGRODA nizej, od 8 X 2026).
+   Nagrody 50 000, 200 000 i 800 000 qryb (NAGRODA nizej, od 10 X 2026).
 
    100 NOWYCH ZADAN (8 X 2026, polecenie Andrzeja: "dodaj 100 nowych
    zadan"), numery 276-375 na koncu tablicy, wiec zestawy dnia sprzed
@@ -62,7 +62,32 @@ const Zadania = (() => {
      lawicy 15-45 razy (licza sie tylko nacisniecia przycisku, ok. 2 s).
      Pomiar i rachunek: docs/ekonomia-po-finale.md.
      ============================================================ */
-  const NAGRODA = { 1: 280000, 2: 1400000, 3: 7000000 }, KOSZT_ODSWIEZENIA = 1120000;
+  /* ============================================================
+     EKONOMIA CALEJ GRY (10 X 2026, polecenie Andrzeja: "Duzo za duzo
+     zarabia sie w stosunku do zakupow. Napraw ekonomie calej gry.
+     Bazujac na najskuteczniejszych przykladach ze swiata gier").
+     Zasady i pomiar: docs/ekonomia-gry.md, model tools/ekonomia_model.py.
+
+     ZMIERZONE PRZED ZMIANA (jezioro po finale): zadania x40 dawaly
+     graczowi 90 minut dziennie 14,7 mln na dobe, a polow 3,4 mln. Piec
+     zadan idzie rownolegle, a nowy zestaw za 1 120 000 byl wart ok. 13 mln,
+     wiec odswiezanie bez limitu bylo najlepsza "praca" w grze. Paczka
+     podstawowa kosztowala 5-8 minut gry, ciastko niecala godzine.
+
+     JEST, wedlug dwoch wzorcow:
+     - zadania dzienne to dodatek do lowienia, nie glowne zrodlo (ok. 25-30%
+       zarobku): 50 000 / 200 000 / 800 000, czyli podobnie za minute
+       zadania przy kazdej liczbie gwiazdek,
+     - wymiana zadan ma limit jak w Hearthstone (jedna wymiana dziennie):
+       pierwsze odswiezenie w dobie kosztuje KOSZT_ODSWIEZENIA, kazde
+       kolejne tego samego dnia MNOZNIK_ODSWIEZENIA razy wiecej (150 000,
+       300 000, 600 000...). Licznik to `obrot` zestawu dnia, ktory zeruje
+       sie o polnocy razem z nowym zestawem.
+     Model po zmianie: zadania 23-32% zarobku, gracz 90 min/dobe ok. 1,4
+     odswiezenia na dobe.
+     ============================================================ */
+  const NAGRODA = { 1: 50000, 2: 200000, 3: 800000 }, KOSZT_ODSWIEZENIA = 150000;
+  const MNOZNIK_ODSWIEZENIA = 2;
   const ILE_NA_DOBE = 5;
 
   /* ============================================================
@@ -219,17 +244,25 @@ const Zadania = (() => {
   /* Odswiezenie: najpierw wyplata wykonanych zadan, potem oplata. Wyplata
      liczy sie do oplaty, wiec gracz z gotowym zadaniem moze odswiezyc,
      nawet gdy samo saldo nie wystarcza. Zwraca { wyplacono } albo false. */
+  /* Koszt najblizszego odswiezenia w tej dobie: kazde kolejne
+     MNOZNIK_ODSWIEZENIA razy drozsze (opis przy NAGRODA). */
+  function kosztOdswiezenia() {
+    const z = stan();
+    const n = (z && z.obrot) || 0;
+    return Math.round(KOSZT_ODSWIEZENIA * Math.pow(MNOZNIK_ODSWIEZENIA, n));
+  }
   function odswiez() {
     const z = stan(), d = Zapis.dane();
     if (!z) return false;
-    if ((d.monety || 0) + zalegleQryby(z) < KOSZT_ODSWIEZENIA) return false;
+    const koszt = kosztOdswiezenia();
+    if ((d.monety || 0) + zalegleQryby(z) < koszt) return false;
     const wyplacono = wyplacZalegle(z);
-    d.monety -= KOSZT_ODSWIEZENIA;
+    d.monety -= koszt;
     z.obrot++; z.lista = wybierz(z.dzien, z.obrot);
     const pusteN = () => new Array(ILE_NA_DOBE).fill(0);
     z.postep = pusteN(); z.gotowe = pusteN(); z.odebrane = pusteN();
     Zapis.zapisz();
-    return { wyplacono: wyplacono };
+    return { wyplacono: wyplacono, koszt: koszt };
   }
   /* Ile qryb czeka w wykonanych, a nieodebranych zadaniach (panel: czy
      wolno odswiezyc). */
@@ -295,7 +328,7 @@ const Zadania = (() => {
   const wszystkieZrobione = () => { const z = stan(); return z && z.odebrane.every(Boolean); };
   const opis = n => { const z = stan(); return z ? ZADANIA[z.lista[n]] : null; };
   return { stan, odswiez, zdarzenie, odbierz, doOdbioru, doOdbioruQryb, wszystkieZrobione, opis,
-           NAGRODA, KOSZT_ODSWIEZENIA, ILE: () => ZADANIA.length,
+           NAGRODA, KOSZT_ODSWIEZENIA, MNOZNIK_ODSWIEZENIA, kosztOdswiezenia, ILE: () => ZADANIA.length,
            gwiazdki, nagroda, wPuli, poFinale, PO_FINALE, GWIAZDKI_PO_FINALE, wybierz };
 })();
 window.Zadania = Zadania;

@@ -1,6 +1,6 @@
 # QRyby: zadania i zlecenia po finale ZARAZY
 
-Stan kodu z 8 X 2026 (build `2026-10-08-ekonomia-po-finale-v1`; nagrody x40 i x20 od buildu `2026-10-08-nagrody-v1`, sekcja niżej). Polecenie Andrzeja (8 X, 11:06): „Popraw ekonomię zadań i zleceń, bo teraz są nieopłacalne”. Obie poprawki działają od finału ZARAZY, pt 9 X 23:00 (`window.QRYBY_FINAL_ZARAZY` w `src/core/config.js`), tak jak reszta zmian ławicy (`docs/lawica-losowanie.md`).
+Stan kodu z 8 X 2026 (build `2026-10-08-ekonomia-po-finale-v1`; nagrody x40 i x20 od buildu `2026-10-08-nagrody-v1`, sekcja niżej). **Od 10 X 2026 nagrody zadań i zleceń są inne (50 000 / 200 000 / 800 000, odświeżenie 150 000 i 2× drożej z każdym razem w dobie, zlecenia 5 000 za ławicę): `docs/ekonomia-gry.md`.** Gwiazdki z czasu i terminy zleceń z tego dokumentu dalej obowiązują. Polecenie Andrzeja (8 X, 11:06): „Popraw ekonomię zadań i zleceń, bo teraz są nieopłacalne”. Obie poprawki działają od finału ZARAZY, pt 9 X 23:00 (`window.QRYBY_FINAL_ZARAZY` w `src/core/config.js`), tak jak reszta zmian ławicy (`docs/lawica-losowanie.md`).
 
 ## Dlaczego po finale przestawały się opłacać
 Po finale jezioro ma 10% ryb, ławica 5-14 ryb, a ryby z pasm 3-7 trafiają do ławicy jako goście z szansą równą udziałowi w jeziorze. Pomiar na żywym silniku (model połowu niżej):

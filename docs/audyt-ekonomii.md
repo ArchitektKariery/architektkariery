@@ -27,11 +27,11 @@ limit 20;
 |---|---|---|---|
 | sprzedaż wiaderka handlarzowi | wartość ryby = 1 300 × rzadkość^0,33 × rozmiar (0,55-1,90) × jakość z punktów (0,62-2,0); oferta × handlarz (0,45-1,70, średnio ok. 0,85) × apetyt na trofeum × tempo (0,65 przy 1 rybie, 1,40 przy 10) | handlarz co 300 s, wiaderko 10 ryb, czyli najwyżej 120 ryb na godzinę | `src/bucket/pricing.js`, `src/bucket/bucket.js` |
 | premia za rybę mityczną | **usunięta 10 X 2026** (wcześniej +10 000 000 za każdą rybę z pasma 7 i 8 w sprzedanym wiaderku); mityczna płaci tyle, ile wyceni handlarz | brak | `src/bucket/bucket.js` (`Gielda.przyjmij`) |
-| wypuszczenie | +5 000 za każdą rybę, dowolny gatunek (decyzja Andrzeja IX 2026) | brak | `src/card/card.js:149, 545-575` |
-| seria | min(50 000, 10 × 2^(seria−2)) za rybę, od 15. ryby stałe 50 000 | przerywa tylko inny gatunek albo zerwana żyłka; przycisk ŁAWICA i ześlizg nie przerywają (decyzje Andrzeja IX 2026) | `src/card/card.js:350-375`, `src/fish/catching.js:150-156` |
-| sieć | 500 qryb za kg całej ławicy | przerwa tylko na animację 1,4 s (karencja wyłączona IX 2026) | `src/ecosystem/net-catch.js` |
-| zadania dzienne | 7 000 / 35 000 / 175 000 za 1 / 2 / 3 gwiazdki | 5 na dobę, odświeżenie 28 000 bez limitu | `src/tasks/tasks.js` |
-| zlecenia | (ławice × 1 400 + min(0,35 × wartość okazu, 2 × ławice × 1 400)) × 1 / 1,45 / 2,2 × min(4, 1/szansa) plus zwrot kaucji | jedno naraz, przerwa 30-45 zdarzeń | `src/bucket/orders.js` |
+| wypuszczenie | +5 000 za każdą rybę, dowolny gatunek (decyzja Andrzeja IX 2026); od 10 X 2026 +2 000 | brak | `src/card/card.js` |
+| seria | min(50 000, 10 × 2^(seria−2)) za rybę, od 15. ryby stałe 50 000 (od 10 X 2026 sufit 1 000, od 9. ryby) | przerywa tylko inny gatunek albo zerwana żyłka; przycisk ŁAWICA i ześlizg nie przerywają (decyzje Andrzeja IX 2026) | `src/card/card.js:350-375`, `src/fish/catching.js:150-156` |
+| sieć | 500 qryb za kg całej ławicy | przerwa tylko na animację 1,4 s (karencja wyłączona IX 2026); od 10 X 2026 20 zarzutów na dobę | `src/ecosystem/net-catch.js` |
+| zadania dzienne | 7 000 / 35 000 / 175 000 za 1 / 2 / 3 gwiazdki (od 10 X 2026: 50 000 / 200 000 / 800 000) | 5 na dobę, odświeżenie 28 000 bez limitu (od 10 X 2026: 150 000, każde kolejne tej doby 2× droższe) | `src/tasks/tasks.js` |
+| zlecenia | (ławice × 1 400 + min(0,35 × wartość okazu, 2 × ławice × 1 400)) × 1 / 1,45 / 2,2 × min(4, 1/szansa) plus zwrot kaucji (premia za ławicę: 28 000 od 8 X, 5 000 od 10 X 2026) | jedno naraz, przerwa 30-45 zdarzeń | `src/bucket/orders.js` |
 | turnieje | 24 h, 2 osoby: 1 500 000 + 450 000; 10 osób: zwycięzca ok. 10,35 mln, każdy co najmniej 450 000 | wypłatę liczy klient z tabeli wyników, bez minimum punktów | `src/tournaments/tournaments.js:386-468` |
 | rekordy, odkrycia, atlas, progi doby | 100 / 200 za rekord, 100-1 000 za nowy gatunek, 1 000-20 000 za pasmo atlasu, 50 000 za atlas, 100 za próg doby | jednorazowe albo dobowe | `src/card/card.js:337-382`, `src/market/baits.js:30-40`, `src/player/save.js:494-564` |
 
@@ -128,3 +128,8 @@ Inne źródła na godzinę:
   - usunięte też martwe resztki tej premii: `NAGRODA_MITYCZNA`, gałąź `MITYCZNA ZABRANA` i stempel ZABIERZ z kwotą na karcie; mityczna ma na karcie zwykły stempel WIADERKO,
   - mityczna u handlarza (typowy okaz, 50 pkt, 12 gatunków pasma 7, średnia z 300 ofert): sama w wiaderku ok. 213-225 tys., w pełnym wiaderku (tempo 10/10) ok. 430-498 tys. qryb,
   - tekst pustego wiaderka mówił „Ryby mityczne omijają wiaderko: płacą od razu”, co od IX 2026 nie było prawdą; teraz: „Mityczne też: handlarz płaci za nie tyle, ile je wyceni”.
+- **10 X, 16:37, decyzja Andrzeja:** „Dużo za dużo zarabia się w stosunku do zakupów. Napraw ekonomię całej gry. Bazując na najskuteczniejszych przykładach ze świata gier” (build `2026-10-10-ekonomia-v1`, opis, wzorce i pomiar w `docs/ekonomia-gry.md`, model `tools/ekonomia_model.py`):
+  - zmierzone przed zmianą: zadania x40 z odświeżaniem bez limitu dawały 75-97% zarobku (gracz 90 min/dobę: 16,5 mln na dobę, 183 tys. na minutę gry), paczka podstawowa kosztowała 5-8 minut gry,
+  - zadania 50 000 / 200 000 / 800 000, odświeżenie 150 000 i każde kolejne tej doby 2× droższe (W5 i B4 przy okazji), zlecenia 5 000 za ławicę, wypuszczenie 2 000 (B3), seria do 1 000 za rybę (W2), sieć 20 zarzutów na dobę (W3),
+  - po zmianie: 42-48 tys. qryb za minutę gry, połów 66-76% zarobku, paczka podstawowa ok. 20 min gry, tech ok. 40, premium ok. 60, ciastko 3,5-4 h; ceny bez zmian,
+  - salda sprzed zmiany zostają (punkt 5 w `docs/ekonomia-gry.md`), K1 i K4 dalej otwarte.

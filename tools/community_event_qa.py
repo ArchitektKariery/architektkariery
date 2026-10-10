@@ -61,6 +61,7 @@ require(any(x in html for x in [
     "2026-10-09-tarlo-ostatnich-v1",
     "2026-10-10-plec-ryb-v1",
     "2026-10-10-plec-kazdej-v1",
+    "2026-10-10-ekonomia-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -217,14 +218,24 @@ require(_gw is not None and len(_gw.group(1).replace("\n", "").replace(" ", "").
         "GWIAZDKI_PO_FINALE must have one entry per task in ZADANIA")
 require("if (!kand || lista.indexOf(kand.i) >= 0 || !wPuli(kand)) continue;" in _zad, "daily draw must skip tasks outside the post-finale pool")
 require("const ile = nagroda(Z);" in _zad, "task payout must use the post-finale stars")
-# Nagrody dostosowane do ekonomii (8 X 2026, docs/ekonomia-po-finale.md):
-# zadania x40 z odswiezeniem w tej samej proporcji, zlecenia x20, a zadania
-# robione w kilka minut (sprzedaz, utarg, 10 ryb w wiaderku, 15-45 wymian
-# lawicy) maja 1 gwiazdke przed finalem i po finale.
-require("const NAGRODA = { 1: 280000, 2: 1400000, 3: 7000000 }, KOSZT_ODSWIEZENIA = 1120000;" in _zad,
-        "task rewards must be x40 with the refresh price in the same proportion")
-require("const PREMIA_LAWICY = 28000;" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
-        "order premium per school must be x20 (28 000)")
+# Ekonomia calej gry (10 X 2026, polecenie Andrzeja: "Duzo za duzo zarabia sie
+# w stosunku do zakupow. Napraw ekonomie calej gry", docs/ekonomia-gry.md,
+# model tools/ekonomia_model.py). Zadania robione w kilka minut (sprzedaz,
+# utarg, 10 ryb w wiaderku, 15-45 wymian lawicy) dalej maja 1 gwiazdke.
+require("const NAGRODA = { 1: 50000, 2: 200000, 3: 800000 }, KOSZT_ODSWIEZENIA = 150000;" in _zad
+        and "const MNOZNIK_ODSWIEZENIA = 2;" in _zad
+        and "return Math.round(KOSZT_ODSWIEZENIA * Math.pow(MNOZNIK_ODSWIEZENIA, n));" in _zad
+        and "const koszt = kosztOdswiezenia();" in _zad,
+        "task rewards must be 50 000 / 200 000 / 800 000 and every refresh of the day must cost twice the previous one")
+require("Zadania.kosztOdswiezenia()" in html, "the task panel must show the current refresh price")
+require("const PREMIA_LAWICY = 5000;" in (root / "src/bucket/orders.js").read_text(encoding="utf-8"),
+        "order premium per school must be 5 000")
+_cardE = (root / "src/card/card.js").read_text(encoding="utf-8")
+require("const NAGRODA_ZA_WYPUSZCZENIE = 2000;" in _cardE, "release reward must be 2 000")
+require("bonus += Math.min(1000, 10 * Math.pow(2, S.ile - 2));" in _cardE, "series bonus must stop at 1 000 per fish")
+_siecE = (root / "src/ecosystem/net-catch.js").read_text(encoding="utf-8")
+require("ZARZUCEN_NA_DOBE: 20" in _siecE and "if (zostaloZarzutow() <= 0) return null;" in _siecE,
+        "the net must allow 20 casts per day")
 import json as _json
 _ZAD = _json.loads(_re.search(r"const ZADANIA = (\[.*?\]);", _zad, _re.S).group(1))
 _GWP = [int(x) for x in _gw.group(1).replace("\n", "").replace(" ", "").split(",")]

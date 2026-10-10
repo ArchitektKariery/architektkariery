@@ -146,7 +146,7 @@ const CardPerf = (() => {
 window.CardPerf = CardPerf;
 
 const SWIPE_PROG = 120;      /* px sceny; Scene.W to 960, wiec ok. 1/8 szerokosci */
-const NAGRODA_ZA_WYPUSZCZENIE = 5000;   /* stala, patrz komentarz w decyzjaKarty */
+const NAGRODA_ZA_WYPUSZCZENIE = 2000;   /* stala, patrz komentarz w decyzjaKarty */
 /* NAGRODA_MITYCZNA (10 000 000 za mityczna) usunieta 10 X 2026, polecenie
    Andrzeja: "Usun dodatkowe nagrody za mityczne w wiadrze". Mityczna
    placi tyle, ile wyceni ja handlarz (src/bucket/pricing.js). */
@@ -370,8 +370,14 @@ function openCard(fish, lenCm, fromX, fromY) {
          ryzyka. Wprowadzone na wprost, bo tak padlo zyczenie -- ale to
          realny kompromis midzy wygoda a odpornoscia ekonomii na exploit,
          nie oczywista, bezpieczna poprawka. */
+      /* SUFIT 1 000 OD 10 X 2026 (ekonomia calej gry, docs/ekonomia-gry.md).
+         Zmierzone: seria prowadzona celowo dawala po finale 12 mln qryb
+         na godzine (4 zlowienia na minute po 50 000), czyli 5 razy wiecej
+         niz zwykle lowienie. Podwajanie zostaje (10, 20, 40 ... 640),
+         od 9. ryby z rzedu seria placi 1 000 za sztuke, czyli najwyzej
+         240 000 na godzine celowej serii. Seria dalej zageszcza gatunek. */
       if (S && S.ile >= 2) {
-        bonus += Math.min(50000, 10 * Math.pow(2, S.ile - 2));
+        bonus += Math.min(1000, 10 * Math.pow(2, S.ile - 2));
         powody.push('SERIA \u00D7' + S.ile);
       }
 
@@ -566,6 +572,12 @@ function decyzjaKarty(kier) {
        5 000 przebija ja dwukrotnie. Swipe w lewo przestaje byc rezygnacja,
        a staje sie wyborem: drobnice wypuszczasz z zyskiem, a miejsce
        w wiaderku zostaje na okazy warte wiecej niz 5 000.
+       2 000 OD 10 X 2026 (ekonomia calej gry, docs/ekonomia-gry.md). Po
+       finale ZARAZY mediana ryby spadla do ok. 4 000, wiec 5 000 placilo
+       za wypuszczenie wiecej niz handlarz za typowa rybe (26% zarobku
+       z lowienia). 2 000 to ta sama proporcja co przy decyzji z IX 2026:
+       mniej wiecej pol mediany ryby. Wypuszczanie dalej sie oplaca,
+       a zasada zostaje: stala kwota, niezalezna od gatunku.
        ============================================================ */
     /* Wypuszczenie: `Eko.wypuszczono` celowo NIE rusza populacji. Jest
        wolane mimo to, bo to jedyne miejsce, gdzie ta regula jest

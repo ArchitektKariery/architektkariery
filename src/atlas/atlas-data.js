@@ -90,7 +90,7 @@ const POMOC = [
     a: ['Pięć zadań na dobę, te same dla wszystkich graczy.',
         'Gwiazdki mówią, ile czasu zajmą: jedna do kwadransa, trzy nawet kilka godzin.',
         'Trafić może się pięć łatwych albo pięć trudnych.',
-        'Nowy zestaw za 1 120 000 qryb, jeśli nie chcesz czekać do północy.',
+        'Nowy zestaw za 150 000 qryb, jeśli nie chcesz czekać do północy. Każdy kolejny tego dnia kosztuje 2 razy więcej.',
         'Wykonane, a nieodebrane zadania wypłacą się wtedy same, tak samo o północy.'] },
   { t: 'ZANĘTA',
     a: ['Za qryby kupisz zanętę na straganie.',
@@ -100,7 +100,7 @@ const POMOC = [
     a: ['Łowiąc ten sam gatunek pod rząd, budujesz serię.',
         'Im dłuższa, tym częściej ten gatunek przypływa i tym więcej płaci.',
         'Ławica wymieniona przez zegar serii nie kasuje.',
-        'Kasuje ją inna ryba, zerwana żyłka i przycisk NOWA ŁAWICA.'] },
+        'Kasuje ją inna ryba albo zerwana żyłka.'] },
   { t: 'ZAPIS',
     /* NAPRAWA Q06 (audyt IX 2026): bylo "skopiuj go, jesli chcesz grac
        tez na innym telefonie" bez zadnej wzmianki, GDZIE go wkleic --
@@ -127,11 +127,12 @@ const POMOC = [
     c: [['Nowy gatunek', '100 – 1000', 'im rzadsze pasmo, tym wyższa stawka'],
         ['Rekord Polski', '100', 'sztuka większa niż rekord kraju'],
         ['Rekord życiowy', '200', 'twoja największa sztuka tego gatunku'],
-        ['Seria dwóch ryb', '10', 'każda kolejna podwaja, do sufitu 5000 za sztukę']] },
+        ['Seria dwóch ryb', '10', 'każda kolejna podwaja, do sufitu 1000 za sztukę'],
+        ['Wypuszczona ryba', (window.NAGRODA_ZA_WYPUSZCZENIE || 2000).toLocaleString('pl-PL'), 'każda, bez względu na gatunek']] },
   { t: 'QRYBY ZA ZBIERANIE',
-    c: [['Zadanie łatwe', '280 000'],
-        ['Zadanie średnie', '1 400 000'],
-        ['Zadanie trudne', '7 000 000'],
+    c: [['Zadanie łatwe', '50 000'],
+        ['Zadanie średnie', '200 000'],
+        ['Zadanie trudne', '800 000'],
         ['Komplet pasma', (function () {
             const w = Object.values(window.NAGRODA_PASMA || { 1: 1000, 6: 6000 });
             return Math.min.apply(null, w) + ' – ' + Math.max.apply(null, w);

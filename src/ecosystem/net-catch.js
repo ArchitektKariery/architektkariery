@@ -39,7 +39,18 @@ const Siec = (() => {
        wyjezdza z kadru, czyli po ANIM_MS -- jedyna przerwa, jaka zostala,
        to sama animacja ciagniecia. Nie ma juz osobnego licznika karencji;
        tym, co wyznacza moment powrotu, jest dlugosc animacji i nic wiecej. */
-    ANIM_MS: 1400            /* dlugosc przeciagniecia sieci przez kadr */
+    ANIM_MS: 1400,           /* dlugosc przeciagniecia sieci przez kadr */
+    /* ============================================================
+       LIMIT ZARZUCEN NA DOBE (10 X 2026, ekonomia calej gry,
+       docs/ekonomia-gry.md). Bez karencji (decyzja Andrzeja z IX 2026
+       zostaje: po animacji mozna zarzucic od razu), ale najwyzej
+       ZARZUCEN_NA_DOBE razy na dobe gry, jak "energia" w grach mobilnych.
+       Zmierzone po finale ZARAZY: zarzucenie co 5 s dawalo ok. 1,2 mln
+       qryb na godzine i zabieralo jednemu graczowi 3 600 ryb na godzine,
+       czyli 30% jeziora. Przy 20 zarzutach: ok. 32 000 qryb i ok. 100 ryb
+       na dobe. Licznik zeruje sie o polnocy razem z reszta doby.
+       ============================================================ */
+    ZARZUCEN_NA_DOBE: 20
   };
 
   function d() { return (typeof Zapis !== 'undefined') ? Zapis.dane() : null; }
@@ -55,6 +66,17 @@ const Siec = (() => {
     if (D.siec.odnowaOd !== undefined) delete D.siec.odnowaOd;
     return D.siec;
   }
+
+  /* Zarzuty tej doby. Doba gry to ta sama, co w statystykach zapisu
+     (Zapis.nowaDoba ustawia stat.doba). */
+  function dzis() {
+    const D = d(); const s = stan(); if (!D || !s) return 0;
+    try { if (typeof Zapis !== 'undefined' && Zapis.nowaDoba) Zapis.nowaDoba(); } catch (e) {}
+    const doba = D.stat && D.stat.doba;
+    if (s.doba !== doba) { s.doba = doba; s.zarzutow = 0; }
+    return s.zarzutow || 0;
+  }
+  function zostaloZarzutow() { return Math.max(0, CFG.ZARZUCEN_NA_DOBE - dzis()); }
 
   function kg()    { const s = stan(); return s ? s.kg : 0; }
   function sztuk() { const s = stan(); return s ? s.sztuk : 0; }
@@ -74,6 +96,9 @@ const Siec = (() => {
        animacji lawica jest pusta, wiec to ona pilnuje, zeby nie dalo sie
        zarzucic dwa razy w tej samej sekundzie -- bez zadnego licznika. */
     if (!school.length) return null;
+    /* Limit doby (opis przy CFG.ZARZUCEN_NA_DOBE). */
+    if (zostaloZarzutow() <= 0) return null;
+    s.zarzutow = (s.zarzutow || 0) + 1;
 
     let masaG = 0, ile = 0;
     const wg = {};
@@ -114,6 +139,6 @@ const Siec = (() => {
     return q;
   }
 
-  return { CFG, stan, kg, sztuk, wartosc, pusta, zarzuc, sprzedaj };
+  return { CFG, stan, kg, sztuk, wartosc, pusta, zarzuc, sprzedaj, dzis, zostaloZarzutow };
 })();
 window.Siec = Siec;

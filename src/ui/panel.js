@@ -1636,7 +1636,8 @@
     let h = '<div class="tr" style="margin-bottom:8px">Sieć bierze CAŁĄ ławicę naraz i płaci ' +
             'wyłącznie za masę: ' + S.CFG.CENA_KG + ' qryb za kilogram, bez względu na gatunek, ' +
             'rozmiar i punkty. To najgorsza stawka w grze i najszybszy sposób na wytrzebienie jeziora. ' +
-            'Ryby z sieci nie trafiają do atlasu ani do zadań.</div>';
+            'Ryby z sieci nie trafiają do atlasu ani do zadań. Najwyżej ' + (S.CFG.ZARZUCEN_NA_DOBE || 20) +
+            ' zarzutów na dobę.</div>';
     h += '<div class="kwota">' + kg.toFixed(2) + ' kg</div>';
     h += '<div class="kto">' + szt + (szt === 1 ? ' SZTUKA' : ' SZTUK') + ' W SIECI</div>';
     if (szt > 0)
@@ -1649,7 +1650,16 @@
       h += '<button class="duzy" disabled style="opacity:.45">SIEĆ ZABLOKOWANA</button>';
       return h;
     }
-    h += '<button class="duzy" onclick="SiecUI.zarzuc()">ZARZUĆ SIEĆ</button>';
+    /* Limit zarzutow na dobe (10 X 2026, Siec.CFG.ZARZUCEN_NA_DOBE). */
+    const zost = S.zostaloZarzutow ? S.zostaloZarzutow() : 1;
+    if (zost <= 0) {
+      h += '<div class="tr" style="margin-top:8px;font-weight:800">Dzisiejsze zarzuty sieci się skończyły. ' +
+           'Nowe o północy.</div>';
+      h += '<button class="duzy" disabled style="opacity:.45">SIEĆ: 0 / ' + (S.CFG.ZARZUCEN_NA_DOBE || 20) + ' DZIŚ</button>';
+      return h;
+    }
+    h += '<button class="duzy" onclick="SiecUI.zarzuc()">ZARZUĆ SIEĆ · ' + zost + ' / ' +
+         (S.CFG.ZARZUCEN_NA_DOBE || 20) + ' DZIŚ</button>';
     return h;
   }
 
@@ -2227,9 +2237,14 @@
     /* Wykonane, a nieodebrane zadania wyplacaja sie przy odswiezeniu
        i licza sie do oplaty (Zadania.odswiez). */
     const zalegle = Zadania.doOdbioruQryb ? Zadania.doOdbioruQryb() : 0;
+    /* Koszt rosnie z kazdym odswiezeniem tej doby (10 X 2026, ekonomia
+       calej gry: 150 000, potem 2x drozej, zero o polnocy). */
+    const kosztOdsw = Zadania.kosztOdswiezenia ? Zadania.kosztOdswiezenia() : Zadania.KOSZT_ODSWIEZENIA;
     h += '<button id="odswiezZad" class="mini' + (komplet ? ' mocny' : '') + '"' +
-         (m + zalegle < Zadania.KOSZT_ODSWIEZENIA ? ' disabled' : '') + '>' +
-         (komplet ? 'DOKUP NOWE ZA ' : 'ODŚWIEŻ ZA ') + Zadania.KOSZT_ODSWIEZENIA.toLocaleString('pl-PL') + '</button>';
+         (m + zalegle < kosztOdsw ? ' disabled' : '') + '>' +
+         (komplet ? 'DOKUP NOWE ZA ' : 'ODŚWIEŻ ZA ') + kosztOdsw.toLocaleString('pl-PL') + '</button>';
+    h += '<div class="stopka">każde kolejne odświeżenie dziś 2× droższe, o północy cena wraca do ' +
+         Zadania.KOSZT_ODSWIEZENIA.toLocaleString('pl-PL') + '</div>';
     return h;
   }
   /* Przesypywanie monet: licznik w stopce dobija do nowej wartosci przez

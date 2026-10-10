@@ -117,7 +117,12 @@ const Zlecenia = (() => {
      co zwykla gra (zaleznie od wprawy), a gracz, ktory nie naciska
      przycisku, konczy zlecenie przy okazji, srednio raz na kilka godzin.
      Pomiar i model lowcy: docs/ekonomia-po-finale.md. */
-  const PREMIA_LAWICY = 28000;
+  /* 5 000 OD 10 X 2026 (ekonomia calej gry, docs/ekonomia-gry.md).
+     Przy 28 000 szybki lowca zlecen dostawal po finale ok. 6 mln qryb na
+     godzine, prawie 3 razy tyle co zwykle lowienie. Przy 5 000: lowca
+     zwykly ok. 0,2 mln, szybki ok. 1,1 mln na godzine, gracz bez przycisku
+     ok. 50 000 na godzine przy okazji. Kaucja dalej 30% nagrody. */
+  const PREMIA_LAWICY = 5000;
   const UDZIAL_WARTOSCI = 0.35;
   const TRUDNOSC_MAX = 4;
   /* KAUCJA = 30% NAGRODY, NA SZTYWNO (IX 2026, decyzja Andrzeja:
