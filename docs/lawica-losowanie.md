@@ -44,6 +44,11 @@ Wagi liczy jedna tabela (`tabelaWag` w `src/fish/fish-core.js`, `wagaGatunku` w 
 - **Tier okazu** (X-Score) przechodzi losowanie odrzucające (`Tiery.BOOST`: tier 1 ×1, 2 ×2, 3 ×4, 4-7 ×3, do 20 prób). Zmienia rozkład wielkości okazów, nigdy gatunku.
 - **Płeć** z faktycznego składu populacji (gdy zostały same samice, każda ryba jest samicą).
 - Poniżej 100 ryb gatunku ryba to konkretny osobnik z numerem i cechami, który może wrócić w kolejnej ławicy.
+- **Płeć zawsze określona (10 X 2026, zgłoszenie Andrzeja: „płeć nie zawsze jest określona”, build `2026-10-10-plec-ryb-v1`).** Zmierzone przed poprawką: pierwsza ławica po wczytaniu gry pływała cała bez płci (15 z 15 ryb), bo `src/fish/school-update.js` buduje ją przed wczytaniem `Eko`; każda kolejna ławica i ryba dopływająca miała płeć (2423 z 2423 w 200 ławicach). Teraz:
+  - koniec `src/ecosystem/population.js` nadaje tożsamość (`nadajTozsamosc`) każdej rybie ławicy bez płci, gdy `Eko` już jest (po poprawce 0 z 15 bez płci),
+  - `openCard` (`src/card/card.js`) daje płeć ze składu populacji każdej złowionej rybie jeziora, która jej nie ma (siatka bezpieczeństwa; legenda `bezEko` bez płci),
+  - zatrzymana ryba ubywa z jeziora z płcią z karty (`plecZatrzymanej`). Wcześniej płeć odjęcia losowała się od nowa ze składu jeziora i w 17 z 40 zatrzymań karta i wiaderko mówiły co innego niż to, co ubyło z jeziora; po poprawce 40 z 40 zgodnych,
+  - stare ryby bez płci w wiaderku i tarlisku dostają ją przy wczytaniu zapisu (`sanujZapis` w `src/player/save.js`): po połowie, liczona z cech ryby, więc każde wczytanie daje tę samą płeć (974 samców na 2000).
 
 ## Co zmienia skład ławicy
 - **Partner dla samotnej rzadkiej ryby: WYŁĄCZONY od finału ZARAZY** (polecenie Andrzeja 8 X: „nie losuje się dodatkowy partner, po prostu muszą się trafić dwie takie ryby, bez pomocy gry”; `PARTNER_LAWICY` i `dosadzajPartnera` w `src/fish/school.js`, chwila `do` = finał). Do finału gatunek z pasma 3-7 pływający sam w ławicy z przycisku ŁAWICA dostaje partnera przeciwnej płci z szansą 8-55% (`dosadzPartnerow`, `Eko.szukaSamotnych`). Partner dopływał tylko do ryby, która już była w ławicy, więc nie zmieniał, w ilu ławicach pojawia się rzadkie pasmo; zmieniał liczbę par. Od finału para rzadkiego gatunku w jeziorze powstaje tylko wtedy, gdy gość przypłynie drugi raz (pomiar niżej).

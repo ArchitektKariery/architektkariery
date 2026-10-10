@@ -441,8 +441,16 @@ function openCard(fish, lenCm, fromX, fromY) {
   }
   /* Plec na karcie (IX 2026, prosba Andrzeja). Brana z samej ryby, bo
      `nadajTozsamosc` nadaje ja KAZDEJ sztuce -- takze przy duzych
-     populacjach, gdzie nie ma rekordu osobnika. */
-  Card.plec = (fish && fish.plec) || null;
+     populacjach, gdzie nie ma rekordu osobnika.
+     SIATKA BEZPIECZENSTWA (10 X 2026, zgloszenie Andrzeja: "plec nie
+     zawsze jest okreslona"): ryba bez plci dostaje ja tutaj, w chwili
+     zlowienia, ze skladu populacji. Ta sama plec idzie na karte, do
+     wiaderka i do odjecia z jeziora (plecZatrzymanej nizej). Legenda
+     (bezEko) plci nie ma i miec nie bedzie. */
+  if (fish && GATUNKI[gk] && !GATUNKI[gk].bezEko && fish.plec !== 'm' && fish.plec !== 'f') {
+    try { fish.plec = (window.Eko && Eko.losujPlec) ? Eko.losujPlec(gk) : (Math.random() < 0.5 ? 'm' : 'f'); } catch (e) {}
+  }
+  Card.plec = (fish && (fish.plec === 'm' || fish.plec === 'f')) ? fish.plec : null;
   Card.from.x = fromX; Card.from.y = fromY;
   if (window.CardPerf) CardPerf.reset();
   if (window.CardRaster) CardRaster.reset();
@@ -468,6 +476,18 @@ function openCard(fish, lenCm, fromX, fromY) {
                  otwieraniu karty i NIE sa cofane -- wypuszczenie nie
                  kasuje tego, ze rybe zlowiles.
    ============================================================ */
+/* Plec zatrzymanej ryby (10 X 2026): ta z karty, czyli z samej ryby,
+   wiec karta, wiaderko i odjecie z jeziora mowia to samo. Losowanie ze
+   skladu jeziora zostaje tylko awaryjnie, gdy ryba plci nie ma, i wtedy
+   wynik zapisuje sie na karcie, zeby do wiaderka trafila ta sama plec. */
+function plecZatrzymanej(gk) {
+  if (Card.plec === 'm' || Card.plec === 'f') return Card.plec;
+  let pl = null;
+  try { pl = (window.Eko && Eko.losujPlec) ? Eko.losujPlec(gk) : null; } catch (e) { pl = null; }
+  if (pl === 'm' || pl === 'f') Card.plec = pl;
+  return pl;
+}
+
 function decyzjaKarty(kier) {
   if (!Card.swipe || !Card.czeka || Card.decyzja) return;
   const C = Card.czeka;
@@ -512,7 +532,7 @@ function decyzjaKarty(kier) {
     }
     if (window.Eko) {
       if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
+      else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));
     }
     if (typeof Ruch !== 'undefined' && Ruch.zaRekord)
       Ruch.zaRekord(nagroda, ['MITYCZNA ZABRANA']);
@@ -528,13 +548,15 @@ function decyzjaKarty(kier) {
     /* EKOSYSTEM: zatrzymana ryba UBYWA z populacji serwera. Wypuszczona
        nie -- to jest cala roznica miedzy dwoma stronami swipe'a i jedyne
        miejsce, w ktorym gracz sam decyduje o losie gatunku.
-       Plec brana z faktycznego skladu populacji, wiec przy samych
-       samicach kazda zabrana sztuka to samica. */
+       Z jeziora ubywa ryba z PLCIA Z KARTY (plecZatrzymanej). Do 10 X
+       2026 plec odjecia losowala sie od nowa ze skladu jeziora, wiec
+       w 42% zatrzyman (17 z 40 w tescie) karta i wiaderko mowily
+       "samiec", a z jeziora ubywala samica albo odwrotnie. */
     if (window.Eko) {
       /* Ryba z tozsamoscia znika jako KONKRETNY osobnik. Id przenosi sie
          z ryby na karte przy jej otwarciu (patrz `Card.czeka` nizej). */
       if (C.osobnik) Eko.usunOsobnika(C.gk, C.osobnik);
-      else Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk));
+      else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));
     }
     if (window.Wiaderko && !Wiaderko.dodaj(C.gk, C.cm, C.w, C.pkt, Card.plec)) {
       /* Wiaderko pelne: ta sama sciezka co przed swipe'em -- pytamy

@@ -59,6 +59,7 @@ require(any(x in html for x in [
     "2026-10-09-lucjanek-x100-v1",
     "2026-10-09-lucjanek-drazni-v1",
     "2026-10-09-tarlo-ostatnich-v1",
+    "2026-10-10-plec-ryb-v1",
 ]), "missing supported QRyby build id")
 require(tagi("src/lucjanek/community-restoration-live.js") == 1, "live client script tag must exist exactly once")
 require(html.count("GATUNKI.lucjan_czerwony") >= 1, "Lucjan species missing")
@@ -279,6 +280,19 @@ require("rpc('eko_tarlo_ostatnich', { p_gat: gat, p_n: n })" in _srv and "ostatn
         "the game must call eko_tarlo_ostatnich for the revival")
 require("and e.wymarly" in _ost and "grant execute on function public.eko_tarlo_ostatnich(text, integer) to authenticated;" in _ost,
         "eko_tarlo_ostatnich must revive only extinct species and only for signed-in players")
+# Plec ryb (10 X 2026, zgloszenie Andrzeja: "plec nie zawsze jest okreslona").
+# Lawica startowa powstaje przed Eko, karta i wiaderko maja plec zawsze, a z jeziora
+# ubywa ryba z plcia z karty, nie z nowego losowania.
+_card = (root / "src/card/card.js").read_text(encoding="utf-8")
+_save = (root / "src/player/save.js").read_text(encoding="utf-8")
+require("PLEC DLA LAWICY STARTOWEJ" in _pop and "nadajTozsamosc(f);" in _pop.split("PLEC DLA LAWICY STARTOWEJ")[1],
+        "the first school, built before Eko loads, must get its sexes once Eko exists")
+require(_card.count("else Eko.zatrzymano(C.gk, plecZatrzymanej(C.gk));") == 2 and "Eko.zatrzymano(C.gk, Eko.losujPlec(C.gk))" not in _card,
+        "a kept fish must leave the lake with the sex shown on its card")
+require("fish.plec = (window.Eko && Eko.losujPlec) ? Eko.losujPlec(gk)" in _card,
+        "every caught lake fish must get a sex on its card")
+require("if (r.plec !== 'm' && r.plec !== 'f') r.plec = plecZCech(r);" in _save,
+        "old bucket and tarlisko fish without a sex must get one on load")
 
 if errors:
     print("COMMUNITY EVENT QA FAILED")

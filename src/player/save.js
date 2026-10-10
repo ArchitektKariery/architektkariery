@@ -287,6 +287,20 @@ const Zapis = (() => {
     else out.tarlisko = out.tarlisko.filter(r => r && typeof r === 'object' &&
                           (!window.GATUNKI || window.GATUNKI[r.gat]) && !legenda(r))
                           .slice(0, (window.Tarlisko && Tarlisko.MAX) || 2);
+    /* KAZDA RYBA MA PLEC (10 X 2026, zgloszenie Andrzeja: "plec nie zawsze
+       jest okreslona"). Ryby z pierwszej lawicy po wczytaniu gry (przed
+       poprawka w population.js) i ze starych zapisow leza tu bez plci,
+       wiec tarlisko ich nie paruje. Dostaja plec po polowie, liczona
+       z cech samej ryby: kazde wczytanie daje te sama plec, takze zanim
+       zapis zdazy sie zapisac. Legenda tu nie wchodzi (filtr wyzej). */
+    const plecZCech = (r) => {
+      const s = String(r.gat) + '|' + r.cm + '|' + r.waga + '|' + r.pkt;
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+      return (h & 1) ? 'm' : 'f';
+    };
+    for (const r of out.wiaderko.concat(out.tarlisko))
+      if (r.plec !== 'm' && r.plec !== 'f') r.plec = plecZCech(r);
     if (!out.zanetyMam || typeof out.zanetyMam !== 'object' || Array.isArray(out.zanetyMam)) out.zanetyMam = {};
     else for (const k in out.zanetyMam) {
       if (window.ZANETY && !window.ZANETY[k]) { delete out.zanetyMam[k]; continue; }

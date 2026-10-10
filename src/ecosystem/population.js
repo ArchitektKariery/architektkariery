@@ -1858,3 +1858,30 @@ const Eko = (() => {
 })();
 window.Eko = Eko;
 
+/* ============================================================
+   PLEC DLA LAWICY STARTOWEJ (10 X 2026, zgloszenie Andrzeja: "cos nie
+   dziala z plciami ryb w jeziorze, bo nie zawsze jest okreslona").
+
+   ZMIERZONE: pierwsza lawica po wczytaniu gry plywala w CALOSCI bez plci
+   (15 z 15 ryb), kazda nastepna lawica i kazda ryba doplywajaca miala
+   plec (2423 z 2423 w 200 lawicach). Przyczyna: src/fish/school-update.js
+   buduje lawice startowa, zanim wczyta sie ten plik, a nadajTozsamosc bez
+   Eko wraca z ryba bez plci. Skutki: karta bez SAMIEC/SAMICA, ryba
+   w wiaderku bez plci, tarlisko jej nie paruje, gody w toni ja pomijaja.
+
+   Teraz, gdy Eko juz jest, kazda ryba lawicy bez plci dostaje tozsamosc:
+   plec ze skladu populacji, a w trybie indywidualnym konkretnego osobnika.
+   Legenda (bezEko) i Lucjanek Zero (ma wlasna plec) zostaja bez zmian.
+   ============================================================ */
+(function () {
+  try {
+    if (typeof school === 'undefined' || !Array.isArray(school) || typeof nadajTozsamosc !== 'function') return;
+    for (const f of school) {
+      if (!f || !f.gat || f.lzZero) continue;
+      if (f.plec === 'm' || f.plec === 'f') continue;
+      if (typeof GATUNKI !== 'undefined' && GATUNKI[f.gat] && GATUNKI[f.gat].bezEko) continue;
+      nadajTozsamosc(f);
+    }
+  } catch (e) {}
+})();
+
