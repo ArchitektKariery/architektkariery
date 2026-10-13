@@ -1,22 +1,19 @@
 /* ============================================================
-   ODZYSKIWANIE HASLA QRyby — 2026-10-12
+   ODZYSKIWANIE HASLA QRyby — 2026-10-13
 
-   QRyby korzysta z Supabase Auth bez SDK, wiec reset hasla tez idzie
-   bezposrednio po HTTP:
-   1) POST /auth/v1/recover wysyla mail z linkiem,
-   2) link wraca do tej samej strony z tokenem recovery w #hash,
-   3) PUT /auth/v1/user ustawia nowe haslo dla tej sesji recovery.
+   QRyby korzysta z Supabase Auth bez SDK. Gra bywa uruchamiana lokalnie
+   (localhost / plik na telefonie), dlatego link odzyskiwania NIE MOZE
+   wracac do aktualnego location aplikacji. Supabase ma osobny publiczny
+   ekran resetu jako Edge Function i wszystkie maile recovery kierujemy tam.
 
    Ten modul NIE czyta starego hasla, NIE tworzy nowego konta i NIE rusza
-   zapisu gracza. Po zmianie hasla kasuje tylko lokalna sesje logowania,
-   zeby gracz zalogowal sie ponownie nowym haslem.
+   zapisu gracza.
    ============================================================ */
 (() => {
   'use strict';
 
   const ID_PRZYPOMNIJ = 'qrybyZapomnialHasla';
-  const MIN_HASLO = 8;
-  let recoveryToken = '';
+  const RESET_PUBLIC_URL = 'https://jkovzctwakgiwqyskjvp.supabase.co/functions/v1/qryby-password-reset';
 
   function konf() {
     try {
@@ -50,19 +47,11 @@
     return s ? String(s) : 'Nie udało się połączyć z serwerem.';
   }
 
-  function redirectResetu() {
-    if (!/^https?:$/.test(location.protocol)) return '';
-    return location.origin + location.pathname;
-  }
-
   async function wyslijMail(email) {
     const k = konf();
     if (!k || !k.url || !k.klucz) throw new Error('Serwer kont jest niedostępny.');
 
-    const redirect = redirectResetu();
-    const sciezka = '/auth/v1/recover' +
-      (redirect ? ('?redirect_to=' + encodeURIComponent(redirect)) : '');
-
+    const sciezka = '/auth/v1/recover?redirect_to=' + encodeURIComponent(RESET_PUBLIC_URL);
     const res = await fetch(k.url + sciezka, {
       method: 'POST',
       headers: {
@@ -99,7 +88,7 @@
       if (window.Gracz && Gracz.panel) {
         Gracz.panel(
           'Jeśli konto z tym mailem istnieje, wysłaliśmy link do ustawienia nowego hasła.' +
-          '<br><br><b>Sprawdź też SPAM.</b> Link jest jednorazowy.'
+          '<br><br><b>Sprawdź też SPAM.</b> Otwórz najnowszy link — starszy może być już nieważny.'
         );
       } else {
         komunikat('Sprawdź skrzynkę. Jeśli konto istnieje, wysłaliśmy link do resetu hasła.');
@@ -111,7 +100,6 @@
   }
 
   function dolaczPrzycisk() {
-    if (recoveryToken) return;
     const panel = document.getElementById('panelTresc');
     if (!panel || document.getElementById(ID_PRZYPOMNIJ)) return;
 
@@ -127,122 +115,8 @@
     b.textContent = 'NIE PAMIĘTAM HASŁA';
     b.style.marginTop = '8px';
     b.addEventListener('click', klikPrzypomnij);
-
     login.insertAdjacentElement('afterend', b);
   }
-
-  function pokazZmianeHasla() {
-    if (!recoveryToken || !window.pokazPanel) return;
-
-    window.pokazPanel(
-      '<h3>NOWE HASŁO</h3>' +
-      '<div class="drobne">Link odzyskiwania jest poprawny. Ustaw nowe hasło do swojego konta QRyby.</div>' +
-      '<input id="qrybyNoweHaslo1" type="password" placeholder="nowe hasło (min. 8 znaków)" autocomplete="new-password">' +
-      '<input id="qrybyNoweHaslo2" type="password" placeholder="powtórz nowe hasło" autocomplete="new-password">' +
-      '<button class="duzy" id="qrybyUstawNoweHaslo" type="button">USTAW NOWE HASŁO</button>' +
-      '<div id="qrybyResetInfo" class="drobne" style="margin-top:10px"></div>'
-    );
-
-    const b = document.getElementById('qrybyUstawNoweHaslo');
-    if (b) b.addEventListener('click', ustawNoweHaslo);
-    const a = document.getElementById('qrybyNoweHaslo1');
-    if (a) setTimeout(() => a.focus(), 40);
-  }
-
-  async function ustawNoweHaslo() {
-    const p1 = document.getElementById('qrybyNoweHaslo1');
-    const p2 = document.getElementById('qrybyNoweHaslo2');
-    const info = document.getElementById('qrybyResetInfo');
-    const b = document.getElementById('qrybyUstawNoweHaslo');
-    const h1 = p1 ? p1.value : '';
-    const h2 = p2 ? p2.value : '';
-
-    function blad(t) {
-      if (info) info.textContent = t;
-      else komunikat(t);
-    }
-
-    if (h1.length < MIN_HASLO) return blad('Hasło musi mieć co najmniej 8 znaków.');
-    if (h1 !== h2) return blad('Hasła nie są identyczne.');
-
-    const k = konf();
-    if (!k || !k.url || !k.klucz) return blad('Serwer kont jest niedostępny.');
-
-    if (b) {
-      b.disabled = true;
-      b.textContent = 'ZAPISUJĘ...';
-    }
-    if (info) info.textContent = '';
-
-    try {
-      const res = await fetch(k.url + '/auth/v1/user', {
-        method: 'PUT',
-        headers: {
-          'apikey': k.klucz,
-          'Authorization': 'Bearer ' + recoveryToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ password: h1 })
-      });
-      const body = await jsonLubNull(res);
-      if (!res.ok) throw new Error(opisBledu(res, body));
-
-      recoveryToken = '';
-      try {
-        history.replaceState(null, document.title, location.pathname + location.search);
-      } catch (e) {}
-      try {
-        if (window.Chmura && Chmura.wyloguj) Chmura.wyloguj();
-      } catch (e) {}
-
-      if (window.Gracz && Gracz.panel) {
-        Gracz.panel(
-          '<b>Hasło zostało zmienione.</b><br><br>' +
-          'Zaloguj się teraz swoim mailem i nowym hasłem. Twój zapis i konto pozostają bez zmian.'
-        );
-      } else {
-        komunikat('Hasło zostało zmienione. Zaloguj się ponownie.');
-      }
-    } catch (e) {
-      blad(e.message || 'Nie udało się zmienić hasła. Link mógł wygasnąć.');
-      if (b) {
-        b.disabled = false;
-        b.textContent = 'USTAW NOWE HASŁO';
-      }
-    }
-  }
-
-  function odczytajPowrot() {
-    const raw = location.hash ? location.hash.slice(1) : '';
-    if (!raw) return;
-
-    const q = new URLSearchParams(raw);
-    const typ = q.get('type') || '';
-    const token = q.get('access_token') || '';
-
-    if (typ === 'recovery' && token) {
-      recoveryToken = token;
-      return;
-    }
-
-    const kod = q.get('error_code');
-    const opis = q.get('error_description');
-    if (kod || opis) {
-      try {
-        history.replaceState(null, document.title, location.pathname + location.search);
-      } catch (e) {}
-      window.addEventListener('load', () => {
-        if (window.Gracz && Gracz.panel) {
-          Gracz.panel(
-            'Link odzyskiwania jest nieważny albo wygasł.<br><br>' +
-            'Wpisz mail i wybierz <b>NIE PAMIĘTAM HASŁA</b>, aby dostać nowy link.'
-          );
-        }
-      }, { once: true });
-    }
-  }
-
-  odczytajPowrot();
 
   function start() {
     const panel = document.getElementById('panelTresc');
@@ -250,7 +124,6 @@
       new MutationObserver(dolaczPrzycisk).observe(panel, { childList: true, subtree: true });
     }
     dolaczPrzycisk();
-    if (recoveryToken) pokazZmianeHasla();
   }
 
   if (document.readyState === 'complete') start();
